@@ -1,0 +1,44 @@
+{
+  "title": "Release Engineering & DevOps Practices",
+  "domain": "devops",
+  "people": [
+    "Linus Torvalds",
+    "Solomon Hykes",
+    "Adam Wiggins",
+    "Kent Beck",
+    "Gene Kim"
+  ],
+  "power_phrases": [
+    "Release Checklist",
+    "Rollback Playbook",
+    "PR Review Checklist",
+    "Feature Flags",
+    "Lighthouse Gate",
+    "Sprint Experiments",
+    "Twelve-Factor App",
+    "CI/CD Pipeline",
+    "Blue-Green Deployment",
+    "Canary Release",
+    "Blameless Postmortem",
+    "Error Budget",
+    "Infrastructure as Code"
+  ],
+  "frameworks": [
+    "Release Checklist: tests pass → changelog updated → version bumped → docs current → deploy",
+    "Rollback Playbook: detect → assess → rollback → verify → postmortem",
+    "PR Review: passes tests, no secret leaks, docs updated, no architectural violations",
+    "Twelve-Factor App (Wiggins/Heroku): codebase, dependencies, config, backing services, build/release/run, processes, port binding, concurrency, disposability, dev/prod parity, logs, admin processes",
+    "Lighthouse Gate: performance budget check on every PR"
+  ],
+  "concepts": [
+    "Every release needs a pre-flight checklist verified before deployment",
+    "Rollback capability must be tested before you need it",
+    "Feature flags allow deployment without release — decouple ship from activate",
+    "Sprint experiments have a hypothesis, measurement criteria, and time-box",
+    "Lighthouse gates enforce performance budgets in CI — fail the build if perf regresses",
+    "Config lives in the environment, never in code (Factor 3)",
+    "Treat logs as event streams (Factor 11)",
+    "Dev/prod parity eliminates 'works on my machine' bugs (Factor 10)"
+  ],
+  "context": "Extracted from ordostudio — production release engineering practices including a comprehensive release checklist, rollback playbook with step-by-step restore procedures, PR review checklists enforcing architectural invariants, feature flag infrastructure for safe graduated rollouts, and Lighthouse performance gates integrated into CI."
+}

@@ -1,0 +1,51 @@
+{
+  "title": "Applied Enterprise AI & Accountable Leadership (IS 425)",
+  "domain": "bseai_curriculum",
+  "people": [
+    "Alan Turing",
+    "Geoffrey Hinton",
+    "Timnit Gebru",
+    "Joy Buolamwini",
+    "Margaret Hamilton",
+    "Fei-Fei Li",
+    "Satya Nadella",
+    "Norbert Wiener",
+    "Yann LeCun",
+    "Yoshua Bengio"
+  ],
+  "power_phrases": [
+    "Stochastic Parrots",
+    "Gender Shades",
+    "Computability",
+    "Backpropagation",
+    "Software engineering (Hamilton's discipline)",
+    "Growth mindset (Nadella/Dweck)",
+    "Cybernetics",
+    "Blameless postmortem",
+    "Error budget",
+    "Human-in-the-loop",
+    "Prompt injection",
+    "Model extraction",
+    "SBOM (Software Bill of Materials)",
+    "Andon cord"
+  ],
+  "frameworks": [
+    "Production AI System: Knowledge Graph + HITL + Vector Retrieval + Evaluation Harness + Observability",
+    "Evaluation Metrics: Precision, Recall, F1, Confusion Matrix, Statistical Significance, A/B Testing",
+    "AI Security: prompt injection, model extraction, adversarial inputs, data poisoning, SBOM",
+    "Accountable Leadership: stand behind your work, defend with evidence, acknowledge failures honestly",
+    "Google SRE: blameless postmortems, error budgets, SLIs/SLOs"
+  ],
+  "concepts": [
+    "AI cannot be sued, fired, shamed, or praised — accountability is exclusively human",
+    "'Stochastic Parrots' (Gebru): LLMs amplify biases in training data without understanding",
+    "'Gender Shades' (Buolamwini): facial recognition 0.8% error for light males, 34.7% for dark females",
+    "Hamilton invented 'software engineering' because she believed software deserves rigorous discipline",
+    "Hinton left Google in 2023 to warn about AI risks — the most profound act of accountable leadership",
+    "Wiener warned in 1950: automation without accountability concentrates power and destroys human agency",
+    "Costs of wrong AI decisions: 1000 decisions/day at 95% accuracy = 50 wrong decisions/day",
+    "The gap between 'works on my laptop' and 'works for 100 concurrent users in production' is where projects die",
+    "Human Edge Capability: Accountable Leadership"
+  ],
+  "context": "IS 425 is Studio 7 (capstone) of the BSEAI degree. Students build production-quality AI systems with knowledge graphs, human-in-the-loop workflows, vector retrieval, evaluation harnesses, and observability — for real clients with real requirements. Demo Day with industry judges. The core capability is Accountable Leadership."
+}

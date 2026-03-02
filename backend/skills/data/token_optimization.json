@@ -1,0 +1,40 @@
+{
+  "title": "Token Optimization & Vocabulary Power",
+  "domain": "prompt_engineering",
+  "people": [
+    "Claude Shannon",
+    "Andrej Karpathy",
+    "Ilya Sutskever"
+  ],
+  "power_phrases": [
+    "Token economics",
+    "Indexed lookup vs full-table scan",
+    "Vocabulary power",
+    "Context window budget",
+    "Compression ratio",
+    "Activation coherence",
+    "Prompt compression",
+    "Shared compressed protocols",
+    "Optimal source coding",
+    "Knowledge cluster activation"
+  ],
+  "frameworks": [
+    "Shannon's Source Coding: information has optimal encoding, efficient encoding wins",
+    "Token Economics: vague prompt (many rounds, high total tokens) vs precise prompt (one pass, low tokens)",
+    "Vocabulary Power Model: named concepts as indexed lookups, vague descriptions as full-table scans",
+    "Context Window Budget: total available tokens minus system prompt, minus history, equals response budget",
+    "Compression Ratio: tokens spent vs knowledge activated — higher ratio = more efficient prompt"
+  ],
+  "concepts": [
+    "'Ward Cunningham technical debt' is an indexed lookup — 4 tokens activate an entire concept cluster",
+    "'That shortcut thing where you save time now but pay later' is a full-table scan — 12 tokens, fuzzy activation",
+    "Vague prompts scatter activation across low-signal pathways; precise prompts fire dense coherent clusters",
+    "TCP/IP works because both sides share vocabulary (SYN, ACK, FIN) — same principle in human-AI communication",
+    "Every named concept is a compressed knowledge packet — a key that unlocks a door in the AI's library",
+    "At pipeline scale, imprecise vocabulary multiplies into infrastructure cost (tokens cost compute, energy, money)",
+    "Context window management: system prompt budget + conversation history + skill injection + response space",
+    "Prompt compression strategies: use named frameworks instead of descriptions, reference people by name, invoke patterns",
+    "The most efficient encoding wins — Shannon proved this in 1948"
+  ],
+  "context": "Token optimization applies Shannon's information theory to LLM prompting. An LLM processes language as tokens — each costing compute, energy, and money. Precise vocabulary produces better results with fewer tokens. Named concepts activate dense knowledge clusters in LLM parameters, while vague language scatters attention across low-signal pathways. This skill enables systematic prompt compression and context window budget management."
+}

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Agentop
+Comment=Local AI Control Center — Multi-Agent System
+Exec=/root/studio/testing/Agentop/start.sh
+Icon=utilities-terminal
+Terminal=false
+Type=Application
+Categories=Development;Utility;
+StartupNotify=true

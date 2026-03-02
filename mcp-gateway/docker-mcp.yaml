@@ -1,0 +1,15 @@
+# docker-mcp.yaml — Docker MCP Gateway catalog configuration
+# -----------------------------------------------------------
+# Defines which MCP catalogs are available to the gateway.
+# The default Docker Hub MCP catalog provides 200+ servers.
+#
+# Usage:
+#   DOCKER_MCP_IN_CONTAINER=1 docker mcp catalog init
+#   DOCKER_MCP_IN_CONTAINER=1 docker mcp catalog show docker-mcp
+#
+# Ref: https://hub.docker.com/mcp
+
+catalogs:
+  - name: docker-mcp
+    url: https://hub.docker.com/mcp
+    description: Official Docker MCP Catalog — 200+ pre-built MCP servers

@@ -1,0 +1,59 @@
+# registry.yaml — Enabled MCP servers for the Agentop gateway
+# -------------------------------------------------------------
+# Lists the Docker Hub MCP servers that are active in this gateway instance.
+# Each server runs as an isolated Docker container managed by the gateway.
+#
+# To enable/disable servers via CLI:
+#   DOCKER_MCP_IN_CONTAINER=1 docker mcp server enable <name>
+#   DOCKER_MCP_IN_CONTAINER=1 docker mcp server disable <name>
+#   DOCKER_MCP_IN_CONTAINER=1 docker mcp server ls
+#
+# Server images from hub.docker.com/mcp:
+
+servers:
+  # ── Tier 0 / Soul ────────────────────────────────────────────────────────
+  # GitHub — repository inspection, issue tracking, code search
+  - name: github
+    image: mcp/github-mcp-server:latest
+    enabled: true
+    description: "GitHub API — repos, issues, PRs, code search, file contents"
+
+  # ── General purpose ──────────────────────────────────────────────────────
+  # Filesystem — safe local file read/write within allowed paths
+  - name: filesystem
+    image: mcp/filesystem:latest
+    enabled: true
+    description: "Sandboxed filesystem access — read/write within allowed_paths"
+
+  # Time — timezone-aware time and conversion
+  - name: time
+    image: mcp/time:latest
+    enabled: true
+    description: "Current time and timezone conversion"
+
+  # Fetch — HTTP GET requests for external content
+  - name: fetch
+    image: mcp/fetch:latest
+    enabled: true
+    description: "Plain HTTP GET — retrieve web pages and API responses"
+
+  # ── DevOps / Infrastructure ───────────────────────────────────────────────
+  # Docker — container and image management
+  - name: docker
+    image: mcp/docker-mcp:latest
+    enabled: true
+    description: "Docker API — list containers, inspect, logs, restart, images"
+
+  # ── Data ──────────────────────────────────────────────────────────────────
+  # SQLite — read-only SQL queries against local databases
+  - name: sqlite
+    image: mcp/sqlite:latest
+    enabled: true
+    description: "SQLite read-only queries — SELECT and PRAGMA only"
+
+  # ── Communications ────────────────────────────────────────────────────────
+  # Slack — channel messaging and history (requires SLACK_BOT_TOKEN)
+  - name: slack
+    image: mcp/slack:latest
+    enabled: false   # Enable and configure SLACK_BOT_TOKEN to activate
+    description: "Slack API — post messages, list channels, get history"

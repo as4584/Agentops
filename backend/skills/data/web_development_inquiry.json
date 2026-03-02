@@ -1,0 +1,47 @@
+{
+  "title": "Web Development & Disciplined Inquiry (IS 117)",
+  "domain": "bseai_curriculum",
+  "people": [
+    "Tim Berners-Lee",
+    "Linus Torvalds",
+    "Vint Cerf",
+    "Bob Kahn",
+    "Claude Shannon",
+    "Ada Lovelace",
+    "Marc Andreessen",
+    "Don Norman",
+    "Alan Kay"
+  ],
+  "power_phrases": [
+    "View source",
+    "Separation of concerns",
+    "Semantic markup",
+    "First principles",
+    "Version control",
+    "DRY (Don't Repeat Yourself)",
+    "CRC critique (Commend, Recommend, Commend)",
+    "Progressive enhancement",
+    "User experience",
+    "Create-Critique-Revise (CCR) loop",
+    "Spell Book",
+    "Context Pack"
+  ],
+  "frameworks": [
+    "CCR Loop: Create with AI → Critique with vocabulary → Revise with insight",
+    "CRC Critique: Commend, Recommend, Commend — structured peer feedback",
+    "Spell Book: accumulated precision vocabulary for human-AI communication",
+    "Context Pack: what I know, what I don't know, how I evaluate AI answers"
+  ],
+  "concepts": [
+    "An LLM converts energy into intelligence — vocabulary controls the efficiency",
+    "Precise vocabulary activates dense knowledge clusters; vague language scatters attention",
+    "Each named concept is a compressed knowledge packet — a key that unlocks a door in the AI's library",
+    "Shannon's information theory: information has optimal encoding, efficient encoding wins",
+    "The web is open by default — view source is a philosophy, not just a feature",
+    "Disciplined Inquiry: the habit of pausing before accepting an AI answer",
+    "The most important skill in the age of AI is knowing what to ask",
+    "Leonardo da Vinci used monastery libraries the way we use LLMs — vocabulary determines what you can see",
+    "Human Edge Capability: Disciplined Inquiry"
+  ],
+  "context": "IS 117 is Studio 1 of the BSEAI degree (BS in Enterprise AI — The Human Edge). It teaches web development (HTML, CSS, Git, terminal) while building the foundation skill of Disciplined Inquiry — how to formulate questions worth asking and evaluate AI-generated answers. The 40/60 split: 40% manual coding, 60% AI-assisted. Assessment: 20% quizzes, 30% participation, 50% final project + Demo Day."
+}

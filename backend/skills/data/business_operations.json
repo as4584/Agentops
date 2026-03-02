@@ -1,0 +1,37 @@
+{
+  "title": "Business Operations & Guild Model",
+  "domain": "business",
+  "people": [
+    "Eric Ries",
+    "Alexander Osterwalder",
+    "Peter Drucker"
+  ],
+  "power_phrases": [
+    "Commission Model 20/80",
+    "Onboarding Policy",
+    "Guild Hierarchy",
+    "Training Curriculum",
+    "Service Catalog",
+    "Business Model Canvas",
+    "Lean Startup",
+    "Build-Measure-Learn",
+    "Minimum Viable Product",
+    "Operating Model"
+  ],
+  "frameworks": [
+    "Commission: 20% studio / 80% guild member split",
+    "Guild Hierarchy: apprentice → journeyman → master → guild lead",
+    "Onboarding: application → screening → trial period → full membership",
+    "Service Catalog: web development, branding, marketing, AI integration, consulting",
+    "Training Program: technical skills → client skills → leadership track"
+  ],
+  "concepts": [
+    "20/80 commission split incentivizes guild members while sustaining studio operations",
+    "Guild progression is skill-based: apprentices learn, journeymen deliver, masters mentor",
+    "Onboarding is a structured workflow with gates — no automatic progression",
+    "Service offerings must be standardized enough to price but flexible enough to customize",
+    "Training serves dual purpose: skill development and quality assurance",
+    "Every business operation maps to a state machine with documented transitions"
+  ],
+  "context": "Extracted from ordostudio — a guild-based creative studio operating model with 20% studio / 80% member commission splits, tiered guild hierarchy (apprentice through guild lead), structured onboarding workflows, standardized service catalogs, and integrated training programs. All operations are modeled as state machines with governance rules."
+}

@@ -1,0 +1,50 @@
+{
+  "title": "Systems Analysis & Design / Systems Thinking (IS 390)",
+  "domain": "bseai_curriculum",
+  "people": [
+    "Grady Booch",
+    "Melvin Conway",
+    "Donella Meadows",
+    "Edsger Dijkstra",
+    "Barbara Liskov",
+    "Fred Brooks",
+    "Martin Fowler",
+    "Jay Forrester"
+  ],
+  "power_phrases": [
+    "Conway's Law",
+    "Leverage points",
+    "Go To considered harmful",
+    "Liskov Substitution Principle",
+    "Second-system effect",
+    "Code smells",
+    "Refactoring",
+    "System dynamics",
+    "STRIDE threat modeling",
+    "UML (multiple views)",
+    "Emergence",
+    "Defense in depth",
+    "Zero Trust",
+    "Iron triangle (time, quality, scope)"
+  ],
+  "frameworks": [
+    "Conway's Law: organizations design systems mirroring their communication structures",
+    "Meadows's Leverage Points: hierarchy from parameters (easy, weak) to paradigms (hard, powerful)",
+    "STRIDE: Spoofing, Tampering, Repudiation, Information Disclosure, DoS, Elevation",
+    "UML Multiple Views (Booch): class, sequence, component, deployment — no single diagram captures truth",
+    "System Dynamics (Forrester): feedback loops, delays, nonlinear behavior",
+    "Liskov Substitution: if you swap a component for a subtype and nothing breaks, your abstraction is sound"
+  ],
+  "concepts": [
+    "Systems Thinking: see the whole when everyone else sees parts",
+    "Emergence: behavior that appears only when components interact — not visible at component level",
+    "Conway's Law is not a suggestion — it's an observation about an inescapable pattern",
+    "Meadows: most people push easy levers; the most powerful levers are the hardest to find",
+    "Dijkstra: 'Program testing can show the presence of bugs, never their absence'",
+    "Fowler: architecture is not a one-time decision but an evolving conversation",
+    "Graph theory for architecture: components are nodes, dependencies are edges, cycles reveal problems",
+    "Iron triangle: time, quality, scope — pick two. The courage to cut scope is leadership",
+    "Human Edge Capability: Systems Thinking"
+  ],
+  "context": "IS 390 is Studio 6 of the BSEAI degree. Students decompose complex systems including AI components into requirements, architecture documents, threat models, and evaluation plans. The core capability is Systems Thinking — seeing the whole picture including emergent behavior, feedback loops, and second-order effects."
+}

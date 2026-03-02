@@ -1,0 +1,49 @@
+{
+  "title": "Data & Knowledge Systems / Epistemic Humility (IS 331)",
+  "domain": "bseai_curriculum",
+  "people": [
+    "Edgar F. Codd",
+    "Jim Gray",
+    "Michael Stonebraker",
+    "Leonhard Euler",
+    "Larry Ellison",
+    "Tomas Mikolov",
+    "Eric Brewer"
+  ],
+  "power_phrases": [
+    "Relational Model",
+    "ACID Properties",
+    "Normalization (1NF through BCNF)",
+    "SQL Injection (Bobby Tables)",
+    "CAP Theorem",
+    "Graph Theory (Euler)",
+    "Knowledge Graph",
+    "Vector Embeddings",
+    "Cosine Similarity",
+    "Semantic Search",
+    "Denormalization",
+    "Set Theory",
+    "Hybrid Retrieval",
+    "Epistemic Humility"
+  ],
+  "frameworks": [
+    "Relational Model (Codd 1970): data as mathematical relations, SQL as declarative query",
+    "ACID: Atomicity, Consistency, Isolation, Durability — the four guarantees of reliable transactions",
+    "CAP Theorem (Brewer): Consistency, Availability, Partition tolerance — pick two",
+    "Knowledge Graph: entities + relationships + properties modeled as a mathematical graph",
+    "Vector Embeddings + Cosine Similarity: convert meaning to geometry, measure understanding as distance",
+    "Hybrid Retrieval: graph context + vector similarity for comprehensive knowledge access"
+  ],
+  "concepts": [
+    "Vocabulary as database index: named concepts are indexed lookups, vague language is full-table scans",
+    "ACID properties cost performance — understanding the tradeoff is engineering judgment",
+    "Normalization eliminates redundancy; denormalization optimizes read performance — context determines which",
+    "SQL injection is the canonical lesson in never trusting user input",
+    "Graph theory (Euler, 1736) is the mathematical foundation of network analysis, social networks, and knowledge graphs",
+    "Vector embeddings convert meaning into geometry — cosine similarity measures conceptual distance",
+    "Semantic search finds meaning, not just keyword matches",
+    "Epistemic Humility: knowing what you don't know, and having a plan to find out",
+    "Human Edge Capability: Epistemic Humility"
+  ],
+  "context": "IS 331 is Studio 5 of the BSEAI degree. Students build comprehensive data systems spanning relational databases, graph databases, and vector stores. The core capability is Epistemic Humility — knowing the limits of what data can tell you and what it hides. Assessment: 20% quizzes / 30% participation / 50% final project."
+}

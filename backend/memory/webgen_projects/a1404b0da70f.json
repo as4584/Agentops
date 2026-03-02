@@ -1,0 +1,589 @@
+{
+  "id": "a1404b0da70f",
+  "created_at": "2026-03-02T02:41:39.534764",
+  "updated_at": "2026-03-02T02:44:17.779963",
+  "status": "ready",
+  "brief": {
+    "business_name": "Bella's Kitchen",
+    "business_type": "restaurant",
+    "tagline": "Farm-to-table Italian dining",
+    "description": "Family-owned Italian restaurant",
+    "services": [
+      "Dine-in",
+      "Catering",
+      "Private Events"
+    ],
+    "target_audience": "",
+    "tone": "friendly",
+    "colors": {},
+    "logo_url": "",
+    "phone": "555-0123",
+    "email": "info@bellaskitchen.com",
+    "address": "123 Main St",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": []
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - Bella's Kitchen",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "cda6c874",
+          "name": "hero",
+          "component_type": "hero-centered",
+          "content": {
+            "headline": "Experience the Taste of Italy at Bella's Kitchen",
+            "subtitle": "Join us for farm-to-table Italian dining"
+          },
+          "html": "<div class=\"max-w-7xl mx-auto py-12 bg-white shadow-md\">\n  <div class=\"flex flex-col items-center justify-center h-screen\">\n    <h1 class=\"text-3xl font-bold text-gray-900\" aria-label=\"Bella's Kitchen\">\n      Experience the Taste of Italy at Bella's Kitchen\n    </h1>\n    <p class=\"text-lg leading-relaxed text-gray-500\" aria-label=\"Farm-to-table Italian dining\">\n      Join us for farm-to-table Italian dining\n    </p>\n  </div>\n  <nav class=\"flex justify-between mt-4\">\n    <ul class=\"flex space-x-6\">\n      <li><a href=\"index.html\" class=\"text-gray-900 hover:text-blue-500\">Home</a></li>\n      <li><a href=\"about.html\" class=\"text-gray-900 hover:text-blue-500\">About</a></li>\n      <li><a href=\"menu.html\" class=\"text-gray-900 hover:text-blue-500\">Menu</a></li>\n      <li><a href=\"reservations.html\" class=\"text-gray-900 hover:text-blue-500\">Reservations</a></li>\n      <li><a href=\"catering.html\" class=\"text-gray-900 hover:text-blue-500\">Catering</a></li>\n      <li><a href=\"contact.html\" class=\"text-gray-900 hover:text-blue-500\">Contact</a></li>\n    </ul>\n  </nav>\n  <div class=\"mt-6\">\n    <p class=\"text-lg leading-relaxed text-gray-600\">\n      Phone: <span class=\"font-bold\">555-0123</span> | Email: <span class=\"font-bold\"><a href=\"mailto:info@bellaskitchen.com\">info@bellaskitchen.com</a></span>\n    </p>\n  </div>\n</div>",
+          "order": 0
+        },
+        {
+          "id": "611c9b8b",
+          "name": "features",
+          "component_type": "feature-section",
+          "content": {
+            "title": "What We Offer",
+            "description": "Dine-in, Catering, Private Events"
+          },
+          "html": "<div class=\"max-w-3xl mx-auto text-center pb-12\">\n  <h2 class=\"text-4xl font-bold mb-6\">What We Offer</h2>\n  <p class=\"text-lg text-gray-600\" aria-label=\"Description of features section\">\n    Dine-in, Catering, Private Events\n  </p>\n  <div class=\"flex flex-wrap justify-center space-x-4 -mx-4 mb-8\">\n    <a href=\"index.html\" class=\"inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">Home</a>\n    <a href=\"about.html\" class=\"inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">About</a>\n    <a href=\"menu.html\" class=\"inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">Menu</a>\n    <a href=\"reservations.html\" class=\"inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">Reservations</a>\n    <a href=\"catering.html\" class=\"inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">Catering</a>\n    <a href=\"contact.html\" class=\"inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">Contact</a>\n  </div>\n  <p class=\"text-lg text-gray-600\" aria-label=\"Phone number\">\n    Phone: <span class=\"font-bold\">555-0123</span>\n  </p>\n  <p class=\"text-lg text-gray-600\" aria-label=\"Email address\">\n    Email: <a href=\"mailto:info@bellaskitchen.com\">info@bellaskitchen.com</a>\n  </p>\n</div>",
+          "order": 1
+        },
+        {
+          "id": "902f02ef",
+          "name": "menu",
+          "component_type": "grid-view",
+          "content": {
+            "title": "Our Menu",
+            "subtitle": "Fresh ingredients, traditional Italian dishes"
+          },
+          "html": "<nav class=\"bg-white py-4 shadow-md\">\n  <div class=\"container mx-auto px-6 flex justify-between items-center\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Bella's Kitchen</a>\n    <ul class=\"flex space-x-2 items-center\">\n      <li><a href=\"index.html\" class=\"text-gray-600 hover:text-blue-500 transition duration-300 ease-in-out\">Home</a></li>\n      <li><a href=\"about.html\" class=\"text-gray-600 hover:text-blue-500 transition duration-300 ease-in-out\">About</a></li>\n      <li><a href=\"menu.html\" class=\"text-gray-600 hover:text-blue-500 transition duration-300 ease-in-out\">Menu</a></li>\n      <li><a href=\"reservations.html\" class=\"text-gray-600 hover:text-blue-500 transition duration-300 ease-in-out\">Reservations</a></li>\n      <li><a href=\"catering.html\" class=\"text-gray-600 hover:text-blue-500 transition duration-300 ease-in-out\">Catering</a></li>\n      <li><a href=\"contact.html\" class=\"text-gray-600 hover:text-blue-500 transition duration-300 ease-in-out\">Contact</a></li>\n    </ul>\n  </div>\n</nav>\n\n<section aria-label=\"Our Menu\" class=\"bg-white py-12\">\n  <div class=\"container mx-auto px-6 text-center\">\n    <h1 class=\"text-3xl font-bold mb-4\">Our Menu</h1>\n    <p class=\"text-lg font-normal leading-loose mb-8\">Fresh ingredients, traditional Italian dishes</p>\n    <ul class=\"flex flex-wrap justify-center -mx-2\">\n      <li class=\"w-full md:w-1/3 xl:w-1/4 px-2 mb-6\">\n        <h2 class=\"text-lg font-bold\">Dine-in Menu</h2>\n        <ul class=\"list-disc list-inside\">\n          <!-- menu items will go here -->\n        </ul>\n      </li>\n    </ul>\n  </div>\n</section>\n\n<footer class=\"bg-gray-100 py-4 text-center\">\n  <p>&copy; 2023 Bella's Kitchen. All rights reserved.</p>\n  <p class=\"text-lg font-normal\">Phone: 555-0123 | Email: <a href=\"mailto:info@bellaskitchen.com\" class=\"text-blue-500 hover:text-blue-700 transition duration-300 ease-in-out\">info@bellaskitchen.com</a></p>\n</footer>",
+          "order": 2
+        },
+        {
+          "id": "80eefd52",
+          "name": "about",
+          "component_type": "summary-section",
+          "content": {
+            "title": "About Us",
+            "description": "Family-owned Italian restaurant with a passion for farm-to-table cuisine"
+          },
+          "html": "<nav class=\"bg-gray-200 py-4 text-gray-600\">\n  <div class=\"container mx-auto flex justify-between items-center\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Bella's Kitchen</a>\n    <ul class=\"flex space-x-4\">\n      <li><a href=\"about.html\" aria-label=\"About Us\" class=\"text-gray-800 hover:text-gray-900\">About Us</a></li>\n      <li><a href=\"menu.html\" aria-label=\"Menu\" class=\"text-gray-800 hover:text-gray-900\">Menu</a></li>\n      <li><a href=\"reservations.html\" aria-label=\"Reservations\" class=\"text-gray-800 hover:text-gray-900\">Reservations</a></li>\n      <li><a href=\"catering.html\" aria-label=\"Catering\" class=\"text-gray-800 hover:text-gray-900\">Catering</a></li>\n      <li><a href=\"contact.html\" aria-label=\"Contact Us\" class=\"text-gray-800 hover:text-gray-900\">Contact Us</a></li>\n    </ul>\n  </div>\n</nav>\n\n<section aria-labelledby=\"about-us-title\" class=\"bg-white py-12 text-lg\">\n  <h2 id=\"about-us-title\" class=\"text-3xl font-bold leading-tight\">About Us</h2>\n  <p class=\"text-gray-600 mt-4\">Family-owned Italian restaurant with a passion for farm-to-table cuisine.</p>\n  <ul class=\"flex flex-wrap -mx-3 mb-8\">\n    <li class=\"w-full md:w-1/2 xl:w-1/3 px-3 mb-6 last:mt-0\">\n      <div class=\"bg-white rounded shadow-md p-4\">\n        <h3 class=\"text-lg font-bold leading-tight\">Dine-in</h3>\n        <p class=\"text-gray-600\">Enjoy our farm-to-table Italian cuisine in a cozy atmosphere.</p>\n      </div>\n    </li>\n    <li class=\"w-full md:w-1/2 xl:w-1/3 px-3 mb-6\">\n      <div class=\"bg-white rounded shadow-md p-4\">\n        <h3 class=\"text-lg font-bold leading-tight\">Catering</h3>\n        <p class=\"text-gray-600\">Let us bring the taste of Italy to your event.</p>\n      </div>\n    </li>\n    <li class=\"w-full md:w-1/2 xl:w-1/3 px-3 mb-6\">\n      <div class=\"bg-white rounded shadow-md p-4\">\n        <h3 class=\"text-lg font-bold leading-tight\">Private Events</h3>\n        <p class=\"text-gray-600\">Make your event unforgettable with our private dining experiences.</p>\n      </div>\n    </li>\n  </ul>\n  <p class=\"text-gray-600 mb-8\">Call us at 555-0123 or email us at <a href=\"mailto:info@bellaskitchen.com\" class=\"text-blue-500 hover:text-blue-900\">info@bellaskitchen.com</a> to book your table.</p>\n</section>",
+          "order": 3
+        },
+        {
+          "id": "bea2c8a2",
+          "name": "events",
+          "component_type": "event-calendar",
+          "content": {
+            "title": "Upcoming Events",
+            "subtitle": "Private parties, weddings, and corporate events"
+          },
+          "html": "<nav class=\"bg-white py-4 text-sm\">\n  <div class=\"container mx-auto flex justify-between\">\n    <a href=\"index.html\" class=\"text-gray-900\">Home</a>\n    <ul class=\"flex space-x-6\">\n      <li><a href=\"about.html\" aria-current=\"page\">About</a></li>\n      <li><a href=\"menu.html\">Menu</a></li>\n      <li><a href=\"reservations.html\">Reservations</a></li>\n      <li class=\"hidden md:block\"><a href=\"catering.html\">Catering</a></li>\n      <li class=\"hidden md:block\"><a href=\"contact.html\">Contact</a></li>\n    </ul>\n  </div>\n</nav>\n\n<div class=\"container mx-auto py-12\">\n  <h1 id=\"events-title\" class=\"text-3xl font-bold text-gray-900 mb-4\">Upcoming Events</h1>\n  <p id=\"events-subtitle\" class=\"text-lg text-gray-600 mb-6\">Private parties, weddings, and corporate events</p>\n  <div class=\"flex flex-wrap -mx-2\">\n    <div class=\"w-full md:w-1/3 xl:w-1/3 p-4 mb-8\">\n      <h2 class=\"text-lg font-bold text-gray-900\">Private Parties</h2>\n      <ul class=\"list-disc list-inside\">\n        <li class=\"py-2\"><a href=\"#\" class=\"text-gray-900 hover:text-blue-500\">Book Now</a></li>\n        <li class=\"py-2\"><a href=\"#\" class=\"text-gray-900 hover:text-blue-500\">View More</a></li>\n      </ul>\n    </div>\n    <div class=\"w-full md:w-1/3 xl:w-1/3 p-4 mb-8\">\n      <h2 class=\"text-lg font-bold text-gray-900\">Weddings</h2>\n      <ul class=\"list-disc list-inside\">\n        <li class=\"py-2\"><a href=\"#\" class=\"text-gray-900 hover:text-blue-500\">Book Now</a></li>\n        <li class=\"py-2\"><a href=\"#\" class=\"text-gray-900 hover:text-blue-500\">View More</a></li>\n      </ul>\n    </div>\n    <div class=\"w-full md:w-1/3 xl:w-1/3 p-4 mb-8\">\n      <h2 class=\"text-lg font-bold text-gray-900\">Corporate Events</h2>\n      <ul class=\"list-disc list-inside\">\n        <li class=\"py-2\"><a href=\"#\" class=\"text-gray-900 hover:text-blue-500\">Book Now</a></li>\n        <li class=\"py-2\"><a href=\"#\" class=\"text-gray-900 hover:text-blue-500\">View More</a></li>\n      </ul>\n    </div>\n  </div>\n  <p class=\"text-lg text-gray-600\">Call us at 555-0123 or email <a href=\"mailto:info@bellaskitchen.com\" class=\"text-gray-900 hover:text-blue-500\">info@bellaskitchen.com</a> to book your event.</p>\n</div>\n\n<footer class=\"bg-white py-4 text-sm\">\n  <div class=\"container mx-auto flex justify-between\">\n    <p id=\"events-phone\" class=\"text-gray-600\">Phone: 555-0123</p>\n    <p id=\"events-email\" class=\"text-gray-600\">Email: <a href=\"mailto:info@bellaskitchen.com\" class=\"text-gray-900 hover:text-blue-500\">info@bellaskitchen.com</a></p>\n  </div>\n</footer>",
+          "order": 4
+        },
+        {
+          "id": "914d9744",
+          "name": "contact",
+          "component_type": "contact-form",
+          "content": {
+            "title": "Get in Touch",
+            "description": "Reservations, catering inquiries, and more"
+          },
+          "html": "<nav class=\"bg-gray-100 py-4 text-gray-600\">\n  <div class=\"container mx-auto flex justify-between items-center\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Bella's Kitchen</a>\n    <ul class=\"flex space-x-8\">\n      <li><a href=\"about.html\" aria-label=\"About page\">About</a></li>\n      <li><a href=\"menu.html\" aria-label=\"Menu page\">Menu</a></li>\n      <li><a href=\"reservations.html\" aria-label=\"Reservations page\">Reservations</a></li>\n      <li><a href=\"catering.html\" aria-label=\"Catering page\">Catering</a></li>\n    </ul>\n  </div>\n</nav>\n\n<div class=\"py-20 bg-white text-gray-600\">\n  <h2 class=\"text-3xl font-bold mb-4\">Get in Touch</h2>\n  <p class=\"text-lg\">{{ description }}</p>\n  <form id=\"contact-form\" class=\"mt-8 grid gap-4 row-cols-1 md:grid-cols-2 lg:grid-cols-3\">\n    <div class=\"md:col-md-6\">\n      <label for=\"name\" class=\"block text-sm font-bold mb-1\">Name:</label>\n      <input id=\"name\" type=\"text\" name=\"name\" required class=\"block w-full p-2 pl-10 text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500\">\n    </div>\n    <div class=\"md:col-md-6\">\n      <label for=\"email\" class=\"block text-sm font-bold mb-1\">Email:</label>\n      <input id=\"email\" type=\"email\" name=\"email\" required class=\"block w-full p-2 pl-10 text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500\">\n    </div>\n    <div class=\"md:col-md-6 lg:col-lg-3\">\n      <label for=\"phone\" class=\"block text-sm font-bold mb-1\">Phone:</label>\n      <input id=\"phone\" type=\"tel\" name=\"phone\" required class=\"block w-full p-2 pl-10 text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500\">\n    </div>\n    <div class=\"md:col-md-6 lg:col-lg-3\">\n      <label for=\"message\" class=\"block text-sm font-bold mb-1\">Message:</label>\n      <textarea id=\"message\" name=\"message\" required class=\"block w-full p-2 pl-10 text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500\"></textarea>\n    </div>\n    <button type=\"submit\" class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Send</button>\n  </form>\n</div>\n\n<footer class=\"bg-gray-100 py-4\">\n  <p class=\"text-sm text-center\">&copy; 2023 Bella's Kitchen. All rights reserved.</p>\n  <p class=\"text-sm text-center\">Designed and developed with love.</p>\n</footer>",
+          "order": 5
+        }
+      ],
+      "seo": {
+        "title": "Home - Bella's Kitchen | Bella's Kitchen",
+        "meta_description": "Farm-to-table Italian dining",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What is the address of Bella's Kitchen?",
+            "a": "Bella's Kitchen is located at 123 Main St, Anytown, USA."
+          },
+          {
+            "q": "Do you offer catering services?",
+            "a": "Yes, we offer catering services for private events and parties."
+          },
+          {
+            "q": "Can I make a reservation?",
+            "a": "Yes, reservations can be made online or by calling us during business hours."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Bella's Kitchen",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Family-owned Italian restaurant serving traditional dishes in a cozy atmosphere.",
+        "topic_cluster": "Italian Restaurants",
+        "related_topics": [
+          "Best Italian Restaurants in Town",
+          "Restaurant Reviews"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - Bella's Kitchen</title>\n  <meta name=\"description\" content=\"Farm-to-table Italian dining\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Farm-to-table Italian dining\">\n  <meta property=\"og:type\" content=\"website\">\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What is the address of Bella's Kitchen?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bella's Kitchen is located at 123 Main St, Anytown, USA.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Do you offer catering services?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, we offer catering services for private events and parties.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Can I make a reservation?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, reservations can be made online or by calling us during business hours.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<div class=\"max-w-7xl mx-auto py-12 bg-white shadow-md\">\n  <div class=\"flex flex-col items-center justify-center h-screen\">\n    <h1 class=\"text-3xl font-bold text-gray-900\" aria-label=\"Bella's Kitchen\">\n      Experience the Taste of Italy at Bella's Kitchen\n    </h1>\n    <p class=\"text-lg leading-relaxed text-gray-500\" aria-label=\"Farm-to-table Italian dining\">\n      Join us for farm-to-table Italian dining\n    </p>\n  </div>\n  <nav class=\"flex justify-between mt-4\">\n    <ul class=\"flex space-x-6\">\n      <li><a href=\"index.html\" class=\"text-gray-900 hover:text-blue-500\">Home</a></li>\n      <li><a href=\"about.html\" class=\"text-gray-900 hover:text-blue-500\">About</a></li>\n      <li><a href=\"menu.html\" class=\"text-gray-900 hover:text-blue-500\">Menu</a></li>\n      <li><a href=\"reservations.html\" class=\"text-gray-900 hover:text-blue-500\">Reservations</a></li>\n      <li><a href=\"catering.html\" class=\"text-gray-900 hover:text-blue-500\">Catering</a></li>\n      <li><a href=\"contact.html\" class=\"text-gray-900 hover:text-blue-500\">Contact</a></li>\n    </ul>\n  </nav>\n  <div class=\"mt-6\">\n    <p class=\"text-lg leading-relaxed text-gray-600\">\n      Phone: <span class=\"font-bold\">555-0123</span> | Email: <span class=\"font-bold\"><a href=\"mailto:info@bellaskitchen.com\">info@bellaskitchen.com</a></span>\n    </p>\n  </div>\n</div>\n\n<div class=\"max-w-3xl mx-auto text-center pb-12\">\n  <h2 class=\"text-4xl font-bold mb-6\">What We Offer</h2>\n  <p class=\"text-lg text-gray-600\" aria-label=\"Description of features section\">\n    Dine-in, Catering, Private Events\n  </p>\n  <div class=\"flex flex-wrap justify-center space-x-4 -mx-4 mb-8\">\n    <a href=\"index.html\" class=\"inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">Home</a>\n    <a href=\"about.html\" class=\"inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">About</a>\n    <a href=\"menu.html\" class=\"inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">Menu</a>\n    <a href=\"reservations.html\" class=\"inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">Reservations</a>\n    <a href=\"catering.html\" class=\"inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">Catering</a>\n    <a href=\"contact.html\" class=\"inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500\">Contact</a>\n  </div>\n  <p class=\"text-lg text-gray-600\" aria-label=\"Phone number\">\n    Phone: <span class=\"font-bold\">555-0123</span>\n  </p>\n  <p class=\"text-lg text-gray-600\" aria-label=\"Email address\">\n    Email: <a href=\"mailto:info@bellaskitchen.com\">info@bellaskitchen.com</a>\n  </p>\n</div>\n\n<nav class=\"bg-white py-4 shadow-md\">\n  <div class=\"container mx-auto px-6 flex justify-between items-center\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Bella's Kitchen</a>\n    <ul class=\"flex space-x-2 items-center\">\n      <li><a href=\"index.html\" class=\"text-gray-600 hover:text-blue-500 transition duration-300 ease-in-out\">Home</a></li>\n      <li><a href=\"about.html\" class=\"text-gray-600 hover:text-blue-500 transition duration-300 ease-in-out\">About</a></li>\n      <li><a href=\"menu.html\" class=\"text-gray-600 hover:text-blue-500 transition duration-300 ease-in-out\">Menu</a></li>\n      <li><a href=\"reservations.html\" class=\"text-gray-600 hover:text-blue-500 transition duration-300 ease-in-out\">Reservations</a></li>\n      <li><a href=\"catering.html\" class=\"text-gray-600 hover:text-blue-500 transition duration-300 ease-in-out\">Catering</a></li>\n      <li><a href=\"contact.html\" class=\"text-gray-600 hover:text-blue-500 transition duration-300 ease-in-out\">Contact</a></li>\n    </ul>\n  </div>\n</nav>\n\n<section aria-label=\"Our Menu\" class=\"bg-white py-12\">\n  <div class=\"container mx-auto px-6 text-center\">\n    <h1 class=\"text-3xl font-bold mb-4\">Our Menu</h1>\n    <p class=\"text-lg font-normal leading-loose mb-8\">Fresh ingredients, traditional Italian dishes</p>\n    <ul class=\"flex flex-wrap justify-center -mx-2\">\n      <li class=\"w-full md:w-1/3 xl:w-1/4 px-2 mb-6\">\n        <h2 class=\"text-lg font-bold\">Dine-in Menu</h2>\n        <ul class=\"list-disc list-inside\">\n          <!-- menu items will go here -->\n        </ul>\n      </li>\n    </ul>\n  </div>\n</section>\n\n<footer class=\"bg-gray-100 py-4 text-center\">\n  <p>&copy; 2023 Bella's Kitchen. All rights reserved.</p>\n  <p class=\"text-lg font-normal\">Phone: 555-0123 | Email: <a href=\"mailto:info@bellaskitchen.com\" class=\"text-blue-500 hover:text-blue-700 transition duration-300 ease-in-out\">info@bellaskitchen.com</a></p>\n</footer>\n\n<nav class=\"bg-gray-200 py-4 text-gray-600\">\n  <div class=\"container mx-auto flex justify-between items-center\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Bella's Kitchen</a>\n    <ul class=\"flex space-x-4\">\n      <li><a href=\"about.html\" aria-label=\"About Us\" class=\"text-gray-800 hover:text-gray-900\">About Us</a></li>\n      <li><a href=\"menu.html\" aria-label=\"Menu\" class=\"text-gray-800 hover:text-gray-900\">Menu</a></li>\n      <li><a href=\"reservations.html\" aria-label=\"Reservations\" class=\"text-gray-800 hover:text-gray-900\">Reservations</a></li>\n      <li><a href=\"catering.html\" aria-label=\"Catering\" class=\"text-gray-800 hover:text-gray-900\">Catering</a></li>\n      <li><a href=\"contact.html\" aria-label=\"Contact Us\" class=\"text-gray-800 hover:text-gray-900\">Contact Us</a></li>\n    </ul>\n  </div>\n</nav>\n\n<section aria-labelledby=\"about-us-title\" class=\"bg-white py-12 text-lg\">\n  <h2 id=\"about-us-title\" class=\"text-3xl font-bold leading-tight\">About Us</h2>\n  <p class=\"text-gray-600 mt-4\">Family-owned Italian restaurant with a passion for farm-to-table cuisine.</p>\n  <ul class=\"flex flex-wrap -mx-3 mb-8\">\n    <li class=\"w-full md:w-1/2 xl:w-1/3 px-3 mb-6 last:mt-0\">\n      <div class=\"bg-white rounded shadow-md p-4\">\n        <h3 class=\"text-lg font-bold leading-tight\">Dine-in</h3>\n        <p class=\"text-gray-600\">Enjoy our farm-to-table Italian cuisine in a cozy atmosphere.</p>\n      </div>\n    </li>\n    <li class=\"w-full md:w-1/2 xl:w-1/3 px-3 mb-6\">\n      <div class=\"bg-white rounded shadow-md p-4\">\n        <h3 class=\"text-lg font-bold leading-tight\">Catering</h3>\n        <p class=\"text-gray-600\">Let us bring the taste of Italy to your event.</p>\n      </div>\n    </li>\n    <li class=\"w-full md:w-1/2 xl:w-1/3 px-3 mb-6\">\n      <div class=\"bg-white rounded shadow-md p-4\">\n        <h3 class=\"text-lg font-bold leading-tight\">Private Events</h3>\n        <p class=\"text-gray-600\">Make your event unforgettable with our private dining experiences.</p>\n      </div>\n    </li>\n  </ul>\n  <p class=\"text-gray-600 mb-8\">Call us at 555-0123 or email us at <a href=\"mailto:info@bellaskitchen.com\" class=\"text-blue-500 hover:text-blue-900\">info@bellaskitchen.com</a> to book your table.</p>\n</section>\n\n<nav class=\"bg-white py-4 text-sm\">\n  <div class=\"container mx-auto flex justify-between\">\n    <a href=\"index.html\" class=\"text-gray-900\">Home</a>\n    <ul class=\"flex space-x-6\">\n      <li><a href=\"about.html\" aria-current=\"page\">About</a></li>\n      <li><a href=\"menu.html\">Menu</a></li>\n      <li><a href=\"reservations.html\">Reservations</a></li>\n      <li class=\"hidden md:block\"><a href=\"catering.html\">Catering</a></li>\n      <li class=\"hidden md:block\"><a href=\"contact.html\">Contact</a></li>\n    </ul>\n  </div>\n</nav>\n\n<div class=\"container mx-auto py-12\">\n  <h1 id=\"events-title\" class=\"text-3xl font-bold text-gray-900 mb-4\">Upcoming Events</h1>\n  <p id=\"events-subtitle\" class=\"text-lg text-gray-600 mb-6\">Private parties, weddings, and corporate events</p>\n  <div class=\"flex flex-wrap -mx-2\">\n    <div class=\"w-full md:w-1/3 xl:w-1/3 p-4 mb-8\">\n      <h2 class=\"text-lg font-bold text-gray-900\">Private Parties</h2>\n      <ul class=\"list-disc list-inside\">\n        <li class=\"py-2\"><a href=\"#\" class=\"text-gray-900 hover:text-blue-500\">Book Now</a></li>\n        <li class=\"py-2\"><a href=\"#\" class=\"text-gray-900 hover:text-blue-500\">View More</a></li>\n      </ul>\n    </div>\n    <div class=\"w-full md:w-1/3 xl:w-1/3 p-4 mb-8\">\n      <h2 class=\"text-lg font-bold text-gray-900\">Weddings</h2>\n      <ul class=\"list-disc list-inside\">\n        <li class=\"py-2\"><a href=\"#\" class=\"text-gray-900 hover:text-blue-500\">Book Now</a></li>\n        <li class=\"py-2\"><a href=\"#\" class=\"text-gray-900 hover:text-blue-500\">View More</a></li>\n      </ul>\n    </div>\n    <div class=\"w-full md:w-1/3 xl:w-1/3 p-4 mb-8\">\n      <h2 class=\"text-lg font-bold text-gray-900\">Corporate Events</h2>\n      <ul class=\"list-disc list-inside\">\n        <li class=\"py-2\"><a href=\"#\" class=\"text-gray-900 hover:text-blue-500\">Book Now</a></li>\n        <li class=\"py-2\"><a href=\"#\" class=\"text-gray-900 hover:text-blue-500\">View More</a></li>\n      </ul>\n    </div>\n  </div>\n  <p class=\"text-lg text-gray-600\">Call us at 555-0123 or email <a href=\"mailto:info@bellaskitchen.com\" class=\"text-gray-900 hover:text-blue-500\">info@bellaskitchen.com</a> to book your event.</p>\n</div>\n\n<footer class=\"bg-white py-4 text-sm\">\n  <div class=\"container mx-auto flex justify-between\">\n    <p id=\"events-phone\" class=\"text-gray-600\">Phone: 555-0123</p>\n    <p id=\"events-email\" class=\"text-gray-600\">Email: <a href=\"mailto:info@bellaskitchen.com\" class=\"text-gray-900 hover:text-blue-500\">info@bellaskitchen.com</a></p>\n  </div>\n</footer>\n\n<nav class=\"bg-gray-100 py-4 text-gray-600\">\n  <div class=\"container mx-auto flex justify-between items-center\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Bella's Kitchen</a>\n    <ul class=\"flex space-x-8\">\n      <li><a href=\"about.html\" aria-label=\"About page\">About</a></li>\n      <li><a href=\"menu.html\" aria-label=\"Menu page\">Menu</a></li>\n      <li><a href=\"reservations.html\" aria-label=\"Reservations page\">Reservations</a></li>\n      <li><a href=\"catering.html\" aria-label=\"Catering page\">Catering</a></li>\n    </ul>\n  </div>\n</nav>\n\n<div class=\"py-20 bg-white text-gray-600\">\n  <h2 class=\"text-3xl font-bold mb-4\">Get in Touch</h2>\n  <p class=\"text-lg\">{{ description }}</p>\n  <form id=\"contact-form\" class=\"mt-8 grid gap-4 row-cols-1 md:grid-cols-2 lg:grid-cols-3\">\n    <div class=\"md:col-md-6\">\n      <label for=\"name\" class=\"block text-sm font-bold mb-1\">Name:</label>\n      <input id=\"name\" type=\"text\" name=\"name\" required class=\"block w-full p-2 pl-10 text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500\">\n    </div>\n    <div class=\"md:col-md-6\">\n      <label for=\"email\" class=\"block text-sm font-bold mb-1\">Email:</label>\n      <input id=\"email\" type=\"email\" name=\"email\" required class=\"block w-full p-2 pl-10 text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500\">\n    </div>\n    <div class=\"md:col-md-6 lg:col-lg-3\">\n      <label for=\"phone\" class=\"block text-sm font-bold mb-1\">Phone:</label>\n      <input id=\"phone\" type=\"tel\" name=\"phone\" required class=\"block w-full p-2 pl-10 text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500\">\n    </div>\n    <div class=\"md:col-md-6 lg:col-lg-3\">\n      <label for=\"message\" class=\"block text-sm font-bold mb-1\">Message:</label>\n      <textarea id=\"message\" name=\"message\" required class=\"block w-full p-2 pl-10 text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500\"></textarea>\n    </div>\n    <button type=\"submit\" class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Send</button>\n  </form>\n</div>\n\n<footer class=\"bg-gray-100 py-4\">\n  <p class=\"text-sm text-center\">&copy; 2023 Bella's Kitchen. All rights reserved.</p>\n  <p class=\"text-sm text-center\">Designed and developed with love.</p>\n</footer>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What is the address of Bella's Kitchen?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bella's Kitchen is located at 123 Main St, Anytown, USA.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Do you offer catering services?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, we offer catering services for private events and parties.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Can I make a reservation?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, reservations can be made online or by calling us during business hours.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    },
+    {
+      "slug": "about",
+      "title": "About Us - Bella's Kitchen",
+      "purpose": "Page about the business",
+      "sections": [
+        {
+          "id": "460c9f5c",
+          "name": "summary",
+          "component_type": "summary-section",
+          "content": {
+            "title": "Our Story",
+            "description": "Family-owned Italian restaurant with a passion for farm-to-table cuisine"
+          },
+          "html": "<div class=\"max-w-sm mx-auto p-8 bg-white rounded-lg shadow-md\">\n  <h2 class=\"text-lg font-bold mb-4\" aria-label=\"Our Story\">\n    Our Story\n  </h2>\n  <p class=\"text-gray-600 text-base mb-6\" aria-label=\"Family-owned Italian restaurant with a passion for farm-to-table cuisine\">\n    Family-owned Italian restaurant with a passion for farm-to-table cuisine\n  </p>\n  <div class=\"flex justify-between items-center mb-4\">\n    <a href=\"index.html\" class=\"text-blue-600 hover:text-blue-800\">Home</a>\n    <a href=\"about.html\" class=\"ml-6 text-blue-600 hover:text-blue-800\">About</a>\n  </div>\n  <ul class=\"flex justify-between items-center mb-4\">\n    <li class=\"mr-8\">\n      <a href=\"menu.html\" class=\"text-blue-600 hover:text-blue-800\">Menu</a>\n    </li>\n    <li class=\"ml-6 mr-8\">\n      <a href=\"reservations.html\" class=\"text-blue-600 hover:text-blue-800\">Reservations</a>\n    </li>\n    <li class=\"mr-8\">\n      <a href=\"catering.html\" class=\"text-blue-600 hover:text-blue-800\">Catering</a>\n    </li>\n    <li class=\"ml-6\">\n      <a href=\"contact.html\" class=\"text-blue-600 hover:text-blue-800\">Contact</a>\n    </li>\n  </ul>\n  <p class=\"text-gray-600 text-base mb-4\" aria-label=\"Get in touch with us at (555) 0123 or info@bellaskitchen.com\">\n    Get in touch with us at (555) 0123 or <a href=\"mailto:info@bellaskitchen.com\">info@bellaskitchen.com</a>\n  </p>\n</div>",
+          "order": 0
+        },
+        {
+          "id": "c286c587",
+          "name": "team",
+          "component_type": "team-member-grid",
+          "content": {
+            "title": "Meet the Team",
+            "subtitle": "Our chefs, servers, and staff"
+          },
+          "html": "<nav class=\"py-4 bg-white\">\n  <div class=\"container mx-auto px-4 md:px-6 lg:px-8\">\n    <ul class=\"flex justify-between items-center\">\n      <li>\n        <a href=\"index.html\" class=\"text-gray-600 hover:text-gray-900\">Home</a>\n      </li>\n      <li>\n        <a href=\"about.html\" class=\"text-gray-600 hover:text-gray-900\">About</a>\n      </li>\n      <li>\n        <a href=\"menu.html\" class=\"text-gray-600 hover:text-gray-900\">Menu</a>\n      </li>\n      <li>\n        <a href=\"reservations.html\" class=\"text-gray-600 hover:text-gray-900\">Reservations</a>\n      </li>\n      <li>\n        <a href=\"catering.html\" class=\"text-gray-600 hover:text-gray-900\">Catering</a>\n      </li>\n      <li>\n        <a href=\"contact.html\" class=\"text-gray-600 hover:text-gray-900\">Contact</a>\n      </li>\n    </ul>\n  </div>\n</nav>\n\n<section class=\"py-20 bg-white\">\n  <div class=\"container mx-auto px-4 md:px-6 lg:px-8\">\n    <h1 class=\"text-3xl font-bold text-gray-900\" aria-label=\"Meet the Team\">Meet the Team</h1>\n    <p class=\"text-lg text-gray-600\" aria-label=\"Our chefs, servers, and staff\">Our chefs, servers, and staff are dedicated to providing you with an exceptional dining experience.</p>\n  </div>\n</section>\n\n<div class=\"mt-10 grid grid-cols-3 gap-4 lg:grid-cols-2 xl:grid-cols-3\">\n  <div class=\"bg-white shadow-md rounded-lg p-6\">\n    <img src=\"\" alt=\"\" class=\"w-full h-48 object-cover\" aria-label=\"Team Member Image\">\n    <h2 class=\"text-xl font-bold\">Name</h2>\n    <p class=\"text-lg text-gray-600\">Job Title</p>\n    <p class=\"text-base text-gray-900\">Phone: 555-0123 | Email: info@bellaskitchen.com</p>\n  </div>\n  <div class=\"bg-white shadow-md rounded-lg p-6\">\n    <img src=\"\" alt=\"\" class=\"w-full h-48 object-cover\" aria-label=\"Team Member Image\">\n    <h2 class=\"text-xl font-bold\">Name</h2>\n    <p class=\"text-lg text-gray-600\">Job Title</p>\n    <p class=\"text-base text-gray-900\">Phone: 555-0123 | Email: info@bellaskitchen.com</p>\n  </div>\n  <div class=\"bg-white shadow-md rounded-lg p-6\">\n    <img src=\"\" alt=\"\" class=\"w-full h-48 object-cover\" aria-label=\"Team Member Image\">\n    <h2 class=\"text-xl font-bold\">Name</h2>\n    <p class=\"text-lg text-gray-600\">Job Title</p>\n    <p class=\"text-base text-gray-900\">Phone: 555-0123 | Email: info@bellaskitchen.com</p>\n  </div>\n</div>",
+          "order": 1
+        }
+      ],
+      "seo": {
+        "title": "Bella's Kitchen - About Us Restaurant in Downtown",
+        "meta_description": "Discover the story behind Bella's Kitchen, a downtown restaurant offering dine-in, catering, and private events. Learn more today!",
+        "keywords": [
+          "restaurant",
+          "downtown",
+          "about us",
+          "kitchen",
+          "catering",
+          "events"
+        ],
+        "og_title": "Bella's Kitchen | About Us",
+        "og_description": "Get to know Bella's Kitchen, your premier dining destination in downtown. From dine-in to catering and private events, we've got you covered.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Bella's Kitchen",
+          "description": "",
+          "image": "",
+          "url": "https://www.bellaskitchen.com/about",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Main St",
+            "addressLocality": "Downtown",
+            "addressRegion": "",
+            "postalCode": "",
+            "addressCountry": ""
+          },
+          "openingHours": "",
+          "categories": [
+            "Restaurant"
+          ],
+          "serviceAreaGeo": [],
+          "reviews": {
+            "@type": "ReviewCount"
+          },
+          "sameAs": [
+            "https://www.bellaskitchen.com/"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "Bella's Kitchen",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>About Us - Bella's Kitchen</title>\n  <meta name=\"description\" content=\"Farm-to-table Italian dining\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Discover the story behind Bella's Kitchen, a downtown restaurant offering dine-in, catering, and private events. Learn more today!\">\n  <meta name=\"keywords\" content=\"restaurant, downtown, about us, kitchen, catering, events\">\n  <meta property=\"og:title\" content=\"Bella's Kitchen | About Us\">\n  <meta property=\"og:description\" content=\"Get to know Bella's Kitchen, your premier dining destination in downtown. From dine-in to catering and private events, we've got you covered.\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Bella's Kitchen\",\n  \"description\": \"\",\n  \"image\": \"\",\n  \"url\": \"https://www.bellaskitchen.com/about\",\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"123 Main St\",\n    \"addressLocality\": \"Downtown\",\n    \"addressRegion\": \"\",\n    \"postalCode\": \"\",\n    \"addressCountry\": \"\"\n  },\n  \"openingHours\": \"\",\n  \"categories\": [\n    \"Restaurant\"\n  ],\n  \"serviceAreaGeo\": [],\n  \"reviews\": {\n    \"@type\": \"ReviewCount\"\n  },\n  \"sameAs\": [\n    \"https://www.bellaskitchen.com/\"\n  ]\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<div class=\"max-w-sm mx-auto p-8 bg-white rounded-lg shadow-md\">\n  <h2 class=\"text-lg font-bold mb-4\" aria-label=\"Our Story\">\n    Our Story\n  </h2>\n  <p class=\"text-gray-600 text-base mb-6\" aria-label=\"Family-owned Italian restaurant with a passion for farm-to-table cuisine\">\n    Family-owned Italian restaurant with a passion for farm-to-table cuisine\n  </p>\n  <div class=\"flex justify-between items-center mb-4\">\n    <a href=\"index.html\" class=\"text-blue-600 hover:text-blue-800\">Home</a>\n    <a href=\"about.html\" class=\"ml-6 text-blue-600 hover:text-blue-800\">About</a>\n  </div>\n  <ul class=\"flex justify-between items-center mb-4\">\n    <li class=\"mr-8\">\n      <a href=\"menu.html\" class=\"text-blue-600 hover:text-blue-800\">Menu</a>\n    </li>\n    <li class=\"ml-6 mr-8\">\n      <a href=\"reservations.html\" class=\"text-blue-600 hover:text-blue-800\">Reservations</a>\n    </li>\n    <li class=\"mr-8\">\n      <a href=\"catering.html\" class=\"text-blue-600 hover:text-blue-800\">Catering</a>\n    </li>\n    <li class=\"ml-6\">\n      <a href=\"contact.html\" class=\"text-blue-600 hover:text-blue-800\">Contact</a>\n    </li>\n  </ul>\n  <p class=\"text-gray-600 text-base mb-4\" aria-label=\"Get in touch with us at (555) 0123 or info@bellaskitchen.com\">\n    Get in touch with us at (555) 0123 or <a href=\"mailto:info@bellaskitchen.com\">info@bellaskitchen.com</a>\n  </p>\n</div>\n\n<nav class=\"py-4 bg-white\">\n  <div class=\"container mx-auto px-4 md:px-6 lg:px-8\">\n    <ul class=\"flex justify-between items-center\">\n      <li>\n        <a href=\"index.html\" class=\"text-gray-600 hover:text-gray-900\">Home</a>\n      </li>\n      <li>\n        <a href=\"about.html\" class=\"text-gray-600 hover:text-gray-900\">About</a>\n      </li>\n      <li>\n        <a href=\"menu.html\" class=\"text-gray-600 hover:text-gray-900\">Menu</a>\n      </li>\n      <li>\n        <a href=\"reservations.html\" class=\"text-gray-600 hover:text-gray-900\">Reservations</a>\n      </li>\n      <li>\n        <a href=\"catering.html\" class=\"text-gray-600 hover:text-gray-900\">Catering</a>\n      </li>\n      <li>\n        <a href=\"contact.html\" class=\"text-gray-600 hover:text-gray-900\">Contact</a>\n      </li>\n    </ul>\n  </div>\n</nav>\n\n<section class=\"py-20 bg-white\">\n  <div class=\"container mx-auto px-4 md:px-6 lg:px-8\">\n    <h1 class=\"text-3xl font-bold text-gray-900\" aria-label=\"Meet the Team\">Meet the Team</h1>\n    <p class=\"text-lg text-gray-600\" aria-label=\"Our chefs, servers, and staff\">Our chefs, servers, and staff are dedicated to providing you with an exceptional dining experience.</p>\n  </div>\n</section>\n\n<div class=\"mt-10 grid grid-cols-3 gap-4 lg:grid-cols-2 xl:grid-cols-3\">\n  <div class=\"bg-white shadow-md rounded-lg p-6\">\n    <img src=\"\" alt=\"\" class=\"w-full h-48 object-cover\" aria-label=\"Team Member Image\">\n    <h2 class=\"text-xl font-bold\">Name</h2>\n    <p class=\"text-lg text-gray-600\">Job Title</p>\n    <p class=\"text-base text-gray-900\">Phone: 555-0123 | Email: info@bellaskitchen.com</p>\n  </div>\n  <div class=\"bg-white shadow-md rounded-lg p-6\">\n    <img src=\"\" alt=\"\" class=\"w-full h-48 object-cover\" aria-label=\"Team Member Image\">\n    <h2 class=\"text-xl font-bold\">Name</h2>\n    <p class=\"text-lg text-gray-600\">Job Title</p>\n    <p class=\"text-base text-gray-900\">Phone: 555-0123 | Email: info@bellaskitchen.com</p>\n  </div>\n  <div class=\"bg-white shadow-md rounded-lg p-6\">\n    <img src=\"\" alt=\"\" class=\"w-full h-48 object-cover\" aria-label=\"Team Member Image\">\n    <h2 class=\"text-xl font-bold\">Name</h2>\n    <p class=\"text-lg text-gray-600\">Job Title</p>\n    <p class=\"text-base text-gray-900\">Phone: 555-0123 | Email: info@bellaskitchen.com</p>\n  </div>\n</div>\n\n</body>\n</html>",
+      "nav_label": "About",
+      "nav_order": 2
+    },
+    {
+      "slug": "menu",
+      "title": "Menu - Bella's Kitchen",
+      "purpose": "Page showcasing menu items",
+      "sections": [
+        {
+          "id": "ab8349b7",
+          "name": "grid-view",
+          "component_type": "grid-view",
+          "content": {
+            "title": "Our Menu",
+            "subtitle": "Fresh ingredients, traditional Italian dishes"
+          },
+          "html": "<nav class=\"max-w-4xl mx-auto py-8\">\n  <div class=\"flex justify-between items-center\">\n    <h1 class=\"text-lg font-bold\">Bella's Kitchen</h1>\n    <ul class=\"space-x-6 flex items-center\">\n      <li>\n        <a href=\"index.html\" class=\"text-gray-600 hover:text-blue-500\">Home</a>\n      </li>\n      <li>\n        <a href=\"about.html\" class=\"text-gray-600 hover:text-blue-500\">About</a>\n      </li>\n      <li>\n        <a href=\"menu.html\" class=\"text-gray-600 hover:text-blue-500\">Menu</a>\n      </li>\n      <li>\n        <a href=\"reservations.html\" class=\"text-gray-600 hover:text-blue-500\">Reservations</a>\n      </li>\n      <li>\n        <a href=\"catering.html\" class=\"text-gray-600 hover:text-blue-500\">Catering</a>\n      </li>\n      <li>\n        <a href=\"contact.html\" class=\"text-gray-600 hover:text-blue-500\">Contact</a>\n      </li>\n    </ul>\n  </div>\n</nav>\n\n<section aria-label=\"grid-view section\">\n  <h2 class=\"text-3xl font-bold mb-4\">Our Menu</h1>\n  <p class=\"text-lg text-gray-600\">Fresh ingredients, traditional Italian dishes</p>\n</section>",
+          "order": 0
+        },
+        {
+          "id": "4cffea35",
+          "name": "daily-specials",
+          "component_type": "daily-specials",
+          "content": {
+            "title": "Daily Specials",
+            "description": "Limited time offers and seasonal specials"
+          },
+          "html": "<div class=\"max-w-lg mx-auto pt-12 pb-8 xl:max-w-3xl\">\n  <h2 class=\"text-3xl font-bold leading-tight text-gray-900\">Daily Specials</h2>\n  <p class=\"text-xl text-gray-700\" aria-label=\"Description of daily specials\">Limited time offers and seasonal specials at Bella's Kitchen.</p>\n  <nav class=\"flex justify-between mt-4\">\n    <a href=\"index.html\" class=\"text-lg font-bold text-gray-900 hover:text-blue-400 transition duration-300 ease-in-out\">Home</a>\n    <a href=\"about.html\" class=\"text-lg font-bold text-gray-900 hover:text-blue-400 transition duration-300 ease-in-out\">About</a>\n    <a href=\"menu.html\" class=\"text-lg font-bold text-gray-900 hover:text-blue-400 transition duration-300 ease-in-out\">Menu</a>\n    <a href=\"reservations.html\" class=\"text-lg font-bold text-gray-900 hover:text-blue-400 transition duration-300 ease-in-out\">Reservations</a>\n    <a href=\"catering.html\" class=\"text-lg font-bold text-gray-900 hover:text-blue-400 transition duration-300 ease-in-out\">Catering</a>\n    <a href=\"contact.html\" class=\"text-lg font-bold text-gray-900 hover:text-blue-400 transition duration-300 ease-in-out\">Contact</a>\n  </nav>\n  <div class=\"mt-8\">\n    <h3 class=\"text-2xl leading-tight text-gray-900\">Our Specials Today:</h3>\n    <!-- daily specials content will be added here -->\n  </div>\n</div>\n\n<div class=\"bg-white shadow-md rounded-lg mt-6 p-4\">\n  <p class=\"text-base font-medium text-gray-700\">Bella's Kitchen<br>Phone: 555-0123<br>Email: info@bellaskitchen.com</p>\n</div>",
+          "order": 1
+        }
+      ],
+      "seo": {
+        "title": "Bella\u2019s Kitchen - Delicious Menu Items for Your Next Dining Experience",
+        "meta_description": "Discover our mouth-watering menu items at Bella's Kitchen. Book your table now or get in touch for catering and private events!",
+        "keywords": [
+          "restaurant menu",
+          "dining experience",
+          "catering services"
+        ],
+        "og_title": "Bella\u2019s Kitchen Menu - Yum!",
+        "og_description": "Indulge in our delectable dishes at Bella's Kitchen. Book a table today!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "Restaurant",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Bella\u2019s Kitchen Menu",
+          "description": "Our menu features a range of delicious dishes for dine-in, catering and private events.",
+          "url": "https://bellaskitchen.com/menu/",
+          "image": "https://example.com/image.jpg",
+          "sameAs": [
+            "https://www.facebook.com/bellaskitchen"
+          ],
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Main St",
+            "addressLocality": "",
+            "addressRegion": "",
+            "postalCode": "",
+            "addressCountry": ""
+          },
+          "openingHours": "Mon-Thu 11am-10pm, Fri-Sat 11am-11pm, Sun 12pm-9pm",
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "40.7128",
+            "longitude": "-74.0060"
+          }
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What types of cuisine does Bella's Kitchen serve?",
+            "a": "Bella's Kitchen serves traditional Italian cuisine."
+          },
+          {
+            "q": "Can I book a private event at Bella's Kitchen?",
+            "a": "Yes, Bella's Kitchen offers private events for parties and gatherings."
+          },
+          {
+            "q": "Does Bella's Kitchen offer catering services?",
+            "a": "Yes, Bella's Kitchen provides catering options for events and parties."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Bella's Kitchen",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Bella's Kitchen is a family-owned Italian restaurant offering dine-in, catering, and private event services.",
+        "topic_cluster": "Italian Restaurants",
+        "related_topics": [
+          "Best Italian Restaurants",
+          "Family-Owned Restaurants",
+          "Catering Services",
+          "Private Event Venues",
+          "Dine-In Options"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Menu - Bella's Kitchen</title>\n  <meta name=\"description\" content=\"Farm-to-table Italian dining\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Discover our mouth-watering menu items at Bella's Kitchen. Book your table now or get in touch for catering and private events!\">\n  <meta name=\"keywords\" content=\"restaurant menu, dining experience, catering services\">\n  <meta property=\"og:title\" content=\"Bella\u2019s Kitchen Menu - Yum!\">\n  <meta property=\"og:description\" content=\"Indulge in our delectable dishes at Bella's Kitchen. Book a table today!\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"name\": \"Bella\\u2019s Kitchen Menu\",\n  \"description\": \"Our menu features a range of delicious dishes for dine-in, catering and private events.\",\n  \"url\": \"https://bellaskitchen.com/menu/\",\n  \"image\": \"https://example.com/image.jpg\",\n  \"sameAs\": [\n    \"https://www.facebook.com/bellaskitchen\"\n  ],\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"123 Main St\",\n    \"addressLocality\": \"\",\n    \"addressRegion\": \"\",\n    \"postalCode\": \"\",\n    \"addressCountry\": \"\"\n  },\n  \"openingHours\": \"Mon-Thu 11am-10pm, Fri-Sat 11am-11pm, Sun 12pm-9pm\",\n  \"geo\": {\n    \"@type\": \"GeoCoordinates\",\n    \"latitude\": \"40.7128\",\n    \"longitude\": \"-74.0060\"\n  }\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What types of cuisine does Bella's Kitchen serve?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bella's Kitchen serves traditional Italian cuisine.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Can I book a private event at Bella's Kitchen?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, Bella's Kitchen offers private events for parties and gatherings.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Does Bella's Kitchen offer catering services?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, Bella's Kitchen provides catering options for events and parties.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<nav class=\"max-w-4xl mx-auto py-8\">\n  <div class=\"flex justify-between items-center\">\n    <h1 class=\"text-lg font-bold\">Bella's Kitchen</h1>\n    <ul class=\"space-x-6 flex items-center\">\n      <li>\n        <a href=\"index.html\" class=\"text-gray-600 hover:text-blue-500\">Home</a>\n      </li>\n      <li>\n        <a href=\"about.html\" class=\"text-gray-600 hover:text-blue-500\">About</a>\n      </li>\n      <li>\n        <a href=\"menu.html\" class=\"text-gray-600 hover:text-blue-500\">Menu</a>\n      </li>\n      <li>\n        <a href=\"reservations.html\" class=\"text-gray-600 hover:text-blue-500\">Reservations</a>\n      </li>\n      <li>\n        <a href=\"catering.html\" class=\"text-gray-600 hover:text-blue-500\">Catering</a>\n      </li>\n      <li>\n        <a href=\"contact.html\" class=\"text-gray-600 hover:text-blue-500\">Contact</a>\n      </li>\n    </ul>\n  </div>\n</nav>\n\n<section aria-label=\"grid-view section\">\n  <h2 class=\"text-3xl font-bold mb-4\">Our Menu</h1>\n  <p class=\"text-lg text-gray-600\">Fresh ingredients, traditional Italian dishes</p>\n</section>\n\n<div class=\"max-w-lg mx-auto pt-12 pb-8 xl:max-w-3xl\">\n  <h2 class=\"text-3xl font-bold leading-tight text-gray-900\">Daily Specials</h2>\n  <p class=\"text-xl text-gray-700\" aria-label=\"Description of daily specials\">Limited time offers and seasonal specials at Bella's Kitchen.</p>\n  <nav class=\"flex justify-between mt-4\">\n    <a href=\"index.html\" class=\"text-lg font-bold text-gray-900 hover:text-blue-400 transition duration-300 ease-in-out\">Home</a>\n    <a href=\"about.html\" class=\"text-lg font-bold text-gray-900 hover:text-blue-400 transition duration-300 ease-in-out\">About</a>\n    <a href=\"menu.html\" class=\"text-lg font-bold text-gray-900 hover:text-blue-400 transition duration-300 ease-in-out\">Menu</a>\n    <a href=\"reservations.html\" class=\"text-lg font-bold text-gray-900 hover:text-blue-400 transition duration-300 ease-in-out\">Reservations</a>\n    <a href=\"catering.html\" class=\"text-lg font-bold text-gray-900 hover:text-blue-400 transition duration-300 ease-in-out\">Catering</a>\n    <a href=\"contact.html\" class=\"text-lg font-bold text-gray-900 hover:text-blue-400 transition duration-300 ease-in-out\">Contact</a>\n  </nav>\n  <div class=\"mt-8\">\n    <h3 class=\"text-2xl leading-tight text-gray-900\">Our Specials Today:</h3>\n    <!-- daily specials content will be added here -->\n  </div>\n</div>\n\n<div class=\"bg-white shadow-md rounded-lg mt-6 p-4\">\n  <p class=\"text-base font-medium text-gray-700\">Bella's Kitchen<br>Phone: 555-0123<br>Email: info@bellaskitchen.com</p>\n</div>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What types of cuisine does Bella's Kitchen serve?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bella's Kitchen serves traditional Italian cuisine.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Can I book a private event at Bella's Kitchen?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, Bella's Kitchen offers private events for parties and gatherings.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Does Bella's Kitchen offer catering services?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, Bella's Kitchen provides catering options for events and parties.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Menu",
+      "nav_order": 3
+    },
+    {
+      "slug": "reservations",
+      "title": "Reservations - Bella's Kitchen",
+      "purpose": "Page for making reservations",
+      "sections": [
+        {
+          "id": "2ba28f63",
+          "name": "contact-form",
+          "component_type": "contact-form",
+          "content": {
+            "title": "Make a Reservation",
+            "description": "Dine-in, Catering, Private Events"
+          },
+          "html": "<nav class=\"flex justify-between bg-gray-100 px-4 py-2\">\n  <a href=\"index.html\" class=\"text-lg font-bold\">Bella's Kitchen</a>\n  <ul class=\"flex space-x-4\">\n    <li><a href=\"about.html\" aria-label=\"About page\">About</a></li>\n    <li><a href=\"menu.html\" aria-label=\"Menu page\">Menu</a></li>\n    <li><a href=\"reservations.html\" aria-label=\"Reservations page\">Make a Reservation</a></li>\n    <li><a href=\"catering.html\" aria-label=\"Catering page\">Catering</a></li>\n  </ul>\n</nav>\n\n<div class=\"max-w-3xl mx-auto pt-8\">\n  <h1 class=\"text-3xl font-bold mb-4\" aria-labelledby=\"contact-header\">Make a Reservation</h1>\n  <p id=\"contact-description\" class=\"text-lg text-gray-600\" aria-describedby=\"contact-description-desc\">Dine-in, Catering, Private Events</p>\n</div>\n\n<form class=\"max-w-md mx-auto bg-white shadow-md px-4 py-6 rounded\">\n  <div class=\"flex flex-col mb-6\">\n    <label for=\"name\" class=\"block text-gray-700 text-sm font-bold mb-2\">Name:</label>\n    <input type=\"text\" id=\"name\" name=\"name\" placeholder=\"John Doe\" class=\"bg-gray-50 appearance-none block w-full px-3 py-2 border border-gray-400 rounded-t focus:outline-none focus:ring-2 focus:ring-gray-800 sm:text-sm\">\n  </div>\n  <div class=\"flex flex-col mb-6\">\n    <label for=\"email\" class=\"block text-gray-700 text-sm font-bold mb-2\">Email:</label>\n    <input type=\"email\" id=\"email\" name=\"email\" placeholder=\"johndoe@example.com\" class=\"bg-gray-50 appearance-none block w-full px-3 py-2 border border-gray-400 rounded-t focus:outline-none focus:ring-2 focus:ring-gray-800 sm:text-sm\">\n  </div>\n  <div class=\"flex flex-col mb-6\">\n    <label for=\"phone\" class=\"block text-gray-700 text-sm font-bold mb-2\">Phone:</label>\n    <input type=\"tel\" id=\"phone\" name=\"phone\" placeholder=\"555-0123\" class=\"bg-gray-50 appearance-none block w-full px-3 py-2 border border-gray-400 rounded-t focus:outline-none focus:ring-2 focus:ring-gray-800 sm:text-sm\">\n  </div>\n  <button type=\"submit\" class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Submit</button>\n</form>\n\n<div class=\"text-lg text-gray-600 mt-4\">\n  <p>Phone: 555-0123 | Email: info@bellaskitchen.com</p>\n</div>",
+          "order": 0
+        }
+      ],
+      "seo": {
+        "title": "Make a Reservation at Bella's Kitchen - Book Now!",
+        "meta_description": "Book your table at Bella's Kitchen today! Call us to make a reservation or dine in with our delicious menu.",
+        "keywords": [
+          "Bella's Kitchen",
+          "restaurant reservations",
+          "dine-in",
+          "catering",
+          "private events"
+        ],
+        "og_title": "Make a Reservation at Bella's Kitchen",
+        "og_description": "Book your table now at Bella's Kitchen. Enjoy our fine dining experience, catering services, and private events.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org/",
+          "@type": "LocalBusiness",
+          "name": "Bella's Kitchen",
+          "description": "Fine dining restaurant offering dine-in, catering, and private event services.",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Main St",
+            "addressLocality": "",
+            "addressRegion": "",
+            "postalCode": "",
+            "addressCountry": ""
+          },
+          "openingHours": "Mon-Thu 11am-10pm, Fri-Sat 11am-11pm, Sun 10am-9pm",
+          "category": "Restaurant",
+          "service": [
+            "Dine-in",
+            "Catering",
+            "Private Events"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "Can I make a reservation at Bella's Kitchen?",
+            "a": "Yes, you can make a reservation by clicking the 'Make a Reservation' button on our website or by calling us at (123) 456-7890."
+          },
+          {
+            "q": "What types of events does Bella's Kitchen offer?",
+            "a": "Bella's Kitchen offers private events for parties of all sizes, including corporate events and birthday celebrations."
+          },
+          {
+            "q": "Is Bella's Kitchen kid-friendly?",
+            "a": "Yes, Bella's Kitchen is a family-friendly restaurant that welcomes children of all ages."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Bella's Kitchen",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Bella's Kitchen is a family-owned Italian restaurant serving traditional Italian dishes in a cozy atmosphere.",
+        "topic_cluster": "Italian Restaurants",
+        "related_topics": [
+          "Restaurant Reviews",
+          "Food Delivery",
+          "Menu Items",
+          "Catering Services",
+          "Italian Cuisine"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Reservations - Bella's Kitchen</title>\n  <meta name=\"description\" content=\"Farm-to-table Italian dining\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Book your table at Bella's Kitchen today! Call us to make a reservation or dine in with our delicious menu.\">\n  <meta name=\"keywords\" content=\"Bella's Kitchen, restaurant reservations, dine-in, catering, private events\">\n  <meta property=\"og:title\" content=\"Make a Reservation at Bella's Kitchen\">\n  <meta property=\"og:description\" content=\"Book your table now at Bella's Kitchen. Enjoy our fine dining experience, catering services, and private events.\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Bella's Kitchen\",\n  \"description\": \"Fine dining restaurant offering dine-in, catering, and private event services.\",\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"123 Main St\",\n    \"addressLocality\": \"\",\n    \"addressRegion\": \"\",\n    \"postalCode\": \"\",\n    \"addressCountry\": \"\"\n  },\n  \"openingHours\": \"Mon-Thu 11am-10pm, Fri-Sat 11am-11pm, Sun 10am-9pm\",\n  \"category\": \"Restaurant\",\n  \"service\": [\n    \"Dine-in\",\n    \"Catering\",\n    \"Private Events\"\n  ]\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Can I make a reservation at Bella's Kitchen?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, you can make a reservation by clicking the 'Make a Reservation' button on our website or by calling us at (123) 456-7890.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What types of events does Bella's Kitchen offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bella's Kitchen offers private events for parties of all sizes, including corporate events and birthday celebrations.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Is Bella's Kitchen kid-friendly?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, Bella's Kitchen is a family-friendly restaurant that welcomes children of all ages.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<nav class=\"flex justify-between bg-gray-100 px-4 py-2\">\n  <a href=\"index.html\" class=\"text-lg font-bold\">Bella's Kitchen</a>\n  <ul class=\"flex space-x-4\">\n    <li><a href=\"about.html\" aria-label=\"About page\">About</a></li>\n    <li><a href=\"menu.html\" aria-label=\"Menu page\">Menu</a></li>\n    <li><a href=\"reservations.html\" aria-label=\"Reservations page\">Make a Reservation</a></li>\n    <li><a href=\"catering.html\" aria-label=\"Catering page\">Catering</a></li>\n  </ul>\n</nav>\n\n<div class=\"max-w-3xl mx-auto pt-8\">\n  <h1 class=\"text-3xl font-bold mb-4\" aria-labelledby=\"contact-header\">Make a Reservation</h1>\n  <p id=\"contact-description\" class=\"text-lg text-gray-600\" aria-describedby=\"contact-description-desc\">Dine-in, Catering, Private Events</p>\n</div>\n\n<form class=\"max-w-md mx-auto bg-white shadow-md px-4 py-6 rounded\">\n  <div class=\"flex flex-col mb-6\">\n    <label for=\"name\" class=\"block text-gray-700 text-sm font-bold mb-2\">Name:</label>\n    <input type=\"text\" id=\"name\" name=\"name\" placeholder=\"John Doe\" class=\"bg-gray-50 appearance-none block w-full px-3 py-2 border border-gray-400 rounded-t focus:outline-none focus:ring-2 focus:ring-gray-800 sm:text-sm\">\n  </div>\n  <div class=\"flex flex-col mb-6\">\n    <label for=\"email\" class=\"block text-gray-700 text-sm font-bold mb-2\">Email:</label>\n    <input type=\"email\" id=\"email\" name=\"email\" placeholder=\"johndoe@example.com\" class=\"bg-gray-50 appearance-none block w-full px-3 py-2 border border-gray-400 rounded-t focus:outline-none focus:ring-2 focus:ring-gray-800 sm:text-sm\">\n  </div>\n  <div class=\"flex flex-col mb-6\">\n    <label for=\"phone\" class=\"block text-gray-700 text-sm font-bold mb-2\">Phone:</label>\n    <input type=\"tel\" id=\"phone\" name=\"phone\" placeholder=\"555-0123\" class=\"bg-gray-50 appearance-none block w-full px-3 py-2 border border-gray-400 rounded-t focus:outline-none focus:ring-2 focus:ring-gray-800 sm:text-sm\">\n  </div>\n  <button type=\"submit\" class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Submit</button>\n</form>\n\n<div class=\"text-lg text-gray-600 mt-4\">\n  <p>Phone: 555-0123 | Email: info@bellaskitchen.com</p>\n</div>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Can I make a reservation at Bella's Kitchen?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, you can make a reservation by clicking the 'Make a Reservation' button on our website or by calling us at (123) 456-7890.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What types of events does Bella's Kitchen offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bella's Kitchen offers private events for parties of all sizes, including corporate events and birthday celebrations.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Is Bella's Kitchen kid-friendly?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, Bella's Kitchen is a family-friendly restaurant that welcomes children of all ages.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Reservations",
+      "nav_order": 4
+    },
+    {
+      "slug": "catering",
+      "title": "Catering - Bella's Kitchen",
+      "purpose": "Page for catering services",
+      "sections": [
+        {
+          "id": "c3d9831c",
+          "name": "summary-section",
+          "component_type": "summary-section",
+          "content": {
+            "title": "Our Catering Services",
+            "description": "Private parties, weddings, and corporate events"
+          },
+          "html": "<div class=\"max-w-sm mx-auto p-4 bg-white rounded shadow-md\">\n  <h2 class=\"text-lg font-bold mb-2\" id=\"catering-title\">Catering</h2>\n  <p class=\"text-gray-600\" aria-label=\"Our catering services provide private parties, weddings, and corporate events\">\n    <span class=\"font-medium\">Private Parties</span>, Weddings, and Corporate Events\n  </p>\n  <ul class=\"flex flex-col items-start justify-between space-y-2 mt-4\">\n    <li class=\"text-gray-600\">Dine-in</li>\n    <li class=\"text-gray-600\">Catering</li>\n    <li class=\"text-gray-600\">Private Events</li>\n  </ul>\n  <div class=\"flex justify-between mb-2\">\n    <p class=\"text-lg font-bold text-blue-500\">555-0123</p>\n    <a href=\"mailto:info@bellaskitchen.com\" class=\"text-gray-600 hover:text-blue-500\">info@bellaskitchen.com</a>\n  </div>\n</div>",
+          "order": 0
+        },
+        {
+          "id": "75d05cc1",
+          "name": "menu-cards",
+          "component_type": "menu-cards",
+          "content": {
+            "title": "Sample Menu Cards",
+            "description": "Customizable menu options for your event"
+          },
+          "html": "<div class=\"menu-cards container mx-auto p-8\">\n  <h2 class=\"text-3xl font-bold mb-4\">Menu Cards</h2>\n  <p id=\"description\" aria-label=\"Customizable menu options for your event\" class=\"text-lg text-gray-600\">Farm-to-table Italian dining. Dine-in, Catering, Private Events.</p>\n\n  <nav class=\"flex justify-between mt-8\">\n    <a href=\"index.html\" class=\"font-bold text-purple-900 hover:text-white transition duration-300 ease-in-out\">Home</a>\n    <a href=\"about.html\" class=\"text-gray-600 hover:text-white transition duration-300 ease-in-out\">About</a>\n    <a href=\"menu.html\" class=\"text-gray-600 hover:text-white transition duration-300 ease-in-out\">Menu</a>\n    <a href=\"reservations.html\" class=\"text-gray-600 hover:text-white transition duration-300 ease-in-out\">Reservations</a>\n    <a href=\"catering.html\" class=\"text-gray-600 hover:text-white transition duration-300 ease-in-out\">Catering</a>\n    <a href=\"contact.html\" class=\"text-gray-600 hover:text-white transition duration-300 ease-in-out\">Contact</a>\n  </nav>\n\n  <div class=\"mt-8\">\n    <p class=\"font-bold text-lg mb-2\">Get in touch:</p>\n    <div class=\"flex items-center\">\n      <i class=\"text-gray-600 mr-2\"></i>\n      <span class=\"text-lg\">555-0123</span>\n    </div>\n    <div class=\"flex items-center mt-4\">\n      <i class=\"text-gray-600 mr-2\"></i>\n      <a href=\"mailto:info@bellaskitchen.com\" class=\"text-lg\">info@bellaskitchen.com</a>\n    </div>\n  </div>\n</div>",
+          "order": 1
+        }
+      ],
+      "seo": {
+        "title": "Catering - Bella's Kitchen | Bella's Kitchen",
+        "meta_description": "Farm-to-table Italian dining",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What types of events can Bella's Kitchen cater?",
+            "a": "Bella's Kitchen offers catering services for private events, including weddings and corporate functions."
+          },
+          {
+            "q": "Can I order food from Bella's Kitchen online?",
+            "a": "No, Bella's Kitchen is a restaurant that requires dine-in or take-out orders."
+          },
+          {
+            "q": "What is the menu like at Bella's Kitchen?",
+            "a": "Bella's Kitchen serves traditional Italian dishes with a focus on family-owned recipes and ingredients."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Bella's Kitchen",
+        "entity_type": "LocalBusiness",
+        "entity_description": "A family-owned Italian restaurant offering dine-in, catering, and private event services.",
+        "topic_cluster": "Catering Services",
+        "related_topics": [
+          "Italian Food",
+          "Restaurant Catering",
+          "Event Planning"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Catering - Bella's Kitchen</title>\n  <meta name=\"description\" content=\"Farm-to-table Italian dining\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Farm-to-table Italian dining\">\n  <meta property=\"og:type\" content=\"website\">\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What types of events can Bella's Kitchen cater?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bella's Kitchen offers catering services for private events, including weddings and corporate functions.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Can I order food from Bella's Kitchen online?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"No, Bella's Kitchen is a restaurant that requires dine-in or take-out orders.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What is the menu like at Bella's Kitchen?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bella's Kitchen serves traditional Italian dishes with a focus on family-owned recipes and ingredients.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<div class=\"max-w-sm mx-auto p-4 bg-white rounded shadow-md\">\n  <h2 class=\"text-lg font-bold mb-2\" id=\"catering-title\">Catering</h2>\n  <p class=\"text-gray-600\" aria-label=\"Our catering services provide private parties, weddings, and corporate events\">\n    <span class=\"font-medium\">Private Parties</span>, Weddings, and Corporate Events\n  </p>\n  <ul class=\"flex flex-col items-start justify-between space-y-2 mt-4\">\n    <li class=\"text-gray-600\">Dine-in</li>\n    <li class=\"text-gray-600\">Catering</li>\n    <li class=\"text-gray-600\">Private Events</li>\n  </ul>\n  <div class=\"flex justify-between mb-2\">\n    <p class=\"text-lg font-bold text-blue-500\">555-0123</p>\n    <a href=\"mailto:info@bellaskitchen.com\" class=\"text-gray-600 hover:text-blue-500\">info@bellaskitchen.com</a>\n  </div>\n</div>\n\n<div class=\"menu-cards container mx-auto p-8\">\n  <h2 class=\"text-3xl font-bold mb-4\">Menu Cards</h2>\n  <p id=\"description\" aria-label=\"Customizable menu options for your event\" class=\"text-lg text-gray-600\">Farm-to-table Italian dining. Dine-in, Catering, Private Events.</p>\n\n  <nav class=\"flex justify-between mt-8\">\n    <a href=\"index.html\" class=\"font-bold text-purple-900 hover:text-white transition duration-300 ease-in-out\">Home</a>\n    <a href=\"about.html\" class=\"text-gray-600 hover:text-white transition duration-300 ease-in-out\">About</a>\n    <a href=\"menu.html\" class=\"text-gray-600 hover:text-white transition duration-300 ease-in-out\">Menu</a>\n    <a href=\"reservations.html\" class=\"text-gray-600 hover:text-white transition duration-300 ease-in-out\">Reservations</a>\n    <a href=\"catering.html\" class=\"text-gray-600 hover:text-white transition duration-300 ease-in-out\">Catering</a>\n    <a href=\"contact.html\" class=\"text-gray-600 hover:text-white transition duration-300 ease-in-out\">Contact</a>\n  </nav>\n\n  <div class=\"mt-8\">\n    <p class=\"font-bold text-lg mb-2\">Get in touch:</p>\n    <div class=\"flex items-center\">\n      <i class=\"text-gray-600 mr-2\"></i>\n      <span class=\"text-lg\">555-0123</span>\n    </div>\n    <div class=\"flex items-center mt-4\">\n      <i class=\"text-gray-600 mr-2\"></i>\n      <a href=\"mailto:info@bellaskitchen.com\" class=\"text-lg\">info@bellaskitchen.com</a>\n    </div>\n  </div>\n</div>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What types of events can Bella's Kitchen cater?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bella's Kitchen offers catering services for private events, including weddings and corporate functions.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Can I order food from Bella's Kitchen online?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">No, Bella's Kitchen is a restaurant that requires dine-in or take-out orders.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What is the menu like at Bella's Kitchen?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bella's Kitchen serves traditional Italian dishes with a focus on family-owned recipes and ingredients.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Catering",
+      "nav_order": 5
+    },
+    {
+      "slug": "contact",
+      "title": "Contact Us - Bella's Kitchen",
+      "purpose": "Page for contact information and form",
+      "sections": [
+        {
+          "id": "a0aaee31",
+          "name": "contact-form",
+          "component_type": "contact-form",
+          "content": {
+            "title": "Get in Touch",
+            "description": "Reservations, catering inquiries, and more"
+          },
+          "html": "<div class=\"max-w-lg mx-auto bg-white p-4 rounded-md shadow-sm\">\n  <h2 class=\"text-lg font-bold mb-2\">Get in Touch</h2>\n  <p class=\"text-gray-600\">{% 'description' %}</p>\n  <form action=\"/contact\" method=\"post\">\n    <div>\n      <label for=\"name\" class=\"block text-sm font-medium text-gray-700\">Name:</label>\n      <input id=\"name\" type=\"text\" name=\"name\" class=\"mt-1 block w-full p-2 pl-10 text-sm text-gray-700 bg-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500\">\n    </div>\n    <div>\n      <label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email:</label>\n      <input id=\"email\" type=\"email\" name=\"email\" class=\"mt-1 block w-full p-2 pl-10 text-sm text-gray-700 bg-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500\">\n    </div>\n    <div>\n      <label for=\"message\" class=\"block text-sm font-medium text-gray-700\">Message:</label>\n      <textarea id=\"message\" name=\"message\" class=\"mt-1 block w-full p-2 pl-10 text-sm text-gray-700 bg-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500\"></textarea>\n    </div>\n    <button type=\"submit\" class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Send Message</button>\n  </form>\n</div>\n\n<nav class=\"flex justify-between items-center mt-4\">\n  <a href=\"index.html\" class=\"text-gray-600 hover:text-gray-900\">Home</a>\n  <a href=\"about.html\" class=\"text-gray-600 hover:text-gray-900\">About</a>\n  <a href=\"menu.html\" class=\"text-gray-600 hover:text-gray-900\">Menu</a>\n  <a href=\"reservations.html\" class=\"text-gray-600 hover:text-gray-900\">Reservations</a>\n  <a href=\"catering.html\" class=\"text-gray-600 hover:text-gray-900\">Catering</a>\n  <a href=\"contact.html\" class=\"text-gray-600 active:bg-blue-500 hover:text-white\">Contact</a>\n</nav>\n\n<footer class=\"bg-gray-100 text-gray-600 mt-4\">\n  <p class=\"text-center\">\n    Bella's Kitchen<br>\n    Farm-to-table Italian dining<br>\n    Phone: 555-0123<br>\n    Email: <a href=\"mailto:info@bellaskitchen.com\">info@bellaskitchen.com</a><br>\n    Services: Dine-in, Catering, Private Events\n  </p>\n</footer>",
+          "order": 0
+        },
+        {
+          "id": "3cb7eee2",
+          "name": "address-block",
+          "component_type": "address-block",
+          "content": {
+            "title": "Our Address",
+            "description": "Find us on the map"
+          },
+          "html": "<div class=\"max-w-lg mx-auto p-12 bg-white rounded shadow-md text-gray-600\">\n  <h2 class=\"text-3xl font-bold mb-4\">Our Address</h2>\n  <p class=\"text-xl leading-loose\">{{ 'Find us on the map' | markdown }}</p>\n\n  <div class=\"flex justify-between mt-8\">\n    <address class=\"flex flex-col items-start\">\n      <p class=\"text-lg font-bold\">Bella's Kitchen</p>\n      <p>555 Main St, Anytown, USA</p>\n      <p class=\"flex\">\n        <span class=\"mr-2\">Phone:</span>\n        <a href=\"tel:555-0123\" class=\"text-blue-600\">555-0123</a>\n      </p>\n      <p class=\"flex\">\n        <span class=\"mr-2\">Email:</span>\n        <a href=\"mailto:info@bellaskitchen.com\" class=\"text-blue-600\">info@bellaskitchen.com</a>\n      </p>\n    </address>\n\n    <div class=\"flex items-center\">\n      <h3 class=\"text-lg font-bold\">Services</h3>\n      <ul class=\"list-none ml-4\">\n        <li class=\"ml-2\"><a href=\"dine-in.html\" class=\"text-blue-600\">Dine-in</a></li>\n        <li class=\"ml-2\"><a href=\"catering.html\" class=\"text-blue-600\">Catering</a></li>\n        <li class=\"ml-2\"><a href=\"private-events.html\" class=\"text-blue-600\">Private Events</a></li>\n      </ul>\n    </div>\n  </div>\n\n  <nav role=\"navigation\" aria-label=\"Main navigation\">\n    <ul class=\"list-none flex justify-between mb-4\">\n      <li class=\"mr-6\"><a href=\"index.html\" class=\"text-blue-600\">Home</a></li>\n      <li><a href=\"about.html\" class=\"text-blue-600\">About</a></li>\n      <li><a href=\"menu.html\" class=\"text-blue-600\">Menu</a></li>\n      <li><a href=\"reservations.html\" class=\"text-blue-600\">Reservations</a></li>\n      <li><a href=\"catering.html\" class=\"text-blue-600\">Catering</a></li>\n      <li><a href=\"contact.html\" class=\"text-blue-600\">Contact</a></li>\n    </ul>\n  </nav>\n\n  <p class=\"text-lg text-gray-500\">{{ 'Find us on the map' | markdown }}</p>\n</div>",
+          "order": 1
+        }
+      ],
+      "seo": {
+        "title": "Contact Us - Bella's Kitchen | Bella's Kitchen",
+        "meta_description": "Farm-to-table Italian dining",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What is the address of Bella's Kitchen?",
+            "a": "Bella\\u2019s Kitchen is located at [insert address]. We are open for dine-in, catering, and private events."
+          },
+          {
+            "q": "How do I book a private event at Bella's Kitchen?",
+            "a": "To book a private event, please fill out our contact form or call us at [insert phone number]. Our team will be happy to assist you with your event needs."
+          },
+          {
+            "q": "What types of cuisine does Bella's Kitchen serve?",
+            "a": "Bella\\u2019s Kitchen serves authentic Italian cuisine, including pasta dishes, pizzas, and more."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Bella's Kitchen",
+        "entity_type": "LocalBusiness",
+        "entity_description": "A family-owned Italian restaurant offering dine-in, catering, and private events.",
+        "topic_cluster": "Italian Restaurants",
+        "related_topics": [
+          "Best Italian Food in Town",
+          "Restaurant Reservations",
+          "Private Event Planning"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Contact Us - Bella's Kitchen</title>\n  <meta name=\"description\" content=\"Farm-to-table Italian dining\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Farm-to-table Italian dining\">\n  <meta property=\"og:type\" content=\"website\">\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What is the address of Bella's Kitchen?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bella\\\\u2019s Kitchen is located at [insert address]. We are open for dine-in, catering, and private events.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How do I book a private event at Bella's Kitchen?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"To book a private event, please fill out our contact form or call us at [insert phone number]. Our team will be happy to assist you with your event needs.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What types of cuisine does Bella's Kitchen serve?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bella\\\\u2019s Kitchen serves authentic Italian cuisine, including pasta dishes, pizzas, and more.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<div class=\"max-w-lg mx-auto bg-white p-4 rounded-md shadow-sm\">\n  <h2 class=\"text-lg font-bold mb-2\">Get in Touch</h2>\n  <p class=\"text-gray-600\">{% 'description' %}</p>\n  <form action=\"/contact\" method=\"post\">\n    <div>\n      <label for=\"name\" class=\"block text-sm font-medium text-gray-700\">Name:</label>\n      <input id=\"name\" type=\"text\" name=\"name\" class=\"mt-1 block w-full p-2 pl-10 text-sm text-gray-700 bg-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500\">\n    </div>\n    <div>\n      <label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email:</label>\n      <input id=\"email\" type=\"email\" name=\"email\" class=\"mt-1 block w-full p-2 pl-10 text-sm text-gray-700 bg-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500\">\n    </div>\n    <div>\n      <label for=\"message\" class=\"block text-sm font-medium text-gray-700\">Message:</label>\n      <textarea id=\"message\" name=\"message\" class=\"mt-1 block w-full p-2 pl-10 text-sm text-gray-700 bg-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500\"></textarea>\n    </div>\n    <button type=\"submit\" class=\"bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Send Message</button>\n  </form>\n</div>\n\n<nav class=\"flex justify-between items-center mt-4\">\n  <a href=\"index.html\" class=\"text-gray-600 hover:text-gray-900\">Home</a>\n  <a href=\"about.html\" class=\"text-gray-600 hover:text-gray-900\">About</a>\n  <a href=\"menu.html\" class=\"text-gray-600 hover:text-gray-900\">Menu</a>\n  <a href=\"reservations.html\" class=\"text-gray-600 hover:text-gray-900\">Reservations</a>\n  <a href=\"catering.html\" class=\"text-gray-600 hover:text-gray-900\">Catering</a>\n  <a href=\"contact.html\" class=\"text-gray-600 active:bg-blue-500 hover:text-white\">Contact</a>\n</nav>\n\n<footer class=\"bg-gray-100 text-gray-600 mt-4\">\n  <p class=\"text-center\">\n    Bella's Kitchen<br>\n    Farm-to-table Italian dining<br>\n    Phone: 555-0123<br>\n    Email: <a href=\"mailto:info@bellaskitchen.com\">info@bellaskitchen.com</a><br>\n    Services: Dine-in, Catering, Private Events\n  </p>\n</footer>\n\n<div class=\"max-w-lg mx-auto p-12 bg-white rounded shadow-md text-gray-600\">\n  <h2 class=\"text-3xl font-bold mb-4\">Our Address</h2>\n  <p class=\"text-xl leading-loose\">{{ 'Find us on the map' | markdown }}</p>\n\n  <div class=\"flex justify-between mt-8\">\n    <address class=\"flex flex-col items-start\">\n      <p class=\"text-lg font-bold\">Bella's Kitchen</p>\n      <p>555 Main St, Anytown, USA</p>\n      <p class=\"flex\">\n        <span class=\"mr-2\">Phone:</span>\n        <a href=\"tel:555-0123\" class=\"text-blue-600\">555-0123</a>\n      </p>\n      <p class=\"flex\">\n        <span class=\"mr-2\">Email:</span>\n        <a href=\"mailto:info@bellaskitchen.com\" class=\"text-blue-600\">info@bellaskitchen.com</a>\n      </p>\n    </address>\n\n    <div class=\"flex items-center\">\n      <h3 class=\"text-lg font-bold\">Services</h3>\n      <ul class=\"list-none ml-4\">\n        <li class=\"ml-2\"><a href=\"dine-in.html\" class=\"text-blue-600\">Dine-in</a></li>\n        <li class=\"ml-2\"><a href=\"catering.html\" class=\"text-blue-600\">Catering</a></li>\n        <li class=\"ml-2\"><a href=\"private-events.html\" class=\"text-blue-600\">Private Events</a></li>\n      </ul>\n    </div>\n  </div>\n\n  <nav role=\"navigation\" aria-label=\"Main navigation\">\n    <ul class=\"list-none flex justify-between mb-4\">\n      <li class=\"mr-6\"><a href=\"index.html\" class=\"text-blue-600\">Home</a></li>\n      <li><a href=\"about.html\" class=\"text-blue-600\">About</a></li>\n      <li><a href=\"menu.html\" class=\"text-blue-600\">Menu</a></li>\n      <li><a href=\"reservations.html\" class=\"text-blue-600\">Reservations</a></li>\n      <li><a href=\"catering.html\" class=\"text-blue-600\">Catering</a></li>\n      <li><a href=\"contact.html\" class=\"text-blue-600\">Contact</a></li>\n    </ul>\n  </nav>\n\n  <p class=\"text-lg text-gray-500\">{{ 'Find us on the map' | markdown }}</p>\n</div>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What is the address of Bella's Kitchen?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bella\\u2019s Kitchen is located at [insert address]. We are open for dine-in, catering, and private events.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How do I book a private event at Bella's Kitchen?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">To book a private event, please fill out our contact form or call us at [insert phone number]. Our team will be happy to assist you with your event needs.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What types of cuisine does Bella's Kitchen serve?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bella\\u2019s Kitchen serves authentic Italian cuisine, including pasta dishes, pizzas, and more.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Contact",
+      "nav_order": 6
+    }
+  ],
+  "template_ids": [],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/bellas-kitchen",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n",
+  "sitemap_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://bella'skitchen.com/index.html</loc>\n    <priority>1.0</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://bella'skitchen.com/about.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://bella'skitchen.com/menu.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://bella'skitchen.com/reservations.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://bella'skitchen.com/catering.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://bella'skitchen.com/contact.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>",
+  "robots_txt": "User-agent: *\nAllow: /\nSitemap: https://bella'skitchen.com/sitemap.xml\n",
+  "errors": [
+    "[index] Multiple <h1> tags found (3)",
+    "[index] Missing og:title meta tag",
+    "[catering] Missing <h1> tag",
+    "[catering] Missing og:title meta tag",
+    "[contact] Missing <h1> tag",
+    "[contact] Missing og:title meta tag",
+    "[index][llm] No content relevance to the business found",
+    "[index][llm] Proper call-to-action presence found",
+    "[index][llm] Professional tone and language found",
+    "[index][llm] Logical section ordering found",
+    "[index][llm] Broken or placeholder content found: inline-f"
+  ],
+  "metadata": {}
+}

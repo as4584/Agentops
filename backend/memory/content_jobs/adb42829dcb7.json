@@ -1,0 +1,46 @@
+{
+  "job_id": "adb42829dcb7",
+  "topic": "The 5-second rule that changed my life",
+  "hook": "I made a game-changing decision just 5 seconds ago!",
+  "script": "---\nHOOK: I made a game-changing decision just 5 seconds ago!\nPROBLEM: Wanting to tackle clutter but feeling overwhelmed by the task.\nFRAMEWORK:\n1. Get rid of anything you haven't used in the past 6 months.\n2. Sort items into three piles: keep, donate/sell, and discard.\n3. Set a timer for 10 minutes and challenge yourself to sort as much as possible during that time.\nEXAMPLE: I cleared out my entire closet in under an hour by applying these simple steps.\nCTA: Ready to declutter your space? Start now with the 5-second rule!",
+  "final_transcript": "",
+  "voice_audio_path": "",
+  "avatar_video_path": "",
+  "captioned_video_path": "",
+  "status": "generated",
+  "platform_targets": [
+    "instagram",
+    "tiktok",
+    "youtube_shorts"
+  ],
+  "scheduled_time": null,
+  "posted_time": null,
+  "analytics": {
+    "views": 0,
+    "retention": 0.0,
+    "watch_time": 0.0,
+    "shares": 0,
+    "saves": 0,
+    "comments": 0,
+    "followers_gained": 0,
+    "hook_retention": 0.0
+  },
+  "qa_report": {
+    "audio_lufs": null,
+    "audio_clipped": null,
+    "caption_accuracy": null,
+    "video_duration_sec": null,
+    "visual_artifacts": null,
+    "policy_violation": null,
+    "passed": false,
+    "notes": []
+  },
+  "content_pillar": "",
+  "source": "notes",
+  "created_at": "2026-03-02T00:37:42.882707Z",
+  "updated_at": "2026-03-02T00:37:57.424365Z",
+  "failure_reason": "",
+  "retry_count": 0,
+  "hashtags": [],
+  "caption_text": ""
+}

@@ -1,0 +1,51 @@
+{
+  "title": "Infrastructure & Resilience Thinking (IS 218)",
+  "domain": "bseai_curriculum",
+  "people": [
+    "Linus Torvalds",
+    "Robert C. 'Uncle Bob' Martin",
+    "Solomon Hykes",
+    "Kent Beck",
+    "Adam Wiggins",
+    "Erich Gamma",
+    "Richard Helm",
+    "Ralph Johnson",
+    "John Vlissides"
+  ],
+  "power_phrases": [
+    "Twelve-Factor App",
+    "SOLID principles",
+    "Clean Code",
+    "Docker container",
+    "TDD (Test-Driven Development)",
+    "CI/CD pipeline",
+    "Observer pattern",
+    "Strategy pattern",
+    "Factory pattern",
+    "Infrastructure as code",
+    "Blameless postmortem",
+    "Error budget",
+    "Config in the environment",
+    "Dev/prod parity",
+    "Failure Mode Analysis"
+  ],
+  "frameworks": [
+    "Twelve-Factor App: 12 survival lessons from production (Wiggins/Heroku)",
+    "Gang of Four Patterns: Observer, Strategy, Factory, Decorator, Proxy, Singleton",
+    "SOLID Principles: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion",
+    "Clean Code: readable code is resilient code (Uncle Bob Martin)",
+    "Google SRE: blameless postmortems, error budgets, incident response"
+  ],
+  "concepts": [
+    "Resilience Thinking: not preventing failure but recovering well from it",
+    "Uptime math: 99.9% = 8.76 hours downtime/year; 99.99% = 52 minutes",
+    "P50/P95/P99 percentiles: mean response time lies to you",
+    "Error budget: quantified acceptable failure — when spent, stop shipping and fix reliability",
+    "Design patterns are the professional vocabulary of software architecture",
+    "Container revolution (Hykes/Docker): package dependencies, eliminate 'works on my machine'",
+    "Factor 3: config in environment. Factor 10: dev/prod parity. Factor 11: logs as event streams",
+    "Lean engineering: eliminate waste, kaizen (continuous improvement), flow over batch",
+    "Human Edge Capability: Resilience Thinking"
+  ],
+  "context": "IS 218 is Studio 3 of the BSEAI degree. Students containerize applications, build CI/CD pipelines, implement monitoring, and conduct incident drills. The core capability is Resilience Thinking — functioning under pressure, prioritizing during simultaneous failures, and designing systems that degrade gracefully."
+}

@@ -1,0 +1,41 @@
+{
+  "title": "AI Agent Design Patterns",
+  "domain": "agent_engineering",
+  "people": [
+    "Andrew Ng",
+    "Harrison Chase",
+    "Andrej Karpathy"
+  ],
+  "power_phrases": [
+    "Intake Agent Pattern",
+    "Ops Agent Pattern",
+    "CRM Foundation",
+    "Behavior Contract",
+    "Operating Model",
+    "Human-Agent Boundary",
+    "Agent Evaluation Suite",
+    "Tool Permission Model",
+    "Memory Namespace Isolation",
+    "Orchestrator-Mediated Communication",
+    "Autobiographical Memory",
+    "Trust Score Arbitration"
+  ],
+  "frameworks": [
+    "Intake → Process → Respond pipeline",
+    "Maestro Ops Agent (18 tools, 14 evaluations)",
+    "Operating Model: Humans decide strategy, agents execute tactics",
+    "CRM Contact Lifecycle (prospect → lead → customer → alumni)",
+    "Agent Behavior Contract (inputs, outputs, side effects, invariants)"
+  ],
+  "concepts": [
+    "Agents must have explicit behavior contracts defining I/O and side effects",
+    "An ops agent needs 15-20 tools for real production work",
+    "Agent evaluations should cover correctness, boundary respect, and governance compliance",
+    "Human-agent boundary: humans own strategy and escalation; agents own repetitive execution",
+    "Onboarding workflow guides new entities through a structured question sequence",
+    "Contact lifecycle tracks entities through states: prospect, lead, active, alumni",
+    "Agent communication must be orchestrator-mediated, never direct peer-to-peer",
+    "Each agent owns an isolated memory namespace with no cross-contamination"
+  ],
+  "context": "Extracted from ordostudio — production agent patterns including an intake agent with structured question flows, a maestro ops agent with 18 registered tools and 14 evaluation criteria, and a CRM-integrated contact lifecycle. The operating model strictly separates human strategic decisions from agent tactical execution."
+}

@@ -1,0 +1,2 @@
+Place a 128×128 PNG named `agentop.png` here.
+This file is used as the @agentop chat participant icon in VS Code.

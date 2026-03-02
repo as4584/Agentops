@@ -1,0 +1,48 @@
+{
+  "title": "Community AI Training & Translation (IS 482)",
+  "domain": "bseai_curriculum",
+  "people": [
+    "Richard Feynman",
+    "Carl Sagan",
+    "Bret Victor",
+    "Paulo Freire",
+    "Grace Hopper",
+    "Mitch Resnick",
+    "John Sweller"
+  ],
+  "power_phrases": [
+    "Feynman technique",
+    "Cognitive load theory",
+    "Curse of knowledge",
+    "Banking education (Freire's critique)",
+    "Dialogical learning",
+    "Making the invisible visible",
+    "Nanosecond wire (Hopper's technique)",
+    "Lifelong Kindergarten (Resnick)",
+    "Scaffolding (Vygotsky)",
+    "Zone of proximal development",
+    "We are made of star stuff",
+    "Pre/post survey",
+    "Formative assessment",
+    "Accessibility"
+  ],
+  "frameworks": [
+    "Feynman Technique: explain simply → find gaps → return to source → simplify again",
+    "Cognitive Load Theory (Sweller): working memory holds ~4 items, manage load or lose audience",
+    "Freire's Pedagogy: dialogue over banking, co-creation over deposit, lived experience as foundation",
+    "Compression Reversal: in Studios 1-7 you compress (precise terms), in Studio 8 you decompress (accessible terms)",
+    "CCR for Audiences: draft → deliver to pilot → watch confusion → revise → retest"
+  ],
+  "concepts": [
+    "Translation is not 'dumbing it down' — it's finding the bridge between what you know and what your audience can imagine",
+    "The audience has a biological context window: working memory ~4 items (cognitive load theory)",
+    "Shannon's encoding theorem applies both ways: compress for AI, decompress for humans",
+    "If you can't explain it simply, you don't understand it well enough (Feynman)",
+    "Curse of knowledge: once you know something, you can't remember not knowing it",
+    "Change the representation, not the rigor (Resnick/Scratch approach)",
+    "The bottleneck to AI adoption is not technology — it's translation",
+    "Security literacy for non-technical audiences: phishing, privacy, misinformation, deepfakes",
+    "Human Edge Capability: Translation"
+  ],
+  "context": "IS 482 is Studio 8 (final) of the BSEAI degree. Students deliver live community AI training events for real non-technical audiences through the Center for Enterprise AI. The core capability is Translation — making the invisible visible, bridging expert knowledge to public understanding. Service learning course serving the Newark community."
+}

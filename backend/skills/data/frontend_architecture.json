@@ -1,0 +1,43 @@
+{
+  "title": "Frontend Architecture & Design Systems",
+  "domain": "frontend",
+  "people": [
+    "Don Norman",
+    "Steve Krug",
+    "Josef Muller-Brockmann",
+    "Jan Tschichold",
+    "Dieter Rams"
+  ],
+  "power_phrases": [
+    "Swiss/Bauhaus Design",
+    "Design System Tokens",
+    "Dual-Lens Audit",
+    "Krug IA Audit",
+    "Information Architecture",
+    "Progressive Enhancement",
+    "Component-Driven Development",
+    "Accessibility First",
+    "Visual Hierarchy",
+    "Don't Make Me Think",
+    "Mobile-First Design",
+    "Design Tokens"
+  ],
+  "frameworks": [
+    "Swiss/Bauhaus Design Spec: grid-based, typographic hierarchy, whitespace as structure",
+    "Design System Tokens: colors, spacing, typography, breakpoints as variables",
+    "Dual-Lens Audit: Swiss aesthetic lens + Krug usability lens applied to every page",
+    "Krug IA Audit: clear hierarchy, obvious navigation, minimal clicks to content",
+    "Layered Frontend: presentation → component → state → API layer"
+  ],
+  "concepts": [
+    "Design tokens are the single source of truth for visual consistency",
+    "Swiss design uses grid systems and typography as primary design tools",
+    "Krug's principle: 'Don't make me think' — obvious beats clever",
+    "Dual-lens audit catches both aesthetic and usability problems",
+    "Page surface inventory catalogs every element for audit",
+    "Progressive enhancement: core content works without JavaScript",
+    "Accessibility is not an afterthought — it's a design constraint",
+    "Component-driven development: build atoms, compose molecules, assemble pages"
+  ],
+  "context": "Extracted from ordostudio — production frontend architecture using Swiss/Bauhaus design principles with design system tokens, a layered component architecture (presentation → state → API), and dual-lens quality audits combining Josef Muller-Brockmann aesthetic standards with Steve Krug usability heuristics."
+}

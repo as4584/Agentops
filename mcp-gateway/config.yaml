@@ -1,0 +1,75 @@
+# config.yaml — Per-server runtime configuration for Agentop MCP Gateway
+# -----------------------------------------------------------------------
+# Configures server-specific options. Secrets (API keys, tokens) should be
+# set via `docker mcp secret` or environment variables — never hardcoded here.
+#
+# To write config via CLI:
+#   DOCKER_MCP_IN_CONTAINER=1 docker mcp config write '<json>'
+#
+# To read current config:
+#   DOCKER_MCP_IN_CONTAINER=1 docker mcp config read
+
+servers:
+
+  # ── GitHub MCP Server ──────────────────────────────────────────────────
+  github:
+    # Set GITHUB_TOKEN via: docker mcp secret set github GITHUB_TOKEN=<token>
+    # Or via environment variable GITHUB_PERSONAL_ACCESS_TOKEN
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+    # Permissions granted to github server (read-only by default for security)
+    options:
+      read_only: false   # set true to block create_issue / write ops
+
+  # ── Filesystem MCP Server ──────────────────────────────────────────────
+  filesystem:
+    # Restrict server to the project root — no access outside this path
+    options:
+      allowed_paths:
+        - "/root/studio/testing/Agentop"
+    # Map host project root into the container
+    mounts:
+      - source: "/root/studio/testing/Agentop"
+        target: "/workspace"
+        readonly: false
+
+  # ── Docker MCP Server ──────────────────────────────────────────────────
+  docker:
+    # Expose Docker socket into the container so docker MCP can manage containers
+    mounts:
+      - source: "/var/run/docker.sock"
+        target: "/var/run/docker.sock"
+        readonly: false
+    options:
+      # Prevent destructive operations on host containers outside Agentop scope
+      allowed_container_prefixes:
+        - "agentop"
+        - "mcp"
+
+  # ── SQLite MCP Server ──────────────────────────────────────────────────
+  sqlite:
+    options:
+      # Only expose databases within the project memory directory
+      db_path: "/root/studio/testing/Agentop/backend/memory"
+    mounts:
+      - source: "/root/studio/testing/Agentop/backend/memory"
+        target: "/data"
+        readonly: true
+
+  # ── Slack MCP Server ───────────────────────────────────────────────────
+  slack:
+    # Set via: docker mcp secret set slack SLACK_BOT_TOKEN=xoxb-...
+    env:
+      SLACK_BOT_TOKEN: "${SLACK_BOT_TOKEN}"
+    options:
+      # Restrict to specific Slack workspace channels (optional)
+      allowed_channels: []
+
+  # ── Fetch MCP Server ───────────────────────────────────────────────────
+  fetch:
+    options:
+      # Block internal/private IP ranges for security
+      blocked_domains:
+        - "169.254.0.0/16"
+        - "10.0.0.0/8"
+        - "172.16.0.0/12"

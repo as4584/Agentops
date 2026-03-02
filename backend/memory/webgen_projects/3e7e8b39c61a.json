@@ -1,0 +1,36 @@
+{
+  "id": "3e7e8b39c61a",
+  "created_at": "2026-03-02T02:41:06.701678",
+  "updated_at": "2026-03-02T02:41:06.701682",
+  "status": "brief",
+  "brief": {
+    "business_name": "Bella's Kitchen",
+    "business_type": "restaurant",
+    "tagline": "Farm-to-table Italian dining",
+    "description": "Family-owned Italian restaurant",
+    "services": [
+      "Dine-in",
+      "Catering",
+      "Private Events"
+    ],
+    "target_audience": "",
+    "tone": "friendly",
+    "colors": {},
+    "logo_url": "",
+    "phone": "555-0123",
+    "email": "info@bellaskitchen.com",
+    "address": "123 Main St",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": []
+  },
+  "pages": [],
+  "template_ids": [],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/bellas-kitchen",
+  "global_css": "",
+  "sitemap_xml": "",
+  "robots_txt": "",
+  "errors": [],
+  "metadata": {}
+}

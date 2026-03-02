@@ -1,0 +1,40 @@
+{
+  "title": "State Machine Design for Business Domains",
+  "domain": "domain_modeling",
+  "people": [
+    "David Harel",
+    "Martin Fowler",
+    "Eric Evans"
+  ],
+  "power_phrases": [
+    "State Machine",
+    "State Transition",
+    "Guard Condition",
+    "Terminal State",
+    "Deal Lifecycle",
+    "Ledger Entry Lifecycle",
+    "Commercial Lifecycle",
+    "Follow-Up Lifecycle",
+    "Contact Lifecycle",
+    "Event Lifecycle",
+    "Finite State Automaton",
+    "State Chart"
+  ],
+  "frameworks": [
+    "Deal Lifecycle: draft → proposed → negotiating → accepted → invoiced → paid → closed → cancelled",
+    "Ledger: pending → posted → reconciled → voided",
+    "Commercial: prospect → qualifying → proposal → negotiation → closed_won → closed_lost",
+    "Follow-Up: scheduled → attempted → completed → overdue → cancelled",
+    "Contact: prospect → lead → active_customer → alumni → churned",
+    "Event: planned → confirmed → in_progress → completed → cancelled"
+  ],
+  "concepts": [
+    "Every business entity has a lifecycle that can be modeled as a state machine",
+    "Guard conditions prevent invalid transitions (e.g., cannot invoice a cancelled deal)",
+    "Terminal states are absorbing — once entered, no further transitions",
+    "State machines make implicit business rules explicit and testable",
+    "Each transition should be logged with actor, timestamp, and reason",
+    "State machines prevent the most common business logic bug: impossible states"
+  ],
+  "context": "Extracted from ordostudio — 7 production state machines covering deals, ledger entries, commercial pipelines, follow-ups, instructor scheduling, contacts, and events. Each machine defines explicit states, valid transitions, guard conditions, and terminal states. State machines enforce business rules that would otherwise be scattered across application code."
+}

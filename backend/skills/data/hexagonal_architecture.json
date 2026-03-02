@@ -1,0 +1,41 @@
+{
+  "title": "Hexagonal Architecture & Domain-Driven Design",
+  "domain": "software_architecture",
+  "people": [
+    "Alistair Cockburn",
+    "Eric Evans",
+    "Robert C. Martin"
+  ],
+  "power_phrases": [
+    "Ports and Adapters",
+    "Hexagonal Architecture",
+    "Domain-Driven Design",
+    "Bounded Context",
+    "Aggregate Root",
+    "Value Object",
+    "Entity vs Value Object",
+    "Anti-Corruption Layer",
+    "Repository Pattern",
+    "Dependency Inversion",
+    "Clean Architecture",
+    "Onion Architecture"
+  ],
+  "frameworks": [
+    "Hexagonal Architecture (Ports & Adapters)",
+    "Domain-Driven Design (DDD)",
+    "Clean Architecture",
+    "SOLID Principles",
+    "Repository Pattern"
+  ],
+  "concepts": [
+    "Domain logic must never depend on infrastructure",
+    "Ports define contracts; adapters implement them",
+    "Branded/nominal ID types prevent primitive obsession",
+    "Money as Value Object (cents + currency, safe arithmetic)",
+    "Feature flags gate new behavior without branching",
+    "CLI follows manual-page convention with documented subcommands",
+    "Date/time always stored as UTC with explicit timezone conversion",
+    "Domain models are the source of truth, not the database schema"
+  ],
+  "context": "Extracted from ordostudio — a production codebase using hexagonal architecture with DDD, branded IDs, Money value objects, and strict port/adapter separation. Domain logic is isolated from infrastructure via port interfaces. All IDs are nominal types (branded) to prevent cross-entity confusion. Money is always represented in cents with explicit currency to avoid floating-point arithmetic errors."
+}

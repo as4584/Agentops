@@ -1,0 +1,24 @@
+/**
+ * Agentop Dashboard — Global Styles (Mantine v7)
+ *
+ * Most component styling is now handled by Mantine.
+ * This file contains only base overrides and animations.
+ */
+
+/* ── Dark background base ──────────────────────────────── */
+html, body {
+  background: #0a0a0f;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar customization ───────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a3e; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #606078; }
+
+/* ── Animations ────────────────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}

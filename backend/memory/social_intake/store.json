@@ -1,0 +1,22 @@
+{
+  "data": {
+    "acme_co": {
+      "business_id": "acme_co",
+      "current_question_index": 8,
+      "answers": {
+        "business_name": "Acme Co helps local gyms grow memberships with automated SMS marketing.",
+        "industry": "Fitness marketing automation",
+        "target_audience": "Gym owners in urban areas, 24-45, growth-focused",
+        "brand_voice": "Confident, energetic, practical",
+        "goals": "Increase inbound leads and booked consultations",
+        "platforms": "Instagram Reels and TikTok",
+        "offers": "SMS automations and lead reactivation campaigns",
+        "cta": "DM us to book a free strategy call"
+      },
+      "completed": true,
+      "updated_at": "2026-03-01T08:46:56.344371"
+    }
+  },
+  "created": "2026-03-01T08:32:19.493708",
+  "last_modified": "2026-03-01T08:46:56.344577"
+}

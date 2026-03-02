@@ -1,0 +1,46 @@
+{
+  "job_id": "7c59dfa1c235",
+  "topic": "3 productivity hacks that actually work",
+  "hook": "You're wasting 30 minutes a day on stuff that's NOT getting you closer to your goals.",
+  "script": "---\nHOOK: You're wasting 30 minutes a day on stuff that's NOT getting you closer to your goals.\nPROBLEM: Staying focused and productive is killing you, but you don't know where to start.\nFRAMEWORK:\n1. **Schedule your most annoying task first**: Get the worst part out of the way so it's done before lunchtime!\n2. Use the \"2-minute rule\" - if a task can be done in less than 2 minutes, DO IT NOW\n3. Take a 5-minute break every hour to recharge and avoid burnout\nEXAMPLE: Try these hacks for a week and see how much more you get done!\nCTA: Start your productivity boost now by commenting below with one thing you're going to tackle first!",
+  "final_transcript": "",
+  "voice_audio_path": "",
+  "avatar_video_path": "",
+  "captioned_video_path": "",
+  "status": "generated",
+  "platform_targets": [
+    "instagram",
+    "tiktok",
+    "youtube_shorts"
+  ],
+  "scheduled_time": null,
+  "posted_time": null,
+  "analytics": {
+    "views": 0,
+    "retention": 0.0,
+    "watch_time": 0.0,
+    "shares": 0,
+    "saves": 0,
+    "comments": 0,
+    "followers_gained": 0,
+    "hook_retention": 0.0
+  },
+  "qa_report": {
+    "audio_lufs": null,
+    "audio_clipped": null,
+    "caption_accuracy": null,
+    "video_duration_sec": null,
+    "visual_artifacts": null,
+    "policy_violation": null,
+    "passed": false,
+    "notes": []
+  },
+  "content_pillar": "",
+  "source": "notes",
+  "created_at": "2026-03-02T00:37:42.881534Z",
+  "updated_at": "2026-03-02T00:37:55.728812Z",
+  "failure_reason": "",
+  "retry_count": 0,
+  "hashtags": [],
+  "caption_text": ""
+}

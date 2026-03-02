@@ -1,0 +1,405 @@
+{
+  "name": "agentop-orchestrator",
+  "displayName": "Agentop Orchestrator",
+  "description": "VS Code Chat Participant that delegates to the Agentop multi-agent backend — access all 11 agents directly from Copilot Chat.",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "AI",
+    "Chat"
+  ],
+  "keywords": [
+    "agentop",
+    "agents",
+    "orchestrator",
+    "copilot",
+    "chat"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "chatParticipants": [
+      {
+        "id": "agentop.orchestrator",
+        "name": "agentop",
+        "fullName": "Agentop Orchestrator",
+        "description": "Route tasks to any Agentop agent — soul, devops, monitor, security, review, data, comms, it, cs, or knowledge.",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "soul",
+            "description": "Talk to soul_core — governance, goals, cluster reflection, trust arbitration"
+          },
+          {
+            "name": "devops",
+            "description": "Talk to devops_agent — git ops, CI/CD, deployment coordination"
+          },
+          {
+            "name": "monitor",
+            "description": "Talk to monitor_agent — health checks, log tailing, metrics"
+          },
+          {
+            "name": "security",
+            "description": "Talk to security_agent — secret scanning, CVE alerts, reachability"
+          },
+          {
+            "name": "review",
+            "description": "Talk to code_review_agent — diff review, architectural invariant checks"
+          },
+          {
+            "name": "data",
+            "description": "Talk to data_agent — read-only DB queries, schema drift detection"
+          },
+          {
+            "name": "comms",
+            "description": "Talk to comms_agent — outbound webhooks, incident announcements"
+          },
+          {
+            "name": "it",
+            "description": "Talk to it_agent — infrastructure diagnostics, whitelisted shell"
+          },
+          {
+            "name": "cs",
+            "description": "Talk to cs_agent — customer support, knowledge base lookup"
+          }
+        ]
+      }
+    ],
+    "languageModelTools": [
+      {
+        "name": "agentop_file_reader",
+        "tags": [
+          "agentop",
+          "files"
+        ],
+        "displayName": "Read File",
+        "modelDescription": "Read the contents of a file within the Agentop project. Returns raw file text.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Relative path to the file to read"
+            }
+          },
+          "required": [
+            "path"
+          ]
+        }
+      },
+      {
+        "name": "agentop_system_info",
+        "tags": [
+          "agentop",
+          "system"
+        ],
+        "displayName": "System Info",
+        "modelDescription": "Retrieve CPU, memory, disk, and OS information from the Agentop host.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
+        }
+      },
+      {
+        "name": "agentop_git_ops",
+        "tags": [
+          "agentop",
+          "git"
+        ],
+        "displayName": "Git Operations",
+        "modelDescription": "Run a read-only git command (log, status, diff, show, branch, tag, remote) on the project repo.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "subcommand": {
+              "type": "string",
+              "description": "git subcommand: log, status, diff, show, branch, tag, or remote"
+            },
+            "args": {
+              "type": "string",
+              "description": "Additional arguments e.g. '--oneline -10'"
+            }
+          },
+          "required": [
+            "subcommand"
+          ]
+        }
+      },
+      {
+        "name": "agentop_health_check",
+        "tags": [
+          "agentop",
+          "monitoring"
+        ],
+        "displayName": "Health Check",
+        "modelDescription": "Check HTTP reachability of a URL. Returns status code and response time.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "URL to check"
+            }
+          },
+          "required": [
+            "url"
+          ]
+        }
+      },
+      {
+        "name": "agentop_log_tail",
+        "tags": [
+          "agentop",
+          "logs"
+        ],
+        "displayName": "Tail Log File",
+        "modelDescription": "Tail the last N lines from a log file within the project.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Relative path to the log file"
+            },
+            "lines": {
+              "type": "number",
+              "description": "Number of lines to return (default 50)"
+            }
+          },
+          "required": [
+            "path"
+          ]
+        }
+      },
+      {
+        "name": "agentop_secret_scanner",
+        "tags": [
+          "agentop",
+          "security"
+        ],
+        "displayName": "Secret Scanner",
+        "modelDescription": "Scan a file for hardcoded credentials, API keys, tokens, or passwords using regex patterns.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Relative path to the file to scan"
+            }
+          },
+          "required": [
+            "path"
+          ]
+        }
+      },
+      {
+        "name": "agentop_db_query",
+        "tags": [
+          "agentop",
+          "data"
+        ],
+        "displayName": "Database Query",
+        "modelDescription": "Run a read-only SELECT or PRAGMA SQL statement against a local SQLite database.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "db_path": {
+              "type": "string",
+              "description": "Relative path to the SQLite database file"
+            },
+            "query": {
+              "type": "string",
+              "description": "SQL query (SELECT or PRAGMA only)"
+            }
+          },
+          "required": [
+            "db_path",
+            "query"
+          ]
+        }
+      },
+      {
+        "name": "agentop_alert_dispatch",
+        "tags": [
+          "agentop",
+          "alerts"
+        ],
+        "displayName": "Dispatch Alert",
+        "modelDescription": "Dispatch a structured alert to the Agentop shared event log.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "severity": {
+              "type": "string",
+              "description": "Alert severity: INFO, WARNING, ERROR, CRITICAL"
+            },
+            "title": {
+              "type": "string",
+              "description": "Alert title"
+            },
+            "message": {
+              "type": "string",
+              "description": "Alert details"
+            },
+            "agent_id": {
+              "type": "string",
+              "description": "Originating agent ID"
+            }
+          },
+          "required": [
+            "severity",
+            "title",
+            "message",
+            "agent_id"
+          ]
+        }
+      },
+      {
+        "name": "agentop_webhook_send",
+        "tags": [
+          "agentop",
+          "comms"
+        ],
+        "displayName": "Send Webhook",
+        "modelDescription": "Send an HTTP POST webhook to an external URL with a JSON payload.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "Webhook URL"
+            },
+            "payload": {
+              "type": "object",
+              "description": "JSON payload to POST"
+            }
+          },
+          "required": [
+            "url",
+            "payload"
+          ]
+        }
+      },
+      {
+        "name": "agentop_process_restart",
+        "tags": [
+          "agentop",
+          "ops"
+        ],
+        "displayName": "Restart Process",
+        "modelDescription": "Restart a whitelisted Agentop process: backend, frontend, or ollama.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "process": {
+              "type": "string",
+              "description": "Process to restart: backend, frontend, or ollama"
+            }
+          },
+          "required": [
+            "process"
+          ]
+        }
+      },
+      {
+        "name": "agentop_safe_shell",
+        "tags": [
+          "agentop",
+          "shell"
+        ],
+        "displayName": "Safe Shell",
+        "modelDescription": "Execute a whitelisted shell command on the Agentop host.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "description": "The shell command to execute (must be whitelisted)"
+            }
+          },
+          "required": [
+            "command"
+          ]
+        }
+      },
+      {
+        "name": "agentop_doc_updater",
+        "tags": [
+          "agentop",
+          "docs"
+        ],
+        "displayName": "Update Doc",
+        "modelDescription": "Append a change record to an Agentop governance documentation file.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "doc_path": {
+              "type": "string",
+              "description": "Path to the governance doc to update"
+            },
+            "content": {
+              "type": "string",
+              "description": "Markdown content to append"
+            }
+          },
+          "required": [
+            "doc_path",
+            "content"
+          ]
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "agentop.openDashboard",
+        "title": "Agentop: Open Dashboard",
+        "category": "Agentop"
+      },
+      {
+        "command": "agentop.listAgents",
+        "title": "Agentop: List Agents",
+        "category": "Agentop"
+      },
+      {
+        "command": "agentop.soulReflect",
+        "title": "Agentop: Trigger Soul Reflection",
+        "category": "Agentop"
+      }
+    ],
+    "configuration": {
+      "title": "Agentop",
+      "properties": {
+        "agentop.backendUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "Base URL of the Agentop FastAPI backend."
+        },
+        "agentop.defaultAgent": {
+          "type": "string",
+          "default": "knowledge_agent",
+          "description": "Default agent used when no slash command is provided to @agentop."
+        },
+        "agentop.streamResponses": {
+          "type": "boolean",
+          "default": true,
+          "description": "Stream agent responses word-by-word into the chat panel."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.35",
+    "@types/vscode": "^1.109.0",
+    "typescript": "^5.9.3"
+  }
+}

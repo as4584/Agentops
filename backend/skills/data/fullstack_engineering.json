@@ -1,0 +1,47 @@
+{
+  "title": "Full-Stack Engineering & Professional Judgment (IS 118)",
+  "domain": "bseai_curriculum",
+  "people": [
+    "Brendan Eich",
+    "Ward Cunningham",
+    "Roy Fielding",
+    "Andy Hunt",
+    "Dave Thomas",
+    "Douglas Crockford",
+    "Eric Ries"
+  ],
+  "power_phrases": [
+    "Technical debt",
+    "Broken windows",
+    "DRY (Don't Repeat Yourself)",
+    "YAGNI (You Ain't Gonna Need It)",
+    "KISS (Keep It Simple, Stupid)",
+    "Separation of concerns",
+    "REST (Fielding's architectural style)",
+    "MVP (Minimum Viable Product)",
+    "Build-Measure-Learn",
+    "The Agile Manifesto",
+    "User stories",
+    "CI/CD",
+    "Edge cases",
+    "IEEE 754",
+    "AI Audit Log"
+  ],
+  "frameworks": [
+    "Lean Startup: Build-Measure-Learn, MVP, validated learning",
+    "Pragmatic Programmer: craftsmanship, broken windows, DRY, YAGNI",
+    "REST: resources, representations, stateless communication (Fielding 2000)",
+    "AI Audit Log: documented record of every AI interaction — accepted/modified/rejected and why",
+    "Agile Manifesto: individuals over processes, working software over documentation"
+  ],
+  "concepts": [
+    "Technical debt (Cunningham): strategic shortcuts vs. negligent shortcuts, interest accumulates",
+    "Broken windows (Hunt & Thomas): small disorder invites larger disorder",
+    "'Ward Cunningham technical debt' is an indexed lookup; 'that shortcut thing' is a full-table scan",
+    "Professional Judgment: can I trust this AI-generated code enough to ship it?",
+    "IEEE 754: why 0.1 + 0.2 !== 0.3 in JavaScript — handle money in cents, not dollars",
+    "Every AI interaction should have a paper trail: what was asked, produced, and decided",
+    "Human Edge Capability: Professional Judgment"
+  ],
+  "context": "IS 118 is Studio 2 of the BSEAI degree. Students build a real workshop registration system using JavaScript, databases, APIs, and automated testing. The core capability is Professional Judgment — knowing when AI-generated code is trustworthy enough to ship. The course introduces the AI Audit Log as a professional discipline."
+}

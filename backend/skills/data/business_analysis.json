@@ -1,0 +1,55 @@
+{
+  "title": "Business Analysis & Problem Finding (IS 265)",
+  "domain": "bseai_curriculum",
+  "people": [
+    "Jeff Bezos",
+    "Pierre Omidyar",
+    "Peter Thiel",
+    "Max Levchin",
+    "Fred Brooks",
+    "Sakichi Toyoda",
+    "Steve Blank",
+    "Clayton Christensen",
+    "Eric Ries",
+    "Alexander Osterwalder",
+    "Robert Cialdini"
+  ],
+  "power_phrases": [
+    "5 Whys",
+    "Jobs to Be Done",
+    "Essential vs. accidental complexity",
+    "Get out of the building",
+    "Build-Measure-Learn",
+    "MVP (Minimum Viable Product)",
+    "Business Model Canvas",
+    "Pivot",
+    "Brooks's Law (adding people to a late project makes it later)",
+    "No Silver Bullet",
+    "Second-system effect",
+    "Reciprocity, commitment, social proof, authority, liking, scarcity",
+    "Fermi estimation",
+    "ROI (return on investment)",
+    "Total Cost of Ownership"
+  ],
+  "frameworks": [
+    "5 Whys: Toyoda's root cause analysis — ask why five times to get past symptoms to causes",
+    "Jobs to Be Done: Christensen's framework — what job is the user hiring this product to do?",
+    "Business Model Canvas: Osterwalder's one-page framework — value proposition, segments, channels, revenue, costs",
+    "Customer Development: Blank's four steps — Discovery, Validation, Creation, Building",
+    "Cialdini's 6 Principles of Persuasion: reciprocity, commitment, social proof, authority, liking, scarcity",
+    "Lean Startup: Build-Measure-Learn, hypothesis testing, validated learning",
+    "Brooks's essential vs. accidental complexity: the deepest insight in software engineering"
+  ],
+  "concepts": [
+    "Most failed projects fail because someone built an excellent solution to the wrong problem",
+    "Problem Finding: the ability to see the real problem hiding behind the stated one",
+    "'Jobs to Be Done' costs 5 tokens and activates Christensen, Harvard, the milkshake study, and an entire innovation theory",
+    "Describing the same concept from scratch costs 20+ tokens and produces a fuzzier response",
+    "Every power phrase is a capital investment: a few tokens yielding outsized returns in clarity",
+    "Pivoting is Problem Finding in action (PayPal Mafia lesson)",
+    "Fermi estimation: from 'I don't know' to 'my best estimate with stated assumptions is...'",
+    "ROI arithmetic: if the system costs $50K and saves $2K/month, payback at 25 months",
+    "Human Edge Capability: Problem Finding"
+  ],
+  "context": "IS 265 is Studio 4 (midpoint) of the BSEAI degree. Students shift from building technology to understanding the human and business problems technology is supposed to solve. Through real stakeholder interviews, process mapping, requirements elicitation, and business case analysis, students develop Problem Finding — the ability to see the real problem hiding behind the stated one."
+}
