@@ -189,43 +189,22 @@ def main() -> None:
 
     # ---- Open Native Window ----
     print("\n🖥️  Opening Agentop window...\n")
-    try:
-        import webview
 
-        window = webview.create_window(
-            title="Agentop — Local AI Control Center",
-            url="http://localhost:3007",
-            width=1400,
-            height=900,
-            min_size=(900, 600),
-            resizable=True,
-            text_select=True,
-            confirm_close=False,
-        )
+    # Detect WSL — Electron works natively on Windows display, pywebview doesn't
+    is_wsl = "microsoft" in (Path("/proc/version").read_text().lower() if Path("/proc/version").exists() else "")
 
-        # This blocks until the window is closed
-        # Use Qt backend explicitly (pip-installed, no system GTK needed)
-        webview.start(
-            debug=False,
-            private_mode=False,
-            gui="qt",
-        )
-
-    except ImportError:
-        print("  pywebview not available, opening in browser instead...")
-        import webbrowser
-        webbrowser.open("http://localhost:3007")
-        print("\n  Dashboard open in your browser.")
-        print("  Press Ctrl+C to stop all services.\n")
+    if is_wsl or os.environ.get("AGENTOP_USE_ELECTRON"):
+        print("  WSL detected → launching Electron native window...")
         try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            pass
-    except Exception as e:
-        # Fallback: if no display (headless), open in browser
-        if "display" in str(e).lower() or "gtk" in str(e).lower():
-            print(f"  No display detected ({e}), opening in browser...")
+            electron_proc = _start_process(
+                ["npx", "electron", ".", "--no-sandbox", "--disable-gpu"],
+                cwd=FRONTEND_DIR,
+                label="electron",
+            )
+            # Block until Electron exits
+            electron_proc.wait()
+        except (FileNotFoundError, OSError) as e:
+            print(f"  ✗ Electron failed ({e}), opening in browser...")
             import webbrowser
             webbrowser.open("http://localhost:3007")
             print("\n  Dashboard open in your browser.")
@@ -235,8 +214,54 @@ def main() -> None:
                     time.sleep(1)
             except KeyboardInterrupt:
                 pass
-        else:
-            raise
+    else:
+        try:
+            import webview
+
+            window = webview.create_window(
+                title="Agentop — Local AI Control Center",
+                url="http://localhost:3007",
+                width=1400,
+                height=900,
+                min_size=(900, 600),
+                resizable=True,
+                text_select=True,
+                confirm_close=False,
+            )
+
+            # This blocks until the window is closed
+            webview.start(
+                debug=False,
+                private_mode=False,
+                gui="qt",
+            )
+
+        except ImportError:
+            print("  pywebview not available, opening in browser instead...")
+            import webbrowser
+            webbrowser.open("http://localhost:3007")
+            print("\n  Dashboard open in your browser.")
+            print("  Press Ctrl+C to stop all services.\n")
+            try:
+                while True:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                pass
+        except Exception as e:
+            # Fallback: if no display (headless), open in browser
+            if "display" in str(e).lower() or "gtk" in str(e).lower() or "qt" in str(e).lower():
+                print(f"  No display detected ({e}), opening in browser...")
+                import webbrowser
+                webbrowser.open("http://localhost:3007")
+                print("\n  Dashboard open in your browser.")
+                print("  Press Ctrl+C to stop all services.\n")
+                try:
+                    while True:
+                        time.sleep(1)
+                except KeyboardInterrupt:
+                    pass
+            else:
+                raise
 
     # When window closes, cleanup runs via atexit
     print("\n👋 Window closed.")
