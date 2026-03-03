@@ -620,8 +620,11 @@ export default function DashboardPage() {
                   {/* Agent sidebar */}
                   <Grid.Col span={{ base: 12, md: 3 }}>
                     <Card shadow="sm" withBorder>
-                      <Text fw={600} size="sm" tt="uppercase" c="dimmed" mb="sm">Agents</Text>
-                      <ScrollArea h={600} type="auto">
+                      <Group justify="space-between" mb="sm">
+                        <Text fw={600} size="sm" tt="uppercase" c="dimmed">Agents</Text>
+                        <Badge size="xs" variant="light">{agents.length}</Badge>
+                      </Group>
+                      <ScrollArea h={560} type="auto">
                         <Stack gap={4}>
                           {agents.map(a => {
                             const state = getAgentState(a.agent_id);
@@ -631,9 +634,13 @@ export default function DashboardPage() {
                                 borderRadius: 'var(--mantine-radius-sm)',
                                 border: `1px solid ${selected ? 'var(--mantine-color-agentop-5)' : 'var(--mantine-color-dark-4)'}`,
                                 background: selected ? 'var(--mantine-color-agentop-light)' : 'transparent',
+                                transition: 'all 150ms ease',
                               }}>
                                 <Group justify="space-between">
-                                  <Text size="sm" fw={600} c={selected ? 'agentop' : undefined}>{a.agent_id}</Text>
+                                  <Group gap={6}>
+                                    <ThemeIcon size="xs" variant="light" color={selected ? 'agentop' : 'gray'}><IconRobot size={12} /></ThemeIcon>
+                                    <Text size="sm" fw={600} c={selected ? 'agentop' : undefined}>{a.agent_id.replace(/_/g, ' ')}</Text>
+                                  </Group>
                                   <Badge size="xs" color={state?.status === 'ACTIVE' ? 'green' : 'blue'}>{state?.status || 'IDLE'}</Badge>
                                 </Group>
                                 <Text size="xs" c="dimmed" truncate mt={2}>{a.role}</Text>
@@ -648,52 +655,121 @@ export default function DashboardPage() {
                   {/* Chat panel */}
                   <Grid.Col span={{ base: 12, md: 9 }}>
                     <Card shadow="sm" withBorder style={{ display: 'flex', flexDirection: 'column', height: 680 }}>
-                      <Group justify="space-between" mb="sm">
+                      {/* Chat header */}
+                      <Group justify="space-between" mb="sm" pb="sm" style={{ borderBottom: '1px solid var(--mantine-color-dark-4)' }}>
                         <Group gap="xs">
-                          <IconMessage size={18} />
-                          <Text fw={600}>Chat with {chatAgent}</Text>
+                          <ThemeIcon size="md" variant="light" color="agentop"><IconRobot size={18} /></ThemeIcon>
+                          <div>
+                            <Text fw={600} size="sm">{chatAgent.replace(/_/g, ' ')}</Text>
+                            <Text size="xs" c="dimmed">{agents.find(a => a.agent_id === chatAgent)?.role || 'Agent'}</Text>
+                          </div>
                         </Group>
                         <Group gap="sm">
-                          {chatLoading && <Text size="xs" c="yellow" ff="monospace">Processing… {chatElapsed}s</Text>}
+                          {chatLoading && <Badge size="sm" color="yellow" variant="dot" tt="none">Processing… {chatElapsed}s</Badge>}
                           {llmStats && <Text size="xs" c="dimmed" ff="monospace">{fmt.num(llmStats.tokens.total)} tokens</Text>}
+                          {chatMessages.length > 0 && (
+                            <Tooltip label="Clear chat">
+                              <Button variant="subtle" color="gray" size="compact-xs" onClick={() => setChatMessages([])}>
+                                <IconX size={14} />
+                              </Button>
+                            </Tooltip>
+                          )}
                         </Group>
                       </Group>
+
+                      {/* Message area */}
                       <ScrollArea style={{ flex: 1 }} type="auto" mb="sm">
-                        <Stack gap="xs" p="xs">
+                        <Stack gap="sm" p="xs">
                           {chatMessages.length === 0 && (
-                            <Text c="dimmed" size="sm" ta="center" py="xl">
-                              Send a message to <Text span fw={700}>{chatAgent}</Text>
-                              <Text size="xs" mt={4}>This chat runs locally on your machine using Ollama. No data leaves your computer.</Text>
-                            </Text>
+                            <Stack align="center" py="xl" gap="md">
+                              <ThemeIcon size={48} variant="light" color="agentop" radius="xl"><IconMessage size={24} /></ThemeIcon>
+                              <div style={{ textAlign: 'center' }}>
+                                <Text fw={600} mb={4}>Chat with {chatAgent.replace(/_/g, ' ')}</Text>
+                                <Text size="xs" c="dimmed" maw={400}>
+                                  {agents.find(a => a.agent_id === chatAgent)?.role || 'Send a message to start a conversation.'}
+                                </Text>
+                                <Text size="xs" c="dimmed" mt={8}>🔒 Runs locally via Ollama · No data leaves your machine</Text>
+                              </div>
+                              {/* Quick prompts */}
+                              <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="xs" mt="sm" style={{ maxWidth: 480, width: '100%' }}>
+                                {[
+                                  { label: '📊 System status', prompt: 'Give me a summary of the current system status' },
+                                  { label: '🧠 What can you do?', prompt: 'What are your capabilities and how can you help me?' },
+                                  { label: '📝 Analyze my project', prompt: 'Analyze the project structure and give me insights' },
+                                  { label: '💡 Suggest improvements', prompt: 'What improvements would you suggest for this system?' },
+                                ].map(q => (
+                                  <Button key={q.label} variant="light" color="gray" size="xs" fullWidth justify="flex-start"
+                                    style={{ border: '1px solid var(--mantine-color-dark-4)' }}
+                                    onClick={() => { setChatInput(q.prompt); }}
+                                  >
+                                    {q.label}
+                                  </Button>
+                                ))}
+                              </SimpleGrid>
+                            </Stack>
                           )}
                           {chatMessages.map((m, i) => (
-                            <Paper key={i} p="sm" radius="md"
-                              style={{
-                                alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-                                maxWidth: '85%',
-                                background: m.role === 'user' ? 'var(--mantine-color-agentop-filled)' : 'var(--mantine-color-dark-6)',
-                                border: m.role === 'agent' ? '1px solid var(--mantine-color-dark-4)' : 'none',
-                              }}
-                            >
-                              {m.role === 'agent' && m.agent && (
-                                <Text size="xs" c="dimmed" mb={4}>{m.agent} {m.drift && `[${m.drift}]`} {m.timestamp && `· ${fmt.time(m.timestamp)}`}</Text>
+                            <Group key={i} gap="xs" align="flex-start" style={{ justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                              {m.role === 'agent' && (
+                                <ThemeIcon size="sm" variant="light" color="agentop" radius="xl" mt={4}><IconRobot size={12} /></ThemeIcon>
                               )}
-                              <Text size="sm" style={{ whiteSpace: 'pre-wrap' }} c={m.role === 'user' ? 'white' : undefined}>{m.content}</Text>
-                            </Paper>
+                              <Paper p="sm" radius="md"
+                                style={{
+                                  maxWidth: '80%',
+                                  background: m.role === 'user' ? 'var(--mantine-color-agentop-filled)' : 'var(--mantine-color-dark-6)',
+                                  border: m.role === 'agent' ? '1px solid var(--mantine-color-dark-4)' : 'none',
+                                }}
+                              >
+                                {m.role === 'agent' && m.agent && (
+                                  <Group gap={6} mb={4}>
+                                    <Text size="xs" fw={600} c="agentop">{m.agent.replace(/_/g, ' ')}</Text>
+                                    {m.drift && <Badge size="xs" color={driftColor(m.drift)}>{m.drift}</Badge>}
+                                    {m.timestamp && <Text size="xs" c="dimmed">{fmt.time(m.timestamp)}</Text>}
+                                  </Group>
+                                )}
+                                <Text size="sm" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }} c={m.role === 'user' ? 'white' : undefined}>{m.content}</Text>
+                                {m.role === 'user' && m.timestamp && (
+                                  <Text size="xs" c="rgba(255,255,255,0.5)" ta="right" mt={4}>{fmt.time(m.timestamp)}</Text>
+                                )}
+                              </Paper>
+                              {m.role === 'user' && (
+                                <ThemeIcon size="sm" variant="filled" color="agentop" radius="xl" mt={4}><IconSend size={10} /></ThemeIcon>
+                              )}
+                            </Group>
                           ))}
                           {chatLoading && (
-                            <Paper p="sm" radius="md" style={{ alignSelf: 'flex-start', background: 'var(--mantine-color-dark-6)', border: '1px solid var(--mantine-color-dark-4)', opacity: 0.7 }}>
-                              <Group gap="xs"><Loader size="xs" /><Text size="xs" c="dimmed">Thinking… {chatElapsed}s</Text></Group>
-                            </Paper>
+                            <Group gap="xs" align="flex-start">
+                              <ThemeIcon size="sm" variant="light" color="agentop" radius="xl" mt={4}><IconRobot size={12} /></ThemeIcon>
+                              <Paper p="sm" radius="md" style={{ background: 'var(--mantine-color-dark-6)', border: '1px solid var(--mantine-color-dark-4)' }}>
+                                <Group gap="xs"><Loader size="xs" color="agentop" /><Text size="xs" c="dimmed">Thinking… {chatElapsed}s</Text></Group>
+                              </Paper>
+                            </Group>
                           )}
                           <div ref={chatEndRef} />
                         </Stack>
                       </ScrollArea>
+
+                      {/* Input area */}
                       <form onSubmit={sendMessage}>
-                        <Group gap="xs">
-                          <TextInput style={{ flex: 1 }} placeholder={`Message ${chatAgent}…`} value={chatInput} onChange={e => setChatInput(e.currentTarget.value)} disabled={chatLoading} />
-                          <Button type="submit" disabled={chatLoading || !chatInput.trim()} leftSection={<IconSend size={16} />}>Send</Button>
-                        </Group>
+                        <Paper p="xs" withBorder radius="md" style={{ background: 'var(--mantine-color-dark-7)' }}>
+                          <Textarea
+                            placeholder={`Message ${chatAgent.replace(/_/g, ' ')}… (Enter to send, Shift+Enter for newline)`}
+                            value={chatInput}
+                            onChange={e => setChatInput(e.currentTarget.value)}
+                            disabled={chatLoading}
+                            autosize
+                            minRows={1}
+                            maxRows={4}
+                            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(e); } }}
+                            styles={{ input: { border: 'none', background: 'transparent', fontSize: 'var(--mantine-font-size-sm)' } }}
+                          />
+                          <Group justify="space-between" mt={4}>
+                            <Text size="xs" c="dimmed">Press Enter to send · Shift+Enter for newline</Text>
+                            <Button type="submit" disabled={chatLoading || !chatInput.trim()} size="compact-sm" leftSection={<IconSend size={14} />}>
+                              Send
+                            </Button>
+                          </Group>
+                        </Paper>
                       </form>
                     </Card>
                   </Grid.Col>
@@ -899,29 +975,80 @@ export default function DashboardPage() {
                 {/* Model Capacity */}
                 {llmCapacity && (
                   <>
-                    <Title order={4} mb="sm" mt="lg">Model Capacity ({llmCapacity.total_known_models} known · {llmCapacity.available_models.length} available)</Title>
-                    <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
-                      {llmCapacity.model_capacities.map(model => (
-                        <Card key={model.model_id} shadow="sm" withBorder style={{ opacity: model.available ? 1 : 0.5 }}>
-                          <Group justify="space-between" mb="xs">
-                            <Text fw={700} ff="monospace">{model.model_id}</Text>
-                            <Badge color={model.available ? 'green' : 'red'} size="sm">{model.available ? 'Available' : 'Not Pulled'}</Badge>
-                          </Group>
-                          <Stack gap={4}>
-                            <Group justify="space-between"><Text size="xs" c="dimmed">Family</Text><Text size="xs">{model.family}</Text></Group>
-                            <Group justify="space-between"><Text size="xs" c="dimmed">Parameters</Text><Text size="xs">{model.parameters}</Text></Group>
-                            <Group justify="space-between"><Text size="xs" c="dimmed">VRAM</Text><Text size="xs">{model.vram_gb} GB</Text></Group>
-                            <Group justify="space-between"><Text size="xs" c="dimmed">Context</Text><Text size="xs">{fmt.num(model.context_window)} tokens</Text></Group>
-                            <Group justify="space-between"><Text size="xs" c="dimmed">Speed</Text><Text size="xs">{model.speed_tier}</Text></Group>
-                            <Group justify="space-between"><Text size="xs" c="dimmed">Quality</Text><Text size="xs">{model.quality_tier}</Text></Group>
-                            <Group justify="space-between"><Text size="xs" c="dimmed">Est. Speed</Text><Text size="xs">{model.estimated_tokens_per_second} tok/s</Text></Group>
-                          </Stack>
-                          {model.best_for.length > 0 && (
-                            <Group gap={4} mt="xs">{model.best_for.slice(0, 3).map(u => <Badge key={u} size="xs" variant="light">{u}</Badge>)}</Group>
-                          )}
-                        </Card>
-                      ))}
-                    </SimpleGrid>
+                    <Title order={4} mb="sm" mt="lg">Model Capacity ({llmCapacity.total_known_models} known · {llmCapacity.available_models.length + llmCapacity.model_capacities.filter(m => m.provider === 'cloud' && m.available).length} available)</Title>
+
+                    {/* Local Models */}
+                    {llmCapacity.model_capacities.filter(m => m.provider !== 'cloud').length > 0 && (
+                      <>
+                        <Group gap="xs" mb="sm">
+                          <ThemeIcon size="sm" variant="light" color="green"><IconCpu size={14} /></ThemeIcon>
+                          <Text fw={600} size="sm">Local Models (Ollama)</Text>
+                          <Text size="xs" c="dimmed">— free, runs on your hardware</Text>
+                        </Group>
+                        <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} mb="lg">
+                          {llmCapacity.model_capacities.filter(m => m.provider !== 'cloud').map(model => (
+                            <Card key={model.model_id} shadow="sm" withBorder style={{ opacity: model.available ? 1 : 0.5 }}>
+                              <Group justify="space-between" mb="xs">
+                                <Text fw={700} ff="monospace" size="sm">{model.model_id}</Text>
+                                <Badge color={model.available ? 'green' : 'red'} size="sm">{model.available ? 'Available' : 'Not Pulled'}</Badge>
+                              </Group>
+                              <Stack gap={4}>
+                                <Group justify="space-between"><Text size="xs" c="dimmed">Family</Text><Text size="xs">{model.family}</Text></Group>
+                                <Group justify="space-between"><Text size="xs" c="dimmed">Parameters</Text><Text size="xs">{model.parameters}</Text></Group>
+                                <Group justify="space-between"><Text size="xs" c="dimmed">VRAM</Text><Text size="xs">{model.vram_gb} GB</Text></Group>
+                                <Group justify="space-between"><Text size="xs" c="dimmed">Context</Text><Text size="xs">{fmt.num(model.context_window)} tokens</Text></Group>
+                                <Group justify="space-between"><Text size="xs" c="dimmed">Speed</Text><Text size="xs">{model.speed_tier}</Text></Group>
+                                <Group justify="space-between"><Text size="xs" c="dimmed">Quality</Text><Text size="xs">{model.quality_tier}</Text></Group>
+                                <Group justify="space-between"><Text size="xs" c="dimmed">Est. Speed</Text><Text size="xs">{model.estimated_tokens_per_second} tok/s</Text></Group>
+                              </Stack>
+                              {!model.available && (
+                                <Code block mt="xs" style={{ fontSize: 'var(--mantine-font-size-xs)' }}>ollama pull {model.model_id}</Code>
+                              )}
+                              {model.best_for.length > 0 && (
+                                <Group gap={4} mt="xs">{model.best_for.slice(0, 3).map(u => <Badge key={u} size="xs" variant="light">{u}</Badge>)}</Group>
+                              )}
+                            </Card>
+                          ))}
+                        </SimpleGrid>
+                      </>
+                    )}
+
+                    {/* Cloud Models */}
+                    {llmCapacity.model_capacities.filter(m => m.provider === 'cloud').length > 0 && (
+                      <>
+                        <Group gap="xs" mb="sm">
+                          <ThemeIcon size="sm" variant="light" color="blue"><IconCloud size={14} /></ThemeIcon>
+                          <Text fw={600} size="sm">Cloud Models (OpenRouter)</Text>
+                          <Text size="xs" c="dimmed">— pay-per-use, no GPU required</Text>
+                        </Group>
+                        <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
+                          {llmCapacity.model_capacities.filter(m => m.provider === 'cloud').map(model => (
+                            <Card key={model.model_id} shadow="sm" withBorder style={{ opacity: model.available ? 1 : 0.6, borderColor: model.available ? 'var(--mantine-color-blue-7)' : undefined }}>
+                              <Group justify="space-between" mb="xs">
+                                <Group gap={6}>
+                                  <IconCloud size={14} color="var(--mantine-color-blue-5)" />
+                                  <Text fw={700} size="sm">{model.family}</Text>
+                                </Group>
+                                <Badge color={model.available ? 'blue' : 'gray'} size="sm" variant="light">{model.available ? 'Configured' : 'No API Key'}</Badge>
+                              </Group>
+                              <Stack gap={4}>
+                                <Group justify="space-between"><Text size="xs" c="dimmed">Model ID</Text><Text size="xs" ff="monospace">{model.model_id}</Text></Group>
+                                <Group justify="space-between"><Text size="xs" c="dimmed">Context</Text><Text size="xs">{fmt.num(model.context_window)} tokens</Text></Group>
+                                <Group justify="space-between"><Text size="xs" c="dimmed">Input Cost</Text><Text size="xs" c="green">${(model as any).cost_per_m_in?.toFixed(2) ?? '?'}/M tok</Text></Group>
+                                <Group justify="space-between"><Text size="xs" c="dimmed">Output Cost</Text><Text size="xs" c="yellow">${(model as any).cost_per_m_out?.toFixed(2) ?? '?'}/M tok</Text></Group>
+                                <Group justify="space-between"><Text size="xs" c="dimmed">Quality</Text><Text size="xs">{model.quality_tier}</Text></Group>
+                              </Stack>
+                              {!model.available && (
+                                <Text size="xs" c="dimmed" mt="xs" ta="center">Add OPENROUTER_API_KEY to .env to enable</Text>
+                              )}
+                              {model.best_for.length > 0 && (
+                                <Group gap={4} mt="xs">{model.best_for.slice(0, 3).map(u => <Badge key={u} size="xs" variant="light" color="blue">{u}</Badge>)}</Group>
+                              )}
+                            </Card>
+                          ))}
+                        </SimpleGrid>
+                      </>
+                    )}
                   </>
                 )}
               </Tabs.Panel>

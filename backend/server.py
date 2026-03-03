@@ -684,8 +684,10 @@ async def llm_capacity() -> dict[str, Any]:
     """
     Return LLM capacity info: available models, VRAM estimates,
     context window sizes, and throughput estimates.
+    Includes both local (Ollama) and cloud (OpenRouter) models.
     """
     from lib.localllm.models import MODELS
+    from lib.localllm.cloud_client import CLOUD_MODELS
 
     available: list[str] = []
     if _llm_client:
@@ -695,6 +697,8 @@ async def llm_capacity() -> dict[str, Any]:
             pass
 
     model_capacities = []
+
+    # ── Local Ollama models ───────────────────────────────
     for model_id, profile in MODELS.items():
         is_available = any(model_id in m for m in available)
         # Derive speed/quality tier from parameter count
@@ -726,11 +730,32 @@ async def llm_capacity() -> dict[str, Any]:
             "available": is_available,
             "estimated_tokens_per_second": est_tps,
             "best_for": profile.best_for,
+            "provider": "local",
+        })
+
+    # ── Cloud models (OpenRouter) ─────────────────────────────────────
+    import os as _os
+    cloud_configured = bool(_os.getenv("OPENROUTER_API_KEY", ""))
+    for cloud_key, cloud_info in CLOUD_MODELS.items():
+        model_capacities.append({
+            "model_id": cloud_key,
+            "family": cloud_info.get("name", cloud_key),
+            "parameters": "cloud",
+            "vram_gb": 0,
+            "context_window": cloud_info.get("context_window", 128000),
+            "speed_tier": "fast",
+            "quality_tier": "premium",
+            "available": cloud_configured,
+            "estimated_tokens_per_second": 80,
+            "best_for": cloud_info.get("strengths", []),
+            "provider": "cloud",
+            "cost_per_m_in": cloud_info.get("input_cost_per_m", 0),
+            "cost_per_m_out": cloud_info.get("output_cost_per_m", 0),
         })
 
     return {
         "available_models": available,
-        "total_known_models": len(MODELS),
+        "total_known_models": len(MODELS) + len(CLOUD_MODELS),
         "model_capacities": model_capacities,
     }
 

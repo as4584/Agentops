@@ -304,6 +304,9 @@ export interface ModelCapacity {
   available: boolean;
   estimated_tokens_per_second: number;
   best_for: string[];
+  provider?: 'local' | 'cloud';
+  cost_per_m_in?: number;
+  cost_per_m_out?: number;
 }
 
 export interface LLMCapacity {

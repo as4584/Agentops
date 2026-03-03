@@ -53,7 +53,8 @@ API_SECRET: str = os.getenv("AGENTOP_API_SECRET", "")
 # Maximum chat message size (bytes)
 MAX_CHAT_MESSAGE_LENGTH: int = int(os.getenv("MAX_CHAT_MESSAGE_LENGTH", "8192"))
 # Rate limit: max requests per minute per IP (0 = disabled)
-RATE_LIMIT_RPM: int = int(os.getenv("RATE_LIMIT_RPM", "120"))
+# Dashboard polls ~10 endpoints every 5s (~120/min) so keep headroom
+RATE_LIMIT_RPM: int = int(os.getenv("RATE_LIMIT_RPM", "600"))
 # Internal-only URL prefixes that webhook_send / health_check must NOT contact
 SSRF_BLOCKED_PREFIXES: list[str] = [
     "http://169.254.",       # cloud metadata
