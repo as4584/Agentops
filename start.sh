@@ -14,4 +14,10 @@ echo "  ║   Agentop — Local AI Control Center  ║"
 echo "  ╚══════════════════════════════════════╝"
 echo ""
 
+# Activate virtual environment if it exists
+if [ -f "$DIR/.venv/bin/activate" ]; then
+    echo "  → Activating virtual environment..."
+    source "$DIR/.venv/bin/activate"
+fi
+
 python3 app.py
