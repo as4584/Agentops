@@ -183,12 +183,21 @@ app.add_middleware(
 
 @app.middleware("http")
 async def security_middleware(request: Request, call_next):
-    """Apply rate limiting and auth to every request (except /health and /docs)."""
+    """Apply rate limiting and auth to every request.
+
+    Rate limiting is DISABLED for local dashboard traffic (127.0.0.1)
+    because the frontend polls ~12 endpoints every 5 seconds. For
+    remote IPs, rate limiting and auth are enforced.
+    """
     path = request.url.path
+    ip = request.client.host if request.client else "unknown"
+    is_local = ip in ("127.0.0.1", "::1", "localhost")
     # Skip auth for health check and OpenAPI docs
     skip_auth_paths = {"/health", "/docs", "/openapi.json", "/redoc"}
     if path not in skip_auth_paths:
-        _rate_limit(request)
+        # Only rate-limit non-local traffic
+        if not is_local:
+            _rate_limit(request)
         await _verify_auth(request)
     response = await call_next(request)
     # Security headers

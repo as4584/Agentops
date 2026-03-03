@@ -86,6 +86,20 @@
       "active_goals": 0,
       "recent_reflections": 0,
       "timestamp": "2026-03-03T06:17:59.470533"
+    },
+    {
+      "type": "SOUL_BOOT",
+      "session": 10,
+      "active_goals": 0,
+      "recent_reflections": 0,
+      "timestamp": "2026-03-03T06:21:48.176701"
+    },
+    {
+      "type": "SOUL_BOOT",
+      "session": 11,
+      "active_goals": 0,
+      "recent_reflections": 0,
+      "timestamp": "2026-03-03T06:45:50.145650"
     }
   ]
 }

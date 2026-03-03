@@ -25,19 +25,28 @@ const ICON_ICO = path.join(__dirname, 'icon.ico')
 const ICON_PNG = path.join(__dirname, 'icon.png')
 const ICON_PATH = process.platform === 'win32' ? ICON_ICO : ICON_PNG
 
-// ─── Wait for a URL to become available ──────────────────────────────────────
-function waitForPort(url, maxMs = 30000) {
-  return new Promise((resolve) => {
+// ─── Wait for a URL to return HTTP 200 ───────────────────────────────────────
+function waitForPort(url, maxMs = 60000) {
+  return new Promise((resolve, reject) => {
     const start = Date.now()
     const check = () => {
       http.get(url, (res) => {
-        if (res.statusCode < 500) resolve()
-        else retry()
+        // Only accept 200 — not 404 or other codes
+        if (res.statusCode === 200) {
+          res.resume()
+          resolve()
+        } else {
+          res.resume()
+          retry()
+        }
       }).on('error', retry)
     }
     const retry = () => {
-      if (Date.now() - start > maxMs) { resolve(); return }
-      setTimeout(check, 500)
+      if (Date.now() - start > maxMs) {
+        reject(new Error(`Timed out waiting for ${url} after ${maxMs}ms`))
+        return
+      }
+      setTimeout(check, 800)
     }
     check()
   })
@@ -65,17 +74,43 @@ async function createWindow() {
   mainWindow.removeMenu()
 
   // Wait for Next.js to be ready before loading
-  await waitForPort('http://localhost:3007', 45000)
+  try {
+    await waitForPort('http://localhost:3007', 60000)
+  } catch (err) {
+    console.error('Frontend not ready:', err.message)
+  }
   mainWindow.loadURL('http://localhost:3007')
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
     mainWindow.focus()
-    // Force a repaint to fix black-screen on Linux compositors
     mainWindow.webContents.invalidate()
   })
 
+  // Auto-retry on load failure (404, connection refused, etc.)
+  mainWindow.webContents.on('did-fail-load', (_ev, code, desc) => {
+    console.error(`Page load failed (${code}): ${desc}. Retrying in 3s...`)
+    setTimeout(() => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.loadURL('http://localhost:3007')
+      }
+    }, 3000)
+  })
+
   mainWindow.webContents.on('did-finish-load', () => {
+    // Check if we got a real page or an error page
+    mainWindow.webContents.executeJavaScript(
+      `document.title.includes('404') || document.body.innerText.includes('404')`
+    ).then(is404 => {
+      if (is404) {
+        console.log('Got 404 page, retrying in 3s...')
+        setTimeout(() => {
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.loadURL('http://localhost:3007')
+          }
+        }, 3000)
+      }
+    }).catch(() => {})
     mainWindow.webContents.invalidate()
   })
 

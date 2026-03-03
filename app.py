@@ -43,6 +43,38 @@ def _is_port_open(port: int, host: str = "127.0.0.1") -> bool:
         return s.connect_ex((host, port)) == 0
 
 
+def _is_healthy(port: int, path: str = "/", expect_status: int = 200) -> bool:
+    """HTTP health check — verifies the service returns the expected status."""
+    import urllib.request
+    import urllib.error
+    try:
+        req = urllib.request.Request(f"http://127.0.0.1:{port}{path}")
+        resp = urllib.request.urlopen(req, timeout=3)
+        return resp.status == expect_status
+    except Exception:
+        return False
+
+
+def _kill_port(port: int) -> None:
+    """Kill any process listening on a port (cleanup zombies/stale procs)."""
+    try:
+        out = subprocess.check_output(
+            ["lsof", "-ti", f":{port}"], stderr=subprocess.DEVNULL
+        ).decode().strip()
+        if out:
+            for pid in out.split("\n"):
+                pid = pid.strip()
+                if pid:
+                    try:
+                        os.kill(int(pid), signal.SIGKILL)
+                        print(f"  → Killed stale PID {pid} on :{port}")
+                    except (ProcessLookupError, PermissionError):
+                        pass
+            time.sleep(0.5)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
+
+
 def _wait_for_port(port: int, timeout: int = 60, label: str = "") -> bool:
     """Block until a port is open or timeout."""
     start = time.time()
@@ -52,6 +84,18 @@ def _wait_for_port(port: int, timeout: int = 60, label: str = "") -> bool:
             return True
         time.sleep(0.5)
     print(f"  ✗ {label or f'Port {port}'} timed out after {timeout}s")
+    return False
+
+
+def _wait_for_healthy(port: int, path: str = "/", timeout: int = 60, label: str = "") -> bool:
+    """Block until an HTTP endpoint returns 200 or timeout."""
+    start = time.time()
+    while time.time() - start < timeout:
+        if _is_healthy(port, path):
+            print(f"  ✓ {label or f'Port {port}'} healthy")
+            return True
+        time.sleep(1)
+    print(f"  ✗ {label or f'Port {port}'} health check timed out after {timeout}s")
     return False
 
 
@@ -155,22 +199,28 @@ def main() -> None:
 
     # ---- Start Backend ----
     print("\n🚀 Starting backend...")
-    if _is_port_open(8000):
-        print("  ✓ Backend already running on :8000")
+    if _is_port_open(8000) and _is_healthy(8000, "/health"):
+        print("  ✓ Backend already running and healthy on :8000")
     else:
+        if _is_port_open(8000):
+            print("  ⚠ Port 8000 occupied but unhealthy — killing stale process")
+            _kill_port(8000)
         _start_process(
             [sys.executable, "-m", "uvicorn", "backend.server:app",
              "--host", "0.0.0.0", "--port", "8000"],
             cwd=ROOT,
             label="backend",
         )
-        _wait_for_port(8000, timeout=30, label="Backend :8000")
+        _wait_for_healthy(8000, "/health", timeout=30, label="Backend :8000")
 
     # ---- Start Frontend ----
     print("\n🎨 Starting dashboard...")
-    if _is_port_open(3007):
-        print("  ✓ Dashboard already running on :3007")
+    if _is_port_open(3007) and _is_healthy(3007):
+        print("  ✓ Dashboard already running and healthy on :3007")
     else:
+        if _is_port_open(3007):
+            print("  ⚠ Port 3007 occupied but unhealthy — killing stale process")
+            _kill_port(3007)
         # Check if node_modules exists
         if not (FRONTEND_DIR / "node_modules").exists():
             print("  → Installing frontend dependencies (first run)...")
@@ -185,7 +235,8 @@ def main() -> None:
             cwd=FRONTEND_DIR,
             label="dashboard",
         )
-        _wait_for_port(3007, timeout=45, label="Dashboard :3007")
+        # Wait for Next.js to be fully compiled and serving pages
+        _wait_for_healthy(3007, "/", timeout=60, label="Dashboard :3007")
 
     # ---- Open Native Window ----
     print("\n🖥️  Opening Agentop window...\n")
