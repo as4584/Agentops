@@ -204,9 +204,11 @@ def main() -> None:
         )
 
         # This blocks until the window is closed
+        # Use Qt backend explicitly (pip-installed, no system GTK needed)
         webview.start(
             debug=False,
             private_mode=False,
+            gui="qt",
         )
 
     except ImportError:
