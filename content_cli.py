@@ -5,14 +5,20 @@ content_cli.py — CLI for the Autonomous Content Pipeline.
 All LLM calls use local Ollama. Zero cloud dependency.
 
 Usage:
-  python content_cli.py run              Run full pipeline once
-  python content_cli.py agent NAME       Run specific agent
-  python content_cli.py approve JOB_ID   Approve a QA-passed job
-  python content_cli.py reject JOB_ID    Reject a job
-  python content_cli.py retry JOB_ID ST  Retry from status
+    python content_cli.py run --tests-ok --playwright-ok --lighthouse-mobile-ok
+                                                                                Run full pipeline once (gated)
+    python content_cli.py agent NAME --tests-ok --playwright-ok --lighthouse-mobile-ok
+                                                                                Run specific agent (gated)
+    python content_cli.py approve JOB_ID --tests-ok --playwright-ok --lighthouse-mobile-ok
+                                                                                Approve a QA-passed job (gated)
+    python content_cli.py reject JOB_ID --tests-ok --playwright-ok --lighthouse-mobile-ok
+                                                                                Reject a job (gated)
+    python content_cli.py retry JOB_ID ST --tests-ok --playwright-ok --lighthouse-mobile-ok
+                                                                                Retry from status (gated)
   python content_cli.py status           Pipeline status
   python content_cli.py jobs             List all jobs
-  python content_cli.py analytics        Run weekly analytics
+    python content_cli.py analytics --tests-ok --playwright-ok --lighthouse-mobile-ok
+                                                                                Run weekly analytics (gated)
   python content_cli.py health           Check LLM + system health
 """
 
@@ -27,6 +33,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from backend.llm import OllamaClient
+from backend.config import SANDBOX_ENFORCEMENT_ENABLED
 from backend.content.pipeline import ContentPipeline
 from backend.content.job_store import job_store
 from backend.content.video_job import JobStatus
@@ -35,6 +42,32 @@ from backend.content.video_job import JobStatus
 def _get_pipeline() -> ContentPipeline:
     llm = OllamaClient()
     return ContentPipeline(llm)
+
+
+def _extract_quality_checks(argv: list[str]) -> tuple[list[str], dict[str, bool]]:
+    checks = {
+        "tests_ok": "--tests-ok" in argv,
+        "playwright_ok": "--playwright-ok" in argv,
+        "lighthouse_mobile_ok": "--lighthouse-mobile-ok" in argv,
+    }
+    filtered = [
+        item for item in argv
+        if item not in {"--tests-ok", "--playwright-ok", "--lighthouse-mobile-ok"}
+    ]
+    return filtered, checks
+
+
+def _require_quality_checks(checks: dict[str, bool]) -> None:
+    if not SANDBOX_ENFORCEMENT_ENABLED:
+        return
+    required = ("tests_ok", "playwright_ok", "lighthouse_mobile_ok")
+    missing = [name for name in required if checks.get(name) is not True]
+    if missing:
+        raise SystemExit(
+            "❌ Content mutation blocked by quality gate. "
+            f"Missing checks: {', '.join(missing)}. "
+            "Pass --tests-ok --playwright-ok --lighthouse-mobile-ok after validation."
+        )
 
 
 async def cmd_run():
@@ -115,28 +148,36 @@ async def cmd_health():
 
 
 def main():
-    if len(sys.argv) < 2:
+    argv, quality_checks = _extract_quality_checks(sys.argv)
+
+    if len(argv) < 2:
         print(__doc__)
         sys.exit(1)
 
-    cmd = sys.argv[1]
+    cmd = argv[1]
 
     if cmd == "run":
+        _require_quality_checks(quality_checks)
         asyncio.run(cmd_run())
     elif cmd == "agent":
-        asyncio.run(cmd_agent(sys.argv[2]))
+        _require_quality_checks(quality_checks)
+        asyncio.run(cmd_agent(argv[2]))
     elif cmd == "approve":
-        asyncio.run(cmd_approve(sys.argv[2]))
+        _require_quality_checks(quality_checks)
+        asyncio.run(cmd_approve(argv[2]))
     elif cmd == "reject":
-        reason = sys.argv[3] if len(sys.argv) > 3 else ""
-        asyncio.run(cmd_reject(sys.argv[2], reason))
+        _require_quality_checks(quality_checks)
+        reason = argv[3] if len(argv) > 3 else ""
+        asyncio.run(cmd_reject(argv[2], reason))
     elif cmd == "retry":
-        asyncio.run(cmd_retry(sys.argv[2], sys.argv[3]))
+        _require_quality_checks(quality_checks)
+        asyncio.run(cmd_retry(argv[2], argv[3]))
     elif cmd == "status":
         asyncio.run(cmd_status())
     elif cmd == "jobs":
         asyncio.run(cmd_jobs())
     elif cmd == "analytics":
+        _require_quality_checks(quality_checks)
         asyncio.run(cmd_analytics())
     elif cmd == "health":
         asyncio.run(cmd_health())

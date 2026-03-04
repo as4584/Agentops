@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from backend.config import PLAYBOX_DIR, SANDBOX_ROOT_DIR
+
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -35,10 +37,16 @@ class SandboxSession:
         self.model = model
         self.session_id = session_id or f"session-{uuid.uuid4().hex[:8]}"
         self.threshold = threshold or ScoreThreshold()
-        self.root = Path("/tmp/ai-sandbox") / self.session_id
+        self.root = SANDBOX_ROOT_DIR / self.session_id
         self.workspace = self.root / "workspace"
         self.reports = self.root / "reports"
+        self.playbox = PLAYBOX_DIR / self.session_id / "staged"
         self.meta_path = self.root / "meta.json"
+
+    @property
+    def is_local_model(self) -> bool:
+        marker = self.model.lower()
+        return "local" in marker or "ollama" in marker or marker.startswith("llama")
 
     def create(self) -> dict[str, Any]:
         self.workspace.mkdir(parents=True, exist_ok=True)
@@ -84,6 +92,50 @@ class SandboxSession:
         meta["last_promoted_at"] = _utc_now()
         self._write_meta(meta)
         return promoted
+
+    def stage_to_playbox(self, files: list[str]) -> list[str]:
+        staged: list[str] = []
+        missing: list[str] = []
+        for rel_path in files:
+            src = self.workspace / rel_path
+            dst = self.playbox / rel_path
+            if not src.exists() or not src.is_file():
+                missing.append(rel_path)
+                continue
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
+            staged.append(rel_path)
+
+        if missing:
+            raise FileNotFoundError(f"Missing files in sandbox workspace: {', '.join(missing)}")
+
+        meta = self.read_meta()
+        meta["staged_files"] = sorted(set(meta.get("staged_files", []) + staged))
+        meta["last_staged_at"] = _utc_now()
+        self._write_meta(meta)
+        return staged
+
+    def release_from_playbox(self, files: list[str]) -> list[str]:
+        released: list[str] = []
+        missing: list[str] = []
+        for rel_path in files:
+            src = self.playbox / rel_path
+            dst = self.project_root / rel_path
+            if not src.exists() or not src.is_file():
+                missing.append(rel_path)
+                continue
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
+            released.append(rel_path)
+
+        if missing:
+            raise FileNotFoundError(f"Missing files in playbox staged area: {', '.join(missing)}")
+
+        meta = self.read_meta()
+        meta["released_files"] = sorted(set(meta.get("released_files", []) + released))
+        meta["last_released_at"] = _utc_now()
+        self._write_meta(meta)
+        return released
 
     @staticmethod
     def scores_meet_threshold(summary: dict[str, Any], threshold: ScoreThreshold) -> bool:
@@ -157,7 +209,7 @@ class SandboxSession:
             shutil.rmtree(self.root, ignore_errors=True)
 
 
-def list_active_sessions(base_dir: Path = Path("/tmp/ai-sandbox")) -> list[dict[str, Any]]:
+def list_active_sessions(base_dir: Path = SANDBOX_ROOT_DIR) -> list[dict[str, Any]]:
     if not base_dir.exists():
         return []
     sessions: list[dict[str, Any]] = []

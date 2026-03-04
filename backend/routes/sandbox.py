@@ -6,10 +6,16 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from backend.config import PROJECT_ROOT
+from backend.agents.gatekeeper_agent import GatekeeperAgent
+from backend.config import (
+    LOCAL_LLM_REQUIRED_CHECKS,
+    PROJECT_ROOT,
+    SANDBOX_ENFORCEMENT_ENABLED,
+)
 from sandbox.session_manager import SandboxSession, list_active_sessions
 
 router = APIRouter(prefix="/sandbox", tags=["sandbox"])
+_gatekeeper = GatekeeperAgent()
 
 
 class SandboxCreateRequest(BaseModel):
@@ -35,6 +41,23 @@ class SandboxFinalizeRequest(BaseModel):
     after_scores: dict[str, Any] | None = None
 
 
+class QualityChecks(BaseModel):
+    tests_ok: bool = False
+    playwright_ok: bool = False
+    lighthouse_mobile_ok: bool = False
+
+
+class SandboxStageRequest(BaseModel):
+    files: list[str] = Field(default_factory=list)
+
+
+class SandboxReleaseRequest(BaseModel):
+    files: list[str] = Field(default_factory=list)
+    checks: QualityChecks
+    before_scores: dict[str, Any] | None = None
+    after_scores: dict[str, Any] | None = None
+
+
 class LhciCheckRequest(BaseModel):
     summary_json_path: str
     files_to_promote: list[str] = Field(default_factory=list)
@@ -42,12 +65,28 @@ class LhciCheckRequest(BaseModel):
 
 
 def _session(session_id: str) -> SandboxSession:
-    return SandboxSession(
+    session = SandboxSession(
         project_root=PROJECT_ROOT,
         task="managed-session",
         model="local",
         session_id=session_id,
     )
+    try:
+        meta = session.read_meta()
+        session.task = str(meta.get("task", session.task))
+        session.model = str(meta.get("model", session.model))
+    except FileNotFoundError:
+        pass
+    return session
+
+
+def _missing_required_checks(checks: QualityChecks) -> list[str]:
+    missing: list[str] = []
+    checks_map = checks.model_dump() if hasattr(checks, "model_dump") else checks.dict()
+    for check_name in LOCAL_LLM_REQUIRED_CHECKS:
+        if checks_map.get(check_name) is not True:
+            missing.append(check_name)
+    return missing
 
 
 @router.get("/sessions")
@@ -75,6 +114,11 @@ async def create_session(body: SandboxCreateRequest) -> SandboxCreateResponse:
 @router.post("/{session_id}/promote")
 async def promote_files(session_id: str, body: SandboxPromoteRequest) -> dict[str, Any]:
     session = _session(session_id)
+    if SANDBOX_ENFORCEMENT_ENABLED and session.is_local_model:
+        raise HTTPException(
+            status_code=403,
+            detail="Local-model sessions must use /sandbox/{session_id}/stage and /sandbox/{session_id}/release",
+        )
     try:
         promoted = session.promote(body.files)
     except FileNotFoundError as exc:
@@ -82,9 +126,77 @@ async def promote_files(session_id: str, body: SandboxPromoteRequest) -> dict[st
     return {"session_id": session_id, "promoted": promoted}
 
 
+@router.post("/{session_id}/stage")
+async def stage_files(session_id: str, body: SandboxStageRequest) -> dict[str, Any]:
+    session = _session(session_id)
+    try:
+        staged = session.stage_to_playbox(body.files)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    return {"session_id": session_id, "staged": staged, "playbox": str(session.playbox)}
+
+
+@router.post("/{session_id}/release")
+async def release_files(session_id: str, body: SandboxReleaseRequest) -> dict[str, Any]:
+    session = _session(session_id)
+    if SANDBOX_ENFORCEMENT_ENABLED and not session.is_local_model:
+        raise HTTPException(status_code=400, detail="Release endpoint is reserved for local-model sandbox sessions")
+
+    missing_checks = _missing_required_checks(body.checks)
+    if missing_checks:
+        raise HTTPException(
+            status_code=412,
+            detail={
+                "message": "Release blocked: required quality checks failed or missing",
+                "missing_checks": missing_checks,
+            },
+        )
+
+    payload = {
+        "files_changed": body.files,
+        "source_model": session.model,
+        "sandbox_session_id": session_id,
+        "staged_in_playbox": True,
+        "tests_ok": body.checks.tests_ok,
+        "playwright_ok": body.checks.playwright_ok,
+        "lighthouse_mobile_ok": body.checks.lighthouse_mobile_ok,
+        "syntax_ok": body.checks.tests_ok,
+        "lighthouse_ok": body.checks.lighthouse_mobile_ok,
+        "secrets_ok": True,
+    }
+    review = _gatekeeper.review_mutation(payload)
+    if not review.approved:
+        raise HTTPException(
+            status_code=412,
+            detail={"message": "Release blocked by gatekeeper", "violations": review.violations},
+        )
+
+    try:
+        released = session.release_from_playbox(body.files)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+    session.destroy(
+        before_scores=body.before_scores,
+        after_scores=body.after_scores,
+        promoted_files=released,
+    )
+    return {
+        "session_id": session_id,
+        "released": released,
+        "status": "deleted",
+        "checks_required": list(LOCAL_LLM_REQUIRED_CHECKS),
+    }
+
+
 @router.post("/{session_id}/finalize")
 async def finalize_session(session_id: str, body: SandboxFinalizeRequest) -> dict[str, Any]:
     session = _session(session_id)
+    if SANDBOX_ENFORCEMENT_ENABLED and session.is_local_model:
+        raise HTTPException(
+            status_code=403,
+            detail="Local-model sessions must finalize through /sandbox/{session_id}/release",
+        )
     try:
         promoted = session.promote(body.files)
     except FileNotFoundError as exc:

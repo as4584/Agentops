@@ -6,11 +6,13 @@ Coordinates all agents from brief → deployed site.
 
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
+from backend.agents.gatekeeper_agent import GatekeeperAgent
+from backend.config import LOCAL_LLM_REQUIRED_CHECKS, PROJECT_ROOT, SANDBOX_ENFORCEMENT_ENABLED
 from backend.llm import OllamaClient
+from sandbox.session_manager import SandboxSession
 from backend.utils import logger
 from backend.webgen.agents.aeo_agent import AEOAgent
 from backend.webgen.agents.page_generator import PageGeneratorAgent
@@ -62,6 +64,88 @@ class WebGenPipeline:
         self.seo_agent = SEOAgent(self.llm)
         self.aeo_agent = AEOAgent(self.llm)
         self.qa_agent = WebQAAgent(self.llm)
+        self._gatekeeper = GatekeeperAgent()
+
+    def _is_local_llm(self) -> bool:
+        model = str(getattr(self.llm, "model", "local")).lower()
+        return "local" in model or "ollama" in model or model.startswith("llama")
+
+    def _render_export_files(self, project: SiteProject) -> dict[str, str]:
+        files: dict[str, str] = {}
+        output_root = Path(project.output_dir)
+        try:
+            rel_base = output_root.resolve().relative_to(PROJECT_ROOT.resolve())
+        except Exception:
+            rel_base = Path("output") / "webgen" / output_root.name
+
+        for page in project.pages:
+            if page.html:
+                files[str(rel_base / f"{page.slug}.html")] = page.html
+
+        if project.sitemap_xml:
+            files[str(rel_base / "sitemap.xml")] = project.sitemap_xml
+
+        if project.robots_txt:
+            files[str(rel_base / "robots.txt")] = project.robots_txt
+
+        if project.global_css:
+            files[str(rel_base / "css" / "global.css")] = project.global_css
+
+        return files
+
+    def _release_via_sandbox(
+        self,
+        project: SiteProject,
+        files: dict[str, str],
+        quality_checks: dict[str, bool] | None = None,
+    ) -> tuple[bool, Path]:
+        model_name = str(getattr(self.llm, "model", "local"))
+        session = SandboxSession(
+            project_root=PROJECT_ROOT,
+            task=f"webgen-export:{project.id}",
+            model=model_name,
+        )
+        session.create()
+
+        changed_files = sorted(files.keys())
+        for rel_path, content in files.items():
+            dst = session.workspace / rel_path
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_text(content)
+
+        session.stage_to_playbox(changed_files)
+
+        checks = quality_checks or {}
+        payload: dict[str, Any] = {
+            "files_changed": changed_files,
+            "source_model": model_name,
+            "sandbox_session_id": session.session_id,
+            "staged_in_playbox": True,
+            "tests_ok": bool(checks.get("tests_ok", False)),
+            "playwright_ok": bool(checks.get("playwright_ok", False)),
+            "lighthouse_mobile_ok": bool(checks.get("lighthouse_mobile_ok", False)),
+            "syntax_ok": bool(checks.get("tests_ok", False)),
+            "lighthouse_ok": bool(checks.get("lighthouse_mobile_ok", False)),
+            "secrets_ok": True,
+        }
+
+        review = self._gatekeeper.review_mutation(payload)
+        if not review.approved:
+            project.metadata["sandbox_session_id"] = session.session_id
+            project.metadata["playbox_path"] = str(session.playbox)
+            project.metadata["release_blocked"] = True
+            project.metadata["release_violations"] = review.violations
+            project.metadata["required_checks"] = list(LOCAL_LLM_REQUIRED_CHECKS)
+            self.site_store.save(project)
+            logger.warning(
+                "[WebGenPipeline] Release blocked by gatekeeper; files staged in playbox. "
+                f"session={session.session_id}, violations={review.violations}"
+            )
+            return False, session.playbox
+
+        released = session.release_from_playbox(changed_files)
+        session.destroy(promoted_files=released)
+        return True, Path(project.output_dir)
 
     # ── Template learning ────────────────────────────────
 
@@ -119,31 +203,25 @@ class WebGenPipeline:
         self.site_store.save(project)
         return project
 
-    def export(self, project: SiteProject) -> Path:
+    def export(self, project: SiteProject, quality_checks: dict[str, bool] | None = None) -> Path:
         """Write all generated files to the output directory."""
         out = Path(project.output_dir)
+        files = self._render_export_files(project)
+
+        if SANDBOX_ENFORCEMENT_ENABLED and self._is_local_llm():
+            released, path = self._release_via_sandbox(project, files, quality_checks)
+            if released:
+                project.advance(SiteStatus.READY)
+                self.site_store.save(project)
+                logger.info(f"[WebGenPipeline] Exported via sandbox release: {path}")
+            return path
+
         out.mkdir(parents=True, exist_ok=True)
-
-        # Write HTML pages
-        for page in project.pages:
-            if page.html:
-                page_path = out / f"{page.slug}.html"
-                page_path.write_text(page.html)
-                logger.info(f"[WebGenPipeline] Wrote: {page_path}")
-
-        # Write sitemap.xml
-        if project.sitemap_xml:
-            (out / "sitemap.xml").write_text(project.sitemap_xml)
-
-        # Write robots.txt
-        if project.robots_txt:
-            (out / "robots.txt").write_text(project.robots_txt)
-
-        # Write global CSS
-        if project.global_css:
-            css_dir = out / "css"
-            css_dir.mkdir(exist_ok=True)
-            (css_dir / "global.css").write_text(project.global_css)
+        for rel_path, content in files.items():
+            dst = PROJECT_ROOT / rel_path
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_text(content)
+            logger.info(f"[WebGenPipeline] Wrote: {dst}")
 
         project.advance(SiteStatus.READY)
         self.site_store.save(project)
@@ -157,6 +235,7 @@ class WebGenPipeline:
         brief: ClientBrief,
         base_url: str = "",
         export: bool = True,
+        quality_checks: dict[str, bool] | None = None,
     ) -> SiteProject:
         """
         Run the full pipeline from brief to exported site.
@@ -175,7 +254,7 @@ class WebGenPipeline:
         project = await self.qa(project)
 
         if export:
-            self.export(project)
+            self.export(project, quality_checks=quality_checks)
 
         logger.info(
             f"[WebGenPipeline] Pipeline complete: {project.id} "

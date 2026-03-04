@@ -130,7 +130,24 @@ MCP_TOOL_TIMEOUT: int = int(os.getenv("MCP_TOOL_TIMEOUT", "30"))
 # Path to docker-mcp config directory (defaults to project mcp-gateway/ folder)
 MCP_CONFIG_DIR: Path = Path(os.getenv("MCP_CONFIG_DIR", str(PROJECT_ROOT / "mcp-gateway")))
 
+# ---------------------------------------------------------------------------
+# Sandbox / Playbox Enforcement Configuration
+# ---------------------------------------------------------------------------
+SANDBOX_ENFORCEMENT_ENABLED: bool = os.getenv("SANDBOX_ENFORCEMENT_ENABLED", "true").lower() == "true"
+SANDBOX_ROOT_DIR: Path = Path(os.getenv("SANDBOX_ROOT_DIR", "/tmp/ai-sandbox"))
+PLAYBOX_DIR: Path = Path(os.getenv("PLAYBOX_DIR", str(PROJECT_ROOT / "playground" / "local-llm")))
+LOCAL_LLM_REQUIRED_CHECKS: tuple[str, ...] = tuple(
+    item.strip()
+    for item in os.getenv(
+        "LOCAL_LLM_REQUIRED_CHECKS",
+        "tests_ok,playwright_ok,lighthouse_mobile_ok",
+    ).split(",")
+    if item.strip()
+)
+
 # Ensure required directories exist
 MEMORY_DIR.mkdir(parents=True, exist_ok=True)
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 MCP_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+SANDBOX_ROOT_DIR.mkdir(parents=True, exist_ok=True)
+PLAYBOX_DIR.mkdir(parents=True, exist_ok=True)

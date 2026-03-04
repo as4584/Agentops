@@ -114,6 +114,19 @@ This system implements a **documentation-first governance model** to prevent arc
 | 🟡 YELLOW | Pending documentation update. Operations continue with warning. |
 | 🔴 RED | Invariant violation. Execution halted. |
 
+### Local LLM Sandbox Policy
+
+Local-model code mutations are enforced through a two-step containment flow:
+
+1. Generate into sandbox (`/tmp/ai-sandbox/session-*/workspace`)
+2. Stage into playbox (`playground/local-llm/<session>/staged`)
+3. Release to project paths only via gatekeeper approval
+
+Release requires all 3 checks to pass:
+- `tests_ok`
+- `playwright_ok`
+- `lighthouse_mobile_ok`
+
 ---
 
 ## How to Add a New Agent Safely

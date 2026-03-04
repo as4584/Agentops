@@ -211,6 +211,13 @@ if HAS_RICH:
         pages: str = typer.Option("", "--pages", help="Comma-separated page slugs"),
         base_url: str = typer.Option("", "--url", help="Base URL for the site"),
         no_export: bool = typer.Option(False, "--no-export", help="Skip file export"),
+        tests_ok: bool = typer.Option(False, "--tests-ok", help="Mark test quality gate as passed"),
+        playwright_ok: bool = typer.Option(False, "--playwright-ok", help="Mark Playwright quality gate as passed"),
+        lighthouse_mobile_ok: bool = typer.Option(
+            False,
+            "--lighthouse-mobile-ok",
+            help="Mark mobile Lighthouse quality gate as passed",
+        ),
     ):
         """Generate a complete website from a business brief."""
         # Validate business type
@@ -244,7 +251,18 @@ if HAS_RICH:
         ))
 
         try:
-            project = _run(pipeline.quick_generate(brief, base_url, export=not no_export))
+            project = _run(
+                pipeline.quick_generate(
+                    brief,
+                    base_url,
+                    export=not no_export,
+                    quality_checks={
+                        "tests_ok": tests_ok,
+                        "playwright_ok": playwright_ok,
+                        "lighthouse_mobile_ok": lighthouse_mobile_ok,
+                    },
+                )
+            )
 
             # Summary
             issues = len(project.errors)
