@@ -40,3 +40,12 @@ backend/logs/*.jsonl
 # Build outputs
 output/
 src-tauri/target/
+
+# Generated reports/artifacts
+reports/lhci/mobile/
+reports/lhci/desktop/
+reports/playwright/playwright-report/
+reports/playwright/test-results/
+
+# Local sandbox runtime (ephemeral)
+/tmp/ai-sandbox/

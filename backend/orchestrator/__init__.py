@@ -36,6 +36,7 @@ from backend.models import (
     DriftStatus,
 )
 from backend.agents import create_agent, ALL_AGENT_DEFINITIONS, SoulAgent
+from backend.agents.gatekeeper_agent import GatekeeperAgent, GatekeeperResult
 from backend.tasks import task_tracker, TaskStatus
 from backend.utils import logger
 
@@ -104,6 +105,7 @@ class AgentOrchestrator:
     def __init__(self, llm_client: OllamaClient) -> None:
         self.llm_client = llm_client
         self._agents: dict[str, Any] = {}
+        self._gatekeeper = GatekeeperAgent()
         self._knowledge_store = KnowledgeVectorStore(llm_client)
         self._knowledge_agent_id = "knowledge_agent"
         self._intake_namespace = "social_intake"
@@ -130,6 +132,10 @@ class AgentOrchestrator:
         self._compiled_graph = self._graph.compile()
         self._initialize_agents()
         logger.info("AgentOrchestrator initialized with full agent cluster")
+
+    def gatekeeper_review(self, payload: dict[str, Any]) -> GatekeeperResult:
+        """Run mutation payload through the Gatekeeper review layer."""
+        return self._gatekeeper.review_mutation(payload)
 
     def _initialize_agents(self) -> None:
         """Instantiate all registered agents from ALL_AGENT_DEFINITIONS."""

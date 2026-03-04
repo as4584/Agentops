@@ -292,3 +292,25 @@
 - **Risk Assessment:** LOW — Dashboard is read-only (INV-8 compliant). New API endpoints are all GET/read-only. No state mutation beyond existing /chat, /soul/reflect, /soul/goals.
 - **Impacted Subsystems:** Frontend dashboard, API server (5 new read-only endpoints), API client types
 - **Documentation Updated:** YES — CHANGE_LOG.md updated.
+
+---
+
+### 2026-03-03T00:00:00Z — Repository cleanup + Sandbox + TDD/Lighthouse gate foundations
+
+- **Agent:** architecture-governor
+- **Files Modified:**
+  - Repository structure: created `reports/`, `playground/`, `sandbox/`, `archive/ibds/`; moved IBDS assets into archive
+  - Removed root junk/one-shot files and leaked Lighthouse temp directories
+  - `sandbox/session_manager.py` — new ephemeral session manager for `/tmp/ai-sandbox/session-*`
+  - `backend/routes/sandbox.py`, `backend/server.py` — sandbox APIs and route registration
+  - `backend/agents/gatekeeper_agent.py`, `backend/orchestrator/__init__.py` — Gatekeeper scaffold integration
+  - `frontend/package.json` — LHCI + Playwright scripts/deps
+  - `reports/lhci/lighthouserc.mobile.js`, `reports/lhci/lighthouserc.desktop.js`
+  - `frontend/playwright.config.ts`, `frontend/tests/*.spec.ts`
+  - `.github/workflows/lhci-mobile.yml`, `.github/workflows/lhci-desktop.yml`, `.github/workflows/playwright.yml`
+  - `scripts/hooks/pre-commit`, `.gitignore`
+  - `docs/AGENT_REGISTRY.md`, `docs/SANDBOX_LOG.md`, `docs/TDD_GUIDE.md`, `docs/GATEKEEPER.md`
+- **Reason:** Establish a clean production-oriented architecture that isolates experiments, enforces TDD, gates low-reasoning model output, and makes Lighthouse (mobile+desktop) and UI testing blocking quality controls.
+- **Risk Assessment:** MEDIUM
+- **Impacted Subsystems:** Repo layout, backend API surface, orchestration governance, frontend QA pipeline, CI workflows
+- **Documentation Updated:** YES

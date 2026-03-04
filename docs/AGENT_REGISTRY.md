@@ -210,6 +210,21 @@ Each agent entry must contain:
 
 ---
 
+### Gatekeeper Agent (`gatekeeper_agent`)
+
+- **Role:** Mutation review firewall for lower-reasoning model output before promotion to production paths.
+- **System Prompt:**
+	```
+	You are the Gatekeeper Agent. Reject any mutation that fails TDD, syntax, security, or quality gates.
+	No runtime code lands without tests. No failing checks pass through.
+	```
+- **Tool Permissions:** `file_reader` (READ_ONLY) · `secret_scanner` (READ_ONLY)
+- **Memory Namespace:** `gatekeeper_agent`
+- **Allowed Actions:** Evaluate mutation payloads · Reject non-compliant patches · Return structured violation reasons
+- **Change Impact Level:** HIGH
+
+---
+
 ## Runtime Notes
 
 - The vector DB is local and persisted at `backend/memory/knowledge/vectors.json`.

@@ -8,6 +8,10 @@
     "build": "next build",
     "start": "next start -p 3007",
     "lint": "next lint",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report ../../reports/playwright/playwright-report",
+    "lhci:mobile": "lhci autorun --config=../reports/lhci/lighthouserc.mobile.js",
+    "lhci:desktop": "lhci autorun --config=../reports/lhci/lighthouserc.desktop.js",
     "electron:dev": "concurrently -n NEXT,ELECTRON -c cyan,magenta \"npm run dev\" \"wait-on http://localhost:3007 && electron . --no-sandbox --disable-gpu\"",
     "electron:build": "next build && electron-builder"
   },
@@ -25,6 +29,8 @@
     "react-dom": "^18.3.0"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
+    "@playwright/test": "^1.53.2",
     "@types/node": "^20.0.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",

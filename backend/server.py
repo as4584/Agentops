@@ -51,6 +51,11 @@ from backend.tasks import task_tracker
 from backend.tools import execute_tool, get_tool_definitions
 from backend.utils import logger
 from backend.config import PROJECT_ROOT, LLM_MONTHLY_BUDGET
+from backend.routes.agent_control import router as agent_control_router
+from backend.routes.task_management import router as task_management_router
+from backend.routes.memory_management import router as memory_management_router
+from backend.routes.content_pipeline import router as content_pipeline_router
+from backend.routes.sandbox import router as sandbox_router
 
 
 # ---------------------------------------------------------------------------
@@ -175,6 +180,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(agent_control_router)
+app.include_router(task_management_router)
+app.include_router(memory_management_router)
+app.include_router(content_pipeline_router)
+app.include_router(sandbox_router)
 
 
 # ---------------------------------------------------------------------------

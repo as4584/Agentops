@@ -236,11 +236,36 @@ Agentop/
 │   ├── CHANGE_LOG.md        # Change history
 │   ├── AGENT_REGISTRY.md    # Agent definitions
 │   └── DRIFT_GUARD.md       # Invariants & rules
+├── reports/
+│   ├── lhci/                # Lighthouse configs + generated reports
+│   └── playwright/          # E2E test artifacts
+├── playground/
+│   ├── ui-experiments/
+│   ├── lighthouse-fixes/
+│   └── responsive-tests/
+├── sandbox/
+│   └── session_manager.py   # /tmp/ai-sandbox/session-* lifecycle
+├── archive/
+│   └── ibds/                # Archived client assets/scripts
 ├── src-tauri/
 │   └── tauri.conf.json      # Tauri desktop config
 ├── requirements.txt
 ├── pyproject.toml
 └── README.md
+```
+
+## Quality Gates (Blocking)
+
+```bash
+# UI regression + responsive checks
+cd frontend && npm run test:e2e
+
+# Lighthouse quality gates (mobile + desktop)
+cd frontend && npm run lhci:mobile
+cd frontend && npm run lhci:desktop
+
+# Install local TDD pre-commit gate
+./scripts/install-hooks.sh
 ```
 
 ---

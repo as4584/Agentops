@@ -11,6 +11,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, FormEvent } from 'react';
+import dynamic from 'next/dynamic';
 import {
   AppShell,
   Badge,
@@ -98,6 +99,10 @@ import {
 // ---------------------------------------------------------------------------
 const POLL_INTERVAL = 5000;
 
+const DashboardLayout = dynamic(() => import('@/components/DashboardLayout'), {
+  ssr: false,
+});
+
 const TIER_LABELS: Record<number, string> = {
   0: 'Tier 0 — Soul',
   1: 'Tier 1 — Cluster Ops',
@@ -171,6 +176,7 @@ function StatCard({ label, value, color, onClick }: { label: string; value: stri
 // ---------------------------------------------------------------------------
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<string | null>('overview');
+  const [osView, setOsView] = useState(false);
 
   // Core state
   const [health, setHealth] = useState<HealthCheck | null>(null);
@@ -245,7 +251,7 @@ export default function DashboardPage() {
         api.soulGoals().catch(() => ({ goals: [], count: 0 })),
       ]);
       setHealth(h); setAgents(a); setTools(t); setDrift(d); setLogs(l);
-      setMemoryUsage(mem.agents); setSoulGoals(goals.goals);
+      setMemoryUsage(mem?.agents ?? []); setSoulGoals(goals?.goals ?? []);
       setConnected(true); setError(null);
 
       try { const td = await api.tasks(30); setTasks(td.tasks); setTaskStats(td.stats); } catch {}
@@ -353,6 +359,20 @@ export default function DashboardPage() {
   // ======================================================================
   // RENDER
   // ======================================================================
+  if (osView) return (
+    <div style={{ position: 'relative' }}>
+      <Button
+        size="xs"
+        variant="default"
+        style={{ position: 'fixed', top: 10, right: 10, zIndex: 1000, opacity: 0.7 }}
+        onClick={() => setOsView(false)}
+      >
+        ← Classic
+      </Button>
+      <DashboardLayout />
+    </div>
+  );
+
   return (
     <AppShell padding="md">
       <AppShell.Main>
@@ -372,6 +392,7 @@ export default function DashboardPage() {
                   <Text size="xs" c="dimmed" ff="monospace">Uptime: {Math.round(health.uptime_seconds)}s</Text>
                 </>
               )}
+              <Button size="xs" variant="light" onClick={() => setOsView(true)}>OS View</Button>
               <Badge variant="filled" color={driftColor(driftStatus)} size="lg" leftSection={
                 <Box w={8} h={8} style={{ borderRadius: '50%', background: 'currentColor', animation: 'pulse 2s ease-in-out infinite' }} />
               }>
@@ -390,7 +411,7 @@ export default function DashboardPage() {
           )}
 
           {connected && (
-            <Tabs value={activeTab} onChange={setActiveTab} variant="pills" radius="md">
+            <Tabs value={activeTab} onChange={setActiveTab} variant="pills" radius="md" keepMounted={false}>
               <Tabs.List mb="lg">
                 <Tabs.Tab value="overview" leftSection={<IconLayout size={16} />}>Overview</Tabs.Tab>
                 <Tabs.Tab value="agents" leftSection={<IconHexagon size={16} />} rightSection={<Badge size="xs" variant="filled" circle>{agents.length}</Badge>}>Agents</Tabs.Tab>
