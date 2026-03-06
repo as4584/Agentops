@@ -56,8 +56,11 @@ ollama serve
 # From project root
 pip install -r requirements.txt
 
-# Start FastAPI server on port 8000
-python -m uvicorn backend.server:app --host 0.0.0.0 --port 8000 --reload
+# Check port collisions before startup
+./scripts/port-check.sh
+
+# Start FastAPI server with collision protection
+python -m backend.port_guard serve backend.server:app --host 127.0.0.1 --port 8000
 ```
 
 ### 3. Start the Frontend
@@ -126,6 +129,7 @@ Release requires all 3 checks to pass:
 - `tests_ok`
 - `playwright_ok`
 - `lighthouse_mobile_ok`
+- Sandbox sessions reserve unique frontend/backend ports from configured ranges to avoid collisions during parallel runs.
 
 ---
 
@@ -311,6 +315,21 @@ The Tauri config restricts HTTP access to `localhost:8000` only — maintaining 
 | `BACKEND_HOST` | `0.0.0.0` | Backend bind address |
 | `BACKEND_PORT` | `8000` | Backend port |
 | `LOG_LEVEL` | `INFO` | Logging level |
+
+## Port Collision Troubleshooting
+
+Use the built-in port tooling:
+
+```bash
+# View known port usage + owners
+python -m backend.port_guard status
+
+# Kill process bound to a conflicting port
+python -m backend.port_guard kill 8000
+
+# Preflight check before launch
+./scripts/port-check.sh
+```
 
 ---
 

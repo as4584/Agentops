@@ -16,7 +16,11 @@ from pydantic import BaseModel, Field
 
 
 class JobStatus(str, Enum):
-    DRAFT = "draft"
+    # --- Ideation gate (new) ---
+    IDEA_PENDING = "idea_pending"    # waiting for human greenlight
+    IDEA_APPROVED = "idea_approved"  # greenlit → ready for scripting
+    # --- Production pipeline ---
+    DRAFT = "draft"                  # legacy / manual entry
     GENERATED = "generated"
     AUDIO_READY = "audio_ready"
     VIDEO_READY = "video_ready"
@@ -59,6 +63,21 @@ class VideoJob(BaseModel):
     script: str = ""
     final_transcript: str = ""
 
+    # --- Ideation / research fields ---
+    idea_pitch: str = ""             # one-paragraph pitch with conflict angle
+    trend_data: dict = {}             # raw trend signals from TrendResearcher
+    prompt_frames: list[str] = Field(
+        default_factory=list
+    )                                 # one image-gen prompt per arc beat (8 beats)
+    niche: str = ""                   # e.g. "gaming", "ai_tools", "money"
+    visual_style: str = ""            # e.g. "reddit_commentary", "cinematic", "news"
+    style_notes: str = ""             # free-form style guide for frame generation
+
+    # --- Upload timing ---
+    channel_views_per_hr: float = 0.0      # latest video's current views/hr
+    velocity_hours_below_threshold: int = 0  # consecutive hours below threshold
+
+    # --- Production paths ---
     voice_audio_path: str = ""
     avatar_video_path: str = ""
     captioned_video_path: str = ""
@@ -90,7 +109,12 @@ class VideoJob(BaseModel):
     def transition(self, new_status: JobStatus) -> None:
         """Enforce legal state transitions."""
         _LEGAL: dict[JobStatus, set[JobStatus]] = {
+            # Ideation gate
+            JobStatus.IDEA_PENDING: {JobStatus.IDEA_APPROVED, JobStatus.FAILED},
+            JobStatus.IDEA_APPROVED: {JobStatus.GENERATED, JobStatus.FAILED},
+            # Legacy / manual entry
             JobStatus.DRAFT: {JobStatus.GENERATED, JobStatus.FAILED},
+            # Production pipeline
             JobStatus.GENERATED: {JobStatus.AUDIO_READY, JobStatus.FAILED},
             JobStatus.AUDIO_READY: {JobStatus.VIDEO_READY, JobStatus.FAILED},
             JobStatus.VIDEO_READY: {JobStatus.CAPTIONED, JobStatus.FAILED},
@@ -100,6 +124,7 @@ class VideoJob(BaseModel):
             JobStatus.SCHEDULED: {JobStatus.POSTED, JobStatus.FAILED},
             JobStatus.POSTED: set(),
             JobStatus.FAILED: {
+                JobStatus.IDEA_PENDING, JobStatus.IDEA_APPROVED,
                 JobStatus.DRAFT, JobStatus.GENERATED, JobStatus.AUDIO_READY,
                 JobStatus.VIDEO_READY, JobStatus.CAPTIONED,
             },

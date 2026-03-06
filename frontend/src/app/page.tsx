@@ -11,6 +11,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, FormEvent } from 'react';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import {
   AppShell,
@@ -100,6 +101,10 @@ import {
 const POLL_INTERVAL = 5000;
 
 const DashboardLayout = dynamic(() => import('@/components/DashboardLayout'), {
+  ssr: false,
+});
+
+const OrchestrationHub = dynamic(() => import('@/components/OrchestrationHub'), {
   ssr: false,
 });
 
@@ -412,8 +417,21 @@ export default function DashboardPage() {
 
           {connected && (
             <Tabs value={activeTab} onChange={setActiveTab} variant="pills" radius="md" keepMounted={false}>
+              <Card mb="lg" withBorder>
+                <Group justify="space-between" align="center" wrap="wrap">
+                  <Text size="sm" c="dimmed">Quick Launch</Text>
+                  <Group gap="xs">
+                    <Button component={Link} href="/customers" size="xs" variant="light">Customers</Button>
+                    <Button component={Link} href="/pricing" size="xs" variant="light">Pricing</Button>
+                    <Button component={Link} href="/webgen" size="xs" variant="light">Website Maker</Button>
+                    <Button component={Link} href="/marketing" size="xs" variant="light">Marketing Console</Button>
+                  </Group>
+                </Group>
+              </Card>
+
               <Tabs.List mb="lg">
                 <Tabs.Tab value="overview" leftSection={<IconLayout size={16} />}>Overview</Tabs.Tab>
+                <Tabs.Tab value="command" leftSection={<IconBrain size={16} />}>Command</Tabs.Tab>
                 <Tabs.Tab value="agents" leftSection={<IconHexagon size={16} />} rightSection={<Badge size="xs" variant="filled" circle>{agents.length}</Badge>}>Agents</Tabs.Tab>
                 <Tabs.Tab value="chat" leftSection={<IconMessage size={16} />}>Chat</Tabs.Tab>
                 <Tabs.Tab value="projects" leftSection={<IconFolder size={16} />} rightSection={<Badge size="xs" variant="filled" circle>{projects.length}</Badge>}>Projects</Tabs.Tab>
@@ -525,6 +543,13 @@ export default function DashboardPage() {
                     )}
                   </ScrollArea>
                 </Card>
+              </Tabs.Panel>
+
+              {/* ============================================================ */}
+              {/* COMMAND TAB — Mission Control Org-Chart                      */}
+              {/* ============================================================ */}
+              <Tabs.Panel value="command">
+                <OrchestrationHub agents={agents} />
               </Tabs.Panel>
 
               {/* ============================================================ */}

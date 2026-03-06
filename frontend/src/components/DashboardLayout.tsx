@@ -1,15 +1,13 @@
 import type { FC } from 'react';
-import { MantineProvider, Card } from '@mantine/core';
+import { Card } from '@mantine/core';
 import { ActivePanel, PlanPanel, CostPanel, BuildPanel, MemoryPanel, ContentPanel, BrandIntakePanel } from '@/components/panels';
-import { theme } from '@/lib/theme';
 
 export interface DashboardLayoutProps {
   className?: string;
 }
 
 const DashboardLayout: FC<DashboardLayoutProps> = ({ className }) => (
-  <MantineProvider theme={theme}>
-    <div
+  <div
       className={className}
       style={{
         display: 'grid',
@@ -45,7 +43,6 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ className }) => (
         <BrandIntakePanel />
       </Card>
     </div>
-  </MantineProvider>
 );
 
 export default DashboardLayout;

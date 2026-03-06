@@ -39,6 +39,7 @@ from backend.agents import create_agent, ALL_AGENT_DEFINITIONS, SoulAgent
 from backend.agents.gatekeeper_agent import GatekeeperAgent, GatekeeperResult
 from backend.tasks import task_tracker, TaskStatus
 from backend.utils import logger
+from backend.utils.tool_ids import ToolIdRegistry
 
 
 # ---------------------------------------------------------------------------
@@ -60,6 +61,11 @@ class OrchestratorState(TypedDict):
     # Response
     response: str                   # The agent's response
     tool_calls: list[dict[str, Any]]  # Tool calls made during processing
+
+    # Tool ID normalisation — per-conversation ToolIdRegistry instance.
+    # Stored as Any to keep TypedDict JSON-annotation compatible; actual
+    # value is always a ToolIdRegistry or None (created at conversation start).
+    tool_id_registry: Any
 
     # Governance
     drift_status: str               # Current drift status (GREEN/YELLOW/RED)
@@ -433,6 +439,7 @@ class AgentOrchestrator:
             "context": context or {},
             "response": "",
             "tool_calls": [],
+            "tool_id_registry": ToolIdRegistry(),
             "drift_status": DriftStatus.GREEN.value,
             "governance_notes": [],
             "timestamp": datetime.utcnow().isoformat(),

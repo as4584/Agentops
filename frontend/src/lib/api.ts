@@ -356,6 +356,64 @@ export interface ProjectFilesResponse {
   file_count: number;
 }
 
+export interface WebgenGenerateResponse {
+  project_id: string;
+  project_slug: string;
+  status: string;
+  output_dir: string;
+  preview_file: string;
+  html: string;
+  pages: string[];
+}
+
+export interface WebgenProjectItem {
+  id: string;
+  business_name: string;
+  status: string;
+  updated_at: string;
+  output_dir: string;
+}
+
+export interface CustomerService {
+  id: string;
+  type: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  progress_percent: number;
+  assigned_agents: string[];
+}
+
+export interface ServiceTimelineEvent {
+  id: string;
+  event_type: string;
+  detail: string;
+  created_at: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface CustomerRecord {
+  id: string;
+  name: string;
+  email: string;
+  business_name: string;
+  tier: 'foundation' | 'growth' | 'domination';
+  website_url: string | null;
+  social_media_accounts: Record<string, string>;
+  monthly_token_budget: number;
+  tokens_used_this_month: number;
+  services: CustomerService[];
+}
+
+export interface CustomerDeployment {
+  id: string;
+  customer_id: string;
+  project_id: string;
+  project_slug: string;
+  deployed_url: string;
+  qr_path: string | null;
+  deployed_at: string;
+  metadata: Record<string, unknown>;
+}
+
 export const api = {
   health: () => fetchAPI<HealthCheck>('/health'),
   status: () => fetchAPI<SystemStatus>('/status'),
@@ -424,4 +482,60 @@ export const api = {
   projects: () => fetchAPI<ProjectsResponse>('/projects'),
   projectFiles: (projectId: string, projectType = 'webgen') =>
     fetchAPI<ProjectFilesResponse>(`/projects/${projectId}/files?project_type=${projectType}`),
+  // Customer operations
+  customers: () => fetchAPI<CustomerRecord[]>('/api/customers/'),
+  customer: (id: string) => fetchAPI<CustomerRecord>(`/api/customers/${id}`),
+  createCustomer: (payload: { name: string; email: string; business_name: string; tier: string }) =>
+    fetchAPI<CustomerRecord>('/api/customers/', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  addCustomerService: (customerId: string, serviceType: string, notes = '') =>
+    fetchAPI<{ service_id: string; status: string; assigned_agents: string[]; child_tasks: Record<string, string> }>(`/api/customers/${customerId}/services`, {
+      method: 'POST',
+      body: JSON.stringify({ service_type: serviceType, notes }),
+    }),
+  customerServiceTimeline: (customerId: string, serviceId: string) =>
+    fetchAPI<{ customer_id: string; service_id: string; events: ServiceTimelineEvent[] }>(
+      `/api/customers/${customerId}/services/${serviceId}/timeline`
+    ),
+  customerDashboardStats: () => fetchAPI<{ total_customers: number; active_services: number; total_tokens_used: number }>('/api/customers/dashboard/stats'),
+  customerDeployments: (customerId: string) =>
+    fetchAPI<{ customer_id: string; deployments: CustomerDeployment[]; count: number }>(`/api/customers/${customerId}/deployments`),
+  // Webgen builder
+  webgenGenerate: (payload: {
+    business_name: string;
+    business_type: string;
+    tagline?: string;
+    description?: string;
+    services?: string[];
+    target_audience?: string;
+    tone?: string;
+    customer_id?: string;
+  }) =>
+    fetchAPI<WebgenGenerateResponse>('/api/webgen/generate', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  webgenProjects: () => fetchAPI<{ projects: WebgenProjectItem[]; count: number }>('/api/webgen/projects'),
+  webgenProject: (projectId: string) =>
+    fetchAPI<{ project_id: string; status: string; business_name: string; project_slug: string; preview_file: string; output_dir: string; html: string; deployed_url: string }>(
+      `/api/webgen/projects/${projectId}`
+    ),
+  webgenSavePage: (projectId: string, html: string) =>
+    fetchAPI<{ project_id: string; saved_file: string; status: string }>(`/api/webgen/projects/${projectId}/page`, {
+      method: 'PUT',
+      body: JSON.stringify({ html }),
+    }),
+  webgenDeploy: (projectId: string, customerId?: string) =>
+    fetchAPI<{ project_id: string; deployed_url: string; status: string; customer_id?: string; qr_path?: string | null }>('/api/webgen/deploy', {
+      method: 'POST',
+      body: JSON.stringify({ project_id: projectId, customer_id: customerId || null }),
+    }),
+  webgenQR: (projectId: string, targetUrl: string) =>
+    fetchAPI<{ project_id: string; target_url: string; qr_path: string }>('/api/webgen/qr', {
+      method: 'POST',
+      body: JSON.stringify({ project_id: projectId, target_url: targetUrl }),
+    }),
+  webgenQrFileUrl: (qrPath: string) => `${API_BASE}/api/webgen/qr/file?path=${encodeURIComponent(qrPath)}`,
 };

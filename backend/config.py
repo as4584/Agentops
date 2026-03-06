@@ -8,6 +8,11 @@ Environment variables override defaults for deployment flexibility.
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+# Load .env from the project root (owner-only 600 file, never committed to git)
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
 
 # ---------------------------------------------------------------------------
 # Path Configuration
@@ -55,6 +60,8 @@ MAX_CHAT_MESSAGE_LENGTH: int = int(os.getenv("MAX_CHAT_MESSAGE_LENGTH", "8192"))
 # Rate limit: max requests per minute per IP (0 = disabled)
 # Dashboard polls ~10 endpoints every 5s (~120/min) so keep headroom
 RATE_LIMIT_RPM: int = int(os.getenv("RATE_LIMIT_RPM", "600"))
+# Stricter rate limit for expensive LLM-backed endpoints (per-IP, per minute)
+LLM_RATE_LIMIT_RPM: int = int(os.getenv("LLM_RATE_LIMIT_RPM", "30"))
 # Internal-only URL prefixes that webhook_send / health_check must NOT contact
 SSRF_BLOCKED_PREFIXES: list[str] = [
     "http://169.254.",       # cloud metadata
@@ -98,6 +105,36 @@ SHELL_DANGEROUS_CHARS: list[str] = [
     ";", "&&", "||", "|", "`", "$(", "${", "<(", ">(", "\n",
     ">>", ">", "<", "\\", "!",
 ]
+
+
+# ---------------------------------------------------------------------------
+# CORS Configuration
+# ---------------------------------------------------------------------------
+
+def _parse_cors_origins() -> list[str]:
+    """Parse allowed CORS origins from the environment.
+
+    AGENTOP_CORS_ORIGINS accepts a comma-separated list of origins.
+    Falls back to localhost:3007 (the default Next.js dashboard port) when
+    the variable is unset so local development works out of the box.
+    Wildcard '*' is explicitly rejected because we use allow_credentials=True.
+    """
+    raw = os.getenv("AGENTOP_CORS_ORIGINS", "")
+    if not raw.strip():
+        return ["http://localhost:3007", "http://127.0.0.1:3007"]
+    origins: list[str] = []
+    for origin in raw.split(","):
+        origin = origin.strip()
+        if origin == "*":
+            # Wildcard is incompatible with credentials and is a security risk.
+            # Silently skip it — callers must list origins explicitly.
+            continue
+        if origin:
+            origins.append(origin)
+    return origins or ["http://localhost:3007", "http://127.0.0.1:3007"]
+
+
+CORS_ORIGINS: list[str] = _parse_cors_origins()
 
 # Prohibited patterns for safe_shell
 SAFE_SHELL_BLACKLIST: list[str] = [
@@ -144,6 +181,10 @@ LOCAL_LLM_REQUIRED_CHECKS: tuple[str, ...] = tuple(
     ).split(",")
     if item.strip()
 )
+SANDBOX_FRONTEND_PORT_RANGE_START = int(os.getenv("SANDBOX_FRONTEND_PORT_RANGE_START", "3100"))
+SANDBOX_FRONTEND_PORT_RANGE_END = int(os.getenv("SANDBOX_FRONTEND_PORT_RANGE_END", "3999"))
+SANDBOX_BACKEND_PORT_RANGE_START = int(os.getenv("SANDBOX_BACKEND_PORT_RANGE_START", "8100"))
+SANDBOX_BACKEND_PORT_RANGE_END = int(os.getenv("SANDBOX_BACKEND_PORT_RANGE_END", "8999"))
 
 # Ensure required directories exist
 MEMORY_DIR.mkdir(parents=True, exist_ok=True)

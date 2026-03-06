@@ -23,6 +23,8 @@ import threading
 import time
 from pathlib import Path
 
+from backend.port_guard import _get_process_using_port
+
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
@@ -73,6 +75,27 @@ def _kill_port(port: int) -> None:
             time.sleep(0.5)
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
+
+
+def _find_available_port(preferred: int, fallback_start: int, fallback_end: int, host: str = "127.0.0.1") -> int:
+    if not _is_port_open(preferred, host=host):
+        return preferred
+    for port in range(fallback_start, fallback_end + 1):
+        if not _is_port_open(port, host=host):
+            return port
+    raise RuntimeError(
+        f"No available port in range {fallback_start}-{fallback_end} (preferred {preferred} occupied)"
+    )
+
+
+def _is_agentop_owned_process(command: str) -> bool:
+    cmd = command.lower()
+    return (
+        "backend.server:app" in cmd
+        or "next dev" in cmd
+        or "agentop" in cmd
+        or "frontend/node_modules/electron" in cmd
+    )
 
 
 def _wait_for_port(port: int, timeout: int = 60, label: str = "") -> bool:
@@ -199,28 +222,44 @@ def main() -> None:
 
     # ---- Start Backend ----
     print("\n🚀 Starting backend...")
-    if _is_port_open(8000) and _is_healthy(8000, "/health"):
-        print("  ✓ Backend already running and healthy on :8000")
+    backend_port = 8000
+    if _is_port_open(backend_port) and _is_healthy(backend_port, "/health"):
+        print(f"  ✓ Backend already running and healthy on :{backend_port}")
     else:
-        if _is_port_open(8000):
-            print("  ⚠ Port 8000 occupied but unhealthy — killing stale process")
-            _kill_port(8000)
+        if _is_port_open(backend_port):
+            owner = _get_process_using_port(backend_port)
+            owner_cmd = owner.get("command", "") if owner else ""
+            if owner and _is_agentop_owned_process(owner_cmd):
+                print(f"  ⚠ Port {backend_port} occupied by stale Agentop process — killing")
+                _kill_port(backend_port)
+            else:
+                print(f"  ⚠ Port {backend_port} occupied by non-Agentop process; selecting fallback port")
+                backend_port = _find_available_port(backend_port, 8765, 8799)
+                print(f"  → Backend fallback port: :{backend_port}")
         _start_process(
             [sys.executable, "-m", "uvicorn", "backend.server:app",
-             "--host", "0.0.0.0", "--port", "8000"],
+             "--host", "127.0.0.1", "--port", str(backend_port)],
             cwd=ROOT,
             label="backend",
         )
-        _wait_for_healthy(8000, "/health", timeout=30, label="Backend :8000")
+        _wait_for_healthy(backend_port, "/health", timeout=30, label=f"Backend :{backend_port}")
 
     # ---- Start Frontend ----
     print("\n🎨 Starting dashboard...")
-    if _is_port_open(3007) and _is_healthy(3007):
-        print("  ✓ Dashboard already running and healthy on :3007")
+    dashboard_port = 3007
+    if _is_port_open(dashboard_port) and _is_healthy(dashboard_port):
+        print(f"  ✓ Dashboard already running and healthy on :{dashboard_port}")
     else:
-        if _is_port_open(3007):
-            print("  ⚠ Port 3007 occupied but unhealthy — killing stale process")
-            _kill_port(3007)
+        if _is_port_open(dashboard_port):
+            owner = _get_process_using_port(dashboard_port)
+            owner_cmd = owner.get("command", "") if owner else ""
+            if owner and _is_agentop_owned_process(owner_cmd):
+                print(f"  ⚠ Port {dashboard_port} occupied by stale Agentop process — killing")
+                _kill_port(dashboard_port)
+            else:
+                print(f"  ⚠ Port {dashboard_port} occupied by non-Agentop process; selecting fallback port")
+                dashboard_port = _find_available_port(dashboard_port, 3008, 3099)
+                print(f"  → Dashboard fallback port: :{dashboard_port}")
         # Check if node_modules exists
         if not (FRONTEND_DIR / "node_modules").exists():
             print("  → Installing frontend dependencies (first run)...")
@@ -231,12 +270,13 @@ def main() -> None:
                 stderr=subprocess.DEVNULL,
             )
         _start_process(
-            ["npx", "next", "dev", "-p", "3007"],
+            ["npx", "next", "dev", "-p", str(dashboard_port)],
             cwd=FRONTEND_DIR,
             label="dashboard",
+            env={"NEXT_PUBLIC_API_URL": f"http://127.0.0.1:{backend_port}"},
         )
         # Wait for Next.js to be fully compiled and serving pages
-        _wait_for_healthy(3007, "/", timeout=60, label="Dashboard :3007")
+        _wait_for_healthy(dashboard_port, "/", timeout=60, label=f"Dashboard :{dashboard_port}")
 
     # ---- Open Native Window ----
     print("\n🖥️  Opening Agentop window...\n")
@@ -257,7 +297,7 @@ def main() -> None:
         except (FileNotFoundError, OSError) as e:
             print(f"  ✗ Electron failed ({e}), opening in browser...")
             import webbrowser
-            webbrowser.open("http://localhost:3007")
+            webbrowser.open(f"http://localhost:{dashboard_port}")
             print("\n  Dashboard open in your browser.")
             print("  Press Ctrl+C to stop all services.\n")
             try:
@@ -271,7 +311,7 @@ def main() -> None:
 
             window = webview.create_window(
                 title="Agentop — Local AI Control Center",
-                url="http://localhost:3007",
+                url=f"http://localhost:{dashboard_port}",
                 width=1400,
                 height=900,
                 min_size=(900, 600),
@@ -303,7 +343,7 @@ def main() -> None:
             if "display" in str(e).lower() or "gtk" in str(e).lower() or "qt" in str(e).lower():
                 print(f"  No display detected ({e}), opening in browser...")
                 import webbrowser
-                webbrowser.open("http://localhost:3007")
+                webbrowser.open(f"http://localhost:{dashboard_port}")
                 print("\n  Dashboard open in your browser.")
                 print("  Press Ctrl+C to stop all services.\n")
                 try:

@@ -23,6 +23,97 @@
 
 ## Entries
 
+### 2026-03-04T22:00:00Z — Security Hardening (4-sprint remediation)
+- **Agent:** GitHub Copilot
+- **Files Modified:**
+  - `backend/server.py` — path traversal fix (`resolve()` → `os.path.normpath()`), global exception handlers, prompt-injection heuristic in chat endpoint, CORS env-driven, `TieredRateLimitMiddleware` wired, `import os`, `import uuid`, `JSONResponse` added
+  - `backend/config.py` — added `LLM_RATE_LIMIT_RPM`, `CORS_ORIGINS`, `_parse_cors_origins()`
+  - `backend/security_middleware.py` — new `TieredRateLimitMiddleware`; `SecurityHeadersMiddleware` expanded with `Strict-Transport-Security`, `Permissions-Policy`, tightened `Content-Security-Policy`, `Cache-Control: no-store`
+  - `backend/models/customer.py` — `CustomerCreate` hardened with `@field_validator`: whitespace strip, HTML char block, email normalise+validate, `import re`, `field_validator`
+  - `backend/port_guard.py` — `_save()` uses `tempfile.mkstemp()` + `chmod 0o600` for temp file, `import tempfile`
+  - `backend/routes/webgen_builder.py` — path traversal fix in `_resolve_qr_file_path()`, `import os`
+  - `backend/tools/__init__.py` — all `resolve()` calls on user paths replaced with `os.path.normpath()`, `import os`
+  - `SECURITY_AUDIT.md` — all patched findings updated with remediation notes and status
+  - `docs/IMPLEMENTATION_SPRINTS.md` — security hardening sprint section appended
+  - `docs/HYBRID_ARCHITECTURE.md` — security configuration section updated
+  - `docs/CHANGE_LOG.md` — this entry
+- **Reason:** Remediation of SECURITY_AUDIT.md findings: 9 of 11 vulnerabilities resolved across 4 sprints. CMD-001 (subprocess cwd injection) remains open for a future sprint.
+- **Risk Assessment:** MEDIUM
+- **Impacted Subsystems:** HTTP security layer, path handling in tools/routes/server, input validation, rate limiting, CORS, error responses, temp file permissions
+- **Documentation Updated:** YES
+
+### 2026-03-04T20:00:00Z
+- **Agent:** GitHub Copilot
+- **Files Modified:** `backend/models/customer.py`, `backend/security_middleware.py`, `backend/server.py`, `SECURITY_AUDIT.md`, `docs/CHANGE_LOG.md`
+- **Reason:** Security hardening: added input validation to CustomerCreate model, implemented rate limiting middleware, added security headers middleware, created comprehensive security audit document.
+- **Risk Assessment:** MEDIUM
+- **Impacted Subsystems:** API input validation, request rate limiting, HTTP security headers, customer creation endpoint
+- **Documentation Updated:** YES — security audit and changelog updated.
+
+### 2026-03-04T19:05:00Z
+- **Agent:** GitHub Copilot
+- **Files Modified:** `PORTS.md`, `backend/port_guard.py`, `scripts/port-check.sh`, `backend/server.py`, `app.py`, `docs/IMPLEMENTATION_SPRINTS.md`
+- **Reason:** Implemented port-collision hardening with canonical port registry, runtime port diagnostics, reservation/kill tooling, and safer launcher behavior with non-destructive ownership checks and fallback port selection.
+- **Risk Assessment:** MEDIUM
+- **Impacted Subsystems:** Local runtime startup flow, backend launch behavior, developer operations and troubleshooting
+- **Documentation Updated:** YES — sprint status and changelog updated.
+
+### 2026-03-04T04:20:00Z
+- **Agent:** GitHub Copilot
+- **Files Modified:** `backend/routes/webgen_builder.py`, `frontend/src/lib/api.ts`, `frontend/src/app/customers/[customerId]/page.tsx`, `docs/IMPLEMENTATION_SPRINTS.md`
+- **Reason:** Added one-click QR open flow via secure backend QR file endpoint and improved customer deployment history UX with search and QR presence filters.
+- **Risk Assessment:** LOW
+- **Impacted Subsystems:** Webgen QR retrieval, customer assets UI discoverability, deployment operations workflow
+- **Documentation Updated:** YES — sprint status and changelog updated.
+
+### 2026-03-04T04:00:00Z
+- **Agent:** GitHub Copilot
+- **Files Modified:** `backend/database/customer_store.py`, `backend/routes/customers.py`, `backend/routes/webgen_builder.py`, `frontend/src/lib/api.ts`, `frontend/src/app/customers/[customerId]/page.tsx`, `frontend/src/app/webgen/page.tsx`, `docs/IMPLEMENTATION_SPRINTS.md`
+- **Reason:** Linked website deployments to customer records end-to-end, added customer deployment history API, and surfaced deployment history and customer-linked webgen flow in UI.
+- **Risk Assessment:** MEDIUM
+- **Impacted Subsystems:** Customer assets visibility, webgen deployment metadata, frontend customer profile/workflow navigation
+- **Documentation Updated:** YES — sprint status and changelog updated.
+
+### 2026-03-04T03:30:00Z
+- **Agent:** GitHub Copilot
+- **Files Modified:** `backend/routes/marketing.py`, `frontend/src/app/marketing/page.tsx`, `docs/IMPLEMENTATION_SPRINTS.md`
+- **Reason:** Added customer-specific assistant context so sales-demo answers include selected customer profile data (tier, services, token usage, assets).
+- **Risk Assessment:** LOW
+- **Impacted Subsystems:** Marketing assistant prompt assembly, marketing UI input flow
+- **Documentation Updated:** YES — sprint status and changelog updated.
+
+### 2026-03-04T03:00:00Z
+- **Agent:** GitHub Copilot
+- **Files Modified:** `backend/routes/marketing.py`, `backend/server.py`, `frontend/src/app/marketing/page.tsx`, `frontend/src/app/page.tsx`, `docs/IMPLEMENTATION_SPRINTS.md`
+- **Reason:** Sprint D implementation: business-facing marketing console with FAQ wall + AI assistant endpoint + deployment/QR API, and dashboard quick-launch links.
+- **Risk Assessment:** MEDIUM
+- **Impacted Subsystems:** Marketing API surface, dashboard navigation, deployment orchestration, documentation governance
+- **Documentation Updated:** YES — sprint status and changelog updated.
+
+### 2026-03-04T02:00:00Z
+- **Agent:** GitHub Copilot
+- **Files Modified:** `backend/routes/webgen_builder.py`, `backend/server.py`, `frontend/src/lib/api.ts`, `frontend/src/app/webgen/page.tsx`, `requirements.txt`, `pyproject.toml`, `docs/IMPLEMENTATION_SPRINTS.md`
+- **Reason:** Sprint C implementation: website maker workflow (generate/edit/deploy), Vercel deployment API, QR generation API, and dashboard webgen page.
+- **Risk Assessment:** MEDIUM
+- **Impacted Subsystems:** WebGen pipeline exposure, deployment path, dashboard website-maker UX, dependency surface
+- **Documentation Updated:** YES — sprint doc and changelog entry updated.
+
+### 2026-03-04T01:00:00Z
+- **Agent:** GitHub Copilot
+- **Files Modified:** `backend/database/customer_store.py`, `backend/routes/customers.py`, `frontend/src/app/customers/page.tsx`, `frontend/src/app/customers/[customerId]/page.tsx`, `frontend/src/app/pricing/page.tsx`, `frontend/src/lib/api.ts`, `docs/IMPLEMENTATION_SPRINTS.md`
+- **Reason:** Sprint B implementation: customer profile view, service timeline, subagent fan-out task graph logging, and pricing calculator UI.
+- **Risk Assessment:** MEDIUM
+- **Impacted Subsystems:** Customer operations APIs, task activity logging, frontend customer operations, proposal/pricing workflow
+- **Documentation Updated:** YES — sprint tracking and changelog updated.
+
+### 2026-03-04T00:00:00Z
+- **Agent:** GitHub Copilot
+- **Files Modified:** `backend/llm/unified_registry.py`, `backend/models/customer.py`, `backend/database/customer_store.py`, `backend/routes/__init__.py`, `backend/routes/agent_control.py`, `backend/routes/task_management.py`, `backend/routes/memory_management.py`, `backend/routes/content_pipeline.py`, `backend/routes/customers.py`, `backend/routes/llm_registry.py`, `backend/server.py`, `frontend/src/app/customers/page.tsx`, `frontend/src/lib/api.ts`, `docs/IMPLEMENTATION_SPRINTS.md`
+- **Reason:** Started implementation of customer operations platform: unified model registry endpoint, customer/service backend APIs, token usage tracking hooks, and initial dashboard UI with + service assignment and confirm flow.
+- **Risk Assessment:** MEDIUM
+- **Impacted Subsystems:** Backend routes, data persistence (SQLite), LLM integration layer, frontend dashboard surface, governance docs
+- **Documentation Updated:** YES — implementation sprint plan and changelog entry added.
+
 ### 2026-03-01T00:00:00Z
 - **Agent:** system-init
 - **Files Modified:** All files (initial scaffold)

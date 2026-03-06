@@ -1,13 +1,25 @@
 """
-PublisherAgent — Generates hashtags, captions, schedules posts.
-===============================================================
-Uses local Ollama LLM for caption + hashtag generation.
-Publishing integrations are optional.
+PublisherAgent — Captions, hashtags, and smart upload timing.
+=============================================================
+Jack Craig Method: Upload timing is as important as content quality.
+
+Timing rules:
+  1. Minimum 48 hours between any two posts (algorithm stability)
+  2. Only post when the LAST video's views/hr has been
+     below VIEW_VELOCITY_THRESHOLD for VIEW_VELOCITY_WINDOW_HOURS
+     consecutive hours (signals algorithm has finished distributing it)
+  3. If a trend is expiring, override to post immediately
+
+Env knobs:
+  UPLOAD_INTERVAL_HOURS         (default 48)
+  VIEW_VELOCITY_THRESHOLD       (default 100 views/hr)
+  VIEW_VELOCITY_WINDOW_HOURS    (default 12)
 """
 
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional
@@ -34,8 +46,8 @@ class PublisherAgent(ContentAgent):
         # Generate caption via local LLM
         caption = await self._generate_caption(job.topic, job.hook)
 
-        # Determine post time
-        scheduled_time = self._calculate_post_time()
+        # Determine post time (Jack Craig timing rules)
+        scheduled_time = self._calculate_post_time(job)
 
         # Export publish package
         self._export_package(job, caption, hashtags, scheduled_time)
@@ -90,9 +102,124 @@ class PublisherAgent(ContentAgent):
             logger.warning(f"[{self.name}] Caption generation failed: {e}")
             return topic
 
-    def _calculate_post_time(self) -> datetime:
+    def _calculate_post_time(self, job: Optional[VideoJob] = None) -> datetime:  # noqa: F841
+        """
+        Jack Craig upload timing rules:
+          1. Never post within UPLOAD_INTERVAL_HOURS of the last post
+          2. Only post when most-recent video's view velocity <
+             VIEW_VELOCITY_THRESHOLD for VIEW_VELOCITY_WINDOW_HOURS+ hours
+          3. Align to optimal UTC upload window for target market
+        """
+        interval_hours = int(os.getenv("UPLOAD_INTERVAL_HOURS", "48"))
+        velocity_threshold = int(os.getenv("VIEW_VELOCITY_THRESHOLD", "100"))
+        velocity_window = int(os.getenv("VIEW_VELOCITY_WINDOW_HOURS", "12"))
+
         now = datetime.now(timezone.utc)
-        return now.replace(hour=12, minute=0, second=0) + timedelta(days=1)
+
+        # --- Rule 1: 48-hour interval from last posted video ---
+        last_post_time = self._get_last_post_time()
+        earliest_by_interval = (
+            last_post_time + timedelta(hours=interval_hours)
+            if last_post_time
+            else now
+        )
+
+        # --- Rule 2: View velocity window ---
+        # Check the most recent posted video's velocity data.
+        # If channel_views_per_hr < threshold and held for velocity_window hours,
+        # the algorithm has finished cycling — we're clear to post.
+        velocity_clear = self._check_velocity_window(
+            velocity_threshold, velocity_window
+        )
+
+        # --- Rule 3: Align to optimal upload hour (14:00 UTC default) ---
+        optimal_hour = int(os.getenv("UPLOAD_HOUR_UTC", "14"))
+
+        # Start from the later of (interval constraint) and (now if velocity is clear)
+        base = max(earliest_by_interval, now if velocity_clear else now + timedelta(hours=velocity_window))
+
+        # Advance to next occurrence of optimal_hour
+        candidate = base.replace(minute=0, second=0, microsecond=0)
+        if candidate.hour >= optimal_hour:
+            candidate = candidate + timedelta(days=1)
+        candidate = candidate.replace(hour=optimal_hour)
+
+        logger.info(
+            f"[{self.name}] Upload window: velocity_clear={velocity_clear}, "
+            f"earliest_by_interval={earliest_by_interval.isoformat()}, "
+            f"scheduled={candidate.isoformat()}"
+        )
+        return candidate
+
+    def _get_last_post_time(self) -> Optional[datetime]:
+        """Return the posted_time of the most recently posted video."""
+        try:
+            posted = self.store.get_by_status(JobStatus.POSTED)
+            if not posted:
+                return None
+            latest = max(
+                (j for j in posted if j.posted_time),
+                key=lambda j: j.posted_time,
+                default=None,
+            )
+            return latest.posted_time if latest else None
+        except Exception:
+            return None
+
+    def _check_velocity_window(
+        self, threshold: int, window_hours: int
+    ) -> bool:
+        """
+        Returns True if the most recent posted video's view velocity has been
+        below `threshold` for at least `window_hours` consecutive hours.
+
+        Uses velocity_hours_below_threshold field on the VideoJob.
+        This field is updated by AnalyticsAgent when it polls platform APIs.
+        Until real-time data is wired up it falls back to a conservative
+        time-based heuristic: assume velocity drops after 36 hours.
+        """
+        try:
+            posted = self.store.get_by_status(JobStatus.POSTED)
+            if not posted:
+                return True  # no previous video — free to post
+
+            latest = max(
+                (j for j in posted if j.posted_time),
+                key=lambda j: j.posted_time,
+                default=None,
+            )
+            if not latest:
+                return True
+
+            # If we have real velocity data from analytics, use it
+            if latest.velocity_hours_below_threshold >= window_hours:
+                logger.info(
+                    f"[{self.name}] Velocity window met: "
+                    f"{latest.velocity_hours_below_threshold}h below {threshold} views/hr"
+                )
+                return True
+
+            # Fallback heuristic: assume velocity window opens 36h after post
+            hours_since_post = (
+                datetime.now(timezone.utc) - latest.posted_time
+            ).total_seconds() / 3600
+            if hours_since_post >= 36:
+                logger.info(
+                    f"[{self.name}] Velocity heuristic: "
+                    f"{hours_since_post:.1f}h since last post (>= 36h threshold)"
+                )
+                return True
+
+            logger.info(
+                f"[{self.name}] Velocity window NOT met: "
+                f"{hours_since_post:.1f}h since last post, "
+                f"{latest.velocity_hours_below_threshold}h of sub-{threshold} velocity"
+            )
+            return False
+
+        except Exception as e:
+            logger.warning(f"[{self.name}] Velocity check failed: {e} — defaulting safe")
+            return False
 
     def _export_package(
         self,

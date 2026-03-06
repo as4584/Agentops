@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import platform
 import re
 import shutil
@@ -404,7 +405,10 @@ async def safe_shell(command: str, agent_id: str) -> dict[str, Any]:
         if arg.startswith("-"):
             continue  # skip flags
         try:
-            resolved = Path(arg).resolve() if arg.startswith("/") else (PROJECT_ROOT / arg).resolve()
+            if arg.startswith("/"):
+                resolved = Path(os.path.normpath(str(arg)))
+            else:
+                resolved = Path(os.path.normpath(str(PROJECT_ROOT / arg)))
             if not str(resolved).startswith(str(PROJECT_ROOT)):
                 error = f"BLOCKED: Path argument '{arg}' resolves outside project directory"
                 logger.warning(f"safe_shell BLOCKED for {agent_id}: {error}")
@@ -465,7 +469,9 @@ async def file_reader(file_path: str, agent_id: str) -> dict[str, Any]:
         Dict with content, size, exists.
     """
     try:
-        path = Path(file_path).resolve()
+        path = Path(os.path.normpath(
+            str(file_path) if Path(file_path).is_absolute() else str(PROJECT_ROOT / file_path)
+        ))
 
         # Security: restrict to project directory
         if not str(path).startswith(str(PROJECT_ROOT)):
@@ -750,7 +756,9 @@ async def log_tail(file_path: str, lines: int, agent_id: str) -> dict[str, Any]:
     READ_ONLY — restricted to project directory.
     """
     try:
-        path = Path(file_path).resolve()
+        path = Path(os.path.normpath(
+            str(file_path) if Path(file_path).is_absolute() else str(PROJECT_ROOT / file_path)
+        ))
         if not str(path).startswith(str(PROJECT_ROOT)):
             return {"content": "", "error": "Access denied: path outside project directory"}
         if not path.exists() or not path.is_file():
@@ -818,7 +826,9 @@ async def secret_scanner(target_path: str, agent_id: str) -> dict[str, Any]:
 
     READ_ONLY — makes no changes, reports findings.
     """
-    target = Path(target_path).resolve()
+    target = Path(os.path.normpath(
+        str(target_path) if Path(target_path).is_absolute() else str(PROJECT_ROOT / target_path)
+    ))
     if not str(target).startswith(str(PROJECT_ROOT)):
         return {"findings": [], "error": "Access denied: path outside project directory"}
     if not target.exists():
@@ -882,7 +892,9 @@ async def db_query(db_path: str, query: str, agent_id: str) -> dict[str, Any]:
     if not query_stripped.startswith("SELECT") and not query_stripped.startswith("PRAGMA"):
         return {"rows": [], "error": "Only SELECT and PRAGMA queries are permitted"}
 
-    path = Path(db_path).resolve()
+    path = Path(os.path.normpath(
+        str(db_path) if Path(db_path).is_absolute() else str(PROJECT_ROOT / db_path)
+    ))
     if not str(path).startswith(str(PROJECT_ROOT)):
         return {"rows": [], "error": "Access denied: path outside project directory"}
     if not path.exists():
@@ -1000,7 +1012,10 @@ async def folder_analyzer(
     """
     try:
         raw = Path(folder_path)
-        root = raw.resolve() if raw.is_absolute() else (PROJECT_ROOT / raw).resolve()
+        if raw.is_absolute():
+            root = Path(os.path.normpath(str(raw)))
+        else:
+            root = Path(os.path.normpath(str(PROJECT_ROOT / raw)))
 
         # Security: restrict to project directory
         if not str(root).startswith(str(PROJECT_ROOT)):

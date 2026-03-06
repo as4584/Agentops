@@ -28,7 +28,10 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from backend.utils.tool_ids import ToolIdRegistry
 
 import httpx
 
@@ -289,6 +292,102 @@ class CloudLLMClient:
             model=model,
         )
         return self._parse_json(raw)
+
+    # ── Generate with tools (OpenAI tool-call protocol) ──
+
+    async def generate_with_tools(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        temperature: float = 0.7,
+        max_tokens: int = 2048,
+        model: Optional[str] = None,
+        registry: Optional["ToolIdRegistry"] = None,
+    ) -> dict[str, Any]:
+        """
+        Chat completion with OpenAI-format tool definitions.
+
+        All tool names in *tools* **must** already satisfy
+        ``^[a-zA-Z0-9_-]{1,64}$`` (enforced by ``ToolIdRegistry.sanitize_tool_definitions``
+        before this method is called from ``UnifiedModelRouter.generate_with_tools``).
+
+        Returns a dict with:
+          - ``output``     – assistant's text reply (may be empty when tools are called).
+          - ``tool_calls`` – list of OpenAI ``tool_calls`` objects (may be empty).
+          - ``usage``      – raw usage dict from the API.
+
+        Args:
+            messages:    OpenAI-format conversation history.
+            tools:       Pre-sanitized OpenAI tool definitions.
+            temperature: Sampling temperature.
+            max_tokens:  Maximum output tokens.
+            model:       Short model key or full OpenRouter model ID.
+            registry:    ToolIdRegistry used for this session (informational; the
+                         caller is responsible for desanitization).
+        """
+        model_id, extra_params = self._resolve_model(model)
+
+        payload: dict[str, Any] = {
+            "model": model_id,
+            "messages": messages,
+            "tools": tools,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+        payload.update(extra_params)
+
+        try:
+            resp = await self.client.post(
+                OPENROUTER_API_URL,
+                headers=self._headers(),
+                json=payload,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+            usage = data.get("usage", {})
+            self._total_input_tokens += usage.get("prompt_tokens", 0)
+            self._total_output_tokens += usage.get("completion_tokens", 0)
+            self._total_requests += 1
+
+            choices = data.get("choices", [])
+            output_text = ""
+            raw_tool_calls: list[dict[str, Any]] = []
+
+            if choices:
+                message = choices[0].get("message", {})
+                output_text = message.get("content") or ""
+                raw_tool_calls = message.get("tool_calls") or []
+
+            return {
+                "output": output_text,
+                "tool_calls": raw_tool_calls,
+                "usage": usage,
+            }
+
+        except httpx.ConnectError:
+            raise ConnectionError(
+                "Cannot reach OpenRouter API at "
+                f"{OPENROUTER_API_URL}. Check network connectivity."
+            )
+        except httpx.HTTPStatusError as e:
+            status = e.response.status_code
+            body = e.response.text[:500]
+            if status == 400:
+                # Most likely cause: invalid tool name — surface clearly.
+                raise ValueError(
+                    f"OpenRouter 400 Bad Request (possible invalid tool name/ID). "
+                    f"Verify tool names match ^[a-zA-Z0-9_-]{{1,64}}$. "
+                    f"Body: {body}"
+                )
+            if status == 401:
+                raise PermissionError(
+                    "OpenRouter API key is invalid or expired. "
+                    "Check OPENROUTER_API_KEY in .env"
+                )
+            if status == 429:
+                raise RuntimeError("OpenRouter rate limit exceeded.")
+            raise RuntimeError(f"OpenRouter error {status}: {body}")
 
     # ── Embed (stub — OpenRouter doesn't serve embeddings) ─
 

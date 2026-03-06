@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import socket
 import shutil
 import uuid
 from dataclasses import dataclass
@@ -8,11 +9,90 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from backend.config import PLAYBOX_DIR, SANDBOX_ROOT_DIR
+from backend.config import (
+    PLAYBOX_DIR,
+    SANDBOX_BACKEND_PORT_RANGE_END,
+    SANDBOX_BACKEND_PORT_RANGE_START,
+    SANDBOX_FRONTEND_PORT_RANGE_END,
+    SANDBOX_FRONTEND_PORT_RANGE_START,
+    SANDBOX_ROOT_DIR,
+)
 
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _is_port_available(port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            sock.bind(("127.0.0.1", port))
+        except OSError:
+            return False
+    return True
+
+
+def _collect_reserved_ports(base_dir: Path) -> set[int]:
+    if not base_dir.exists():
+        return set()
+
+    reserved_ports: set[int] = set()
+    for child in base_dir.iterdir():
+        if not child.is_dir():
+            continue
+        meta_path = child / "meta.json"
+        if not meta_path.exists():
+            continue
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if meta.get("status") != "active":
+            continue
+        session_ports = meta.get("reserved_ports")
+        if not isinstance(session_ports, dict):
+            continue
+        for key in ("frontend", "backend"):
+            value = session_ports.get(key)
+            if isinstance(value, int):
+                reserved_ports.add(value)
+    return reserved_ports
+
+
+def _allocate_session_ports(base_dir: Path) -> dict[str, int]:
+    reserved_ports = _collect_reserved_ports(base_dir)
+
+    frontend_port: int | None = None
+    for port in range(SANDBOX_FRONTEND_PORT_RANGE_START, SANDBOX_FRONTEND_PORT_RANGE_END + 1):
+        if port in reserved_ports:
+            continue
+        if _is_port_available(port):
+            frontend_port = port
+            break
+    if frontend_port is None:
+        raise RuntimeError(
+            "No available frontend port in configured range "
+            f"{SANDBOX_FRONTEND_PORT_RANGE_START}-{SANDBOX_FRONTEND_PORT_RANGE_END}"
+        )
+
+    backend_port: int | None = None
+    for port in range(SANDBOX_BACKEND_PORT_RANGE_START, SANDBOX_BACKEND_PORT_RANGE_END + 1):
+        if port in reserved_ports or port == frontend_port:
+            continue
+        if _is_port_available(port):
+            backend_port = port
+            break
+    if backend_port is None:
+        raise RuntimeError(
+            "No available backend port in configured range "
+            f"{SANDBOX_BACKEND_PORT_RANGE_START}-{SANDBOX_BACKEND_PORT_RANGE_END}"
+        )
+
+    return {
+        "frontend": frontend_port,
+        "backend": backend_port,
+    }
 
 
 @dataclass
@@ -51,6 +131,7 @@ class SandboxSession:
     def create(self) -> dict[str, Any]:
         self.workspace.mkdir(parents=True, exist_ok=True)
         self.reports.mkdir(parents=True, exist_ok=True)
+        reserved_ports = _allocate_session_ports(SANDBOX_ROOT_DIR)
         payload = {
             "session_id": self.session_id,
             "task": self.task,
@@ -64,6 +145,7 @@ class SandboxSession:
             },
             "status": "active",
             "promoted_files": [],
+            "reserved_ports": reserved_ports,
         }
         self.meta_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
         return payload

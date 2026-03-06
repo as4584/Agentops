@@ -33,8 +33,8 @@ export default function PlanPanel() {
         fetch(`${API_BASE}/soul/goals`),
         fetch(`${API_BASE}/tasks`),
       ]);
-      if (gr.ok) setGoals(await gr.json());
-      if (tr.ok) setTasks(await tr.json());
+      if (gr.ok) { const d = await gr.json(); setGoals(Array.isArray(d) ? d : (d.goals ?? [])); }
+      if (tr.ok) { const d = await tr.json(); setTasks(Array.isArray(d) ? d : (d.tasks ?? [])); }
     } catch {}
   };
 

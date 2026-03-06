@@ -35,6 +35,8 @@ from backend.models import (
 )
 from backend.tools import execute_tool
 from backend.utils import logger
+from backend.utils.tool_ids import ToolIdRegistry, make_tool_call_id
+from backend.utils.tool_validator import ToolValidator, validator_for_agent
 
 
 # ---------------------------------------------------------------------------
@@ -61,6 +63,10 @@ class BaseAgent:
         self.llm = llm_client
         self.state = AgentState(agent_id=definition.agent_id)
         self._conversation_history: list[dict[str, str]] = []
+        # Tool ID sanitization state (per-conversation, reset each session)
+        self._tool_id_registry: ToolIdRegistry = ToolIdRegistry()
+        self._tool_validator: ToolValidator = validator_for_agent(definition.tool_permissions)
+        self._tool_call_sequence: int = 0
         logger.info(
             f"Agent initialized: {definition.agent_id} "
             f"(impact={definition.change_impact_level})"
@@ -168,9 +174,29 @@ class BaseAgent:
     async def _handle_tool_calls(self, response: str) -> str:
         """
         Parse LLM response for tool call patterns and execute them.
-        Pattern: [TOOL:tool_name(param=value, param2=value2)]
+
+        Supports two formats:
+        1. Legacy text pattern: ``[TOOL:tool_name(param=value)]``
+        2. Structured JSON block: ``[TOOL_CALLS:<json_array>]``
+
+        For every tool invocation:
+        - A deterministic call ID is generated via ``make_tool_call_id``.
+        - The tool name is validated against the allowed set; unknown names
+          receive a structured "tool not available" response (no execution).
+        - The call ID → canonical mapping is stored in ``_tool_id_registry``
+          for response correlation.
         """
         import re
+
+        # ── Structured tool_calls JSON block (OpenAI format bridged to text) ──
+        structured_pattern = r'\[TOOL_CALLS:(.*?)\]'
+        structured_match = re.search(structured_pattern, response, re.DOTALL)
+        if structured_match:
+            response = await self._handle_structured_tool_calls(
+                response, structured_match
+            )
+
+        # ── Legacy text pattern ──────────────────────────────────────────────
         tool_pattern = r'\[TOOL:(\w+)\(([^)]*)\)\]'
         matches = re.findall(tool_pattern, response)
 
@@ -178,7 +204,28 @@ class BaseAgent:
             return response
 
         for tool_name, params_str in matches:
-            # Parse parameters
+            # Validate tool name before execution.
+            validation = self._tool_validator.validate(tool_name)
+            if not validation.valid:
+                logger.warning(
+                    f"Agent {self.agent_id}: {validation.error_message}"
+                )
+                tool_call_str = f"[TOOL:{tool_name}({params_str})]"
+                blocked_str = f"\n[Tool Blocked: {tool_name}]\n{validation.error_message}\n"
+                response = response.replace(tool_call_str, blocked_str)
+                continue
+
+            # Generate deterministic tool call ID.
+            self._tool_call_sequence += 1
+            call_id = make_tool_call_id(
+                agent_id=self.agent_id,
+                tool_name=tool_name,
+                sequence=self._tool_call_sequence,
+            )
+            # Register for round-trip correlation.
+            self._tool_id_registry.register(call_id)
+
+            # Parse parameters.
             kwargs: dict[str, str] = {}
             if params_str.strip():
                 for param in params_str.split(","):
@@ -186,7 +233,7 @@ class BaseAgent:
                         key, value = param.split("=", 1)
                         kwargs[key.strip()] = value.strip().strip("'\"")
 
-            # Execute the tool through the guarded executor
+            # Execute the tool through the guarded executor.
             result = await execute_tool(
                 tool_name=tool_name,
                 agent_id=self.agent_id,
@@ -194,18 +241,84 @@ class BaseAgent:
                 **kwargs,
             )
 
-            # Replace tool call with result in response
+            # Replace tool call with result in response.
             tool_call_str = f"[TOOL:{tool_name}({params_str})]"
-            result_str = f"\n[Tool Result: {tool_name}]\n{_format_result(result)}\n"
+            result_str = (
+                f"\n[Tool Result: {tool_name} | id={call_id}]\n"
+                f"{_format_result(result)}\n"
+            )
             response = response.replace(tool_call_str, result_str)
 
-            # Add tool result to conversation for context
+            # Add tool result to conversation for context.
             self._conversation_history.append({
                 "role": "system",
-                "content": f"Tool {tool_name} returned: {_format_result(result)}",
+                "content": f"Tool {tool_name} (call_id={call_id}) returned: {_format_result(result)}",
             })
 
         return response
+
+    async def _handle_structured_tool_calls(
+        self,
+        response: str,
+        match: "re.Match[str]",
+    ) -> str:
+        """
+        Handle the JSON-array ``[TOOL_CALLS:<json>]`` format that bridges
+        structured OpenAI tool_calls to text-based agent responses.
+
+        Each element should be: ``{"name": "...", "arguments": {...}}``
+        """
+        import json as _json
+        import re
+
+        try:
+            calls: list[dict] = _json.loads(match.group(1))
+        except (_json.JSONDecodeError, ValueError) as exc:
+            logger.warning(f"Agent {self.agent_id}: malformed TOOL_CALLS JSON — {exc}")
+            return response
+
+        replacement_parts: list[str] = []
+
+        for call in calls:
+            tool_name: str = call.get("name", "")
+            arguments: dict = call.get("arguments", {})
+
+            # Validate.
+            validation = self._tool_validator.validate(tool_name)
+            if not validation.valid:
+                logger.warning(f"Agent {self.agent_id}: {validation.error_message}")
+                replacement_parts.append(
+                    f"\n[Tool Blocked: {tool_name}]\n{validation.error_message}\n"
+                )
+                continue
+
+            # Deterministic ID.
+            self._tool_call_sequence += 1
+            call_id = make_tool_call_id(
+                agent_id=self.agent_id,
+                tool_name=tool_name,
+                sequence=self._tool_call_sequence,
+            )
+            self._tool_id_registry.register(call_id)
+
+            result = await execute_tool(
+                tool_name=tool_name,
+                agent_id=self.agent_id,
+                allowed_tools=self.definition.tool_permissions,
+                **{k: str(v) for k, v in arguments.items()},
+            )
+
+            replacement_parts.append(
+                f"\n[Tool Result: {tool_name} | id={call_id}]\n"
+                f"{_format_result(result)}\n"
+            )
+            self._conversation_history.append({
+                "role": "system",
+                "content": f"Tool {tool_name} (call_id={call_id}) returned: {_format_result(result)}",
+            })
+
+        block = "\n".join(replacement_parts)
+        return response[:match.start()] + block + response[match.end():]
 
     def _build_tools_context(self) -> str:
         """Build a description of available tools for the prompt."""

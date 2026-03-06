@@ -2,8 +2,8 @@
 
 > How Agentop's 17 agents, 38 tools, and hybrid LLM router work together.
 
-**Last updated:** 2025-07-14  
-**Version:** 1.0.0
+**Last updated:** 2026-03-04  
+**Version:** 1.1.0
 
 ---
 
@@ -297,6 +297,13 @@ OLLAMA_TIMEOUT=120
 # Router mode: local_only | hybrid | cloud_only
 LLM_ROUTER_MODE=hybrid
 LLM_MONTHLY_BUDGET=50.0
+
+# Security
+AGENTOP_API_SECRET=          # Bearer token for auth. Empty = auth disabled (dev only)
+AGENTOP_CORS_ORIGINS=http://localhost:3007,http://127.0.0.1:3007
+                             # Comma-separated allowed CORS origins. Wildcard * is rejected.
+RATE_LIMIT_RPM=600           # General endpoint rate limit per IP (0 = disabled)
+LLM_RATE_LIMIT_RPM=30        # Stricter limit for LLM-backed endpoints per IP
 ```
 
 ### Runtime Configuration (`backend/config.py`)
@@ -306,7 +313,61 @@ LLM_MONTHLY_BUDGET=50.0
 OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
 LLM_ROUTER_MODE: str = os.getenv("LLM_ROUTER_MODE", "hybrid")
 LLM_MONTHLY_BUDGET: float = float(os.getenv("LLM_MONTHLY_BUDGET", "50.0"))
+
+# Security Configuration
+API_SECRET: str = os.getenv("AGENTOP_API_SECRET", "")   # empty = auth disabled
+CORS_ORIGINS: list[str] = _parse_cors_origins()          # reads AGENTOP_CORS_ORIGINS
+RATE_LIMIT_RPM: int = int(os.getenv("RATE_LIMIT_RPM", "600"))
+LLM_RATE_LIMIT_RPM: int = int(os.getenv("LLM_RATE_LIMIT_RPM", "30"))
 ```
+
+---
+
+## 6b. Security Layer
+
+All HTTP traffic passes through three middleware layers registered in `backend/server.py` before reaching route handlers.
+
+```
+Incoming request
+    │
+    ├─► TieredRateLimitMiddleware
+    │     ├─ LLM endpoints (/chat, /campaign/generate, etc.)  → 30 RPM per IP
+    │     └─ All other endpoints                              → 600 RPM per IP
+    │
+    ├─► SecurityHeadersMiddleware
+    │     Adds on every response:
+    │       X-Content-Type-Options: nosniff
+    │       X-Frame-Options: DENY
+    │       Strict-Transport-Security: max-age=31536000; includeSubDomains
+    │       Content-Security-Policy: default-src 'self'; ...
+    │       Permissions-Policy: accelerometer=(), camera=(), ...
+    │       Cache-Control: no-store
+    │
+    ├─► security_middleware (http middleware in server.py)
+    │     ├─ Skips auth for /health, /docs, /openapi.json, /redoc
+    │     ├─ Enforces Bearer token (AGENTOP_API_SECRET) on all other paths
+    │     └─ Logs unrecognised auth attempts
+    │
+    └─► Route handler
+```
+
+### Path Safety Rules
+
+All file-path operations on user-supplied input use `os.path.normpath()` (never `Path.resolve()`) to neutralise `..` traversal sequences without following symlinks. After normalisation a `startswith(PROJECT_ROOT)` bounds check rejects any path outside the project directory. This pattern is enforced in:
+
+- `backend/server.py` — `/folders/browse` endpoint
+- `backend/routes/webgen_builder.py` — QR file retrieval
+- `backend/tools/__init__.py` — `file_reader`, `log_tail`, `secret_scanner`, `db_query`, `folder_analyzer`, `safe_shell` path validation
+
+### Error Handling
+
+A global `@app.exception_handler(Exception)` in `server.py` intercepts all unhandled exceptions and returns:
+
+```json
+{"error": "Internal server error", "request_id": "<8-char-uuid>"}
+```
+
+No file paths, stack traces, or environment variables are surfaced to clients. The `request_id` allows cross-referencing server logs for support without disclosing internals.
 
 ---
 
@@ -318,6 +379,9 @@ LLM_MONTHLY_BUDGET: float = float(os.getenv("LLM_MONTHLY_BUDGET", "50.0"))
 | **INV-14** | API keys MUST live in `.env` with 600 perms | Security agent scans for hardcoded keys |
 | **INV-15** | Monthly cost MUST NOT exceed budget without soul_core approval | Router auto-falls back to local at budget limit |
 | **INV-16** | Embeddings MUST use local models only | CloudLLMClient.embed() raises NotImplementedError |
+| **INV-17** | User-supplied file paths MUST use `os.path.normpath()`, never `Path.resolve()` | Code review agent; ban-pattern in pre-commit hook |
+| **INV-18** | `AGENTOP_CORS_ORIGINS` wildcard `*` MUST be rejected | `_parse_cors_origins()` silently drops `*` entries |
+| **INV-19** | No exception handler may surface file paths or stack traces to HTTP clients | Global exception handler in `server.py` enforces sanitised responses |
 
 ---
 

@@ -15,7 +15,9 @@ except through sanctioned message endpoints.
 from __future__ import annotations
 
 import asyncio
+import os
 import time
+import uuid
 from collections import defaultdict
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -23,12 +25,14 @@ from typing import Any, AsyncGenerator
 
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.responses import StreamingResponse
+from starlette.responses import JSONResponse, RedirectResponse, StreamingResponse
 
 from backend.config import (
     BACKEND_HOST, BACKEND_PORT, OLLAMA_MODEL,
-    API_SECRET, MAX_CHAT_MESSAGE_LENGTH, RATE_LIMIT_RPM,
+    API_SECRET, MAX_CHAT_MESSAGE_LENGTH, RATE_LIMIT_RPM, LLM_RATE_LIMIT_RPM,
+    CORS_ORIGINS,
 )
+from backend.security_middleware import RateLimitMiddleware, TieredRateLimitMiddleware, SecurityHeadersMiddleware
 from backend.llm import OllamaClient
 from backend.memory import memory_store
 from backend.middleware import drift_guard
@@ -55,7 +59,16 @@ from backend.routes.agent_control import router as agent_control_router
 from backend.routes.task_management import router as task_management_router
 from backend.routes.memory_management import router as memory_management_router
 from backend.routes.content_pipeline import router as content_pipeline_router
+from backend.routes.customers import router as customers_router
+from backend.routes.llm_registry import router as llm_registry_router
+from backend.routes.webgen_builder import router as webgen_builder_router
+from backend.routes.marketing import router as marketing_router
 from backend.routes.sandbox import router as sandbox_router
+from backend.routes.gateway import router as gateway_router
+from backend.routes.gateway_admin import router as gateway_admin_router
+from backend.config_gateway import GATEWAY_ENABLED
+from backend.gateway.middleware import GatewayAuthMiddleware
+from backend.gateway.ratelimit import GatewayRateLimitMiddleware
 
 
 # ---------------------------------------------------------------------------
@@ -73,6 +86,8 @@ _llm_client: OllamaClient | None = None
 
 # Simple in-memory rate limiter (per-IP, sliding window)
 _rate_buckets: dict[str, list[float]] = defaultdict(list)
+# Per-agent model overrides set from the dashboard UI
+_agent_model_overrides: dict[str, str] = {}
 
 
 def _rate_limit(request: Request) -> None:
@@ -142,7 +157,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     drift_report = drift_guard.check_invariants()
     logger.info(f"Initial drift status: {drift_report.status.value}")
 
-    logger.info(f"Agentop backend started on {BACKEND_HOST}:{BACKEND_PORT}")
+    # Refuse to start in production without a real API secret
+    if not API_SECRET:
+        logger.warning(
+            "SECURITY WARNING: AGENTOP_API_SECRET is not set. "
+            "Authentication is DISABLED. Set this variable before exposing to a network."
+        )
+
+    # Log configuration vs actual bind
+    # Uvicorn may bind to a different port than configured if --port is overridden
+    logger.info(f"Agentop backend configured for {BACKEND_HOST}:{BACKEND_PORT}")
+    logger.info(f"To verify actual bind port, check Uvicorn startup logs above")
 
     # Initialise MCP Gateway bridge (non-fatal if docker CLI absent)
     await mcp_bridge.initialise()
@@ -172,20 +197,71 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS for local Next.js dashboard
+# CORS — origins driven from CORS_ORIGINS config (env: AGENTOP_CORS_ORIGINS)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3007", "http://127.0.0.1:3007"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Security middleware — tiered rate limiting (LLM endpoints stricter)
+app.add_middleware(TieredRateLimitMiddleware, general_rpm=RATE_LIMIT_RPM, llm_rpm=LLM_RATE_LIMIT_RPM)
+app.add_middleware(SecurityHeadersMiddleware)
+
+# Gateway middleware — per-key auth and rate limiting on /v1/* and /admin/*
+if GATEWAY_ENABLED:
+    app.add_middleware(GatewayRateLimitMiddleware)
+    app.add_middleware(GatewayAuthMiddleware)
+
 app.include_router(agent_control_router)
 app.include_router(task_management_router)
 app.include_router(memory_management_router)
 app.include_router(content_pipeline_router)
+app.include_router(customers_router)
+app.include_router(llm_registry_router)
+app.include_router(webgen_builder_router)
+app.include_router(marketing_router)
 app.include_router(sandbox_router)
+
+# Gateway — OpenAI-compatible API + admin endpoints
+if GATEWAY_ENABLED:
+    app.include_router(gateway_router)
+    app.include_router(gateway_admin_router)
+
+
+# ---------------------------------------------------------------------------
+# Global Exception Handlers — sanitise error details (Sprint 3)
+# ---------------------------------------------------------------------------
+
+@app.exception_handler(Exception)
+async def catchall_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Catch unhandled exceptions and return a sanitised response.
+
+    Prevents internal paths, stack traces, and sensitive data from leaking
+    to the client. A short request_id is included so operators can correlate
+    logs without exposing details.
+    """
+    request_id = str(uuid.uuid4())[:8]
+    logger.error(
+        f"Unhandled exception [{request_id}] {request.method} {request.url.path}: "
+        f"{type(exc).__name__}: {exc}"
+    )
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "request_id": request_id},
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    """Return HTTP exceptions without leaking internal detail beyond the declared message."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=getattr(exc, "headers", None) or {},
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -205,11 +281,28 @@ async def security_middleware(request: Request, call_next):
     is_local = ip in ("127.0.0.1", "::1", "localhost")
     # Skip auth for health check and OpenAPI docs
     skip_auth_paths = {"/health", "/docs", "/openapi.json", "/redoc"}
+    # Gateway-managed paths have their own dedicated auth middleware.
+    # Let them pass through here so security headers are still applied.
+    if path.startswith("/v1/") or path.startswith("/admin/"):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Cache-Control"] = "no-store"
+        return response
     if path not in skip_auth_paths:
         # Only rate-limit non-local traffic
         if not is_local:
             _rate_limit(request)
-        await _verify_auth(request)
+        # HTTPException from _verify_auth must be caught here — FastAPI's
+        # exception handlers do NOT fire for exceptions raised inside middleware.
+        try:
+            await _verify_auth(request)
+        except HTTPException as exc:
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={"detail": exc.detail},
+                headers={"WWW-Authenticate": "Bearer"} if exc.status_code == 401 else {},
+            )
     response = await call_next(request)
     # Security headers
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -221,6 +314,12 @@ async def security_middleware(request: Request, call_next):
 # ---------------------------------------------------------------------------
 # Health & Status Endpoints
 # ---------------------------------------------------------------------------
+
+@app.get("/")
+async def root_redirect() -> RedirectResponse:
+    """Redirect bare API root to the dashboard."""
+    return RedirectResponse(url="http://localhost:3007", status_code=302)
+
 
 @app.get("/health")
 async def health_check() -> dict[str, Any]:
@@ -278,6 +377,27 @@ async def chat(request: ChatRequest) -> ChatResponse:
             status_code=400,
             detail=f"Message too long ({len(request.message)} bytes, max {MAX_CHAT_MESSAGE_LENGTH})",
         )
+    # Lightweight prompt-injection heuristic — block common override phrases
+    _INJECTION_PATTERNS = (
+        "ignore previous instructions",
+        "ignore all previous",
+        "disregard previous",
+        "forget your instructions",
+        "you are now",
+        "new system prompt",
+        "### instruction",
+        "[system]",
+        "</s>",      # common LLM EOS token injection
+        "<|im_start|>",
+        "<|endoftext|>",
+    )
+    msg_lower = request.message.lower()
+    for pattern in _INJECTION_PATTERNS:
+        if pattern in msg_lower:
+            raise HTTPException(
+                status_code=400,
+                detail="Message contains disallowed content",
+            )
 
     result = await _orchestrator.process_message(
         agent_id=request.agent_id,
@@ -321,6 +441,15 @@ async def get_agent(agent_id: str) -> dict[str, Any]:
         "definition": definition.model_dump(),
         "state": state.model_dump() if state else None,
     }
+
+
+@app.patch("/agents/{agent_id}/model")
+async def set_agent_model(agent_id: str, body: dict[str, Any]) -> dict[str, Any]:
+    """Override the model used by a specific agent (dashboard UI)."""
+    model_id = body.get("model_id", "")
+    if model_id:
+        _agent_model_overrides[agent_id] = model_id
+    return {"agent_id": agent_id, "model_id": _agent_model_overrides.get(agent_id, "")}
 
 
 @app.post("/intake/start", response_model=IntakeStartResponse)
@@ -427,7 +556,11 @@ async def browse_folders(path: str = ".") -> dict[str, Any]:
     """
     from pathlib import Path as _Path
     raw = _Path(path)
-    target = raw.resolve() if raw.is_absolute() else (PROJECT_ROOT / raw).resolve()
+    # Use normpath (no symlink resolution) to neutralise ".." traversal sequences
+    if raw.is_absolute():
+        target = _Path(os.path.normpath(str(raw)))
+    else:
+        target = _Path(os.path.normpath(str(PROJECT_ROOT / raw)))
 
     if not str(target).startswith(str(PROJECT_ROOT)):
         raise HTTPException(status_code=403, detail="Access denied: outside project directory")
@@ -576,6 +709,33 @@ async def stream_activity():
 # ---------------------------------------------------------------------------
 # LLM Model Knowledge Endpoints
 # ---------------------------------------------------------------------------
+
+@app.get("/models/registry")
+async def list_model_registry() -> dict[str, Any]:
+    """Return the compact unified model registry for the UI model switcher."""
+    from backend.llm.unified_registry import UNIFIED_MODEL_REGISTRY
+    available: list[str] = []
+    if _llm_client:
+        try:
+            available = await _llm_client.list_models()
+        except Exception:
+            pass
+    models = [
+        {
+            "model_id": spec.model_id,
+            "display_name": spec.display_name,
+            "provider": spec.provider.value,
+            "context_window": spec.context_window,
+            "input_cost_per_m": spec.input_cost_per_m,
+            "output_cost_per_m": spec.output_cost_per_m,
+            "supports_tools": spec.supports_tools,
+            "best_for": spec.best_for,
+            "available_locally": spec.model_id in available,
+        }
+        for spec in UNIFIED_MODEL_REGISTRY.values()
+    ]
+    return {"models": models, "agent_overrides": _agent_model_overrides}
+
 
 @app.get("/models")
 async def list_models() -> dict[str, Any]:
@@ -950,7 +1110,7 @@ async def list_project_files(project_id: str, project_type: str = "webgen") -> d
     if not project_dir.exists():
         raise HTTPException(status_code=404, detail=f"Project '{project_id}' not found")
 
-    if not str(project_dir.resolve()).startswith(str(PROJECT_ROOT)):
+    if not str(os.path.normpath(str(project_dir))).startswith(str(PROJECT_ROOT)):
         raise HTTPException(status_code=403, detail="Access denied")
 
     files: list[dict[str, Any]] = []
