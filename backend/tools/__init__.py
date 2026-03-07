@@ -334,6 +334,65 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.READ_ONLY,
         requires_doc_update=False,
     ),
+
+    # ── Browser Control (Sprint 4) ───────────────────────────
+    "browser_open": ToolDefinition(
+        name="browser_open",
+        description="[Browser] Navigate to a URL in the agent's browser session (http/https only)",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
+    "browser_click": ToolDefinition(
+        name="browser_click",
+        description="[Browser] Click a page element by CSS selector",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
+    "browser_type": ToolDefinition(
+        name="browser_type",
+        description="[Browser] Type text into an input element by CSS selector",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
+    "browser_select": ToolDefinition(
+        name="browser_select",
+        description="[Browser] Select an option in a <select> element",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
+    "browser_snapshot": ToolDefinition(
+        name="browser_snapshot",
+        description="[Browser] Return the accessibility tree snapshot of the current page",
+        modification_type=ModificationType.READ_ONLY,
+        requires_doc_update=False,
+    ),
+    "browser_screenshot": ToolDefinition(
+        name="browser_screenshot",
+        description="[Browser] Capture a screenshot and save it under output/browser/",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
+    "browser_upload": ToolDefinition(
+        name="browser_upload",
+        description="[Browser] Upload a file via a file-input element",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
+    "browser_close": ToolDefinition(
+        name="browser_close",
+        description="[Browser] Close the agent's browser session",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
+    # -----------------------------------------------------------------------
+    # Sandbox tools (Sprint 8)
+    # -----------------------------------------------------------------------
+    "sandbox_exec": ToolDefinition(
+        name="sandbox_exec",
+        description="Execute a shell command inside the agent's Docker sandbox container (falls back to workspace directory when Docker is disabled)",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
 }
 
 
@@ -1217,12 +1276,60 @@ async def execute_tool(
 
     tool_fn = tool_functions.get(tool_name)
 
+    # Browser tools — routed through BrowserSessionRegistry (Sprint 4)
+    if tool_name.startswith("browser_"):
+        from backend.browser.tooling import (
+            browser_open, browser_click, browser_type, browser_select,
+            browser_snapshot, browser_screenshot, browser_upload, browser_close,
+        )
+        _browser_map: dict[str, Any] = {
+            "browser_open": lambda: browser_open(url=kwargs.get("url", ""), agent_id=agent_id),
+            "browser_click": lambda: browser_click(selector=kwargs.get("selector", ""), agent_id=agent_id),
+            "browser_type": lambda: browser_type(selector=kwargs.get("selector", ""), text=kwargs.get("text", ""), agent_id=agent_id),
+            "browser_select": lambda: browser_select(selector=kwargs.get("selector", ""), value=kwargs.get("value", ""), agent_id=agent_id),
+            "browser_snapshot": lambda: browser_snapshot(agent_id=agent_id),
+            "browser_screenshot": lambda: browser_screenshot(path=kwargs.get("path", ""), agent_id=agent_id),
+            "browser_upload": lambda: browser_upload(selector=kwargs.get("selector", ""), file_path=kwargs.get("file_path", ""), agent_id=agent_id),
+            "browser_close": lambda: browser_close(agent_id=agent_id),
+        }
+        tool_fn = _browser_map.get(tool_name)
+
     # MCP Gateway tools — route through MCPBridge
     if tool_name.startswith("mcp_"):
         bridge = get_mcp_bridge()
         # Strip non-serialisable kwargs keys
         mcp_args = {k: v for k, v in kwargs.items() if k not in ("agent_id", "allowed_tools")}
         tool_fn = lambda: bridge.call_tool(tool_name, agent_id, mcp_args)
+
+    # Sandbox exec — route through SandboxSession.exec_in_container (Sprint 8)
+    if tool_name == "sandbox_exec":
+        from sandbox.session_manager import SandboxSession
+        from backend.config import PROJECT_ROOT
+        _session_id: str = str(kwargs.get("session_id") or "")
+        _command: list[str] = list(kwargs.get("command") or [])
+        _timeout: int = int(kwargs.get("timeout") or 30)
+        if not _session_id:
+            async def _err_sid() -> dict[str, Any]:
+                return {"error": "sandbox_exec requires 'session_id'"}
+            tool_fn = _err_sid
+        elif not _command:
+            async def _err_cmd() -> dict[str, Any]:
+                return {"error": "sandbox_exec requires 'command' (non-empty list)"}
+            tool_fn = _err_cmd
+        else:
+            _sandbox = SandboxSession(
+                project_root=PROJECT_ROOT,
+                task="exec",
+                model="",
+                session_id=_session_id,
+            )
+            async def _sandbox_exec_inner(
+                _sb: Any = _sandbox,
+                _cmd: list[str] = _command,
+                _to: int = _timeout,
+            ) -> dict[str, Any]:
+                return _sb.exec_in_container(command=_cmd, timeout=_to)
+            tool_fn = _sandbox_exec_inner
 
     if tool_fn is None:
         return {"error": f"Tool '{tool_name}' registered but not implemented"}

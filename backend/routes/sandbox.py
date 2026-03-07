@@ -29,6 +29,9 @@ class SandboxCreateResponse(BaseModel):
     path: str
     task: str
     model: str
+    container_id: str | None = None
+    container_name: str | None = None
+    container_status: str | None = None
 
 
 class SandboxPromoteRequest(BaseModel):
@@ -82,7 +85,7 @@ def _session(session_id: str) -> SandboxSession:
 
 def _missing_required_checks(checks: QualityChecks) -> list[str]:
     missing: list[str] = []
-    checks_map = checks.model_dump() if hasattr(checks, "model_dump") else checks.dict()
+    checks_map = checks.model_dump()
     for check_name in LOCAL_LLM_REQUIRED_CHECKS:
         if checks_map.get(check_name) is not True:
             missing.append(check_name)
@@ -102,12 +105,15 @@ async def create_session(body: SandboxCreateRequest) -> SandboxCreateResponse:
         model=body.model,
         session_id=body.session_id,
     )
-    session.create()
+    meta = session.create()
     return SandboxCreateResponse(
         session_id=session.session_id,
         path=str(session.root),
         task=body.task,
         model=body.model,
+        container_id=meta.get("container_id"),
+        container_name=meta.get("container_name"),
+        container_status=meta.get("container_status"),
     )
 
 
@@ -152,7 +158,7 @@ async def release_files(session_id: str, body: SandboxReleaseRequest) -> dict[st
             },
         )
 
-    payload = {
+    payload: dict[str, Any] = {
         "files_changed": body.files,
         "source_model": session.model,
         "sandbox_session_id": session_id,
@@ -246,6 +252,30 @@ async def lhci_check_and_cleanup(session_id: str, body: LhciCheckRequest) -> dic
         "promoted": promoted,
         "status": "deleted",
     }
+
+
+class SandboxExecRequest(BaseModel):
+    command: list[str]
+    timeout: int = Field(default=30, ge=1, le=300)
+
+
+@router.post("/{session_id}/exec")
+async def exec_in_session(session_id: str, body: SandboxExecRequest) -> dict[str, Any]:
+    """Execute a command inside the session container (or locally if not containerised)."""
+    if not body.command:
+        raise HTTPException(status_code=422, detail="command must be a non-empty list")
+
+    session = _session(session_id)
+    try:
+        result = session.exec_in_container(body.command, timeout=body.timeout)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Session '{session_id}' not found")
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    return {"session_id": session_id, **result}
 
 
 @router.get("/log")

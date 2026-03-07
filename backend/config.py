@@ -21,6 +21,12 @@ PROJECT_ROOT: Path = Path(__file__).resolve().parent.parent
 BACKEND_DIR: Path = PROJECT_ROOT / "backend"
 DOCS_DIR: Path = PROJECT_ROOT / "docs"
 MEMORY_DIR: Path = BACKEND_DIR / "memory"
+OUTPUT_DIR: Path = PROJECT_ROOT / "output"
+BROWSER_ALLOWED_AGENTS: list[str] = [
+    a.strip()
+    for a in os.getenv("BROWSER_ALLOWED_AGENTS", "").split(",")
+    if a.strip()
+]
 
 # Governance documents
 SOURCE_OF_TRUTH_PATH: Path = DOCS_DIR / "SOURCE_OF_TRUTH.md"
@@ -41,6 +47,11 @@ OLLAMA_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", "120"))
 OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
 LLM_ROUTER_MODE: str = os.getenv("LLM_ROUTER_MODE", "hybrid")
 LLM_MONTHLY_BUDGET: float = float(os.getenv("LLM_MONTHLY_BUDGET", "50.0"))
+LLM_CIRCUIT_FAILURE_THRESHOLD: int = int(os.getenv("LLM_CIRCUIT_FAILURE_THRESHOLD", "3"))
+LLM_CIRCUIT_RESET_SECONDS: int = int(os.getenv("LLM_CIRCUIT_RESET_SECONDS", "300"))
+AGENTOP_WEBHOOK_SECRET: str = os.getenv("AGENTOP_WEBHOOK_SECRET", "")
+WEBHOOK_RATE_LIMIT_RPM: int = int(os.getenv("WEBHOOK_RATE_LIMIT_RPM", "60"))
+A2A_MAX_DEPTH: int = int(os.getenv("A2A_MAX_DEPTH", "4"))
 
 # ---------------------------------------------------------------------------
 # Server Configuration
@@ -154,6 +165,8 @@ SAFE_SHELL_BLACKLIST: list[str] = [
 # Drift Detection Configuration
 # ---------------------------------------------------------------------------
 DRIFT_CHECK_INTERVAL_SECONDS: int = int(os.getenv("DRIFT_CHECK_INTERVAL", "30"))
+SCHEDULER_DB_PATH: Path = Path(os.getenv("SCHEDULER_DB_PATH", str(PROJECT_ROOT / "backend" / "memory" / "scheduler.db")))
+WEBHOOKS_DB_PATH: Path = Path(os.getenv("WEBHOOKS_DB_PATH", str(PROJECT_ROOT / "backend" / "memory" / "webhooks.json")))
 
 # ---------------------------------------------------------------------------
 # Docker MCP Gateway Configuration
@@ -185,6 +198,27 @@ SANDBOX_FRONTEND_PORT_RANGE_START = int(os.getenv("SANDBOX_FRONTEND_PORT_RANGE_S
 SANDBOX_FRONTEND_PORT_RANGE_END = int(os.getenv("SANDBOX_FRONTEND_PORT_RANGE_END", "3999"))
 SANDBOX_BACKEND_PORT_RANGE_START = int(os.getenv("SANDBOX_BACKEND_PORT_RANGE_START", "8100"))
 SANDBOX_BACKEND_PORT_RANGE_END = int(os.getenv("SANDBOX_BACKEND_PORT_RANGE_END", "8999"))
+SANDBOX_DOCKER_ENABLED: bool = os.getenv("SANDBOX_DOCKER_ENABLED", "false").lower() == "true"
+SANDBOX_DOCKER_IMAGE: str = os.getenv("SANDBOX_DOCKER_IMAGE", "agentop/sandbox:latest")
+SANDBOX_DOCKER_NETWORK: str = os.getenv("SANDBOX_DOCKER_NETWORK", "none")
+SANDBOX_DOCKER_MEM_LIMIT: str = os.getenv("SANDBOX_DOCKER_MEM_LIMIT", "1g")
+SANDBOX_DOCKER_CPU_LIMIT: str = os.getenv("SANDBOX_DOCKER_CPU_LIMIT", "1.0")
+SANDBOX_DOCKER_PIDS_LIMIT: int = int(os.getenv("SANDBOX_DOCKER_PIDS_LIMIT", "256"))
+SANDBOX_DOCKER_READONLY_ROOTFS: bool = os.getenv("SANDBOX_DOCKER_READONLY_ROOTFS", "true").lower() == "true"
+
+# ---------------------------------------------------------------------------
+# Canvas + A2UI (Feature 5)
+# ---------------------------------------------------------------------------
+# Maximum canvas events (render/replace/append/clear) per session lifetime
+A2UI_MAX_EVENTS_PER_SESSION: int = int(os.getenv("A2UI_MAX_EVENTS_PER_SESSION", "200"))
+# Maximum widgets per canvas target per session (prevents DOM flooding)
+A2UI_MAX_WIDGETS_PER_TARGET: int = int(os.getenv("A2UI_MAX_WIDGETS_PER_TARGET", "50"))
+# Agents allowed to emit A2UI events (empty = all agents)
+A2UI_ALLOWED_AGENTS: list[str] = [
+    a.strip()
+    for a in os.getenv("A2UI_ALLOWED_AGENTS", "").split(",")
+    if a.strip()
+]
 
 # Ensure required directories exist
 MEMORY_DIR.mkdir(parents=True, exist_ok=True)
@@ -192,3 +226,5 @@ LOG_DIR.mkdir(parents=True, exist_ok=True)
 MCP_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 SANDBOX_ROOT_DIR.mkdir(parents=True, exist_ok=True)
 PLAYBOX_DIR.mkdir(parents=True, exist_ok=True)
+SCHEDULER_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+WEBHOOKS_DB_PATH.parent.mkdir(parents=True, exist_ok=True)

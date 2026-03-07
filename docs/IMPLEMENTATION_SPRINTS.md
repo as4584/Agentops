@@ -232,3 +232,31 @@ LLM endpoints rate-limited at 30 RPM: `/chat`, `/agents/message`, `/llm/generate
 ### Open Item
 
 CMD-001 (subprocess `cwd` validation before `vercel` CLI call in `webgen_builder.py` / `marketing.py`) is deferred to a future sprint.
+
+---
+
+## OpenClaw Adoption Track (2026-03-06)
+
+### Objectives
+- Implement owner-selected OpenClaw-inspired capabilities: **1, 3, 4, 5, 7, 8, 9, 10**
+- Preserve current Agentop invariants and avoid REST API regressions
+- Phase in Docker-backed sandboxing without disrupting existing sandbox/playbox flow
+
+### Planning Artifacts
+- Master spec + sprint breakdown: `docs/OPENCLAW_ADOPTION_SPECS.md`
+- Sandbox implementation runbook: `docs/SANDBOX_SETUP.md`
+
+### Locked Execution Order
+1. Feature 10 — Model Failover & Profile Rotation
+2. Feature 9 — Cron + Webhook Automation
+3. Feature 3 — Skills Platform v2
+4. Feature 7 — Agent-to-Agent Messaging
+5. Feature 8 — Per-Session Docker Sandboxing
+6. Feature 1 — WebSocket Control Plane
+7. Feature 4 — Browser Control
+8. Feature 5 — Canvas + A2UI
+
+### Delivery Notes
+- This track is intentionally split into small Codex-executable sprints with explicit file targets, tests, and acceptance criteria.
+- Any tool-permission change must update `docs/AGENT_REGISTRY.md`.
+- Any architectural invariant change must update `docs/SOURCE_OF_TRUTH.md`.

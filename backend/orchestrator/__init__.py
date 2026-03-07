@@ -18,8 +18,11 @@ Architecture Notes:
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, TypedDict
+import uuid
+
+from pydantic import BaseModel, Field
 
 from langgraph.graph import StateGraph, END
 
@@ -27,6 +30,7 @@ from backend.knowledge import KnowledgeVectorStore
 from backend.llm import OllamaClient
 from backend.memory import memory_store
 from backend.middleware import drift_guard
+from backend.config import A2A_MAX_DEPTH
 from backend.models import (
     AgentDefinition,
     AgentState,
@@ -86,6 +90,18 @@ INTAKE_QUESTIONS: list[tuple[str, str]] = [
     ("offers", "Which products/services should be promoted first?"),
     ("cta", "What call-to-actions should content push (book call, buy now, DM, email signup)?"),
 ]
+
+
+class AgentMessage(BaseModel):
+    message_id: str
+    thread_id: str
+    from_agent: str
+    to_agent: str
+    parent_message_id: str | None = None
+    depth: int = Field(default=0, ge=0)
+    purpose: str
+    payload: dict[str, Any]
+    created_at: str
 
 
 # ---------------------------------------------------------------------------
@@ -500,6 +516,90 @@ class AgentOrchestrator:
             if hasattr(agent, "definition"):
                 defs.append(agent.definition)
         return defs
+
+    def send_agent_message(
+        self,
+        from_agent: str,
+        to_agent: str,
+        purpose: str,
+        payload: dict[str, Any],
+        parent_message_id: str | None = None,
+        depth: int = 0,
+        allow_self: bool = False,
+        message_id: str | None = None,
+        thread_id: str | None = None,
+    ) -> dict[str, Any]:
+        if from_agent not in self._all_agent_ids:
+            raise ValueError(f"Unknown from_agent: {from_agent}")
+        if to_agent not in self._all_agent_ids:
+            raise ValueError(f"Unknown to_agent: {to_agent}")
+        if from_agent == to_agent and not allow_self:
+            raise ValueError("Self-send is not allowed without allow_self=true")
+        if depth > A2A_MAX_DEPTH:
+            raise ValueError(f"A2A depth exceeded max={A2A_MAX_DEPTH}")
+
+        resolved_message_id = message_id or f"a2a_{uuid.uuid4().hex}"
+        history = self.get_message_history(thread_id=thread_id or "") if thread_id else self.list_agent_messages(agent_id=from_agent, limit=500)
+        if any(item.get("message_id") == resolved_message_id for item in history):
+            raise ValueError(f"Duplicate message_id: {resolved_message_id}")
+
+        resolved_thread_id = thread_id or parent_message_id or resolved_message_id
+        envelope = AgentMessage(
+            message_id=resolved_message_id,
+            thread_id=resolved_thread_id,
+            from_agent=from_agent,
+            to_agent=to_agent,
+            parent_message_id=parent_message_id,
+            depth=depth,
+            purpose=purpose,
+            payload=payload,
+            created_at=datetime.now(timezone.utc).isoformat(),
+        )
+
+        memory_store.append_shared_event({
+            "type": "A2A_MESSAGE",
+            "thread_id": resolved_thread_id,
+            "message": envelope.model_dump(mode="json"),
+        })
+        logger.info(
+            "A2A message persisted",
+            event_type="a2a_message_sent",
+            message_id=resolved_message_id,
+            thread_id=resolved_thread_id,
+            from_agent=from_agent,
+            to_agent=to_agent,
+        )
+        return envelope.model_dump(mode="json")
+
+    def list_agent_messages(self, agent_id: str, limit: int = 50) -> list[dict[str, Any]]:
+        events = memory_store.get_shared_events(limit=max(limit * 5, 200))
+        matched: list[dict[str, Any]] = []
+        for event in events:
+            if not isinstance(event, dict):
+                continue
+            if event.get("type") != "A2A_MESSAGE":
+                continue
+            message = event.get("message")
+            if not isinstance(message, dict):
+                continue
+            if message.get("from_agent") == agent_id or message.get("to_agent") == agent_id:
+                matched.append(message)
+        return matched[-limit:]
+
+    def get_message_history(self, thread_id: str) -> list[dict[str, Any]]:
+        events = memory_store.get_shared_events(limit=2000)
+        matched: list[dict[str, Any]] = []
+        for event in events:
+            if not isinstance(event, dict):
+                continue
+            if event.get("type") != "A2A_MESSAGE":
+                continue
+            message = event.get("message")
+            if not isinstance(message, dict):
+                continue
+            if message.get("thread_id") == thread_id:
+                matched.append(message)
+        return matched
 
     async def reindex_knowledge(self) -> dict[str, Any]:
         """Force rebuild the local vector DB and return index stats."""

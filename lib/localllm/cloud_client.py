@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import re
 from pathlib import Path
 from typing import Any, Optional, TYPE_CHECKING
@@ -34,6 +33,8 @@ if TYPE_CHECKING:
     from backend.utils.tool_ids import ToolIdRegistry
 
 import httpx
+
+from backend.llm.profiles import ProfileRotator
 
 
 # ---------------------------------------------------------------------------
@@ -128,12 +129,21 @@ class CloudLLMClient:
         site_url: str = "https://agentop.dev",
         site_name: str = "Agentop",
     ) -> None:
-        self.api_key = api_key or os.getenv("OPENROUTER_API_KEY", "")
-        if not self.api_key:
-            raise ValueError(
-                "OPENROUTER_API_KEY not set. "
-                "Add it to .env or pass api_key= to CloudLLMClient."
-            )
+        self._fixed_api_key = (api_key or "").strip() or None
+        self.profile_rotator = ProfileRotator()
+        self.profile_rotator.load_from_env()
+
+        if self._fixed_api_key:
+            self.api_key = self._fixed_api_key
+        else:
+            try:
+                bootstrap_profile = self.profile_rotator.get_profile("openrouter")
+                self.api_key = bootstrap_profile.api_key
+            except ValueError as exc:
+                raise ValueError(
+                    "OPENROUTER_API_KEY not set. "
+                    "Add it to .env or pass api_key= to CloudLLMClient."
+                ) from exc
 
         self.model = model
         self.timeout = timeout
@@ -167,6 +177,46 @@ class CloudLLMClient:
             "HTTP-Referer": self.site_url,
             "X-Title": self.site_name,
         }
+
+    def _headers_for_key(self, api_key: str) -> dict[str, str]:
+        return {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": self.site_url,
+            "X-Title": self.site_name,
+        }
+
+    def _get_openrouter_auth(self) -> tuple[str, str | None]:
+        if self._fixed_api_key:
+            return self._fixed_api_key, None
+
+        profile = self.profile_rotator.get_profile("openrouter")
+        return profile.api_key, profile.profile_id
+
+    def _resolve_model_entry(self, model: Optional[str], resolved_model_id: str) -> dict[str, Any]:
+        if model and model in CLOUD_MODELS:
+            return CLOUD_MODELS[model]
+
+        if self.model in CLOUD_MODELS and (model is None):
+            return CLOUD_MODELS[self.model]
+
+        for entry in CLOUD_MODELS.values():
+            if entry.get("id") == resolved_model_id:
+                return entry
+
+        return CLOUD_MODELS[DEFAULT_CLOUD_MODEL]
+
+    def _estimate_request_cost(
+        self,
+        prompt_tokens: int,
+        completion_tokens: int,
+        model: Optional[str],
+        resolved_model_id: str,
+    ) -> float:
+        model_entry = self._resolve_model_entry(model=model, resolved_model_id=resolved_model_id)
+        input_cost = (prompt_tokens / 1_000_000) * float(model_entry.get("input_cost_per_m", 0.0))
+        output_cost = (completion_tokens / 1_000_000) * float(model_entry.get("output_cost_per_m", 0.0))
+        return round(input_cost + output_cost, 6)
 
     # ── Model resolution ─────────────────────────────────
 
@@ -326,6 +376,7 @@ class CloudLLMClient:
                          caller is responsible for desanitization).
         """
         model_id, extra_params = self._resolve_model(model)
+        api_key, profile_id = self._get_openrouter_auth()
 
         payload: dict[str, Any] = {
             "model": model_id,
@@ -339,16 +390,27 @@ class CloudLLMClient:
         try:
             resp = await self.client.post(
                 OPENROUTER_API_URL,
-                headers=self._headers(),
+                headers=self._headers_for_key(api_key),
                 json=payload,
             )
             resp.raise_for_status()
             data = resp.json()
 
             usage = data.get("usage", {})
-            self._total_input_tokens += usage.get("prompt_tokens", 0)
-            self._total_output_tokens += usage.get("completion_tokens", 0)
+            prompt_tokens = int(usage.get("prompt_tokens", 0) or 0)
+            completion_tokens = int(usage.get("completion_tokens", 0) or 0)
+            self._total_input_tokens += prompt_tokens
+            self._total_output_tokens += completion_tokens
             self._total_requests += 1
+
+            if profile_id:
+                call_cost = self._estimate_request_cost(
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens,
+                    model=model,
+                    resolved_model_id=model_id,
+                )
+                self.profile_rotator.record_spend(profile_id=profile_id, usd=call_cost)
 
             choices = data.get("choices", [])
             output_text = ""
@@ -408,7 +470,7 @@ class CloudLLMClient:
         try:
             resp = await self.client.get(
                 OPENROUTER_MODELS_URL,
-                headers=self._headers(),
+                headers=self._headers_for_key(self._get_openrouter_auth()[0]),
             )
             return resp.status_code == 200
         except Exception:
@@ -503,6 +565,7 @@ class CloudLLMClient:
         Core method: send messages to OpenRouter and return response text.
         """
         model_id, extra_params = self._resolve_model(model)
+        api_key, profile_id = self._get_openrouter_auth()
 
         payload: dict[str, Any] = {
             "model": model_id,
@@ -515,7 +578,7 @@ class CloudLLMClient:
         try:
             resp = await self.client.post(
                 OPENROUTER_API_URL,
-                headers=self._headers(),
+                headers=self._headers_for_key(api_key),
                 json=payload,
             )
             resp.raise_for_status()
@@ -523,9 +586,20 @@ class CloudLLMClient:
 
             # Track usage
             usage = data.get("usage", {})
-            self._total_input_tokens += usage.get("prompt_tokens", 0)
-            self._total_output_tokens += usage.get("completion_tokens", 0)
+            prompt_tokens = int(usage.get("prompt_tokens", 0) or 0)
+            completion_tokens = int(usage.get("completion_tokens", 0) or 0)
+            self._total_input_tokens += prompt_tokens
+            self._total_output_tokens += completion_tokens
             self._total_requests += 1
+
+            if profile_id:
+                call_cost = self._estimate_request_cost(
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens,
+                    model=model,
+                    resolved_model_id=model_id,
+                )
+                self.profile_rotator.record_spend(profile_id=profile_id, usd=call_cost)
 
             # Extract content
             choices = data.get("choices", [])

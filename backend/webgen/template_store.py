@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
@@ -41,7 +41,7 @@ class ComponentRecord(BaseModel):
     business_types: list[str] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
     source_url: str = ""
-    created_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 class TemplateRecord(BaseModel):
@@ -58,7 +58,7 @@ class TemplateRecord(BaseModel):
     nav_pattern: str = ""        # top-bar, sidebar, hamburger
     footer_pattern: str = ""
     section_order: list[str] = Field(default_factory=list)  # common section order
-    created_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 

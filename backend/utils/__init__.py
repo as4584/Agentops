@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import logging
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from threading import Lock
 from typing import Any
@@ -116,8 +116,8 @@ class CentralLogger:
 
     def log(self, level: str, message: str, **kwargs: Any) -> None:
         """General-purpose structured log entry."""
-        entry = {
-            "timestamp": datetime.utcnow().isoformat(),
+        entry: dict[str, Any] = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "level": level,
             "message": message,
             **kwargs,

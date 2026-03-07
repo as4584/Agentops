@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import socket
 import shutil
+import subprocess
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -11,6 +12,13 @@ from typing import Any
 
 from backend.config import (
     PLAYBOX_DIR,
+    SANDBOX_DOCKER_CPU_LIMIT,
+    SANDBOX_DOCKER_ENABLED,
+    SANDBOX_DOCKER_IMAGE,
+    SANDBOX_DOCKER_MEM_LIMIT,
+    SANDBOX_DOCKER_NETWORK,
+    SANDBOX_DOCKER_PIDS_LIMIT,
+    SANDBOX_DOCKER_READONLY_ROOTFS,
     SANDBOX_BACKEND_PORT_RANGE_END,
     SANDBOX_BACKEND_PORT_RANGE_START,
     SANDBOX_FRONTEND_PORT_RANGE_END,
@@ -53,8 +61,9 @@ def _collect_reserved_ports(base_dir: Path) -> set[int]:
         session_ports = meta.get("reserved_ports")
         if not isinstance(session_ports, dict):
             continue
+        session_ports_map = dict(session_ports)
         for key in ("frontend", "backend"):
-            value = session_ports.get(key)
+            value = session_ports_map.get(key)
             if isinstance(value, int):
                 reserved_ports.add(value)
     return reserved_ports
@@ -132,7 +141,8 @@ class SandboxSession:
         self.workspace.mkdir(parents=True, exist_ok=True)
         self.reports.mkdir(parents=True, exist_ok=True)
         reserved_ports = _allocate_session_ports(SANDBOX_ROOT_DIR)
-        payload = {
+        container_name = f"agentop-sbx-{self.session_id}"
+        payload: dict[str, Any] = {
             "session_id": self.session_id,
             "task": self.task,
             "model": self.model,
@@ -146,8 +156,16 @@ class SandboxSession:
             "status": "active",
             "promoted_files": [],
             "reserved_ports": reserved_ports,
+            "container_name": container_name,
+            "container_id": None,
+            "container_status": "not_started",
         }
         self.meta_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+        if SANDBOX_DOCKER_ENABLED and self.is_local_model:
+            container = self.start_container()
+            payload.update(container)
+
         return payload
 
     def read_meta(self) -> dict[str, Any]:
@@ -157,6 +175,164 @@ class SandboxSession:
 
     def _write_meta(self, data: dict[str, Any]) -> None:
         self.meta_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    def start_container(self) -> dict[str, Any]:
+        if not SANDBOX_DOCKER_ENABLED:
+            return {
+                "container_id": None,
+                "container_name": f"agentop-sbx-{self.session_id}",
+                "container_status": "disabled",
+            }
+
+        docker_bin = shutil.which("docker")
+        if not docker_bin:
+            raise RuntimeError("Docker CLI not found while SANDBOX_DOCKER_ENABLED=true")
+
+        meta = self.read_meta()
+        container_name = str(meta.get("container_name") or f"agentop-sbx-{self.session_id}")
+
+        cmd = [
+            docker_bin,
+            "run",
+            "-d",
+            "--name",
+            container_name,
+            "--network",
+            SANDBOX_DOCKER_NETWORK,
+            "--memory",
+            SANDBOX_DOCKER_MEM_LIMIT,
+            "--cpus",
+            SANDBOX_DOCKER_CPU_LIMIT,
+            "--pids-limit",
+            str(SANDBOX_DOCKER_PIDS_LIMIT),
+            "--tmpfs",
+            "/tmp:rw,noexec,nosuid,size=256m",
+            "-v",
+            f"{self.workspace}:/workspace:rw",
+            "-v",
+            f"{self.project_root}:/project_ro:ro",
+        ]
+        if SANDBOX_DOCKER_READONLY_ROOTFS:
+            cmd.append("--read-only")
+        cmd.append(SANDBOX_DOCKER_IMAGE)
+
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=45,
+            check=False,
+        )
+        if result.returncode != 0:
+            stderr = (result.stderr or "").strip()
+            raise RuntimeError(f"Failed to start sandbox container: {stderr}")
+
+        container_id = (result.stdout or "").strip()
+        meta["container_id"] = container_id or None
+        meta["container_name"] = container_name
+        meta["container_status"] = "running" if container_id else "unknown"
+        self._write_meta(meta)
+        return {
+            "container_id": meta.get("container_id"),
+            "container_name": meta.get("container_name"),
+            "container_status": meta.get("container_status"),
+        }
+
+    def stop_container(self) -> dict[str, Any]:
+        if not self.meta_path.exists():
+            return {
+                "container_id": None,
+                "container_name": None,
+                "container_status": "missing",
+            }
+
+        meta = self.read_meta()
+        container_id = str(meta.get("container_id") or "").strip()
+        container_name = str(meta.get("container_name") or "").strip()
+        container_ref = container_id or container_name
+
+        if container_ref and SANDBOX_DOCKER_ENABLED:
+            docker_bin = shutil.which("docker")
+            if docker_bin:
+                subprocess.run([docker_bin, "stop", container_ref], capture_output=True, text=True, timeout=20, check=False)
+                subprocess.run([docker_bin, "rm", container_ref], capture_output=True, text=True, timeout=20, check=False)
+
+        meta["container_status"] = "stopped" if container_ref else "not_started"
+        self._write_meta(meta)
+        return {
+            "container_id": meta.get("container_id"),
+            "container_name": meta.get("container_name"),
+            "container_status": meta.get("container_status"),
+        }
+
+    def exec_in_container(
+        self,
+        command: list[str],
+        timeout: int = 30,
+    ) -> dict[str, Any]:
+        """Execute a command inside the session's container (if running) or locally in the workspace.
+
+        Returns a dict with keys:
+            stdout, stderr, returncode, mode ("container" | "local"), container_id (str | None)
+        """
+        if not command:
+            raise ValueError("command must be a non-empty list")
+
+        meta = self.read_meta()
+
+        container_id = str(meta.get("container_id") or "").strip()
+        container_status = str(meta.get("container_status") or "").strip()
+        use_container = (
+            SANDBOX_DOCKER_ENABLED
+            and bool(container_id)
+            and container_status == "running"
+        )
+
+        if use_container:
+            docker_bin = shutil.which("docker")
+            if not docker_bin:
+                raise RuntimeError("Docker CLI not found while SANDBOX_DOCKER_ENABLED=true")
+
+            exec_cmd = [
+                docker_bin,
+                "exec",
+                "--no-new-privileges",
+                "-w",
+                "/workspace",
+                container_id,
+            ] + command
+
+            result = subprocess.run(
+                exec_cmd,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                check=False,
+            )
+            return {
+                "stdout": (result.stdout or "").strip(),
+                "stderr": (result.stderr or "").strip(),
+                "returncode": result.returncode,
+                "mode": "container",
+                "container_id": container_id,
+            }
+
+        # Fallback: run directly inside the workspace directory (non-containerised session)
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+            cwd=str(self.workspace),
+        )
+        return {
+            "stdout": (result.stdout or "").strip(),
+            "stderr": (result.stderr or "").strip(),
+            "returncode": result.returncode,
+            "mode": "local",
+            "container_id": None,
+        }
 
     def promote(self, files: list[str]) -> list[str]:
         promoted: list[str] = []
@@ -234,9 +410,11 @@ class SandboxSession:
 
     @staticmethod
     def parse_lhci_summary(summary_json_path: Path) -> dict[str, Any]:
-        raw = json.loads(summary_json_path.read_text(encoding="utf-8"))
-        if isinstance(raw, dict) and "summary" in raw and isinstance(raw["summary"], dict):
-            raw = raw["summary"]
+        loaded = json.loads(summary_json_path.read_text(encoding="utf-8"))
+        raw: dict[str, Any] = loaded if isinstance(loaded, dict) else {}
+        summary = raw.get("summary")
+        if isinstance(summary, dict):
+            raw = summary
         return {
             "performance": float(raw.get("performance", 0)),
             "accessibility": float(raw.get("accessibility", 0)),
@@ -287,6 +465,7 @@ class SandboxSession:
         deleted_at = _utc_now()
         promoted = promoted_files or []
         if self.root.exists():
+            self.stop_container()
             self.append_log(before_scores, after_scores, promoted, deleted_at)
             shutil.rmtree(self.root, ignore_errors=True)
 

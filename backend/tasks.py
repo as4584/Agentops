@@ -15,7 +15,7 @@ import asyncio
 import json
 import threading
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 
@@ -34,11 +34,11 @@ class ActivityEvent:
     def __init__(self, event_type: str, data: dict[str, Any]) -> None:
         self.event_type = event_type
         self.data = data
-        self.timestamp = datetime.utcnow().isoformat()
+        self.timestamp = datetime.now(timezone.utc).isoformat()
 
     def to_sse(self) -> str:
         """Format as an SSE message string."""
-        payload = {**self.data, "timestamp": self.timestamp}
+        payload: dict[str, Any] = {**self.data, "timestamp": self.timestamp}
         return f"event: {self.event_type}\ndata: {json.dumps(payload, default=str)}\n\n"
 
 
@@ -75,7 +75,7 @@ class TaskTracker:
     def _broadcast(self, event: ActivityEvent) -> None:
         """Push an event to all subscribers (non-blocking)."""
         with self._sub_lock:
-            dead: list[asyncio.Queue] = []
+            dead: list[asyncio.Queue[ActivityEvent]] = []
             for q in self._subscribers:
                 try:
                     q.put_nowait(event)
@@ -106,7 +106,7 @@ class TaskTracker:
                 "action": action,
                 "detail": detail,
                 "status": status,
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
                 "started_at": None,
                 "completed_at": None,
                 "duration_ms": None,
@@ -129,7 +129,7 @@ class TaskTracker:
             task = self._find(task_id)
             if task:
                 task["status"] = TaskStatus.RUNNING
-                task["started_at"] = datetime.utcnow().isoformat()
+                task["started_at"] = datetime.now(timezone.utc).isoformat()
         self._broadcast(ActivityEvent("task_started", {"task_id": task_id}))
 
     def complete_task(self, task_id: str, detail: str | None = None) -> None:
@@ -139,7 +139,7 @@ class TaskTracker:
         with self._lock:
             task = self._find(task_id)
             if task:
-                now = datetime.utcnow()
+                now = datetime.now(timezone.utc)
                 task["status"] = TaskStatus.COMPLETED
                 task["completed_at"] = now.isoformat()
                 agent_id = task.get("agent_id", "")
@@ -161,7 +161,7 @@ class TaskTracker:
         with self._lock:
             task = self._find(task_id)
             if task:
-                now = datetime.utcnow()
+                now = datetime.now(timezone.utc)
                 task["status"] = TaskStatus.FAILED
                 task["completed_at"] = now.isoformat()
                 task["error"] = error

@@ -65,6 +65,26 @@
           {
             "name": "cs",
             "description": "Talk to cs_agent — customer support, knowledge base lookup"
+          },
+          {
+            "name": "gsd-map",
+            "description": "Map the entire Agentop codebase → produces STACK.md, ARCHITECTURE.md, CONVENTIONS.md, CONCERNS.md in docs/gsd/"
+          },
+          {
+            "name": "gsd-plan",
+            "description": "Plan a numbered phase with research → draft → Gatekeeper verify loop. Usage: /gsd-plan <n> <description>"
+          },
+          {
+            "name": "gsd-exec",
+            "description": "Execute a planned phase in dependency-ordered parallel waves. Usage: /gsd-exec <n> [--dry-run]"
+          },
+          {
+            "name": "gsd-quick",
+            "description": "Ad-hoc task with GSD state tracking and optional commit. Usage: /gsd-quick <prompt> [--full]"
+          },
+          {
+            "name": "gsd-verify",
+            "description": "UAT verification of executed phase — passed/failed/unverifiable gap report. Usage: /gsd-verify [<n>]"
           }
         ]
       }

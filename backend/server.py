@@ -23,7 +23,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any, AsyncGenerator
 
-from fastapi import FastAPI, HTTPException, Request, Depends
+from fastapi import FastAPI, HTTPException, Request, Depends, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, RedirectResponse, StreamingResponse
 
@@ -55,7 +55,12 @@ from backend.tasks import task_tracker
 from backend.tools import execute_tool, get_tool_definitions
 from backend.utils import logger
 from backend.config import PROJECT_ROOT, LLM_MONTHLY_BUDGET
-from backend.routes.agent_control import router as agent_control_router
+from backend.scheduler import scheduler
+from backend.routes.agent_control import (
+    router as agent_control_router,
+    a2a_router,
+    set_orchestrator as set_agent_control_orchestrator,
+)
 from backend.routes.task_management import router as task_management_router
 from backend.routes.memory_management import router as memory_management_router
 from backend.routes.content_pipeline import router as content_pipeline_router
@@ -64,6 +69,12 @@ from backend.routes.llm_registry import router as llm_registry_router
 from backend.routes.webgen_builder import router as webgen_builder_router
 from backend.routes.marketing import router as marketing_router
 from backend.routes.sandbox import router as sandbox_router
+from backend.routes.scheduler import router as scheduler_router
+from backend.routes.webhooks import router as webhooks_router, set_dispatcher as set_webhook_dispatcher
+from backend.routes.skills import router as skills_router
+from backend.ws.hub import ws_hub, handle_ws_connection
+from backend.routes.a2ui import router as a2ui_router
+from backend.routes.gsd import router as gsd_router
 from backend.routes.gateway import router as gateway_router
 from backend.routes.gateway_admin import router as gateway_admin_router
 from backend.config_gateway import GATEWAY_ENABLED
@@ -148,6 +159,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Initialize orchestrator with LangGraph state machine
     _orchestrator = AgentOrchestrator(_llm_client)
     logger.info("Orchestrator initialized with all registered agents")
+    set_agent_control_orchestrator(_orchestrator)
+
+    async def _scheduler_dispatch(agent_id: str, message: str, context: dict[str, Any]) -> dict[str, Any]:
+        if not _orchestrator:
+            raise RuntimeError("Orchestrator not initialized")
+        return await _orchestrator.process_message(agent_id=agent_id, message=message, context=context)
+
+    scheduler.set_dispatcher(_scheduler_dispatch)
+    set_webhook_dispatcher(_scheduler_dispatch)
+    scheduler.start()
 
     # Boot the Soul Agent — loads identity, goals, and reflection history
     soul_boot = await _orchestrator.boot_soul()
@@ -174,9 +195,35 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     mcp_status = mcp_bridge.get_status()
     logger.info(f"MCP Gateway: enabled={mcp_status['enabled']}, cli={mcp_status['cli_available']}, tools={mcp_status['discovered_tools']}/{mcp_status['declared_tool_count']}")
 
+    # WebSocket hub — heartbeat + task event emitter
+    async def _ws_task_event_emitter() -> None:
+        """Subscribe to TaskTracker SSE bus and forward events to WS 'tasks' channel."""
+        q = task_tracker.subscribe()
+        try:
+            while True:
+                event = await q.get()
+                await ws_hub.broadcast(
+                    channel="tasks",
+                    event=event.event_type,
+                    payload={**event.data, "timestamp": event.timestamp},
+                )
+        except asyncio.CancelledError:
+            pass
+        finally:
+            task_tracker.unsubscribe(q)
+
+    _ws_heartbeat_task = asyncio.create_task(ws_hub.heartbeat_loop())
+    _ws_emitter_task = asyncio.create_task(_ws_task_event_emitter())
+    logger.info("WebSocket hub started (heartbeat + task emitter)")
+
     yield  # Application runs here
 
     # Shutdown
+    _ws_heartbeat_task.cancel()
+    _ws_emitter_task.cancel()
+    set_agent_control_orchestrator(None)
+    set_webhook_dispatcher(None)
+    scheduler.shutdown()
     await mcp_bridge.shutdown()
     if _llm_client:
         await _llm_client.close()
@@ -216,6 +263,7 @@ if GATEWAY_ENABLED:
     app.add_middleware(GatewayAuthMiddleware)
 
 app.include_router(agent_control_router)
+app.include_router(a2a_router)
 app.include_router(task_management_router)
 app.include_router(memory_management_router)
 app.include_router(content_pipeline_router)
@@ -224,11 +272,38 @@ app.include_router(llm_registry_router)
 app.include_router(webgen_builder_router)
 app.include_router(marketing_router)
 app.include_router(sandbox_router)
+app.include_router(scheduler_router)
+app.include_router(webhooks_router)
+app.include_router(skills_router)
+app.include_router(a2ui_router)
+app.include_router(gsd_router)
 
 # Gateway — OpenAI-compatible API + admin endpoints
 if GATEWAY_ENABLED:
     app.include_router(gateway_router)
     app.include_router(gateway_admin_router)
+
+
+# ---------------------------------------------------------------------------
+# WebSocket — Control Plane
+# ---------------------------------------------------------------------------
+
+@app.websocket("/ws/control")
+async def ws_control(
+    websocket: WebSocket,
+    client_id: str | None = None,
+) -> None:
+    """WebSocket control plane endpoint.
+
+    Clients subscribe to channels (``tasks``, ``agents``, ``logs``, ``*``)
+    and receive server-pushed events in real time.
+
+    Protocol:
+    - Inbound:  ``{"type": "subscribe", "channels": ["tasks", "agents"]}``
+    - Outbound: ``{"type": "event", "channel": "tasks", "event": "task_created", "payload": {...}}``
+    - Heartbeat: server pings every 20 s; client should reply with ``{"type": "pong"}``
+    """
+    await handle_ws_connection(websocket, ws_hub, client_id=client_id)
 
 
 # ---------------------------------------------------------------------------
@@ -819,6 +894,14 @@ async def llm_stats() -> dict[str, Any]:
     }
     cost_log: list[dict[str, Any]] = []
     budget_remaining = LLM_MONTHLY_BUDGET
+    circuit_states: dict[str, Any] = {}
+
+    try:
+        from backend.llm.unified_registry import unified_model_router
+
+        circuit_states = unified_model_router.get_health_summary()
+    except Exception:
+        circuit_states = {}
 
     # Look for a router on the llm_client (HybridClient) or orchestrator
     router_obj: LLMRouter | None = None
@@ -843,6 +926,7 @@ async def llm_stats() -> dict[str, Any]:
     return {
         "stats": router_stats,
         "cost_log": cost_log,
+        "circuit_states": circuit_states,
         "budget": {
             "monthly_limit_usd": LLM_MONTHLY_BUDGET,
             "spent_usd": router_stats.get("estimated_cost_usd", 0),

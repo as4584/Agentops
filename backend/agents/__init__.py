@@ -18,12 +18,12 @@ Governance Notes:
 from __future__ import annotations
 
 import json
-from datetime import datetime
-from typing import Any
+import re
+from datetime import datetime, timezone
+from typing import Any, cast
 
 from backend.llm import OllamaClient
 from backend.memory import memory_store
-from backend.middleware import drift_guard
 from backend.tasks import task_tracker, TaskStatus
 from backend.skills import build_skills_prompt
 from backend.models import (
@@ -31,7 +31,6 @@ from backend.models import (
     AgentState,
     AgentStatus,
     ChangeImpactLevel,
-    ModificationType,
 )
 from backend.tools import execute_tool
 from backend.utils import logger
@@ -103,7 +102,7 @@ class BaseAgent:
             The agent's response text.
         """
         self.state.status = AgentStatus.ACTIVE
-        self.state.last_active = datetime.utcnow()
+        self.state.last_active = datetime.now(timezone.utc)
 
         # Track task
         _tid = task_tracker.create_task(
@@ -119,10 +118,17 @@ class BaseAgent:
 
             # Build the full prompt with tool information and domain knowledge
             tools_info = self._build_tools_context()
-            skills_section = build_skills_prompt(self.definition.skills)
-            base_prompt = self.definition.system_prompt
+            runtime_context = context or {}
+            soul_context = str(runtime_context.get("soul_context") or "").strip()
+            skills_section = build_skills_prompt(self.definition.skills, self.agent_id)
+
+            prompt_sections: list[str] = [self.definition.system_prompt]
+            if soul_context:
+                prompt_sections.append(f"[SOUL CONTEXT]\n{soul_context}\n[/SOUL CONTEXT]")
             if skills_section:
-                base_prompt = f"{base_prompt}\n\n{skills_section}"
+                prompt_sections.append(skills_section)
+
+            base_prompt = "\n\n".join(prompt_sections)
             system_prompt = (
                 f"{base_prompt}\n\n"
                 f"Available tools:\n{tools_info}\n\n"
@@ -149,7 +155,7 @@ class BaseAgent:
                 {
                     "message": message,
                     "response": response[:500],
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 },
             )
 
@@ -186,7 +192,6 @@ class BaseAgent:
         - The call ID → canonical mapping is stored in ``_tool_id_registry``
           for response correlation.
         """
-        import re
 
         # ── Structured tool_calls JSON block (OpenAI format bridged to text) ──
         structured_pattern = r'\[TOOL_CALLS:(.*?)\]'
@@ -260,7 +265,7 @@ class BaseAgent:
     async def _handle_structured_tool_calls(
         self,
         response: str,
-        match: "re.Match[str]",
+        match: re.Match[str],
     ) -> str:
         """
         Handle the JSON-array ``[TOOL_CALLS:<json>]`` format that bridges
@@ -269,10 +274,9 @@ class BaseAgent:
         Each element should be: ``{"name": "...", "arguments": {...}}``
         """
         import json as _json
-        import re
 
         try:
-            calls: list[dict] = _json.loads(match.group(1))
+            calls: list[dict[str, Any]] = _json.loads(match.group(1))
         except (_json.JSONDecodeError, ValueError) as exc:
             logger.warning(f"Agent {self.agent_id}: malformed TOOL_CALLS JSON — {exc}")
             return response
@@ -281,7 +285,7 @@ class BaseAgent:
 
         for call in calls:
             tool_name: str = call.get("name", "")
-            arguments: dict = call.get("arguments", {})
+            arguments: dict[str, Any] = call.get("arguments", {})
 
             # Validate.
             validation = self._tool_validator.validate(tool_name)
@@ -322,7 +326,7 @@ class BaseAgent:
 
     def _build_tools_context(self) -> str:
         """Build a description of available tools for the prompt."""
-        lines = []
+        lines: list[str] = []
         for tool_name in self.definition.tool_permissions:
             from backend.tools import get_tool_definition
             tool_def = get_tool_definition(tool_name)
@@ -354,13 +358,14 @@ class BaseAgent:
 def _format_result(result: Any) -> str:
     """Format a tool result for display."""
     if isinstance(result, dict):
-        if "error" in result:
-            return f"Error: {result['error']}"
-        if "content" in result:
-            return result["content"][:1000]
-        if "stdout" in result:
-            return result["stdout"][:1000] or result.get("stderr", "")[:500]
-        return str(result)[:1000]
+        d = cast(dict[str, Any], result)
+        if "error" in d:
+            return f"Error: {d['error']}"
+        if "content" in d:
+            return str(d["content"])[:1000]
+        if "stdout" in d:
+            return str(d["stdout"])[:1000] or str(d.get("stderr", ""))[:500]
+        return str(d)[:1000]
     return str(result)[:1000]
 
 
@@ -389,7 +394,7 @@ class SoulAgent(BaseAgent):
     REFLECTION_KEY = "reflection_log"
     SESSION_KEY = "sessions"
 
-    _DEFAULT_IDENTITY = {
+    _DEFAULT_IDENTITY: dict[str, Any] = {
         "name": "Agentop Core",
         "values": [
             "correctness over speed",
@@ -425,36 +430,32 @@ class SoulAgent(BaseAgent):
         stored_identity = self.read_memory(self.IDENTITY_KEY)
         if not isinstance(stored_identity, dict):
             identity = dict(self._DEFAULT_IDENTITY)
-            identity["created_at"] = datetime.utcnow().isoformat()
+            identity["created_at"] = datetime.now(timezone.utc).isoformat()
             self.write_memory(self.IDENTITY_KEY, identity)
         else:
-            identity = stored_identity
+            identity = cast(dict[str, Any], stored_identity)
         self._identity = identity
 
         # 2. Reflection log
-        log_entries: list[dict[str, Any]] = self.read_memory(self.REFLECTION_KEY) or []
-        if not isinstance(log_entries, list):
-            log_entries = []
+        _raw_log = self.read_memory(self.REFLECTION_KEY)
+        log_entries: list[dict[str, Any]] = cast(list[dict[str, Any]], _raw_log) if isinstance(_raw_log, list) else []
         recent_reflections = log_entries[-5:]
 
         # 3. Goals
-        goals: list[dict[str, Any]] = self.read_memory(self.GOALS_KEY) or []
-        if not isinstance(goals, list):
-            goals = []
+        _raw_goals = self.read_memory(self.GOALS_KEY)
+        goals: list[dict[str, Any]] = cast(list[dict[str, Any]], _raw_goals) if isinstance(_raw_goals, list) else []
         self._active_goals = [g for g in goals if not g.get("completed", False)]
 
         # 4. Trust scores
-        trust: dict[str, float] = self.read_memory(self.TRUST_KEY) or {}
-        if not isinstance(trust, dict):
-            trust = {}
+        _raw_trust = self.read_memory(self.TRUST_KEY)
+        trust: dict[str, float] = cast(dict[str, float], _raw_trust) if isinstance(_raw_trust, dict) else {}
         self._trust_scores = trust
 
         # 5. Session event
-        sessions: list[dict[str, Any]] = self.read_memory(self.SESSION_KEY) or []
-        if not isinstance(sessions, list):
-            sessions = []
+        _raw_sessions = self.read_memory(self.SESSION_KEY)
+        sessions: list[dict[str, Any]] = cast(list[dict[str, Any]], _raw_sessions) if isinstance(_raw_sessions, list) else []
         self._session_count = len(sessions) + 1
-        sessions.append({"started_at": datetime.utcnow().isoformat(), "session": self._session_count})
+        sessions.append({"started_at": datetime.now(timezone.utc).isoformat(), "session": self._session_count})
         self.write_memory(self.SESSION_KEY, sessions[-100:])  # keep last 100
 
         from backend.memory import memory_store as _ms
@@ -463,7 +464,7 @@ class SoulAgent(BaseAgent):
             "session": self._session_count,
             "active_goals": len(self._active_goals),
             "recent_reflections": len(recent_reflections),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         })
 
         logger.info(f"SoulAgent boot complete — session {self._session_count}, {len(self._active_goals)} active goals")
@@ -496,19 +497,17 @@ class SoulAgent(BaseAgent):
             "Write a concise self-reflection (3-5 sentences) covering: "
             "what is going well, what concerns you, and one priority action."
         )
-        import json as _json
         reflection_text = await self.llm.generate(prompt=reflect_prompt)  # type: ignore[attr-defined]
 
         log_entry: dict[str, Any] = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "trigger": trigger,
             "reflection": reflection_text,
             "events_reviewed": len(recent_events),
         }
 
-        log_entries: list[dict[str, Any]] = self.read_memory(self.REFLECTION_KEY) or []
-        if not isinstance(log_entries, list):
-            log_entries = []
+        _raw_log = self.read_memory(self.REFLECTION_KEY)
+        log_entries: list[dict[str, Any]] = cast(list[dict[str, Any]], _raw_log) if isinstance(_raw_log, list) else []
         log_entries.append(log_entry)
         self.write_memory(self.REFLECTION_KEY, log_entries[-200:])  # keep last 200
 
@@ -518,16 +517,15 @@ class SoulAgent(BaseAgent):
     def set_goal(self, title: str, description: str, priority: str = "MEDIUM") -> dict[str, Any]:
         """Add a new active goal."""
         goal: dict[str, Any] = {
-            "id": f"goal_{int(datetime.utcnow().timestamp())}",
+            "id": f"goal_{int(datetime.now(timezone.utc).timestamp())}",
             "title": title,
             "description": description,
             "priority": priority.upper(),
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "completed": False,
         }
-        goals: list[dict[str, Any]] = self.read_memory(self.GOALS_KEY) or []
-        if not isinstance(goals, list):
-            goals = []
+        _raw_goals = self.read_memory(self.GOALS_KEY)
+        goals: list[dict[str, Any]] = cast(list[dict[str, Any]], _raw_goals) if isinstance(_raw_goals, list) else []
         goals.append(goal)
         self.write_memory(self.GOALS_KEY, goals)
         self._active_goals.append(goal)
@@ -535,13 +533,14 @@ class SoulAgent(BaseAgent):
 
     def complete_goal(self, goal_id: str) -> bool:
         """Mark a goal as completed."""
-        goals: list[dict[str, Any]] = self.read_memory(self.GOALS_KEY) or []
-        if not isinstance(goals, list):
+        _raw_goals = self.read_memory(self.GOALS_KEY)
+        if not isinstance(_raw_goals, list):
             return False
+        goals: list[dict[str, Any]] = cast(list[dict[str, Any]], _raw_goals)
         for g in goals:
             if g.get("id") == goal_id:
                 g["completed"] = True
-                g["completed_at"] = datetime.utcnow().isoformat()
+                g["completed_at"] = datetime.now(timezone.utc).isoformat()
         self.write_memory(self.GOALS_KEY, goals)
         self._active_goals = [g for g in goals if not g.get("completed", False)]
         return True

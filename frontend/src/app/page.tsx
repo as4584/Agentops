@@ -94,6 +94,7 @@ import {
   type ModelCapacity,
   type ProjectEntry,
 } from '@/lib/api';
+import LLMHealthPanel from '@/components/panels/LLMHealthPanel';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -1103,6 +1104,8 @@ export default function DashboardPage() {
               {/* SYSTEM TAB                                                    */}
               {/* ============================================================ */}
               <Tabs.Panel value="system">
+                <LLMHealthPanel />
+
                 {/* Drift Monitor */}
                 <Title order={4} mb="sm">Drift Monitor</Title>
                 <Card shadow="sm" withBorder mb="lg">

@@ -291,6 +291,25 @@ export interface LLMStats {
     total_out: number;
     total: number;
   };
+  circuit_states?: Record<string, {
+    model_id: string;
+    healthy: boolean;
+    circuit_open: boolean;
+    consecutive_failures: number;
+    last_error: string | null;
+  }>;
+}
+
+export interface ModelCircuitState {
+  model_id: string;
+  healthy: boolean;
+  circuit_open: boolean;
+  consecutive_failures: number;
+  last_error: string | null;
+}
+
+export interface LLMHealthData {
+  circuit_states: Record<string, ModelCircuitState>;
 }
 
 export interface ModelCapacity {
@@ -475,6 +494,7 @@ export const api = {
     }),
   // LLM stats & capacity
   llmStats: () => fetchAPI<LLMStats>('/llm/stats'),
+  llmHealth: () => fetchAPI<LLMHealthData>('/llm/stats'),
   llmCapacity: () => fetchAPI<LLMCapacity>('/llm/capacity'),
   llmEstimate: (promptTokens = 500, maxTokens = 2048) =>
     fetchAPI<LLMEstimate>(`/llm/estimate?prompt_tokens=${promptTokens}&max_tokens=${maxTokens}`),

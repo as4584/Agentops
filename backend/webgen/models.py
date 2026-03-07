@@ -6,7 +6,7 @@ WebGen Models — Data structures for the web generation pipeline.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Optional
 
@@ -143,8 +143,8 @@ class ClientBrief(BaseModel):
 class SiteProject(BaseModel):
     """Top-level project for a website generation job."""
     id: str = Field(default_factory=lambda: uuid.uuid4().hex[:12])
-    created_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
-    updated_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     status: SiteStatus = SiteStatus.BRIEF
     brief: ClientBrief = Field(default_factory=ClientBrief)
     pages: list[PageSpec] = Field(default_factory=list)
@@ -165,4 +165,4 @@ class SiteProject(BaseModel):
                 f"Allowed: {[s.value for s in allowed]}"
             )
         self.status = new_status
-        self.updated_at = datetime.utcnow().isoformat()
+        self.updated_at = datetime.now(timezone.utc).isoformat()
