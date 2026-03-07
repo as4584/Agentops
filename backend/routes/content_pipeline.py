@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
@@ -198,6 +199,45 @@ async def reject_job(job_id: str, body: RejectRequest = RejectRequest()) -> dict
     except (KeyError, ValueError) as e:
         raise HTTPException(400, str(e))
     return {"job_id": job_id, "status": job.status}
+
+
+# ── Calendar ──────────────────────────────────────────────────────────────────
+
+@router.get("/calendar")
+async def content_calendar() -> list[dict]:
+    """
+    Return all scheduled and approved jobs ordered by scheduled_time.
+    Used by the frontend ContentPanel Calendar view.
+    """
+    all_jobs = job_store.list_all()
+    calendar_statuses = {JobStatus.SCHEDULED, JobStatus.APPROVED, JobStatus.POSTED}
+    entries = [j for j in all_jobs if j.status in calendar_statuses]
+    entries.sort(key=lambda j: j.scheduled_time if j.scheduled_time else datetime.max.replace(tzinfo=timezone.utc))
+    return [
+        {
+            "job_id": j.job_id,
+            "topic": j.topic,
+            "status": j.status,
+            "scheduled_time": j.scheduled_time.isoformat() if j.scheduled_time else None,
+            "platform_targets": j.platform_targets,
+        }
+        for j in entries
+    ]
+
+
+# ── Pipeline shortcut ──────────────────────────────────────────────────────────
+
+@router.post("/run")
+async def run_pipeline() -> dict:
+    """
+    Shortcut: run the full pipeline pass.
+    Alias for POST /content/run/full — used by the ContentPanel "Run" button.
+    """
+    try:
+        results = await get_pipeline().run_full()
+    except Exception as e:
+        raise HTTPException(500, f"Pipeline run failed: {e}")
+    return results
 
 
 # ── Upload timing ──────────────────────────────────────────────────────────────

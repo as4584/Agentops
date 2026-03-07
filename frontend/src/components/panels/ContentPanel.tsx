@@ -116,7 +116,7 @@ const ContentPanel: FC = () => {
 
   const approveJob = async (id: string) => {
     try {
-      await fetch(`${API_BASE}/content/jobs/${id}/approve`, { method: 'POST' });
+      await fetch(`${API_BASE}/content/jobs/${id}/approve`, { method: 'PATCH' });
       await fetchJobs();
     } catch {
       /* silent */
@@ -127,7 +127,7 @@ const ContentPanel: FC = () => {
     if (!rejectJobId || !rejectReason.trim()) return;
     try {
       await fetch(`${API_BASE}/content/jobs/${rejectJobId}/reject`, {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: rejectReason }),
       });
