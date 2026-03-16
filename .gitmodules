@@ -1,0 +1,3 @@
+[submodule "pixel-agents/pixel-agents"]
+	path = pixel-agents/pixel-agents
+	url = https://github.com/pablodelucca/pixel-agents.git
