@@ -7,6 +7,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
   timeout: 30_000,
+  expect: { timeout: 15_000 },
   reporter: [['html', { outputFolder: '../reports/playwright/playwright-report', open: 'never' }]],
   outputDir: '../reports/playwright/test-results',
   use: {

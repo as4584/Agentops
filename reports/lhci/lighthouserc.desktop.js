@@ -6,7 +6,6 @@ module.exports = {
       startServerCommand: "npm run start",
       startServerReadyPattern: "Ready in",
       startServerReadyTimeout: 120000,
-      chromePath: "/root/.cache/ms-playwright/chromium-1208/chrome-linux64/chrome",
       settings: {
         preset: "desktop",
         chromeFlags: "--headless=new --no-sandbox --disable-dev-shm-usage --disable-gpu",
