@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Box,
@@ -26,7 +26,7 @@ const glassStyle = {
   borderRadius: '16px',
 };
 
-export default function WebgenPage() {
+function WebgenPageInner() {
   const searchParams = useSearchParams();
   const preselectedCustomerId = searchParams.get('customerId');
 
@@ -278,5 +278,13 @@ export default function WebgenPage() {
         </Card>
       )}
     </Stack>
+  );
+}
+
+export default function WebgenPage() {
+  return (
+    <Suspense>
+      <WebgenPageInner />
+    </Suspense>
   );
 }
