@@ -1,0 +1,60 @@
+{
+  "_meta": "LOCKED — edit only via vault_manager.py. Never edit manually.",
+  "_version": "1.0",
+  "_locked": true,
+
+  "name": "Xpel",
+  "type": "product_character",
+
+  "product": {
+    "official_name": "MHP XPEL Maximum Strength Herbal Diuretic",
+    "brand": "MHP (Maximum Human Performance)",
+    "format": "supplement box",
+    "colors": {
+      "primary": "navy blue",
+      "accent": "yellow/gold",
+      "text": "white"
+    },
+    "text_on_packaging": [
+      "MHP",
+      "XPEL",
+      "Maximum Strength Herbal Diuretic",
+      "Rapid Water Loss",
+      "Reduces Bloating",
+      "Supports Weight Loss"
+    ]
+  },
+
+  "character_features": {
+    "eyes": "big expressive cartoon eyes on front face of box",
+    "mouth": "small expressive cartoon mouth",
+    "arms": "tiny cartoon arms and hands extending from sides of box",
+    "legs": "small cartoon legs at bottom of box",
+    "size_relative_to_MrWilly": "about waist height when standing on table"
+  },
+
+  "personality": {
+    "energy": "energetic, proud, slightly nervous, eager to prove itself",
+    "expression_range": ["excited", "proud", "nervous", "happy", "defensive", "confident"]
+  },
+
+  "style_ref": "VideoGenerator/styles/Pixar/style.json",
+
+  "anchor_images": {
+    "front":      "VideoGenerator/characters/Xpel/diuretic/front.png",
+    "pose_02":    "VideoGenerator/characters/Xpel/diuretic/approved_poses/xpel_pose_02.png",
+    "pose_03":    "VideoGenerator/characters/Xpel/diuretic/approved_poses/xpel_pose_03.png",
+    "pose_04":    "VideoGenerator/characters/Xpel/diuretic/approved_poses/xpel_pose_04.png",
+    "pose_05":    "VideoGenerator/characters/Xpel/diuretic/approved_poses/xpel_pose_05.png"
+  },
+
+  "approved_poses_dir": "VideoGenerator/characters/Xpel/diuretic/approved_poses/",
+
+  "generation": {
+    "positive_prefix": "Pixar 3D animated feature film render, The Incredibles art style, MHP XPEL Diuretic box character, navy blue and yellow packaging, MHP logo and XPEL text fully readable, big cartoon eyes, small cartoon mouth, tiny arms and legs",
+    "negative": "spinning, glowing, golden particles, light bursts, wrong colors, unreadable text, realistic box with no face, different product, distorted packaging"
+  },
+
+  "drift_threshold": 0.25,
+  "_drift_note": "SSIM between cross-pose AI renders naturally scores 0.25-0.45. This threshold catches catastrophic identity loss only. Visual review happens in approval_gate.py."
+}

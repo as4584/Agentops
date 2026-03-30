@@ -1,0 +1,10 @@
+{
+  "id": "newsletter_weekly_tips",
+  "name": "Newsletter Weekly Tips",
+  "version": "1.0.0",
+  "description": "Generates Damian's weekly email newsletter for Innovation Development Solutions. Triggers on 'generate newsletter', 'write this week's email', or cron (Sunday 6pm EST). Uses local Ollama — zero cloud cost. Outputs subject, preview text, HTML body, and plain text fallback ready for Mailchimp/ConvertKit via Zapier.",
+  "allowed_agents": ["GSDAgent", "ContentAgent"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

@@ -69,17 +69,20 @@ from backend.routes.llm_registry import router as llm_registry_router
 from backend.routes.webgen_builder import router as webgen_builder_router
 from backend.routes.marketing import router as marketing_router
 from backend.routes.sandbox import router as sandbox_router
-from backend.routes.scheduler import router as scheduler_router
+from backend.routes.schedule_routes import router as scheduler_router
 from backend.routes.webhooks import router as webhooks_router, set_dispatcher as set_webhook_dispatcher
 from backend.routes.skills import router as skills_router
-from backend.ws.hub import ws_hub, handle_ws_connection
+from backend.routes.higgsfield import router as higgsfield_router
+from backend.websocket.hub import ws_hub, handle_ws_connection
 from backend.routes.a2ui import router as a2ui_router
 from backend.routes.gsd import router as gsd_router
 from backend.routes.gateway import router as gateway_router
 from backend.routes.gateway_admin import router as gateway_admin_router
+from backend.routes.ml import router as ml_router
 from backend.config_gateway import GATEWAY_ENABLED
 from backend.gateway.middleware import GatewayAuthMiddleware
 from backend.gateway.ratelimit import GatewayRateLimitMiddleware
+from deerflow.execution import ExecutionRecorder, ExecutionAnalyzer
 
 
 # ---------------------------------------------------------------------------
@@ -89,6 +92,8 @@ from backend.gateway.ratelimit import GatewayRateLimitMiddleware
 _start_time: float = 0.0
 _orchestrator: AgentOrchestrator | None = None
 _llm_client: OllamaClient | None = None
+_execution_recorder: ExecutionRecorder | None = None
+_execution_analyzer: ExecutionAnalyzer | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -138,7 +143,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     Initializes LLM client, orchestrator, and governance checks on startup.
     Cleans up resources on shutdown.
     """
-    global _start_time, _orchestrator, _llm_client
+    global _start_time, _orchestrator, _llm_client, _execution_recorder, _execution_analyzer
 
     _start_time = time.time()
 
@@ -160,6 +165,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     _orchestrator = AgentOrchestrator(_llm_client)
     logger.info("Orchestrator initialized with all registered agents")
     set_agent_control_orchestrator(_orchestrator)
+
+    # Execution recorder + async analyzer (OpenSpace-inspired)
+    _execution_recorder = ExecutionRecorder(base_dir=PROJECT_ROOT / "data" / "agents")
+    _execution_analyzer = ExecutionAnalyzer(
+        llm_client=_llm_client,
+        health_monitor=None,  # no chain.health_monitor at this layer; patch in later
+        repair_engine=None,
+    )
+    logger.info("ExecutionRecorder + ExecutionAnalyzer ready")
 
     async def _scheduler_dispatch(agent_id: str, message: str, context: dict[str, Any]) -> dict[str, Any]:
         if not _orchestrator:
@@ -275,8 +289,10 @@ app.include_router(sandbox_router)
 app.include_router(scheduler_router)
 app.include_router(webhooks_router)
 app.include_router(skills_router)
+app.include_router(higgsfield_router)
 app.include_router(a2ui_router)
 app.include_router(gsd_router)
+app.include_router(ml_router)
 
 # Gateway — OpenAI-compatible API + admin endpoints
 if GATEWAY_ENABLED:
@@ -479,6 +495,25 @@ async def chat(request: ChatRequest) -> ChatResponse:
         message=request.message,
         context=request.context,
     )
+
+    # Fire-and-forget post-run analysis (OpenSpace-inspired)
+    if _execution_recorder and _execution_analyzer:
+        run_id = _execution_recorder.start_run(
+            agent_id=request.agent_id,
+            message=request.message,
+        )
+        _execution_recorder.end_run(
+            run_id=run_id,
+            agent_id=request.agent_id,
+            response=result.get("response", ""),
+        )
+        asyncio.ensure_future(
+            _execution_analyzer.analyze_run(
+                run_id=run_id,
+                agent_id=request.agent_id,
+                recorder=_execution_recorder,
+            )
+        )
 
     if result.get("error") and not result.get("response"):
         raise HTTPException(status_code=400, detail=result["error"])

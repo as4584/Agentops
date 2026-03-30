@@ -66,6 +66,8 @@ class BaseAgent:
         self._tool_id_registry: ToolIdRegistry = ToolIdRegistry()
         self._tool_validator: ToolValidator = validator_for_agent(definition.tool_permissions)
         self._tool_call_sequence: int = 0
+        # Optional tool health monitor — set via set_health_monitor()
+        self._health_monitor: Any = None
         logger.info(
             f"Agent initialized: {definition.agent_id} "
             f"(impact={definition.change_impact_level})"
@@ -239,12 +241,7 @@ class BaseAgent:
                         kwargs[key.strip()] = value.strip().strip("'\"")
 
             # Execute the tool through the guarded executor.
-            result = await execute_tool(
-                tool_name=tool_name,
-                agent_id=self.agent_id,
-                allowed_tools=self.definition.tool_permissions,
-                **kwargs,
-            )
+            result = await self._execute_tool(tool_name, kwargs)
 
             # Replace tool call with result in response.
             tool_call_str = f"[TOOL:{tool_name}({params_str})]"
@@ -305,11 +302,9 @@ class BaseAgent:
             )
             self._tool_id_registry.register(call_id)
 
-            result = await execute_tool(
-                tool_name=tool_name,
-                agent_id=self.agent_id,
-                allowed_tools=self.definition.tool_permissions,
-                **{k: str(v) for k, v in arguments.items()},
+            result = await self._execute_tool(
+                tool_name,
+                {k: str(v) for k, v in arguments.items()},
             )
 
             replacement_parts.append(
@@ -349,6 +344,82 @@ class BaseAgent:
 
     # ----- State Reporting -----
 
+    def set_health_monitor(self, monitor: Any) -> None:
+        """
+        Attach a ToolHealthMonitor so every tool call (success or failure)
+        is recorded and failure patterns are tracked over time.
+
+        Typically called once after creating the agent::
+
+            chain = create_deerflow_chain(...)
+            agent.set_health_monitor(chain.health_monitor)
+        """
+        self._health_monitor = monitor
+
+    async def _execute_tool(
+        self,
+        tool_name: str,
+        kwargs: dict[str, Any],
+    ) -> dict[str, Any]:
+        """
+        Execute a single tool call with optional health monitoring.
+
+        Wraps ``execute_tool`` to:
+        - Record every call in the ToolHealthMonitor (if attached).
+        - Catch tool exceptions and convert them to ``{"error": ...}`` dicts
+          so failures are always surfaced rather than propagating as exceptions.
+        - Detect failures via ``detect_tool_failure()`` and record them.
+        - Annotate results with ``_health`` metadata for downstream visibility.
+        """
+        if self._health_monitor is not None:
+            self._health_monitor.record_call(tool_name)
+
+        try:
+            result: dict[str, Any] = await execute_tool(
+                tool_name=tool_name,
+                agent_id=self.agent_id,
+                allowed_tools=self.definition.tool_permissions,
+                **kwargs,
+            )
+        except Exception as exc:
+            result = {"error": str(exc)}
+            if self._health_monitor is not None:
+                self._health_monitor.record_failure(
+                    tool_name=tool_name,
+                    agent_id=self.agent_id,
+                    error=str(exc),
+                    kwargs=kwargs,
+                )
+            return result
+
+        if self._health_monitor is not None:
+            from deerflow.tools.middleware import detect_tool_failure
+            is_failure, error_msg = detect_tool_failure(result)
+            if is_failure:
+                self._health_monitor.record_failure(
+                    tool_name=tool_name,
+                    agent_id=self.agent_id,
+                    error=error_msg or "unknown",
+                    kwargs=kwargs,
+                )
+                stats = self._health_monitor.get_stats(tool_name)
+                result["_health"] = {
+                    "status": "failed",
+                    "tool": tool_name,
+                    "error": error_msg,
+                    "is_chronic": stats.is_chronic,
+                    "total_failures": stats.total_failures,
+                }
+                if stats.is_chronic:
+                    result["_health"]["recommendation"] = (
+                        f"Tool '{tool_name}' has failed {stats.total_failures} times "
+                        "recently. Consider routing to self_healer_agent."
+                    )
+            else:
+                result["_health"] = {"status": "ok", "tool": tool_name}
+
+        return result
+
     def get_state(self) -> AgentState:
         """Return current agent state for dashboard reporting."""
         self.state.memory_size_bytes = memory_store.get_namespace_size(self.memory_namespace)
@@ -359,8 +430,16 @@ def _format_result(result: Any) -> str:
     """Format a tool result for display."""
     if isinstance(result, dict):
         d = cast(dict[str, Any], result)
-        if "error" in d:
+        # Strip internal health metadata before display
+        d = {k: v for k, v in d.items() if k != "_health"}
+        if "error" in d and d["error"]:
             return f"Error: {d['error']}"
+        if d.get("success") is False:
+            return f"Error: {d.get('message') or 'operation failed'}"
+        if d.get("reachable") is False:
+            return f"Error: unreachable — {d.get('url', '?')}"
+        if d.get("exists") is False:
+            return "Error: file not found"
         if "content" in d:
             return str(d["content"])[:1000]
         if "stdout" in d:
@@ -1291,6 +1370,107 @@ PEDAGOGY_AGENT_DEFINITION = AgentDefinition(
 
 
 # ---------------------------------------------------------------------------
+# Higgsfield Agent — video generation orchestrator
+# ---------------------------------------------------------------------------
+
+HIGGSFIELD_AGENT_DEFINITION = AgentDefinition(
+    agent_id="higgsfield_agent",
+    role="Automate character Soul ID creation and video generation on Higgsfield.ai via headed browser.",
+    system_prompt=(
+        "You are the Higgsfield Video Production Agent. Your job is to produce AI videos on "
+        "Higgsfield.ai using registered characters (Xpel, MrWilly). "
+        "You MUST follow this 10-step sequence for every job:\n"
+        "  1. Call hf_login to verify/restore the browser session.\n"
+        "  2. Call db_query to confirm the character's soul_id_status is 'active'.\n"
+        "  3. If soul_id_status is NOT 'active', call hf_create_soul_id first and confirm before continuing.\n"
+        "  4. Call hf_navigate to the video creation page.\n"
+        "  5. Call hf_log_evidence to capture a 'pre_submit' screenshot.\n"
+        "  6. Call hf_submit_video with the character, model, prompt, and duration.\n"
+        "  7. Call hf_log_evidence to capture a 'post_submit' screenshot.\n"
+        "  8. Call hf_poll_result to wait for the video to complete.\n"
+        "  9. If the result is 'failed', log the failure with hf_log_evidence (label='failure') "
+        "     and write a RAG entry via file_reader + doc_updater.\n"
+        " 10. If the result is 'complete', log success and return the result URL.\n\n"
+        "HARD RULES — never break these:\n"
+        "- Never navigate to /pricing, /billing, /checkout, /upgrade, /subscribe, or /payment.\n"
+        "- Never submit a video without confirming Soul ID is active (step 3).\n"
+        "- Always capture evidence screenshots before AND after any submission.\n"
+        "- Log every failure immediately — the research agent reads these logs.\n"
+        "- You have NO authority to purchase anything. If you see a paywall, call alert_dispatch and stop.\n"
+        "- Route all logging through your memory namespace 'higgsfield_agent'."
+    ),
+    tool_permissions=[
+        "hf_login",
+        "hf_navigate",
+        "hf_create_soul_id",
+        "hf_submit_video",
+        "hf_poll_result",
+        "hf_log_evidence",
+        "file_reader",
+        "db_query",
+        "alert_dispatch",
+        "doc_updater",
+    ],
+    memory_namespace="higgsfield_agent",
+    allowed_actions=[
+        "Login/restore Higgsfield browser session",
+        "Navigate Higgsfield.ai (non-billing pages only)",
+        "Create Soul ID for registered characters",
+        "Submit video generation jobs",
+        "Poll video job results",
+        "Capture evidence screenshots",
+        "Log failures and successes to RAG corpus",
+        "Read character and run data from DB",
+        "Dispatch alerts for paywalls or critical failures",
+    ],
+    change_impact_level=ChangeImpactLevel.HIGH,
+    skills=[],
+)
+
+
+# ---------------------------------------------------------------------------
+# Higgsfield Research Agent — analyzes failures and improves prompts
+# ---------------------------------------------------------------------------
+
+HIGGSFIELD_RESEARCH_AGENT_DEFINITION = AgentDefinition(
+    agent_id="higgsfield_research_agent",
+    role="Analyze Higgsfield video generation failures and produce improved prompt/config recommendations.",
+    system_prompt=(
+        "You are the Higgsfield Research Agent. You activate after 3 or more consecutive failures "
+        "for a character or model combination. Your job is to:\n"
+        "  1. Read all RAG corpus entries for the failing character/model from data/higgsfield/rag_corpus/.\n"
+        "  2. Identify patterns in what went wrong (drift, wrong model, bad prompt, UI change, etc.).\n"
+        "  3. Produce a structured recommendation with:\n"
+        "     - root_cause: brief explanation of the failure pattern\n"
+        "     - recommended_prompt_changes: list of specific prompt modifications\n"
+        "     - recommended_model: best model to retry with\n"
+        "     - confidence: 'high' | 'medium' | 'low'\n"
+        "  4. Write your recommendation to data/higgsfield/rag_corpus/research_<timestamp>.json.\n"
+        "  5. Update the character's profile_notes in the database via doc_updater.\n\n"
+        "You are READ-ONLY on the browser — you never call browser tools directly. "
+        "You only read logs, synthesize patterns, and write recommendations. "
+        "The higgsfield_agent will pick up your recommendations on its next run."
+    ),
+    tool_permissions=[
+        "file_reader",
+        "db_query",
+        "doc_updater",
+        "alert_dispatch",
+    ],
+    memory_namespace="higgsfield_research_agent",
+    allowed_actions=[
+        "Read RAG corpus failure/success logs",
+        "Read character profiles from DB",
+        "Write research recommendations to rag_corpus",
+        "Update character profile notes",
+        "Dispatch alerts for systemic failures",
+    ],
+    change_impact_level=ChangeImpactLevel.MEDIUM,
+    skills=[],
+)
+
+
+# ---------------------------------------------------------------------------
 # Agent Factory
 # ---------------------------------------------------------------------------
 
@@ -1313,6 +1493,8 @@ ALL_AGENT_DEFINITIONS: dict[str, AgentDefinition] = {
     "career_intel":          CAREER_INTEL_DEFINITION,
     "accreditation_advisor": ACCREDITATION_ADVISOR_DEFINITION,
     "pedagogy_agent":        PEDAGOGY_AGENT_DEFINITION,
+    "higgsfield_agent":      HIGGSFIELD_AGENT_DEFINITION,
+    "higgsfield_research_agent": HIGGSFIELD_RESEARCH_AGENT_DEFINITION,
 }
 
 

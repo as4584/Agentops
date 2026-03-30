@@ -1,0 +1,243 @@
+nohup: ignoring input
+
+════════════════════════════════════════════════════════════
+ CAMPAIGN: xpel_ad  (7 scenes)
+ Rejections queued: ['scene_01', 'scene_02', 'scene_03', 'scene_04', 'scene_05', 'scene_06', 'scene_07']
+════════════════════════════════════════════════════════════
+
+  [NOTE] scene_01 — injecting rejection note: "our character gbut he doest not have a beard. in the original character model we made he doesnt have a beard."
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_01
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly']
+  Drift limit: 0.25
+  [SEED] Using override: frame_1.png
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors...
+  [RETRY]  our character gbut he doest not have a beard. in the original character model we made he doesnt have a beard.
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166a4/8kIXfn6eMP0a8RVgpOcJA_ab409cacb44a494d91a339614499e68b.png
+  [SAVED] scene_01.png
+  [DRIFT] 0.168  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166a6/kKTz8dm1wv6OeN9l2zQpE_675d00ce3587451389427ae2c7cc20c4.png
+  [SAVED] scene_01.png
+  [DRIFT] 0.170  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166a7/VSeZi6WBgCYgVdp0IDeVZ_6aea8a6458504b4f94441b1247d5264a.png
+  [SAVED] scene_01.png
+  [DRIFT] 0.171  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries reached — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_01.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+  [NOTE] scene_02 — injecting rejection note: "whats wrong is that the image is jusf mr willy but i dont see xpel in the same image and we lost our background. we have texts above which is just not supposed to be there"
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_02
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly', 'Xpel']
+  Drift limit: 0.25
+  [SEED] Using override: frame_2.png
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors...
+  [RETRY]  whats wrong is that the image is jusf mr willy but i dont see xpel in the same image and we lost our background. we have texts above which is just not supposed to be there
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166a8/rkPRxxvOIUjkwvAi6gD0b_e69aab7a0ca742e4b9406b3d719b1300.png
+  [SAVED] scene_02.png
+  [DRIFT] 0.160  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166aa/etfIOxEEV7WlJpqtPzAI6_e3dc1a26a4794755a6824423f8742fdd.png
+  [SAVED] scene_02.png
+  [DRIFT] 0.140  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166ab/F0v6OCsb_HEDyR-8gv7Bf_aa9f27025ad84c7c967f526b2e6f4109.png
+  [SAVED] scene_02.png
+  [DRIFT] 0.143  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries reached — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_02.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+  [NOTE] scene_03 — injecting rejection note: "his hands arent crossed, xpel doesnt look like the original model we made, also we lost the table in the original image and script"
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_03
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly', 'Xpel']
+  Drift limit: 0.25
+  [SEED] Using override: frame_3.png
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors...
+  [RETRY]  his hands arent crossed, xpel doesnt look like the original model we made, also we lost the table in the original image and script
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166ac/M8_r0oDXBmMHCVQb93Lsp_ceabee9a98a64cb0acb3699243fb527a.png
+  [SAVED] scene_03.png
+  [DRIFT] 0.282  ✅ PASSED  (threshold: 0.25)
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_03.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+  [NOTE] scene_04 — injecting rejection note: "we didnt preserve the background, wd make a new character which we've never seen before. also mr willy isnt accurate to his script"
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_04
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly', 'Xpel']
+  Drift limit: 0.25
+  [SEED] Using override: frame_4.png
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors...
+  [RETRY]  we didnt preserve the background, wd make a new character which we've never seen before. also mr willy isnt accurate to his script
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166ae/V2Ta54DLJ99cC_FnFDPwr_564b673313184ef6ad5938002b781e01.png
+  [SAVED] scene_04.png
+  [DRIFT] 0.171  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166af/lGbz_9M-RDD5OvcpIJhVm_66c8f214415045c88650d577254ac26f.png
+  [SAVED] scene_04.png
+  [DRIFT] 0.162  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166b0/973_ZXaTBzx_DepeZpP55_4b4736506c444b088a3ce9f7a6d21905.png
+  [SAVED] scene_04.png
+  [DRIFT] 0.117  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries reached — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_04.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+  [NOTE] scene_05 — injecting rejection note: "same reasons as the last frame"
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_05
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly', 'Xpel']
+  Drift limit: 0.25
+  [SEED] Using override: frame_5.png
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors...
+  [RETRY]  same reasons as the last frame
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166b2/ZzsrxKiJmGiMAKSuki-dx_e4834f915205475e92cf9b44fb2b0e81.png
+  [SAVED] scene_05.png
+  [DRIFT] 0.189  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166b3/G5SiX5kISUghCP42WIYkd_0e7b8b4a03fd4401b56e24c6127d0210.png
+  [SAVED] scene_05.png
+  [DRIFT] 0.237  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166b4/bMLBIitMercO-2bWKhWbT_b8f218ac6d2f4ab0958cc3ccf740f76e.png
+  [SAVED] scene_05.png
+  [DRIFT] 0.175  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries reached — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_05.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+  [NOTE] scene_06 — injecting rejection note: "doesnt follow the script and this guy has a beard now"
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_06
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly', 'Xpel']
+  Drift limit: 0.25
+  [SEED] Using override: frame_6.png
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors...
+  [RETRY]  doesnt follow the script and this guy has a beard now
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166b6/avGSLwNkFx0Rnry8plCz9_52a8960504934549959af99ee82c228e.png
+  [SAVED] scene_06.png
+  [DRIFT] 0.132  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166b7/Wk_sDVPs73Rrvg9i73OA2_7de41ca0ec8a4a4e89c7467f6cbda3cf.png
+  [SAVED] scene_06.png
+  [DRIFT] 0.130  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166b8/CzPBdZzgwBdAay2mn7o-l_0d7f5b303ec94c079010eb989417851b.png
+  [SAVED] scene_06.png
+  [DRIFT] 0.130  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries reached — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_06.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+  [NOTE] scene_07 — injecting rejection note: "doesnt make sense compared to its script"
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_07
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly', 'Xpel']
+  Drift limit: 0.25
+  [SEED] Using override: frame_7.png
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors...
+  [RETRY]  doesnt make sense compared to its script
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166ba/mIVqwt5BbEbt6rfhgA70-_85e346d2b46c46c781e42b1903e76902.png
+  [SAVED] scene_07.png
+  [DRIFT] 0.219  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166bb/f_4e9N5EHsEzVNETP3GHo_cee023e4f40040669e25a5ab2805bc94.png
+  [SAVED] scene_07.png
+  [DRIFT] 0.217  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9166bc/5ZYHrG-vQJEXSGWFfxTML_d81b901e6f974433ba05942aed671aab.png
+  [SAVED] scene_07.png
+  [DRIFT] 0.190  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries reached — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_07.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+
+════════════════════════════════════════════════════════════
+ CAMPAIGN SUMMARY
+════════════════════════════════════════════════════════════
+  scene_01  ✅ pending
+  scene_02  ✅ pending
+  scene_03  ✅ pending
+  scene_04  ✅ pending
+  scene_05  ✅ pending
+  scene_06  ✅ pending
+  scene_07  ✅ pending
+
+  Run: python scripts/approval_gate.py --campaign xpel_ad

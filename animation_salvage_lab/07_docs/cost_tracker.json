@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "currency": "USD",
+    "last_updated": "2026-03-10T10:05:18.492350+00:00",
+    "receipts_dir": "animation_salvage_lab/07_docs/receipts"
+  },
+  "totals": {
+    "all_time_spent_usd": 25.805,
+    "all_time_clips_generated": 7,
+    "all_time_seconds_generated": 70.0
+  },
+  "by_model": {
+    "hailuo": {
+      "total_spent_usd": 0,
+      "total_clips": 0,
+      "total_seconds": 0
+    },
+    "kling_v1_standard": {
+      "total_spent_usd": 0,
+      "total_clips": 0,
+      "total_seconds": 0
+    },
+    "kling_v1_6_pro": {
+      "total_spent_usd": 0.805,
+      "total_clips": 7,
+      "total_seconds": 35.0
+    },
+    "kling_v2_master": {
+      "total_spent_usd": 0,
+      "total_clips": 0,
+      "total_seconds": 0
+    },
+    "veo3_1_fast": {
+      "total_spent_usd": 0,
+      "total_clips": 0,
+      "total_seconds": 0
+    },
+    "veo3_1_standard": {
+      "total_spent_usd": 0,
+      "total_clips": 0,
+      "total_seconds": 0
+    },
+    "runway_gen2": {
+      "total_spent_usd": 0,
+      "total_clips": 0,
+      "total_seconds": 0
+    },
+    "other": {
+      "total_spent_usd": 0,
+      "total_clips": 0,
+      "total_seconds": 0
+    }
+  },
+  "notes": {
+    "pre_tracker_spend_usd": 25.0,
+    "pre_tracker_note": "Estimated spend before cost tracking was set up. Breakdown by model unknown."
+  },
+  "sessions": [
+    {
+      "receipt_id": "20260310T100518_kling_v1_6_pro",
+      "timestamp": "2026-03-10T10:05:18.492350+00:00",
+      "campaign": "xpel_ad",
+      "model": "kling_v1_6_pro",
+      "clips": 7,
+      "total_seconds": 35.0,
+      "cost_usd": 0.805,
+      "receipt_file": "animation_salvage_lab/07_docs/receipts/receipt_2026-03-10T10-05-18-492350+00-00_kling_v1_6_pro_xpel_ad.json"
+    }
+  ]
+}

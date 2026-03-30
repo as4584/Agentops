@@ -1,0 +1,103 @@
+
+════════════════════════════════════════════════════════════
+ CAMPAIGN: xpel_ad  (7 scenes)
+ Mode: ORIGINALS (frame_1-7.png)
+════════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════════
+ ANIMATION ENGINE — scene_01
+════════════════════════════════════════════════════════════
+  Source : frame_1.png  (original)
+  Seed   : 1001   Duration: 5s
+  [PROMPT] Pixar 3D animated feature film, The Incredibles art style, subsurface scattering, physically based rendering, warm cinematic lighting. pharmaceutical laboratory corridor. CAMERA: slow intentional push...
+  [FAL] Uploading frame_1.png...
+  [FAL] Uploaded → https://v3b.fal.media/files/b/0a91699a/viIgPygvLDol1GUHj5y96_frame_1.png
+  [FAL] Submitting to Kling v2.1...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9169a0/nhbIFu4SoKKSPQmOcIInk_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/animated/scene_01.mp4
+
+════════════════════════════════════════════════════════════
+ ANIMATION ENGINE — scene_02
+════════════════════════════════════════════════════════════
+  Source : frame_2.png  (original)
+  Seed   : 1002   Duration: 10s
+  [PROMPT] Pixar 3D animated feature film, The Incredibles art style, subsurface scattering, physically based rendering, warm cinematic lighting. pharmaceutical laboratory corridor. CAMERA: very slow subtle zoom...
+  [FAL] Uploading frame_2.png...
+  [FAL] Uploaded → https://v3b.fal.media/files/b/0a9169a0/QMeYDClEgpeZFsR-KfQPr_frame_2.png
+  [FAL] Submitting to Kling v2.1...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9169ac/h0D2nEv0aj9PRRnlyMTXw_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/animated/scene_02.mp4
+
+════════════════════════════════════════════════════════════
+ ANIMATION ENGINE — scene_03
+════════════════════════════════════════════════════════════
+  Source : frame_3.png  (original)
+  Seed   : 1003   Duration: 5s
+  [PROMPT] Pixar 3D animated feature film, The Incredibles art style, subsurface scattering, physically based rendering, warm cinematic lighting. pharmaceutical laboratory corridor. CAMERA: slow push in toward t...
+  [FAL] Uploading frame_3.png...
+  [FAL] Uploaded → https://v3b.fal.media/files/b/0a9169ac/lfEAGi6Mhm61qeXY4I_Bi_frame_3.png
+  [FAL] Submitting to Kling v2.1...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9169b2/0unab7StdrPBDMoW5m1yo_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/animated/scene_03.mp4
+
+════════════════════════════════════════════════════════════
+ ANIMATION ENGINE — scene_04
+════════════════════════════════════════════════════════════
+  Source : frame_4.png  (original)
+  Seed   : 1004   Duration: 10s
+  [PROMPT] Pixar 3D animated feature film, The Incredibles art style, subsurface scattering, physically based rendering, warm cinematic lighting. pharmaceutical laboratory corridor. CAMERA: very slow pan from Xp...
+  [FAL] Uploading frame_4.png...
+  [FAL] Uploaded → https://v3b.fal.media/files/b/0a9169b3/rFX-FWKEH36a8OMu7xhws_frame_4.png
+  [FAL] Submitting to Kling v2.1...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9169be/0z9P-w88oWEmXamH36pjl_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/animated/scene_04.mp4
+
+════════════════════════════════════════════════════════════
+ ANIMATION ENGINE — scene_05
+════════════════════════════════════════════════════════════
+  Source : frame_5.png  (original)
+  Seed   : 1005   Duration: 5s
+  [PROMPT] Pixar 3D animated feature film, The Incredibles art style, subsurface scattering, physically based rendering, warm cinematic lighting. pharmaceutical laboratory corridor. CAMERA: slow deliberate push ...
+  [FAL] Uploading frame_5.png...
+  [FAL] Uploaded → https://v3b.fal.media/files/b/0a9169be/BBuKdhjxfY8LedIqYOEDf_frame_5.png
+  [FAL] Submitting to Kling v2.1...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9169c5/txAOaHrBrdZOdSCpkmayp_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/animated/scene_05.mp4
+
+════════════════════════════════════════════════════════════
+ ANIMATION ENGINE — scene_06
+════════════════════════════════════════════════════════════
+  Source : frame_6.png  (original)
+  Seed   : 1006   Duration: 10s
+  [PROMPT] Pixar 3D animated feature film, The Incredibles art style, subsurface scattering, physically based rendering, warm cinematic lighting. pharmaceutical laboratory corridor. CAMERA: slow drift toward Xpe...
+  [FAL] Uploading frame_6.png...
+  [FAL] Uploaded → https://v3b.fal.media/files/b/0a9169c5/YXbuFF_TkEkeZhQsh0AUq_frame_6.png
+  [FAL] Submitting to Kling v2.1...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9169d0/K7TefXjpYN8-L2qeivsGJ_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/animated/scene_06.mp4
+
+════════════════════════════════════════════════════════════
+ ANIMATION ENGINE — scene_07
+════════════════════════════════════════════════════════════
+  Source : frame_7.png  (original)
+  Seed   : 1007   Duration: 5s
+  [PROMPT] Pixar 3D animated feature film, The Incredibles art style, subsurface scattering, physically based rendering, warm cinematic lighting. pharmaceutical laboratory corridor. CAMERA: slow push in to creat...
+  [FAL] Uploading frame_7.png...
+  [FAL] Uploaded → https://v3b.fal.media/files/b/0a9169d0/3yYUugJ1DLUGF_3k3RaC6_frame_7.png
+  [FAL] Submitting to Kling v2.1...
+  [FAL] Done → https://v3b.fal.media/files/b/0a9169d6/zPS6j_TBRSFPUHoHSZBNL_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/animated/scene_07.mp4
+
+════════════════════════════════════════════════════════════
+ ANIMATION SUMMARY
+════════════════════════════════════════════════════════════
+  scene_01  ✅ done
+  scene_02  ✅ done
+  scene_03  ✅ done
+  scene_04  ✅ done
+  scene_05  ✅ done
+  scene_06  ✅ done
+  scene_07  ✅ done
+
+  Clips saved to: clients/xpel_ad/clips/xpel_ad/animated/
+  Next: python scripts/assembly_engine.py --campaign xpel_ad

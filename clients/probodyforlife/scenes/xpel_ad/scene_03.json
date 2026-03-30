@@ -1,0 +1,49 @@
+{
+  "_meta": "Scene blueprint — read by animation_engine.py and frame_generator.py",
+  "_version": "1.0",
+  "id": "scene_03",
+  "campaign": "xpel_ad",
+
+  "dialogue": {
+    "character": "MrWilly",
+    "voice": "VideoGenerator/voices/MrWilly/voice.json",
+    "line": "Okay okay... but what's actually inside you? What makes you work?"
+  },
+
+  "frame": {
+    "file": "frames/xpel_ad/approved/scene_03.png",
+    "seed_frame": "frames/xpel_ad/frame_3.png",
+    "characters_present": ["MrWilly", "Xpel"],
+    "MrWilly_pose": "standing right of frame, arms crossed over chest, leaning forward slightly, skeptical",
+    "MrWilly_expression": "skeptical but intrigued, one eyebrow cocked, slight smirk",
+    "Xpel_pose": "standing on table left of frame, one arm raised with finger pointing up as if to answer, eager expression",
+    "Xpel_expression": "eager to answer, eyes bright, leaning slightly toward MrWilly",
+    "camera_angle": "medium two-shot, slight push in on both characters",
+    "background": "VideoGenerator/backgrounds/lab_corridor/background.json"
+  },
+
+  "camera_motion": {
+    "start": "medium two-shot",
+    "movement": "slow push in toward the pair, tightening to closer two-shot",
+    "end": "closer medium two-shot",
+    "speed": "slow, deliberate"
+  },
+
+  "character_motion": {
+    "MrWilly": "arms cross tighter, weight shifts back slightly onto heels, chin drops slightly skeptical, single blink",
+    "Xpel": "finger points up, slight excited bounce, tiny body leans toward MrWilly"
+  },
+
+  "kling_settings": {
+    "motion_bucket_id": 10,
+    "cfg_scale": 0.5,
+    "seed": 1003,
+    "duration": 5,
+    "aspect_ratio": "9:16"
+  },
+
+  "transition_out": {
+    "type": "xfade dissolve",
+    "duration": 0.4
+  }
+}

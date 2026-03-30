@@ -1,5 +1,6 @@
 # Agentop — Python Backend Dependencies
-# Local-first, no cloud dependencies
+# Generated from pyproject.toml — do not edit manually.
+# Regenerate: uv export --no-hashes > requirements.txt
 
 fastapi>=0.111.0
 uvicorn[standard]>=0.30.0
@@ -13,3 +14,4 @@ cryptography>=43.0.0
 apscheduler>=3.10.0
 sqlalchemy>=2.0.0
 playwright>=1.40.0
+rank-bm25>=0.2.2

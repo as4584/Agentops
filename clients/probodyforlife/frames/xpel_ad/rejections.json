@@ -1,0 +1,30 @@
+{
+  "scene_01": {
+    "note": "the table is not visible in the camera view",
+    "timestamp": "2026-03-08T20:54:01.711635"
+  },
+  "scene_02": {
+    "note": "I dont see mr willy.",
+    "timestamp": "2026-03-08T20:56:02.029634"
+  },
+  "scene_03": {
+    "note": "I dont see mr willy",
+    "timestamp": "2026-03-08T20:56:48.361841"
+  },
+  "scene_04": {
+    "note": "I dont see the table",
+    "timestamp": "2026-03-08T20:57:26.877231"
+  },
+  "scene_05": {
+    "note": "This looks good but we need to see tha table and Xpel stadning on the table",
+    "timestamp": "2026-03-08T20:58:07.297070"
+  },
+  "scene_06": {
+    "note": "I dont see mr willy",
+    "timestamp": "2026-03-08T20:58:41.883015"
+  },
+  "scene_07": {
+    "note": "I dont see the table",
+    "timestamp": "2026-03-08T20:59:12.273497"
+  }
+}

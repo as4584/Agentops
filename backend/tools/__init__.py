@@ -393,6 +393,44 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.STATE_MODIFY,
         requires_doc_update=False,
     ),
+
+    # ── Higgsfield Browser Tools (routed to higgsfield_playwright_server:8812) ──
+    "hf_login": ToolDefinition(
+        name="hf_login",
+        description="[Higgsfield] Restore or establish a Higgsfield.ai browser session from saved cookies",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
+    "hf_navigate": ToolDefinition(
+        name="hf_navigate",
+        description="[Higgsfield] Navigate to a path on app.higgsfield.ai (blocks all billing/purchase URLs)",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
+    "hf_create_soul_id": ToolDefinition(
+        name="hf_create_soul_id",
+        description="[Higgsfield] Upload a character reference image and create a Soul ID on Higgsfield.ai",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
+    "hf_submit_video": ToolDefinition(
+        name="hf_submit_video",
+        description="[Higgsfield] Configure and queue a video generation job. Soul ID must be active first.",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
+    "hf_poll_result": ToolDefinition(
+        name="hf_poll_result",
+        description="[Higgsfield] Poll a queued video job until it completes or times out",
+        modification_type=ModificationType.READ_ONLY,
+        requires_doc_update=False,
+    ),
+    "hf_log_evidence": ToolDefinition(
+        name="hf_log_evidence",
+        description="[Higgsfield] Capture a screenshot of current browser state and write a structured RAG log entry",
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
 }
 
 
@@ -1293,6 +1331,24 @@ async def execute_tool(
             "browser_close": lambda: browser_close(agent_id=agent_id),
         }
         tool_fn = _browser_map.get(tool_name)
+
+    # Higgsfield tools — forwarded to higgsfield_playwright_server on port 8812
+    if tool_name.startswith("hf_"):
+        import httpx
+        from backend.config import HF_MCP_PORT  # type: ignore[attr-defined]
+
+        _hf_endpoint = f"http://127.0.0.1:{HF_MCP_PORT}/tools/{tool_name}"
+        _hf_body = {k: v for k, v in kwargs.items() if k not in ("agent_id", "allowed_tools")}
+
+        async def _hf_call(
+            _url: str = _hf_endpoint,
+            _body: dict[str, Any] = _hf_body,
+        ) -> dict[str, Any]:
+            async with httpx.AsyncClient(timeout=960) as client:
+                resp = await client.post(_url, json=_body)
+                return resp.json()
+
+        tool_fn = _hf_call
 
     # MCP Gateway tools — route through MCPBridge
     if tool_name.startswith("mcp_"):

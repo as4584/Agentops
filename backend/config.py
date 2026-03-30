@@ -20,7 +20,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 PROJECT_ROOT: Path = Path(__file__).resolve().parent.parent
 BACKEND_DIR: Path = PROJECT_ROOT / "backend"
 DOCS_DIR: Path = PROJECT_ROOT / "docs"
-MEMORY_DIR: Path = BACKEND_DIR / "memory"
+MEMORY_DIR: Path = PROJECT_ROOT / "data" / "agents"
 OUTPUT_DIR: Path = PROJECT_ROOT / "output"
 BROWSER_ALLOWED_AGENTS: list[str] = [
     a.strip()
@@ -52,6 +52,26 @@ LLM_CIRCUIT_RESET_SECONDS: int = int(os.getenv("LLM_CIRCUIT_RESET_SECONDS", "300
 AGENTOP_WEBHOOK_SECRET: str = os.getenv("AGENTOP_WEBHOOK_SECRET", "")
 WEBHOOK_RATE_LIMIT_RPM: int = int(os.getenv("WEBHOOK_RATE_LIMIT_RPM", "60"))
 A2A_MAX_DEPTH: int = int(os.getenv("A2A_MAX_DEPTH", "4"))
+
+# ---------------------------------------------------------------------------
+# TTS Configuration (Qwen CosyVoice — local open-source)
+# ---------------------------------------------------------------------------
+QWEN_TTS_MODEL: str = os.getenv("QWEN_TTS_MODEL", "iic/CosyVoice2-0.5B")
+QWEN_TTS_VOICE: str = os.getenv("QWEN_TTS_VOICE", "中文女")
+
+# ---------------------------------------------------------------------------
+# ML Pipeline Configuration
+# ---------------------------------------------------------------------------
+ML_DIR: Path = PROJECT_ROOT / "backend" / "ml"
+ML_EXPERIMENTS_DIR: Path = ML_DIR / "experiments"
+ML_MODELS_DIR: Path = ML_DIR / "models"
+ML_MONITORING_DIR: Path = ML_DIR / "monitoring"
+TRAINING_DATA_DIR: Path = PROJECT_ROOT / ".training_data"
+ML_DOC_PATH: Path = DOCS_DIR / "ML_CHANGELOG.md"
+ML_MONITOR_INTERVAL_SECONDS: int = int(os.getenv("ML_MONITOR_INTERVAL_SECONDS", "300"))
+ML_ACCURACY_THRESHOLD: float = float(os.getenv("ML_ACCURACY_THRESHOLD", "0.85"))
+ML_LATENCY_THRESHOLD_MS: float = float(os.getenv("ML_LATENCY_THRESHOLD_MS", "2000"))
+ML_DRIFT_THRESHOLD: float = float(os.getenv("ML_DRIFT_THRESHOLD", "0.1"))
 
 # ---------------------------------------------------------------------------
 # Server Configuration
@@ -165,8 +185,8 @@ SAFE_SHELL_BLACKLIST: list[str] = [
 # Drift Detection Configuration
 # ---------------------------------------------------------------------------
 DRIFT_CHECK_INTERVAL_SECONDS: int = int(os.getenv("DRIFT_CHECK_INTERVAL", "30"))
-SCHEDULER_DB_PATH: Path = Path(os.getenv("SCHEDULER_DB_PATH", str(PROJECT_ROOT / "backend" / "memory" / "scheduler.db")))
-WEBHOOKS_DB_PATH: Path = Path(os.getenv("WEBHOOKS_DB_PATH", str(PROJECT_ROOT / "backend" / "memory" / "webhooks.json")))
+SCHEDULER_DB_PATH: Path = Path(os.getenv("SCHEDULER_DB_PATH", str(PROJECT_ROOT / "data" / "scheduler.db")))
+WEBHOOKS_DB_PATH: Path = Path(os.getenv("WEBHOOKS_DB_PATH", str(PROJECT_ROOT / "data" / "webhooks.json")))
 
 # ---------------------------------------------------------------------------
 # Docker MCP Gateway Configuration
@@ -181,11 +201,16 @@ MCP_TOOL_TIMEOUT: int = int(os.getenv("MCP_TOOL_TIMEOUT", "30"))
 MCP_CONFIG_DIR: Path = Path(os.getenv("MCP_CONFIG_DIR", str(PROJECT_ROOT / "mcp-gateway")))
 
 # ---------------------------------------------------------------------------
+# Higgsfield MCP Server (headed Playwright browser on port 8812)
+# ---------------------------------------------------------------------------
+HF_MCP_PORT: int = int(os.getenv("HF_MCP_PORT", "8812"))
+
+# ---------------------------------------------------------------------------
 # Sandbox / Playbox Enforcement Configuration
 # ---------------------------------------------------------------------------
 SANDBOX_ENFORCEMENT_ENABLED: bool = os.getenv("SANDBOX_ENFORCEMENT_ENABLED", "true").lower() == "true"
 SANDBOX_ROOT_DIR: Path = Path(os.getenv("SANDBOX_ROOT_DIR", "/tmp/ai-sandbox"))
-PLAYBOX_DIR: Path = Path(os.getenv("PLAYBOX_DIR", str(PROJECT_ROOT / "playground" / "local-llm")))
+PLAYBOX_DIR: Path = Path(os.getenv("PLAYBOX_DIR", str(PROJECT_ROOT / "data" / "playbox")))
 LOCAL_LLM_REQUIRED_CHECKS: tuple[str, ...] = tuple(
     item.strip()
     for item in os.getenv(

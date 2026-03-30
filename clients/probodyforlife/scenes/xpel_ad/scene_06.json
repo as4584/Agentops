@@ -1,0 +1,49 @@
+{
+  "_meta": "Scene blueprint — read by animation_engine.py and frame_generator.py",
+  "_version": "1.0",
+  "id": "scene_06",
+  "campaign": "xpel_ad",
+
+  "dialogue": {
+    "character": "Xpel",
+    "voice": "VideoGenerator/voices/Xpel/voice.json",
+    "line": "Well... make sure you stay hydrated. And if you have kidney issues, check with your doctor first. I'm powerful — use me responsibly!"
+  },
+
+  "frame": {
+    "file": "frames/xpel_ad/approved/scene_06.png",
+    "seed_frame": "frames/xpel_ad/frame_6.png",
+    "characters_present": ["MrWilly", "Xpel"],
+    "MrWilly_pose": "standing right of frame, arms crossed, watching Xpel attentively, nodding slowly",
+    "MrWilly_expression": "listening carefully, approving nod, respect growing",
+    "Xpel_pose": "standing on table left of frame, both tiny arms raised in surrender/honesty gesture, being transparent",
+    "Xpel_expression": "honest, slightly nervous but confident, sweating slightly for comedic effect",
+    "camera_angle": "medium two-shot, camera settles on Xpel slightly",
+    "background": "VideoGenerator/backgrounds/lab_corridor/background.json"
+  },
+
+  "camera_motion": {
+    "start": "medium two-shot",
+    "movement": "slow drift toward Xpel, centering slightly more on the product",
+    "end": "medium shot favoring Xpel with MrWilly visible on right",
+    "speed": "slow, gentle"
+  },
+
+  "character_motion": {
+    "MrWilly": "slow approving nod, arms stay crossed, weight shift to one side, natural breathing",
+    "Xpel": "arms in honest surrender position, slight nervous sway left to right, no particles, no glow, no spinning"
+  },
+
+  "kling_settings": {
+    "motion_bucket_id": 10,
+    "cfg_scale": 0.5,
+    "seed": 1006,
+    "duration": 10,
+    "aspect_ratio": "9:16"
+  },
+
+  "transition_out": {
+    "type": "xfade dissolve",
+    "duration": 0.4
+  }
+}

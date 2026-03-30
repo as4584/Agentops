@@ -46,6 +46,7 @@ warn_unused_configs = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 addopts = "-x --tb=short -q --cov=backend --cov=deerflow --cov-report=term-missing"
+testpaths = ["backend/tests", "deerflow/tests"]
 
 [tool.coverage.run]
 omit = [

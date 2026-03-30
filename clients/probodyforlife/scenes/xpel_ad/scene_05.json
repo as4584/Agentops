@@ -1,0 +1,49 @@
+{
+  "_meta": "Scene blueprint — read by animation_engine.py and frame_generator.py",
+  "_version": "1.0",
+  "id": "scene_05",
+  "campaign": "xpel_ad",
+
+  "dialogue": {
+    "character": "MrWilly",
+    "voice": "VideoGenerator/voices/MrWilly/voice.json",
+    "line": "Alright... but what's the catch? There's always a catch."
+  },
+
+  "frame": {
+    "file": "frames/xpel_ad/approved/scene_05.png",
+    "seed_frame": "frames/xpel_ad/frame_5.png",
+    "characters_present": ["MrWilly", "Xpel"],
+    "MrWilly_pose": "standing right of frame, leaning forward, one hand on chin, eyes narrowed suspiciously",
+    "MrWilly_expression": "suspicious, probing, slightly amused — knows there has to be a catch",
+    "Xpel_pose": "standing on table left of frame, both arms slightly raised in mild nervousness, slight shrink",
+    "Xpel_expression": "caught, nervous smile, eyes dart slightly",
+    "camera_angle": "medium two-shot, slight push in",
+    "background": "VideoGenerator/backgrounds/lab_corridor/background.json"
+  },
+
+  "camera_motion": {
+    "start": "medium two-shot",
+    "movement": "slow deliberate push in toward MrWilly — building tension",
+    "end": "tighter medium on MrWilly with Xpel visible on edge of frame",
+    "speed": "slow, building tension"
+  },
+
+  "character_motion": {
+    "MrWilly": "leans forward gradually, hand moves to chin, eyes narrow, one eyebrow rises, single slow blink",
+    "Xpel": "arms rise slightly in nervous surrender position, body shrinks down a tiny bit — no spinning, no particles"
+  },
+
+  "kling_settings": {
+    "motion_bucket_id": 10,
+    "cfg_scale": 0.5,
+    "seed": 1005,
+    "duration": 5,
+    "aspect_ratio": "9:16"
+  },
+
+  "transition_out": {
+    "type": "xfade dissolve",
+    "duration": 0.4
+  }
+}

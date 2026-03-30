@@ -1,0 +1,86 @@
+[
+  {
+    "scene_id": "scene_01",
+    "status": "rejected",
+    "note": "our character gbut he doest not have a beard. in the original character model we made he doesnt have a beard.",
+    "timestamp": "2026-03-08T18:46:37.069254"
+  },
+  {
+    "scene_id": "scene_02",
+    "status": "rejected",
+    "note": "whats wrong is that the image is jusf mr willy but i dont see xpel in the same image and we lost our background. we have texts above which is just not supposed to be there",
+    "timestamp": "2026-03-08T18:48:09.475125"
+  },
+  {
+    "scene_id": "scene_03",
+    "status": "rejected",
+    "note": "his hands arent crossed, xpel doesnt look like the original model we made, also we lost the table in the original image and script",
+    "timestamp": "2026-03-08T18:50:40.056482"
+  },
+  {
+    "scene_id": "scene_04",
+    "status": "rejected",
+    "note": "we didnt preserve the background, wd make a new character which we've never seen before. also mr willy isnt accurate to his script",
+    "timestamp": "2026-03-08T18:59:22.626273"
+  },
+  {
+    "scene_id": "scene_05",
+    "status": "rejected",
+    "note": "same reasons as the last frame",
+    "timestamp": "2026-03-08T19:00:42.971628"
+  },
+  {
+    "scene_id": "scene_06",
+    "status": "rejected",
+    "note": "doesnt follow the script and this guy has a beard now",
+    "timestamp": "2026-03-08T19:03:48.959569"
+  },
+  {
+    "scene_id": "scene_07",
+    "status": "rejected",
+    "note": "doesnt make sense compared to its script",
+    "timestamp": "2026-03-08T19:05:12.648432"
+  },
+  {
+    "scene_id": "scene_01",
+    "status": "rejected",
+    "note": "the table is not visible in the camera view",
+    "timestamp": "2026-03-08T20:54:01.718761"
+  },
+  {
+    "scene_id": "scene_02",
+    "status": "rejected",
+    "note": "I dont see mr willy.",
+    "timestamp": "2026-03-08T20:56:02.030466"
+  },
+  {
+    "scene_id": "scene_03",
+    "status": "rejected",
+    "note": "I dont see mr willy",
+    "timestamp": "2026-03-08T20:56:48.362364"
+  },
+  {
+    "scene_id": "scene_04",
+    "status": "rejected",
+    "note": "I dont see the table",
+    "timestamp": "2026-03-08T20:57:26.877840"
+  },
+  {
+    "scene_id": "scene_05",
+    "status": "rejected",
+    "note": "This looks good but we need to see tha table and Xpel stadning on the table",
+    "timestamp": "2026-03-08T20:58:07.297553"
+  },
+  {
+    "scene_id": "scene_06",
+    "status": "rejected",
+    "note": "I dont see mr willy",
+    "timestamp": "2026-03-08T20:58:41.883472"
+  },
+  {
+    "scene_id": "scene_07",
+    "status": "rejected",
+    "note": "I dont see the table",
+    "timestamp": "2026-03-08T20:59:12.273974"
+  }
+]

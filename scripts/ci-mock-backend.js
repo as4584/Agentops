@@ -12,7 +12,7 @@ const routes = {
   '/drift': { violations: [], drift_score: 0, last_updated: null },
   '/status': { agents: [] },
   '/tasks': { tasks: [], stats: {} },
-  '/projects': { projects: [], types: [] },
+  '/projects': { projects: [], types: {} },
   '/llm/stats': { tokens: { total: 0 }, stats: { total_requests: 0 } },
   '/llm/capacity': { available: false },
   '/models': { models: [], available_locally: [], total_known: 0, agent_recommendations: {} },

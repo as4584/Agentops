@@ -1,0 +1,199 @@
+name: ML Pipeline CI
+
+on:
+  push:
+    paths:
+      - "backend/ml/**"
+      - ".training_data/**"
+      - "backend/content/voice_agent.py"
+    branches: ["**"]
+  pull_request:
+    paths:
+      - "backend/ml/**"
+      - ".training_data/**"
+      - "backend/content/voice_agent.py"
+    branches: ["**"]
+  workflow_dispatch:
+    inputs:
+      run_training:
+        description: "Run full training pipeline"
+        type: boolean
+        default: false
+      dataset_version:
+        description: "Dataset version override (leave blank for auto)"
+        type: string
+        default: ""
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  # ── ML Tests ─────────────────────────────────────────────────────────
+  ml-tests:
+    name: ML module tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" --quiet
+
+      - name: Run ML tests
+        run: |
+          pytest backend/tests/test_ml_*.py \
+            -x --tb=short -q \
+            --cov=backend/ml \
+            --cov-report=term-missing \
+            --cov-fail-under=80
+
+  # ── Data Validation ──────────────────────────────────────────────────
+  data-validation:
+    name: Validate training data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" --quiet
+
+      - name: Check training data exists
+        run: |
+          python3 -c "
+          from pathlib import Path
+          import sys
+          data_dir = Path('.training_data')
+          if not data_dir.exists():
+              print('WARN: .training_data not present (gitignored) — skipping validation')
+              sys.exit(0)
+          files = list(data_dir.rglob('*'))
+          files = [f for f in files if f.is_file() and '.git' not in f.parts]
+          print(f'Training data: {len(files)} files')
+          if len(files) == 0:
+              print('ERROR: Training data directory is empty')
+              sys.exit(1)
+          "
+
+  # ── Model Artifact Check ────────────────────────────────────────────
+  artifact-check:
+    name: Check experiment artifacts
+    runs-on: ubuntu-latest
+    needs: ml-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" --quiet
+
+      - name: Validate experiment schema
+        run: |
+          python3 -c "
+          from backend.ml.experiment_tracker import ExperimentTracker, ExperimentRun
+          from backend.ml.pipeline import MLPipeline, PipelineStep, PipelineRun
+          from backend.ml.monitor import MLMonitor
+          from backend.ml.data_version import DataVersioner
+          from backend.ml.doc_enforcer import MLDocEnforcer
+          print('All ML module imports validated')
+
+          # Verify ExperimentRun round-trip
+          run = ExperimentRun(
+              run_id='test_001',
+              experiment_name='ci_check',
+              model_type='test',
+              hyperparameters={'lr': 0.01},
+              dataset_version='v0',
+          )
+          data = run.to_dict()
+          restored = ExperimentRun.from_dict(data)
+          assert restored.run_id == 'test_001'
+          assert restored.hyperparameters == {'lr': 0.01}
+          print('ExperimentRun serialization OK')
+          "
+
+  # ── Documentation Compliance ─────────────────────────────────────────
+  doc-compliance:
+    name: ML documentation check
+    runs-on: ubuntu-latest
+    needs: ml-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" --quiet
+
+      - name: Check ML changelog exists
+        run: |
+          python3 -c "
+          from pathlib import Path
+          doc = Path('docs/ML_CHANGELOG.md')
+          if not doc.exists():
+              print('WARN: docs/ML_CHANGELOG.md does not exist yet (will be created on first ML run)')
+          else:
+              lines = doc.read_text().splitlines()
+              print(f'ML Changelog: {len(lines)} lines')
+          "
+
+  # ── Monitoring Smoke Test ────────────────────────────────────────────
+  monitoring-smoke:
+    name: ML monitoring smoke test
+    runs-on: ubuntu-latest
+    needs: ml-tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" --quiet
+
+      - name: Run monitoring smoke test
+        run: |
+          python3 -c "
+          from backend.ml.monitor import MLMonitor
+          import tempfile
+          from pathlib import Path
+
+          monitor = MLMonitor(monitoring_dir=Path(tempfile.mkdtemp()))
+
+          # Test latency recording
+          monitor.record_latency('/chat', 150.0, 'llama3.2')
+          monitor.record_latency('/chat', 3000.0, 'llama3.2')  # should trigger alert
+          stats = monitor.check_latency()
+          assert stats['count'] == 2
+          print(f'Latency check OK: p50={stats[\"p50\"]}ms')
+
+          # Test endpoint monitoring
+          monitor.record_endpoint_result('/chat', 200)
+          monitor.record_endpoint_result('/chat', 500, error='Internal Server Error')
+          health = monitor.check_endpoints()
+          assert health['failure'] == 1
+          print(f'Endpoint check OK: error_rate={health[\"error_rate\"]:.2%}')
+
+          # Test alert generation
+          alerts = monitor.get_alerts()
+          assert len(alerts) >= 2  # slow_response + endpoint_failure
+          print(f'Alert system OK: {len(alerts)} alerts generated')
+          print('Monitoring smoke test PASSED')
+          "

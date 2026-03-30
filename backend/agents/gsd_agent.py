@@ -43,9 +43,20 @@ def _llm_generate(prompt: str, task: str = _DEFAULT_LLM_TASK) -> str:
     tests and offline environments don't hard-fail.
     """
     try:
-        from backend.llm.unified_registry import UnifiedLLMRegistry
-        registry = UnifiedLLMRegistry()
-        return registry.generate(prompt, task=task)
+        from backend.llm.unified_registry import UnifiedModelRouter
+        import asyncio as _asyncio
+
+        async def _run() -> str:
+            router = UnifiedModelRouter()
+            result = await router.generate(prompt, task=task)
+            return str(result.get("output", ""))
+
+        try:
+            return _asyncio.run(_run())
+        except RuntimeError:
+            # Already inside a running event loop (e.g. called from async context)
+            loop = _asyncio.get_event_loop()
+            return str(loop.run_until_complete(_run()))
     except Exception as exc:
         logger.warning(f"GSDAgent LLM unavailable ({exc}), returning stub.")
         return f"[LLM unavailable — stub response for: {prompt[:80]}]"
@@ -405,6 +416,7 @@ class GSDAgent:
         for task in plan.tasks:
             waves.setdefault(task.wave, []).append(task)
 
+        wave_result = WaveResult(wave=0)  # sentinel so post-loop ref is always bound
         for wave_num in sorted(waves):
             tasks_in_wave = waves[wave_num]
             wave_result = WaveResult(wave=wave_num)
@@ -429,7 +441,7 @@ class GSDAgent:
                             "task_id": t.id, "status": "error", "error": str(output),
                         })
                     else:
-                        wave_result.task_results.append(output)
+                        wave_result.task_results.append(output)  # type: ignore[arg-type]
 
             result.wave_results.append(wave_result)
             result.waves_completed += 1
@@ -525,7 +537,7 @@ class GSDAgent:
 
         committed = False
         if full:
-            committed = await asyncio.to_thread(self._try_commit, prompt)
+            committed = await self._try_commit(prompt)
 
         state = gsd_store.load_state()
         ts = datetime.now(timezone.utc).isoformat()
@@ -541,13 +553,16 @@ class GSDAgent:
             timestamp=datetime.now(timezone.utc),
         )
 
-    def _try_commit(self, prompt: str) -> bool:
+    async def _try_commit(self, prompt: str) -> bool:
         """Attempt a git commit via the git_ops tool if available."""
         try:
             from backend.tools import execute_tool
-            result = execute_tool(
+            result = await execute_tool(
                 "git_ops",
-                {"action": "commit", "message": f"gsd-quick: {prompt[:72]}"},
+                "gsd_agent",
+                ["git_ops"],
+                action="commit",
+                message=f"gsd-quick: {prompt[:72]}",
             )
             return bool(result and not result.get("error"))
         except Exception as exc:

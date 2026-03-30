@@ -1,0 +1,32 @@
+{
+  "_meta": "LOCKED — edit only via vault_manager.py. Never edit manually.",
+  "_version": "1.0",
+  "_name": "lab_corridor",
+
+  "description": "Pharmaceutical laboratory corridor with neon blue lit supplement shelves",
+  "master_image": "VideoGenerator/backgrounds/lab_corridor/background_master.png",
+
+  "visual_elements": {
+    "walls": "clean white laboratory walls",
+    "shelves": "floor-to-ceiling shelving units on both sides of corridor",
+    "shelf_contents": "rows of colorful supplement bottles, protein containers, vitamin jars",
+    "lighting": "blue neon strip lights under each shelf level, cool blue ambient glow",
+    "floor": "clean white laboratory floor",
+    "depth": "corridor stretches into background creating depth"
+  },
+
+  "table": {
+    "present": true,
+    "position": "foreground, slightly left of center",
+    "style": "clean white low table",
+    "purpose": "where Xpel character stands"
+  },
+
+  "camera_position": {
+    "default_angle": "slight low angle looking slightly upward",
+    "default_shot": "wide shot showing full corridor with character centered"
+  },
+
+  "generation_prompt": "pharmaceutical laboratory corridor, floor-to-ceiling shelves on both sides lined with colorful supplement bottles, blue neon lighting under each shelf, clean white walls and floor, white table in foreground, corridor perspective stretching into background",
+  "negative": "outdoor, dark room, messy, dirty, gym, warehouse, different setting"
+}

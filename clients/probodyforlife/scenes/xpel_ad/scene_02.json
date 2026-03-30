@@ -1,0 +1,49 @@
+{
+  "_meta": "Scene blueprint — read by animation_engine.py and frame_generator.py",
+  "_version": "1.0",
+  "id": "scene_02",
+  "campaign": "xpel_ad",
+
+  "dialogue": {
+    "character": "Xpel",
+    "voice": "VideoGenerator/voices/Xpel/voice.json",
+    "line": "I'm America's number one selling diuretic! I flush out excess water, reduce bloating, and support weight loss — naturally!"
+  },
+
+  "frame": {
+    "file": "frames/xpel_ad/approved/scene_02.png",
+    "seed_frame": "frames/xpel_ad/frame_2.png",
+    "characters_present": ["MrWilly", "Xpel"],
+    "MrWilly_pose": "standing right of frame, arms open in surprised amused reaction, eyebrows raised, big smile",
+    "MrWilly_expression": "genuinely surprised and impressed, open and warm",
+    "Xpel_pose": "standing on table left of frame, both tiny arms stretched wide open excitedly, chest puffed out",
+    "Xpel_expression": "maximum excitement, huge smile, proud eyes",
+    "camera_angle": "medium two-shot, eye level, both characters visible",
+    "background": "VideoGenerator/backgrounds/lab_corridor/background.json"
+  },
+
+  "camera_motion": {
+    "start": "medium two-shot framing both characters",
+    "movement": "very slow subtle zoom out to show both characters more fully",
+    "end": "wide two-shot",
+    "speed": "very slow, barely perceptible"
+  },
+
+  "character_motion": {
+    "MrWilly": "natural breathing, slight lean back in surprise, arms open wider as Xpel speaks, single blink",
+    "Xpel": "tiny arms wave enthusiastically side to side, slight bounce on feet, no spinning, no glowing"
+  },
+
+  "kling_settings": {
+    "motion_bucket_id": 12,
+    "cfg_scale": 0.5,
+    "seed": 1002,
+    "duration": 10,
+    "aspect_ratio": "9:16"
+  },
+
+  "transition_out": {
+    "type": "xfade dissolve",
+    "duration": 0.4
+  }
+}

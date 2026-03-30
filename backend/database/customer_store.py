@@ -14,7 +14,7 @@ class CustomerStore:
     """SQLite storage for customers and assigned services."""
 
     def __init__(self, db_path: Path | None = None) -> None:
-        self.db_path = db_path or Path("backend/memory/customers.db")
+        self.db_path = db_path or Path("data/customers.db")
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_schema()
 

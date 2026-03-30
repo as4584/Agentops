@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import tempfile
+from collections.abc import Generator
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
@@ -25,7 +26,7 @@ from backend.models.gsd import (
 
 
 @pytest.fixture()
-def tmp_store(tmp_path: Path) -> GSDStore:
+def tmp_store(tmp_path: Path) -> Generator[GSDStore, None, None]:
     """A GSDStore with all paths redirected to a temp directory."""
     store = GSDStore()
     # Patch all path constants to use tmp_path

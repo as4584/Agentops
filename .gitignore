@@ -24,6 +24,27 @@ frontend/node_modules/
 .DS_Store
 Thumbs.db
 
+# Windows Lighthouse CI temp profiles (created by LHCI on Windows, written into project dir)
+**/lighthouse.*/
+**/C:\\Users\\*
+
+# Pytest
+.pytest_cache/
+
+# TypeScript build info
+**/tsconfig.tsbuildinfo
+
+# Agent context (local only, never push)
+.agentctx/
+
+# ML training data (cloned from GitHub, never push into parent repo)
+.training_data/
+
+# Embedded git repos (submodules or cloned reference projects)
+SigmaSimulator/
+sandbox/everything-claude-code/
+sandbox/ui-ux-pro-max-skill/
+
 # IDE
 .vscode/
 .idea/
@@ -39,7 +60,12 @@ backend/logs/*.jsonl
 
 # Build outputs
 output/
-src-tauri/target/
+
+# Runtime agent data store (agent memory, scheduler.db, webhooks.json)
+# These are created at runtime — do not track. Restore with: mkdir -p data/agents
+data/*.db
+data/*.json
+data/agents/
 
 # Generated reports/artifacts
 reports/lhci/mobile/
@@ -49,3 +75,10 @@ reports/playwright/test-results/
 
 # Local sandbox runtime (ephemeral)
 /tmp/ai-sandbox/
+
+playground/sandbox
+
+playground
+# Higgsfield — session cookies (contain auth tokens, never commit)
+data/higgsfield/.session_cookies.json
+data/higgsfield/evidence/

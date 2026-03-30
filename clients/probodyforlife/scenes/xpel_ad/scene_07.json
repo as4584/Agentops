@@ -1,0 +1,49 @@
+{
+  "_meta": "Scene blueprint — read by animation_engine.py and frame_generator.py",
+  "_version": "1.0",
+  "id": "scene_07",
+  "campaign": "xpel_ad",
+
+  "dialogue": {
+    "character": "MrWilly",
+    "voice": "VideoGenerator/voices/MrWilly/voice.json",
+    "line": "And THAT is why everyone at the gym is talking about XPEL. Link in bio."
+  },
+
+  "frame": {
+    "file": "frames/xpel_ad/approved/scene_07.png",
+    "seed_frame": "frames/xpel_ad/frame_7.png",
+    "characters_present": ["MrWilly", "Xpel"],
+    "MrWilly_pose": "facing camera directly, big confident smile, one arm raised holding Xpel box up toward camera, other hand doing thumbs up or finger guns",
+    "MrWilly_expression": "triumphant, warm, direct address to viewer, maximum energy",
+    "Xpel_pose": "being held up by MrWilly, facing camera, big happy smile, tiny arms waving at camera",
+    "Xpel_expression": "thrilled to be held up, celebrating, waving happily",
+    "camera_angle": "medium close-up, slight low angle looking up — hero shot",
+    "background": "VideoGenerator/backgrounds/lab_corridor/background.json"
+  },
+
+  "camera_motion": {
+    "start": "medium two-shot",
+    "movement": "slow push in to create hero moment, slight upward tilt",
+    "end": "medium close-up hero shot",
+    "speed": "moderate, building energy"
+  },
+
+  "character_motion": {
+    "MrWilly": "natural confident breathing, slight proud chest expansion, arm holding Xpel remains steady and raised, head nods once",
+    "Xpel": "tiny arms wave happily at camera, slight wiggle with excitement — no spinning, no particles"
+  },
+
+  "kling_settings": {
+    "motion_bucket_id": 15,
+    "cfg_scale": 0.5,
+    "seed": 1007,
+    "duration": 5,
+    "aspect_ratio": "9:16"
+  },
+
+  "transition_out": {
+    "type": "fade_to_black",
+    "duration": 0.5
+  }
+}

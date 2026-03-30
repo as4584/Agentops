@@ -1,0 +1,40 @@
+{
+  "_meta": "LOCKED — edit only via vault_manager.py. Never edit manually.",
+  "_version": "1.0",
+  "_name": "Pixar",
+
+  "render_style": "Pixar 3D animated feature film",
+  "sub_style": "The Incredibles physique and action, Soul skin tone rendering",
+
+  "lighting": {
+    "direction": "upper left",
+    "quality": "warm soft studio lighting",
+    "shadows": "soft, no harsh shadows",
+    "color_temperature": "warm 5500K"
+  },
+
+  "color_profile": {
+    "overall": "rich saturated warm palette",
+    "skin_tones": "warm subsurface scattering",
+    "environment": "deep blues, warm whites, vibrant accents"
+  },
+
+  "technical": {
+    "quality": "render farm quality",
+    "shading": "physically based shading with subsurface scattering",
+    "depth_of_field": "shallow, cinematic",
+    "anti_aliasing": "smooth edges, no pixelation",
+    "framerate": "24fps"
+  },
+
+  "format": {
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920",
+    "orientation": "vertical portrait"
+  },
+
+  "ffmpeg_color_grade": "eq=saturation=1.25:contrast=1.05:brightness=0.02,colorbalance=rs=0.08:gs=0.03:bs=-0.05",
+
+  "generation_prefix": "Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors, cinematic depth of field",
+  "negative": "photorealistic, live action, sketch, watercolor, 2D flat, anime, dark background, harsh shadows, low quality, blurry, noisy"
+}

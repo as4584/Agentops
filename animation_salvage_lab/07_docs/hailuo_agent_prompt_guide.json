@@ -1,0 +1,114 @@
+{
+  "model": {
+    "name": "Hailuo",
+    "provider": "MiniMax",
+    "fal_endpoints": [
+      "fal-ai/minimax/video-01",
+      "fal-ai/minimax/video-01-live"
+    ]
+  },
+  "requirements": {
+    "reference_image": {
+      "required": true,
+      "reason": "Without it the model invents the subject each generation. Identity will drift across clips."
+    },
+    "max_clip_length_seconds": 4,
+    "max_prompt_words": 40
+  },
+  "prompt_structure": {
+    "order": [
+      "shot_type",
+      "subject_and_action",
+      "light_source",
+      "camera_move",
+      "style_tag"
+    ],
+    "template": "[SHOT TYPE], [SUBJECT + SIMPLE ACTION], [LIGHT SOURCE], [CAMERA MOVE], [STYLE TAG]",
+    "example": "Close up, woman slowly turns toward camera, soft natural window light, static, photorealistic"
+  },
+  "allowed_values": {
+    "shot_type": [
+      "Extreme close up",
+      "Close up",
+      "Medium close up",
+      "Medium shot",
+      "Wide shot"
+    ],
+    "camera_move": [
+      "slow push in",
+      "slow pull back",
+      "static",
+      "slow pan left",
+      "slow pan right",
+      "tracking shot"
+    ],
+    "light_source": [
+      "soft natural window light",
+      "golden hour rim light",
+      "soft diffused overhead light",
+      "motivated side lighting"
+    ],
+    "style_tag": [
+      "photorealistic",
+      "cinematic",
+      "film grain",
+      "shallow depth of field",
+      "macro lens",
+      "commercial photography style"
+    ]
+  },
+  "hard_rules": [
+    "Use exactly one shot_type",
+    "Use exactly one camera_move",
+    "Use exactly one light_source",
+    "Use exactly one style_tag",
+    "One subject only per prompt",
+    "Do not describe subject personality",
+    "Do not use vague quality words",
+    "Do not repeat camera instructions",
+    "Shot type must be first word of prompt"
+  ],
+  "strip_before_sending": [
+    "Physical descriptions already shown in reference image",
+    "Personality adjectives: mysterious, powerful, elegant, confident",
+    "Vague quality words: nice, beautiful, dramatic, amazing",
+    "Repeated camera instructions",
+    "Background story or narrative context"
+  ],
+  "cost_usd_per_second": 0.018,
+  "cost_estimates": {
+    "3s_clip": 0.054,
+    "4s_clip": 0.072,
+    "5s_clip": 0.09,
+    "10s_clip": 0.18
+  },
+  "failure_modes": [
+    {
+      "symptom": "Different face each clip",
+      "cause": "No reference image provided",
+      "fix": "Add reference image to every call"
+    },
+    {
+      "symptom": "Identity drift after 3 seconds",
+      "cause": "Clip length too long",
+      "fix": "Reduce clip to 3-4 seconds max"
+    },
+    {
+      "symptom": "Wrong camera movement",
+      "cause": "Multiple or conflicting camera instructions in prompt",
+      "fix": "Use exactly one camera_move value from allowed list"
+    },
+    {
+      "symptom": "Subject action ignored",
+      "cause": "Action buried after too much description",
+      "fix": "Move action earlier — second slot after shot_type"
+    },
+    {
+      "symptom": "Inconsistent style across clips",
+      "cause": "No style tag or conflicting style tags",
+      "fix": "Pick one style_tag from allowed list, place it last"
+    }
+  ],
+  "bad_prompt_pattern": "[adjective] [subject] with [physical description] who is [personality trait] doing [action in prose] with [vague lighting] and the camera [passive description]",
+  "good_prompt_pattern": "[shot_type], [subject] [single action verb + small motion], [light_source], [camera_move], [style_tag]"
+}

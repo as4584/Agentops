@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-03-27T18:47:30.901776+00:00",
+  "run_id": "inspect_002",
+  "label": "home_login_check",
+  "notes": "check login state",
+  "current_url": "https://higgsfield.ai/",
+  "screenshot_path": "data/higgsfield/evidence/inspect_002/home_login_check_20260327T184730.png"
+}

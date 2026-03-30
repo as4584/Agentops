@@ -1,0 +1,48 @@
+{
+  "_meta": "Scene blueprint — read by animation_engine.py and frame_generator.py",
+  "_version": "1.0",
+  "id": "scene_01",
+  "campaign": "xpel_ad",
+
+  "dialogue": {
+    "character": "MrWilly",
+    "voice": "VideoGenerator/voices/MrWilly/voice.json",
+    "line": "Hey XPEL... everyone at the gym keeps talking about you. What's your deal?"
+  },
+
+  "frame": {
+    "file": "frames/xpel_ad/approved/scene_01.png",
+    "seed_frame": "frames/xpel_ad/frame_1.png",
+    "characters_present": ["MrWilly"],
+    "MrWilly_pose": "standing centered, arms relaxed at sides, one hand beginning to point down toward table",
+    "MrWilly_expression": "curious, one eyebrow raised, slight smirk, friendly challenge",
+    "Xpel_present": false,
+    "camera_angle": "slight low angle, wide shot, table visible in foreground bottom left",
+    "background": "VideoGenerator/backgrounds/lab_corridor/background.json"
+  },
+
+  "camera_motion": {
+    "start": "wide, slight low angle",
+    "movement": "slow intentional push in toward MrWilly",
+    "end": "medium shot, eye level",
+    "speed": "slow, 24fps smooth"
+  },
+
+  "character_motion": {
+    "MrWilly": "one full natural breath cycle, chest rises and falls, slight weight shift to left foot, right hand lifts slightly, head tilts 5 degrees left, single natural eye blink",
+    "Xpel": "not present"
+  },
+
+  "kling_settings": {
+    "motion_bucket_id": 10,
+    "cfg_scale": 0.5,
+    "seed": 1001,
+    "duration": 5,
+    "aspect_ratio": "9:16"
+  },
+
+  "transition_out": {
+    "type": "xfade dissolve",
+    "duration": 0.4
+  }
+}

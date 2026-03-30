@@ -1,0 +1,233 @@
+
+════════════════════════════════════════════════════════════
+ CAMPAIGN: xpel_ad  (7 scenes)
+ Rejections queued: ['scene_01', 'scene_02', 'scene_03', 'scene_04', 'scene_05', 'scene_06', 'scene_07']
+════════════════════════════════════════════════════════════
+
+  [NOTE] scene_01 — injecting rejection note: "the table is not visible in the camera view"
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_01
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly']
+  Mode:        kontext (pose edit)
+  Drift limit: 0.25
+  [SEED] Using override: frame_1.png
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors, cinematic depth of...
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916956/_A6ZsMml7XxXu4z0-Naiw_dc29e8b91ad94c1b8fbc6122614e1b35.png
+  [SAVED] scene_01.png
+  [DRIFT] 0.176  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916958/lGUODyvqvTjxIHRQUiJm0_5a15ee26f3eb4519aec033b4dae07214.png
+  [SAVED] scene_01.png
+  [DRIFT] 0.168  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Uploading seed image...
+  [FAL] Running flux-pro/kontext...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916959/0pMjudUXKMFl8EMsfQmdc_c5d68a251beb40288b75818d5cba8577.png
+  [SAVED] scene_01.png
+  [DRIFT] 0.197  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_01.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+  [NOTE] scene_02 — injecting rejection note: "I dont see mr willy."
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_02
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly', 'Xpel']
+  Mode:        text-to-image (full scene)
+  Drift limit: 0.25
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors, cinematic depth of...
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916959/K6A1JQ8m-N3Wc4gVn-7_a_f4776ec04576452e981a61879bb18328.png
+  [SAVED] scene_02.png
+  [DRIFT] 0.173  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a91695a/V3SBLWh1REQYdxi1CMeHH_07f789d5e5284d6f8f0816cdd2152870.png
+  [SAVED] scene_02.png
+  [DRIFT] 0.173  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a91695b/C0dvszYteiXHN105ly8MZ_6d7a2447840b4daba236da9dfd244573.png
+  [SAVED] scene_02.png
+  [DRIFT] 0.173  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_02.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+  [NOTE] scene_03 — injecting rejection note: "I dont see mr willy"
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_03
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly', 'Xpel']
+  Mode:        text-to-image (full scene)
+  Drift limit: 0.25
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors, cinematic depth of...
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a91695b/mGW7JPeJ7i5kuopgd61ND_613b3d6a721d4504830122c5125446c7.png
+  [SAVED] scene_03.png
+  [DRIFT] 0.198  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a91695c/OZAsI0nJcqK91nUZurgjY_304f3239efca4013bfafa51c016caa78.png
+  [SAVED] scene_03.png
+  [DRIFT] 0.198  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a91695c/Ahk2lIE4X_hr5LG5lpd6R_62351f03502a410fb20f0dff37f2ac55.png
+  [SAVED] scene_03.png
+  [DRIFT] 0.198  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_03.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+  [NOTE] scene_04 — injecting rejection note: "I dont see the table"
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_04
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly', 'Xpel']
+  Mode:        text-to-image (full scene)
+  Drift limit: 0.25
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors, cinematic depth of...
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a91695d/yNbrUdvANGOXQFNToDUqy_759e1fbef1194635b966d9a81b17d176.png
+  [SAVED] scene_04.png
+  [DRIFT] 0.216  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a91695d/gBYM9wXLNJCJKS_d3GpgZ_88126b85544c48c6a00aa68de21c6d2c.png
+  [SAVED] scene_04.png
+  [DRIFT] 0.218  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a91695e/Y5TzBMEGWOpHMaUP2jpFb_5ecd06eff93d46309251127b27ce3a87.png
+  [SAVED] scene_04.png
+  [DRIFT] 0.218  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_04.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+  [NOTE] scene_05 — injecting rejection note: "This looks good but we need to see tha table and Xpel stadning on the table"
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_05
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly', 'Xpel']
+  Mode:        text-to-image (full scene)
+  Drift limit: 0.25
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors, cinematic depth of...
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a91695e/KeoMYT9fhuVC13tY4geQG_7e69572b0762447db93e616c110804d4.png
+  [SAVED] scene_05.png
+  [DRIFT] 0.203  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a91695f/AU00uqAkaFkSAjV1ezVYs_fd3302a4736a4b0a8017a2779e44bcea.png
+  [SAVED] scene_05.png
+  [DRIFT] 0.152  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a91695f/3vCH2O1y91W23-KMd9U9s_547e929340434581a5e02b0fd5abf972.png
+  [SAVED] scene_05.png
+  [DRIFT] 0.148  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_05.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+  [NOTE] scene_06 — injecting rejection note: "I dont see mr willy"
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_06
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly', 'Xpel']
+  Mode:        text-to-image (full scene)
+  Drift limit: 0.25
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors, cinematic depth of...
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916960/zsvE06uZs7eYppRyRNSRV_c8e9a6be21a14806a31e9b8abc4a9f39.png
+  [SAVED] scene_06.png
+  [DRIFT] 0.001  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916960/R66AQZSGL1ARzwMZ0I2Cc_cffd7e4d519149c2b3ef28ecfb964360.png
+  [SAVED] scene_06.png
+  [DRIFT] 0.001  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916961/RG5KIIDR4a954fJcr5Qrf_2e15b0a34ef0458592fe0cae58710be2.png
+  [SAVED] scene_06.png
+  [DRIFT] 0.001  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_06.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+  [NOTE] scene_07 — injecting rejection note: "I dont see the table"
+
+════════════════════════════════════════════════════════════
+ FRAME GENERATOR — scene_07
+════════════════════════════════════════════════════════════
+  Characters:  ['MrWilly', 'Xpel']
+  Mode:        text-to-image (full scene)
+  Drift limit: 0.25
+
+  [PROMPT] Pixar 3D animated feature film render, The Incredibles art style, render farm quality, subsurface scattering, physically based shading, warm soft studio lighting from upper left, rich saturated colors, cinematic depth of...
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916961/XaA0fqR7KHsnu6FuG5lhp_d998aa645d1648098b373781b4b0ebb4.png
+  [SAVED] scene_07.png
+  [DRIFT] 0.249  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 1/2]
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916962/wJK72f-dpxogPFUFsJLZg_cfd5f9e70ab14732b7cfd76350b6533d.png
+  [SAVED] scene_07.png
+  [DRIFT] 0.248  ❌ FAILED  (threshold: 0.25)
+
+  [AUTO-RETRY 2/2]
+  [FAL] Running flux-pro text-to-image (full scene composition)...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916962/jdPwDgHFXy8eFUiiBunVL_fa8ef1c2d64348ae88afc6e203f3e355.png
+  [SAVED] scene_07.png
+  [DRIFT] 0.250  ❌ FAILED  (threshold: 0.25)
+  [DRIFT] Max retries — sending to manual review
+
+  → /root/studio/testing/Agentop/clients/probodyforlife/frames/xpel_ad/pending/scene_07.png
+  Next: python scripts/approval_gate.py --campaign xpel_ad
+
+════════════════════════════════════════════════════════════
+ CAMPAIGN SUMMARY
+════════════════════════════════════════════════════════════
+  scene_01  ✅ pending
+  scene_02  ✅ pending
+  scene_03  ✅ pending
+  scene_04  ✅ pending
+  scene_05  ✅ pending
+  scene_06  ✅ pending
+  scene_07  ✅ pending
+
+  Run: python scripts/approval_gate.py --campaign xpel_ad

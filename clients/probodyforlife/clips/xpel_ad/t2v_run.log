@@ -1,0 +1,77 @@
+nohup: ignoring input
+
+════════════════════════════════════════════════════════════
+ T2V — scene_01  (MrWilly alone, curious, pointing toward table)
+════════════════════════════════════════════════════════════
+  Seed: 1001  Duration: 5s  Ratio: 9:16
+  Prompt (1428 chars): Pixar 3D animated feature film quality. The Incredibles character art style. Render farm quality. Subsurface scattering skin. Physically based rendering. Rich saturated colors. War...
+  [FAL] Submitting to fal-ai/kling-video/v1/standard/text-to-video ...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916b22/WJsS-dvjbxp6dpAilvNxo_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/t2v/scene_01.mp4  (6922 KB)
+
+════════════════════════════════════════════════════════════
+ T2V — scene_02  (MrWilly + Xpel first meeting, both surprised and excited)
+════════════════════════════════════════════════════════════
+  Seed: 1002  Duration: 5s  Ratio: 9:16
+  Prompt (1864 chars): Pixar 3D animated feature film quality. The Incredibles character art style. Render farm quality. Subsurface scattering skin. Physically based rendering. Rich saturated colors. War...
+  [FAL] Submitting to fal-ai/kling-video/v1/standard/text-to-video ...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916b43/DpOef9G446xdleISTr4LR_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/t2v/scene_02.mp4  (4141 KB)
+
+════════════════════════════════════════════════════════════
+ T2V — scene_03  (MrWilly skeptical arms crossed, Xpel explaining with raised finger)
+════════════════════════════════════════════════════════════
+  Seed: 1003  Duration: 5s  Ratio: 9:16
+  Prompt (1949 chars): Pixar 3D animated feature film quality. The Incredibles character art style. Render farm quality. Subsurface scattering skin. Physically based rendering. Rich saturated colors. War...
+  [FAL] Submitting to fal-ai/kling-video/v1/standard/text-to-video ...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916b64/GT5Ihe8KHLv2okbFcTeIQ_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/t2v/scene_03.mp4  (4118 KB)
+
+════════════════════════════════════════════════════════════
+ T2V — scene_04  (Xpel proud puffed chest, MrWilly impressed wide smile)
+════════════════════════════════════════════════════════════
+  Seed: 1004  Duration: 5s  Ratio: 9:16
+  Prompt (1908 chars): Pixar 3D animated feature film quality. The Incredibles character art style. Render farm quality. Subsurface scattering skin. Physically based rendering. Rich saturated colors. War...
+  [FAL] Submitting to fal-ai/kling-video/v1/standard/text-to-video ...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916b85/-HmvIcUGiQ3DlMRAUpoDz_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/t2v/scene_04.mp4  (4831 KB)
+
+════════════════════════════════════════════════════════════
+ T2V — scene_05  (MrWilly leaning forward suspicious, Xpel arms up nervous)
+════════════════════════════════════════════════════════════
+  Seed: 1005  Duration: 5s  Ratio: 9:16
+  Prompt (1990 chars): Pixar 3D animated feature film quality. The Incredibles character art style. Render farm quality. Subsurface scattering skin. Physically based rendering. Rich saturated colors. War...
+  [FAL] Submitting to fal-ai/kling-video/v1/standard/text-to-video ...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916ba6/UbTi-wUBWHyoHzDIOMrrH_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/t2v/scene_05.mp4  (5185 KB)
+
+════════════════════════════════════════════════════════════
+ T2V — scene_06  (Xpel honest arms up, MrWilly slow approving nod)
+════════════════════════════════════════════════════════════
+  Seed: 1006  Duration: 5s  Ratio: 9:16
+  Prompt (1888 chars): Pixar 3D animated feature film quality. The Incredibles character art style. Render farm quality. Subsurface scattering skin. Physically based rendering. Rich saturated colors. War...
+  [FAL] Submitting to fal-ai/kling-video/v1/standard/text-to-video ...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916bcc/lANm_yQZEOfnSSKITcNjn_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/t2v/scene_06.mp4  (5338 KB)
+
+════════════════════════════════════════════════════════════
+ T2V — scene_07  (Hero shot — MrWilly holds Xpel up to camera triumphantly)
+════════════════════════════════════════════════════════════
+  Seed: 1007  Duration: 5s  Ratio: 9:16
+  Prompt (2055 chars): Pixar 3D animated feature film quality. The Incredibles character art style. Render farm quality. Subsurface scattering skin. Physically based rendering. Rich saturated colors. War...
+  [FAL] Submitting to fal-ai/kling-video/v1/standard/text-to-video ...
+  [FAL] Done → https://v3b.fal.media/files/b/0a916bec/FK6kUeRVwR80gBeK3tM05_output.mp4
+  [SAVED] /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/t2v/scene_07.mp4  (5492 KB)
+
+════════════════════════════════════════════════════════════
+ SUMMARY
+════════════════════════════════════════════════════════════
+  scene_01  ✅ done
+  scene_02  ✅ done
+  scene_03  ✅ done
+  scene_04  ✅ done
+  scene_05  ✅ done
+  scene_06  ✅ done
+  scene_07  ✅ done
+
+  Clips: /root/studio/testing/Agentop/clients/probodyforlife/clips/xpel_ad/t2v

@@ -21,7 +21,7 @@ from backend.models.gsd import (
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-_GSD_ROOT = Path("backend/memory/gsd")
+_GSD_ROOT = Path("data/agents/gsd")
 _STATE_PATH = _GSD_ROOT / "gsd_state.json"
 _MAP_PATH = _GSD_ROOT / "map_docs.json"
 _PHASES_ROOT = _GSD_ROOT / "phases"

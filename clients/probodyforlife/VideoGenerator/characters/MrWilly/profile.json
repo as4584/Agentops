@@ -1,0 +1,47 @@
+{
+  "_meta": "LOCKED — edit only via vault_manager.py. Never edit manually.",
+  "_version": "1.0",
+  "_locked": true,
+
+  "name": "MrWilly",
+  "type": "human_character",
+
+  "physical": {
+    "race": "Latino/Hispanic",
+    "age": "late 40s",
+    "build": "extremely muscular, thick arms, broad chest, stocky powerful frame",
+    "head": "completely bald, completely clean shaven, no facial hair, strong jaw, high cheekbones",
+    "skin": "light-medium warm skin tone",
+    "height": "tall, dominant frame"
+  },
+
+  "clothing": {
+    "top": "white MHP basketball jersey #97 with gold and navy trim, MHP logo on chest",
+    "bottom": "navy blue shorts",
+    "shoes": "blue sneakers"
+  },
+
+  "personality": {
+    "energy": "confident, warm, enthusiastic, approachable",
+    "expression_range": ["curious", "skeptical", "impressed", "triumphant", "amused", "suspicious"]
+  },
+
+  "style_ref": "VideoGenerator/styles/Pixar/style.json",
+
+  "anchor_images": {
+    "front":        "VideoGenerator/characters/MrWilly/front.png",
+    "side_left":    "VideoGenerator/characters/MrWilly/side_left.png",
+    "3q_right":     "VideoGenerator/characters/MrWilly/approved_poses/guy_3q_right.png",
+    "reference_photo": "VideoGenerator/characters/MrWilly/real_reference.jpg"
+  },
+
+  "approved_poses_dir": "VideoGenerator/characters/MrWilly/approved_poses/",
+
+  "generation": {
+    "positive_prefix": "Pixar 3D animated feature film render, The Incredibles art style, extremely muscular completely bald Latino male late 40s, light-medium warm skin tone, completely clean shaven no facial hair, strong jaw and high cheekbones, white MHP basketball jersey #97 gold and navy trim, navy blue shorts, blue sneakers",
+    "negative": "realistic, photorealistic, live action, 2D flat, anime, hair on head, beard, stubble, facial hair, goatee, mustache, dark skin, different face, different person, wrong clothing, missing jersey number, face warp, face distortion"
+  },
+
+  "drift_threshold": 0.25,
+  "_drift_note": "SSIM between cross-pose AI renders naturally scores 0.25-0.45. This threshold catches catastrophic identity loss only. Visual review happens in approval_gate.py."
+}

@@ -1,12 +1,13 @@
 """
 VoiceAgent — Generates spoken audio from scripts.
 ==================================================
-Uses local TTS options:
-  1. Piper TTS (fully local, fast, good quality)
-  2. Coqui TTS (local, supports voice cloning)
-  3. ElevenLabs API (optional, if configured)
+Uses local open-source TTS backends (no cloud services):
+  1. Qwen CosyVoice 2 (best quality, local, 0.5B params)
+  2. Piper TTS (fully local, fast, good quality)
+  3. Coqui TTS (local, supports voice cloning)
+  4. eSpeak-NG (basic fallback, always available)
 
-Default: Piper TTS — runs entirely on your machine.
+Default: CosyVoice 2 — runs entirely on your machine.
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ from typing import Optional
 
 from backend.content.base_agent import ContentAgent
 from backend.content.video_job import VideoJob, JobStatus
-from backend.config import MEMORY_DIR
+from backend.config import MEMORY_DIR, QWEN_TTS_MODEL, QWEN_TTS_VOICE
 from backend.utils import logger
 
 AUDIO_DIR = MEMORY_DIR / "content_audio"
@@ -35,19 +36,25 @@ class VoiceAgent(ContentAgent):
         spoken_text = self._clean_for_tts(job.script)
         audio_path = AUDIO_DIR / f"{job.job_id}.wav"
 
-        # Try backends in order of preference
+        # Try backends in order of preference — all open-source, all local
         success = False
 
-        if self._has_piper():
+        if self._has_cosyvoice():
+            success = self._generate_cosyvoice(spoken_text, audio_path)
+
+        if not success and self._has_piper():
             success = self._generate_piper(spoken_text, audio_path)
-        elif self._has_coqui():
+
+        if not success and self._has_coqui():
             success = self._generate_coqui(spoken_text, audio_path)
-        elif self._has_espeak():
+
+        if not success and self._has_espeak():
             success = self._generate_espeak(spoken_text, audio_path)
 
         if not success:
             raise RuntimeError(
                 "No TTS backend available. Install one:\n"
+                "  - CosyVoice: pip install cosyvoice\n"
                 "  - Piper: pip install piper-tts\n"
                 "  - Coqui: pip install TTS\n"
                 "  - eSpeak: sudo apt install espeak-ng"
@@ -83,6 +90,14 @@ class VoiceAgent(ContentAgent):
 
     # ── TTS Backends ─────────────────────────────────────
 
+    def _has_cosyvoice(self) -> bool:
+        """Check if Qwen CosyVoice 2 is installed."""
+        try:
+            from cosyvoice.cli.cosyvoice import CosyVoice2  # noqa: F401
+            return True
+        except ImportError:
+            return False
+
     def _has_piper(self) -> bool:
         return shutil.which("piper") is not None
 
@@ -95,6 +110,37 @@ class VoiceAgent(ContentAgent):
 
     def _has_espeak(self) -> bool:
         return shutil.which("espeak-ng") is not None or shutil.which("espeak") is not None
+
+    def _generate_cosyvoice(self, text: str, output: Path) -> bool:
+        """Generate audio using Qwen CosyVoice 2 (local, open-source)."""
+        try:
+            from cosyvoice.cli.cosyvoice import CosyVoice2
+            import torchaudio
+
+            model = CosyVoice2(
+                QWEN_TTS_MODEL,
+                load_jit=True,
+                load_trt=False,
+            )
+
+            # Use streaming inference, collect all chunks
+            chunks = []
+            for chunk in model.inference_sft(text, QWEN_TTS_VOICE, stream=False):
+                chunks.append(chunk["tts_speech"])
+
+            if not chunks:
+                logger.warning(f"[{self.name}] CosyVoice returned no audio chunks")
+                return False
+
+            import torch
+            audio = torch.cat(chunks, dim=1)
+            torchaudio.save(str(output), audio, model.sample_rate)
+
+            logger.info(f"[{self.name}] CosyVoice TTS success ({QWEN_TTS_MODEL})")
+            return True
+        except Exception as e:
+            logger.warning(f"[{self.name}] CosyVoice error: {e}")
+            return False
 
     def _generate_piper(self, text: str, output: Path) -> bool:
         """Generate audio using Piper TTS (fully local)."""

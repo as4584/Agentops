@@ -1,0 +1,15 @@
+{
+  "receipt_id": "20260310T100518_kling_v1_6_pro",
+  "timestamp": "2026-03-10T10:05:18.492350+00:00",
+  "campaign": "xpel_ad",
+  "model": "kling_v1_6_pro",
+  "endpoint": "",
+  "clips_generated": 7,
+  "seconds_per_clip": 5.0,
+  "total_seconds_generated": 35.0,
+  "cost_per_second_usd": 0.023,
+  "total_cost_usd": 0.805,
+  "output_files": [],
+  "prompts": [],
+  "notes": "Scene 01-07 first pass t2v run"
+}

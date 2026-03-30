@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seagull Mediterranean Seafood | Fresh Egyptian Seafood — Paterson, NJ</title>
+  <meta name="description" content="Seagull Mediterranean Seafood in Paterson, NJ. Authentic Egyptian-inspired seafood — grilled branzino, lamb chops, surf & turf, halal certified. 864 Main St. Open daily.">
+  <link rel="canonical" href="https://seagullmediterranean.com/">
+  <meta property="og:title" content="Seagull Mediterranean Seafood | Paterson, NJ">
+  <meta property="og:description" content="NJ's premier Egyptian seafood restaurant. Fresh fish daily, halal certified. 864 Main St, Paterson.">
+  <meta property="og:image" content="https://seagullmediterranean.com/assets/images/og.jpg">
+  <meta property="og:url" content="https://seagullmediterranean.com/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Restaurant","name":"Seagull Mediterranean Seafood","url":"https://seagullmediterranean.com","telephone":"+19733330006","email":"seagullmediterranean@gmail.com","address":{"@type":"PostalAddress","streetAddress":"864 Main St","addressLocality":"Paterson","addressRegion":"NJ","postalCode":"07503","addressCountry":"US"},"geo":{"@type":"GeoCoordinates","latitude":40.8976,"longitude":-74.1627},"servesCuisine":["Mediterranean","Egyptian","Seafood","Halal"],"priceRange":"$$","openingHours":["Mo-Su 12:00-22:00"],"sameAs":["https://www.instagram.com/seagullmediterraneanseafood/","https://www.facebook.com/p/Seagull-Mediterranean-Seafood-100095014026221/","https://www.tiktok.com/@seagullmediterranean"],"hasMenu":"https://seagullmediterranean.com/menu.html","acceptsReservations":"True"}
+  </script>
+<style>
+/* ─── RESET & BASE ─── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:#0b1a1f;
+  color:#f0ede8;
+  font-family:'Outfit',sans-serif;
+  font-weight:300;
+  line-height:1.7;
+  overflow-x:hidden;
+}
+img{display:block;max-width:100%;height:100%;object-fit:cover}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+
+/* ─── BRAND ─── */
+:root{
+  --teal:   #1a7a8a;
+  --teal2:  #239aad;
+  --teal3:  #2ec4db;
+  --orange: #f26522;
+  --orange2:#ff8c4b;
+  --dark:   #0b1a1f;
+  --dark2:  #0f2129;
+  --dark3:  #162d38;
+  --dark4:  #1e3d4a;
+  --cream:  #f0ede8;
+  --cream2: #d8d2c8;
+  --muted:  #7a9aa5;
+  --white:  #ffffff;
+}
+
+/* ─── NAV ─── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  padding:1.5rem 3rem;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:all .35s ease;
+}
+nav.scrolled{
+  background:rgba(11,26,31,0.96);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  padding:1rem 3rem;
+  border-bottom:1px solid rgba(26,122,138,.2);
+}
+.nav-logo{
+  display:flex;align-items:center;gap:.75rem;
+}
+.nav-logo-img{
+  width:42px;height:42px;
+  object-fit:contain;
+}
+.nav-logo-text{
+  font-family:'Playfair Display',serif;
+  font-size:1.15rem;font-weight:700;
+  color:var(--cream);
+  line-height:1.2;
+}
+.nav-logo-text span{
+  display:block;font-size:.65rem;font-family:'Outfit',sans-serif;
+  font-weight:400;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--teal3);
+}
+.nav-links{display:flex;gap:2.5rem;align-items:center}
+.nav-links a{
+  font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;font-weight:500;
+  color:var(--muted);transition:color .2s;
+}
+.nav-links a:hover,.nav-links a.active{color:var(--cream)}
+.nav-order{
+  background:var(--orange)!important;color:#fff!important;
+  padding:.55rem 1.4rem!important;
+  font-weight:600!important;letter-spacing:.06em!important;
+  border-radius:2px;
+  transition:background .2s,transform .2s!important;
+}
+.nav-order:hover{background:var(--orange2)!important;transform:translateY(-1px)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:201}
+.hamburger span{display:block;width:22px;height:1.5px;background:var(--cream);transition:.3s}
+
+/* ─── HERO ─── */
+.hero{
+  position:relative;min-height:100vh;
+  display:flex;align-items:center;
+  overflow:hidden;
+}
+/* Diagonal split: left = brand dark, right = image */
+.hero-split{
+  position:absolute;inset:0;
+  display:grid;grid-template-columns:52% 48%;
+}
+.hero-left-bg{
+  background:var(--dark2);
+  position:relative;overflow:hidden;
+}
+.hero-left-bg::after{
+  content:'';position:absolute;right:-80px;top:0;bottom:0;width:160px;
+  background:var(--dark2);
+  clip-path:polygon(0 0,0 100%,100% 100%);
+  z-index:1;
+}
+/* Teal wave texture on left */
+.hero-left-bg::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 20% 80%,rgba(26,122,138,.25) 0%,transparent 60%),
+    radial-gradient(ellipse at 80% 20%,rgba(242,101,34,.08) 0%,transparent 50%);
+}
+.hero-right-bg{
+  position:relative;
+  background:#0f2129;
+}
+.hero-right-bg img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  opacity:.75;
+  mix-blend-mode:luminosity;
+  filter:sepia(.3) hue-rotate(160deg) saturate(1.4) brightness(.7);
+}
+.hero-right-bg::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,var(--dark2) 0%,transparent 40%,rgba(11,26,31,.6) 100%);
+}
+/* Animated wave lines */
+.hero-waves{
+  position:absolute;bottom:0;left:0;right:0;z-index:2;
+  pointer-events:none;overflow:hidden;
+}
+.hero-content{
+  position:relative;z-index:10;
+  padding:0 3rem;
+  max-width:660px;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(26,122,138,.15);
+  border:1px solid rgba(46,196,219,.25);
+  padding:.45rem 1rem;
+  border-radius:100px;
+  font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--teal3);font-weight:500;
+  margin-bottom:2rem;
+  opacity:0;animation:fadeUp .7s ease .2s forwards;
+}
+.hero-badge::before{content:'';display:block;width:6px;height:6px;border-radius:50%;background:var(--teal3)}
+.hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(3rem,6vw,5.5rem);
+  font-weight:700;
+  line-height:1.05;
+  letter-spacing:-.02em;
+  color:var(--white);
+  margin-bottom:1.25rem;
+  opacity:0;animation:fadeUp .7s ease .4s forwards;
+}
+.hero h1 em{font-style:italic;color:var(--orange)}
+.hero-sub{
+  font-size:1rem;color:var(--cream2);
+  font-weight:300;line-height:1.75;
+  max-width:460px;
+  margin-bottom:2.5rem;
+  opacity:0;animation:fadeUp .7s ease .6s forwards;
+}
+.hero-ctas{
+  display:flex;gap:.75rem;flex-wrap:wrap;
+  opacity:0;animation:fadeUp .7s ease .8s forwards;
+}
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.85rem 1.8rem;
+  font-family:'Outfit',sans-serif;
+  font-size:.8rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+  cursor:pointer;border:none;transition:all .25s;
+  border-radius:2px;
+}
+.btn-primary{background:var(--orange);color:#fff}
+.btn-primary:hover{background:var(--orange2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(242,101,34,.3)}
+.btn-ghost{background:transparent;color:var(--cream);border:1px solid rgba(240,237,232,.25)}
+.btn-ghost:hover{border-color:var(--teal3);color:var(--teal3);transform:translateY(-2px)}
+.btn-teal{background:var(--teal);color:#fff}
+.btn-teal:hover{background:var(--teal2);transform:translateY(-2px)}
+
+/* Floating review badge */
+.hero-review{
+  position:absolute;bottom:3.5rem;right:3.5rem;z-index:10;
+  background:rgba(11,26,31,.85);
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(26,122,138,.3);
+  padding:1rem 1.5rem;
+  border-radius:4px;
+  opacity:0;animation:fadeIn .8s ease 1.2s forwards;
+  max-width:220px;
+}
+.review-stars{color:var(--orange);font-size:.9rem;letter-spacing:.05em;margin-bottom:.35rem}
+.review-text{font-size:.78rem;color:var(--cream2);line-height:1.5;font-style:italic}
+.review-meta{font-size:.65rem;color:var(--muted);margin-top:.4rem;letter-spacing:.05em}
+
+/* ─── BRAND BAR ─── */
+.brand-bar{
+  background:var(--teal);
+  padding:.85rem 3rem;
+  display:flex;align-items:center;justify-content:center;gap:3rem;
+  flex-wrap:wrap;
+  border-top:2px solid rgba(255,255,255,.1);
+}
+.brand-bar-item{
+  display:flex;align-items:center;gap:.6rem;
+  font-size:.75rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,255,255,.9);
+}
+.brand-bar-item::before{content:'✦';font-size:.5rem;color:rgba(255,255,255,.5)}
+.brand-bar-sep{width:1px;height:24px;background:rgba(255,255,255,.2)}
+
+/* ─── SECTION SHARED ─── */
+.section-tag{
+  font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--teal3);font-weight:600;margin-bottom:.9rem;
+}
+.section-h{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2rem,4vw,3.25rem);
+  font-weight:700;line-height:1.1;
+  color:var(--cream);
+}
+.section-h em{font-style:italic;color:var(--orange)}
+.section-p{font-size:.95rem;color:var(--muted);line-height:1.85;max-width:520px}
+.rule{width:40px;height:2px;background:var(--teal);margin:1.2rem 0}
+
+/* ─── STORY STRIP ─── */
+.story{
+  display:grid;grid-template-columns:1fr 1fr;
+  min-height:560px;
+}
+.story-img{position:relative;overflow:hidden;min-height:460px}
+.story-img img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;
+  transition:transform .8s ease;
+}
+.story-img:hover img{transform:scale(1.04)}
+/* Teal overlay tint on image */
+.story-img::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(26,122,138,.25) 0%,transparent 60%);
+  pointer-events:none;
+}
+/* Orange accent line */
+.story-img::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:linear-gradient(to bottom,var(--orange),var(--teal));
+  z-index:1;
+}
+.story-text{
+  background:var(--dark2);
+  padding:5rem 4rem;
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;overflow:hidden;
+}
+/* Background geometric detail */
+.story-text::after{
+  content:'"';
+  position:absolute;right:2rem;bottom:-2rem;
+  font-family:'Playfair Display',serif;
+  font-size:20rem;color:rgba(26,122,138,.04);
+  pointer-events:none;line-height:1;
+}
+.story-text .section-p{margin-bottom:1.75rem}
+.story-stat-row{
+  display:flex;gap:2.5rem;margin-top:2rem;
+  padding-top:2rem;border-top:1px solid rgba(255,255,255,.07);
+}
+.stat-item{}
+.stat-num{
+  font-family:'Playfair Display',serif;
+  font-size:2.2rem;font-weight:700;color:var(--orange);line-height:1;
+}
+.stat-label{font-size:.72rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:.25rem}
+
+/* ─── DISHES SHOWCASE ─── */
+.dishes{background:var(--dark3);padding:5rem 3rem}
+.dishes-header{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  max-width:1200px;margin:0 auto 3rem;
+  flex-wrap:wrap;gap:1.5rem;
+}
+/* Asymmetric bento-style grid */
+.dishes-bento{
+  max-width:1200px;margin:0 auto;
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr;
+  grid-template-rows:320px 240px;
+  gap:3px;
+}
+.dish{
+  position:relative;overflow:hidden;
+  background:var(--dark4);
+  cursor:pointer;
+}
+/* Large hero dish */
+.dish-hero{grid-row:span 2}
+.dish img{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  transition:transform .6s ease;
+  filter:brightness(.85) saturate(1.1);
+}
+.dish:hover img{transform:scale(1.06)}
+/* Dish bottom gradient + label */
+.dish-label{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(11,26,31,.92) 0%,rgba(11,26,31,.2) 45%,transparent 70%);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:1.5rem;
+  transition:opacity .3s;
+}
+.dish-name{
+  font-family:'Playfair Display',serif;
+  font-size:1.2rem;font-weight:700;color:var(--white);
+  margin-bottom:.2rem;
+}
+.dish-hero .dish-name{font-size:1.7rem}
+.dish-desc{font-size:.78rem;color:var(--cream2);opacity:.85;line-height:1.5}
+/* Orange tag on hover */
+.dish-tag{
+  position:absolute;top:1rem;right:1rem;
+  background:var(--orange);color:#fff;
+  font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem .7rem;border-radius:2px;
+  opacity:0;transition:opacity .3s;
+}
+.dish:hover .dish-tag{opacity:1}
+/* No-image fallback: rich dark gradient with dish description */
+.dish-fallback{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:2rem;
+}
+.dish-fallback-bg{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--dark3),var(--dark4));
+}
+.dish-fallback-pattern{
+  position:absolute;inset:0;opacity:.04;
+  background-image:
+    repeating-linear-gradient(45deg,var(--teal3) 0,var(--teal3) 1px,transparent 0,transparent 50%);
+  background-size:20px 20px;
+}
+/* Teal accent on top for no-image dishes */
+.dish:not(:has(img)) .dish-label::before,
+.dish-fallback::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(to right,var(--teal),transparent);
+}
+
+/* ─── 3-COLUMN HIGHLIGHTS ─── */
+.highlights{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-top:1px solid rgba(26,122,138,.15);
+}
+.hl-card{
+  padding:3rem 2.5rem;
+  border-right:1px solid rgba(26,122,138,.1);
+  background:var(--dark2);
+  transition:background .3s;
+  position:relative;overflow:hidden;
+}
+.hl-card:last-child{border-right:none}
+.hl-card:hover{background:var(--dark3)}
+.hl-card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(to right,var(--orange),transparent);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .4s ease;
+}
+.hl-card:hover::after{transform:scaleX(1)}
+.hl-icon{
+  width:48px;height:48px;border-radius:4px;
+  background:rgba(26,122,138,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;
+  margin-bottom:1.5rem;
+  border:1px solid rgba(26,122,138,.2);
+}
+.hl-card h3{
+  font-family:'Playfair Display',serif;
+  font-size:1.15rem;font-weight:700;color:var(--cream);
+  margin-bottom:.6rem;
+}
+.hl-card p{font-size:.85rem;color:var(--muted);line-height:1.7}
+
+/* ─── REVIEW STRIP ─── */
+.reviews{
+  background:var(--teal);
+  padding:4rem 3rem;
+  overflow:hidden;position:relative;
+}
+.reviews::before{
+  content:'"';
+  position:absolute;left:-1rem;top:-3rem;
+  font-family:'Playfair Display',serif;
+  font-size:22rem;color:rgba(255,255,255,.05);
+  pointer-events:none;line-height:1;
+}
+.reviews-inner{
+  max-width:1100px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;
+}
+.review-card{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  padding:1.75rem;
+  border-radius:4px;
+  position:relative;
+}
+.review-card::before{
+  content:'"';
+  position:absolute;top:-10px;left:1.5rem;
+  font-family:'Playfair Display',serif;
+  font-size:4rem;color:var(--orange);
+  line-height:1;font-style:italic;
+}
+.review-stars{color:var(--orange2);font-size:.85rem;letter-spacing:.05em;margin-bottom:.75rem}
+.review-text{font-size:.88rem;color:rgba(255,255,255,.85);line-height:1.7;font-style:italic}
+.review-author{font-size:.7rem;color:rgba(255,255,255,.5);letter-spacing:.1em;text-transform:uppercase;margin-top:1rem}
+.reviews-header{
+  text-align:center;margin-bottom:3rem;
+}
+.reviews-header .section-h{color:#fff}
+.reviews-header .section-tag{color:rgba(255,255,255,.6)}
+
+/* ─── FULL-WIDTH CTA ─── */
+.cta-strip{
+  position:relative;overflow:hidden;
+  min-height:380px;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;
+}
+.cta-bg{
+  position:absolute;inset:0;
+  background:
+    linear-gradient(135deg,rgba(11,26,31,.95) 0%,rgba(15,33,41,.9) 100%);
+}
+.cta-bg-img{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 50% 50%,rgba(26,122,138,.2) 0%,transparent 70%);
+}
+/* animated ring */
+.cta-ring{
+  position:absolute;
+  width:600px;height:600px;
+  border:1px solid rgba(26,122,138,.08);
+  border-radius:50%;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  animation:ringPulse 6s ease infinite;
+}
+.cta-ring:nth-child(2){width:420px;height:420px;animation-delay:2s;border-color:rgba(242,101,34,.06)}
+.cta-ring:nth-child(3){width:240px;height:240px;animation-delay:4s}
+.cta-content{position:relative;z-index:2;padding:0 2rem}
+.cta-content .section-h{font-size:clamp(2rem,5vw,3.5rem);margin-bottom:1rem}
+.cta-content p{color:var(--muted);max-width:500px;margin:0 auto 2.5rem;font-size:1rem}
+.cta-buttons{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+/* ─── INSTAGRAM GRID ─── */
+.insta-section{padding:5rem 3rem;background:var(--dark)}
+.insta-header{text-align:center;margin-bottom:3rem}
+.insta-handle{
+  display:inline-flex;align-items:center;gap:.5rem;
+  color:var(--teal3);font-size:.85rem;font-weight:500;
+  margin-top:.75rem;
+  transition:color .2s;
+}
+.insta-handle:hover{color:var(--orange)}
+/* 6-cell grid: 3 cols × 2 rows */
+.insta-grid{
+  max-width:1100px;margin:0 auto;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(2,260px);
+  gap:3px;
+}
+.insta-cell{
+  position:relative;overflow:hidden;
+  background:var(--dark3);
+  cursor:pointer;
+}
+.insta-cell img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform .5s ease;
+  filter:brightness(.9) saturate(1.15);
+}
+.insta-cell:hover img{transform:scale(1.08)}
+.insta-cell-overlay{
+  position:absolute;inset:0;
+  background:rgba(26,122,138,.0);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:all .35s ease;
+}
+.insta-cell:hover .insta-cell-overlay{
+  background:rgba(11,26,31,.65);
+  opacity:1;
+}
+.insta-cell-label{
+  text-align:center;
+  transform:translateY(8px);
+  transition:transform .35s ease;
+}
+.insta-cell:hover .insta-cell-label{transform:translateY(0)}
+.insta-cell-label p{
+  font-family:'Playfair Display',serif;
+  font-size:1rem;font-style:italic;color:#fff;
+  margin-bottom:.35rem;
+}
+.insta-cell-label span{font-size:.7rem;color:var(--teal3);letter-spacing:.1em;text-transform:uppercase}
+/* No-image fallback cell styling */
+.insta-fallback{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.5rem;
+  background:linear-gradient(135deg,var(--dark3),var(--dark4));
+}
+.insta-fallback p{
+  font-family:'Playfair Display',serif;font-style:italic;
+  color:var(--muted);font-size:1rem;text-align:center;padding:0 1rem;
+}
+.insta-fallback span{font-size:.65rem;color:var(--teal);letter-spacing:.12em;text-transform:uppercase}
+
+/* ─── FOOTER ─── */
+footer{
+  background:var(--dark2);
+  border-top:1px solid rgba(26,122,138,.15);
+  padding:4rem 3rem 2rem;
+}
+.footer-top{
+  max-width:1100px;margin:0 auto;
+  display:grid;grid-template-columns:2.5fr 1fr 1fr 1.5fr;
+  gap:3rem;padding-bottom:3rem;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.footer-logo-wrap .nav-logo-text{font-size:1.3rem}
+.footer-logo-wrap p{font-size:.85rem;color:var(--muted);max-width:240px;line-height:1.7;margin-top:.75rem}
+.footer-col h4{
+  font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--teal3);margin-bottom:1.1rem;
+}
+.footer-col ul li{margin-bottom:.55rem}
+.footer-col ul li a{font-size:.85rem;color:var(--muted);transition:color .2s}
+.footer-col ul li a:hover{color:var(--orange)}
+.footer-contact p,.footer-contact a{font-size:.85rem;color:var(--muted);line-height:1.9;transition:color .2s}
+.footer-contact a:hover{color:var(--cream)}
+.footer-halal{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(26,122,138,.1);border:1px solid rgba(26,122,138,.2);
+  padding:.45rem .9rem;border-radius:100px;
+  font-size:.72rem;font-weight:600;color:var(--teal3);
+  letter-spacing:.08em;text-transform:uppercase;
+  margin-top:1rem;
+}
+.footer-bottom{
+  max-width:1100px;margin:0 auto;
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:1.5rem;flex-wrap:wrap;gap:.75rem;
+}
+.footer-bottom p{font-size:.75rem;color:rgba(122,154,165,.4)}
+.social-row{display:flex;gap:1.5rem}
+.social-row a{font-size:.75rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;transition:color .2s}
+.social-row a:hover{color:var(--orange)}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes ringPulse{0%,100%{opacity:1;transform:translate(-50%,-50%) scale(1)}50%{opacity:.4;transform:translate(-50%,-50%) scale(1.05)}}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-d1{transition-delay:.1s}.reveal-d2{transition-delay:.2s}.reveal-d3{transition-delay:.3s}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:1024px){
+  .dishes-bento{grid-template-columns:1fr 1fr;grid-template-rows:280px 280px 200px}
+  .dish-hero{grid-row:span 1}
+  .story{grid-template-columns:1fr}
+  .story-img{min-height:340px}
+  .footer-top{grid-template-columns:1fr 1fr;gap:2rem}
+}
+@media(max-width:768px){
+  nav{padding:1.1rem 1.5rem}
+  nav.scrolled{padding:.85rem 1.5rem}
+  .nav-links{
+    display:none;position:fixed;inset:0;
+    background:rgba(11,26,31,.98);
+    flex-direction:column;justify-content:center;align-items:center;
+    gap:2rem;z-index:199;
+  }
+  .nav-links.open{display:flex}
+  .nav-links a{font-size:1rem}
+  .hamburger{display:flex}
+  .hero{min-height:100svh}
+  .hero-split{grid-template-columns:1fr}
+  .hero-right-bg{display:none}
+  .hero-left-bg{min-height:100vh}
+  .hero-content{padding:6rem 1.5rem 4rem;max-width:100%}
+  .hero-review{display:none}
+  .brand-bar{padding:.75rem 1.5rem;gap:1.5rem}
+  .brand-bar-sep{display:none}
+  .story{grid-template-columns:1fr}
+  .story-text{padding:3rem 1.5rem}
+  .story-stat-row{gap:1.5rem}
+  .dishes{padding:4rem 1.5rem}
+  .dishes-bento{grid-template-columns:1fr;grid-template-rows:auto}
+  .dish{height:260px;position:relative}
+  .dish-hero{height:320px}
+  .highlights{grid-template-columns:1fr}
+  .reviews{padding:3rem 1.5rem}
+  .reviews-inner{grid-template-columns:1fr}
+  .insta-section{padding:4rem 1.5rem}
+  .insta-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,180px)}
+  .hero-ctas{flex-direction:column;align-items:flex-start}
+  footer{padding:3rem 1.5rem 1.5rem}
+  .footer-top{grid-template-columns:1fr;gap:2rem}
+  .cta-strip{min-height:280px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav id="nav">
+  <a href="index.html" class="nav-logo">
+    <!-- Logo: teal seagull wordmark inline SVG — swap for img tag with logo file -->
+    <svg class="nav-logo-img" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Sun -->
+      <circle cx="72" cy="42" r="22" fill="#f26522" opacity=".9"/>
+      <!-- Palm silhouette -->
+      <path d="M35 95 Q32 70 38 55 Q30 48 20 45 Q28 52 36 50 Q30 40 22 36 Q31 42 38 42 Q34 32 28 28 Q36 35 40 38 Q42 25 38 18 Q44 30 42 42 Q50 35 56 30 Q52 40 44 45 Q50 55 46 95Z" fill="#1a7a8a"/>
+      <!-- Bird silhouette -->
+      <path d="M60 28 Q75 20 90 24 Q80 26 78 30 Q85 26 95 28 Q84 32 75 30 Q70 34 60 28Z" fill="#1a7a8a"/>
+      <!-- Wave arc -->
+      <path d="M25 88 Q40 80 55 88 Q70 96 85 88 Q100 80 110 84" stroke="#2ec4db" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M20 96 Q38 86 56 96 Q74 106 92 96 Q102 90 112 93" stroke="#2ec4db" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".5"/>
+    </svg>
+    <div class="nav-logo-text">
+      Seagull
+      <span>Mediterranean Seafood</span>
+    </div>
+  </a>
+  <div class="nav-links" id="navLinks">
+    <a href="menu.html">Menu</a>
+    <a href="about.html">Our Story</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://order.toasttab.com/online/seagull-mediterranean-seafood-864-main-st" target="_blank" class="nav-order">Order Online</a>
+  </div>
+  <div class="hamburger" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-split">
+    <div class="hero-left-bg"></div>
+    <div class="hero-right-bg">
+      <!-- 
+        PHOTO INSTRUCTIONS:
+        Replace this with their best Instagram food photo.
+        Best candidates from @seagullmediterraneanseafood:
+        - Grilled branzino overhead shot
+        - Surf & turf platter
+        - Fresh fish display/tank
+        Drag from Instagram, save as assets/images/hero.jpg
+      -->
+      <img src="assets/images/hero.jpg" alt="Fresh grilled Mediterranean seafood at Seagull, Paterson NJ" 
+           onerror="this.parentElement.style.background='linear-gradient(135deg,#0f2129,#162d38)'">
+    </div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span>Paterson, NJ · Since 2022</span>
+    </div>
+    <h1>Where <em>Alexandria</em><br>Meets New Jersey</h1>
+    <p class="hero-sub">Fresh Mediterranean seafood with authentic Egyptian soul. Grilled whole fish, lamb chops, surf & turf — and the mint lemonade people drive across the state for.</p>
+    <div class="hero-ctas">
+      <a href="menu.html" class="btn btn-primary">View Our Menu</a>
+      <a href="https://order.toasttab.com/online/seagull-mediterranean-seafood-864-main-st" target="_blank" class="btn btn-ghost">Order Online</a>
+      <a href="contact.html#reserve" class="btn btn-teal">Reserve a Table</a>
+    </div>
+  </div>
+
+  <div class="hero-review">
+    <div class="review-stars">★★★★★</div>
+    <p class="review-text">"The food was beyond delicious — every dish bursting with freshness. You could taste the care and love."</p>
+    <p class="review-meta">Google Review · 769 reviews · 4.8 avg</p>
+  </div>
+</section>
+
+<!-- ═══ BRAND BAR ═══ -->
+<div class="brand-bar">
+  <div class="brand-bar-item">Fresh Catch Daily</div>
+  <div class="brand-bar-sep"></div>
+  <div class="brand-bar-item">100% Halal Certified</div>
+  <div class="brand-bar-sep"></div>
+  <div class="brand-bar-item">Dine In · Takeout · Delivery</div>
+  <div class="brand-bar-sep"></div>
+  <div class="brand-bar-item">Open Daily 12pm – 10pm</div>
+  <div class="brand-bar-sep"></div>
+  <div class="brand-bar-item">864 Main St · Paterson, NJ</div>
+</div>
+
+<!-- ═══ STORY STRIP ═══ -->
+<div class="story">
+  <div class="story-img reveal">
+    <!-- 
+      PHOTO: Restaurant interior / fish tank / atmosphere shot
+      From Facebook photos — the marine decor and fish tank are frequently mentioned
+      Save as: assets/images/interior.jpg
+    -->
+    <img src="assets/images/interior.jpg" 
+         alt="The warm dining room and fresh fish display at Seagull Mediterranean Seafood"
+         onerror="this.style.display='none'">
+    <!-- Fallback background when no image -->
+    <div style="position:absolute;inset:0;background:linear-gradient(135deg,#0f2129 0%,#1e3d4a 50%,#0f2129 100%);z-index:-1;display:flex;align-items:center;justify-content:center">
+      <svg width="180" height="60" viewBox="0 0 180 60" fill="none" opacity=".12">
+        <path d="M10 30 Q45 10 90 30 Q135 50 170 30" stroke="#2ec4db" stroke-width="2" fill="none"/>
+        <path d="M10 40 Q45 20 90 40 Q135 60 170 40" stroke="#2ec4db" stroke-width="1" fill="none" opacity=".5"/>
+      </svg>
+    </div>
+  </div>
+  <div class="story-text">
+    <p class="section-tag reveal">Our Story</p>
+    <h2 class="section-h reveal reveal-d1">The Coast of <em>Alexandria</em>,<br>Right in Paterson</h2>
+    <div class="rule reveal reveal-d1"></div>
+    <p class="section-p reveal reveal-d2">Born from a love of Egypt's northern shore, Seagull brings the bold, fresh flavors of Alexandrian coastal cuisine to New Jersey. Our fish tank showcases the day's catch — every plate proves it.</p>
+    <p class="section-p reveal reveal-d2" style="margin-top:1rem">100% halal. Warmly welcoming. A place where the food does the talking.</p>
+    <div style="margin-top:2.5rem" class="reveal reveal-d3">
+      <a href="about.html" class="btn btn-ghost" style="display:inline-flex">Read Our Full Story →</a>
+    </div>
+    <div class="story-stat-row reveal reveal-d3">
+      <div class="stat-item">
+        <div class="stat-num">4.8</div>
+        <div class="stat-label">Google Rating</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">769+</div>
+        <div class="stat-label">Reviews</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">16K</div>
+        <div class="stat-label">Instagram Fans</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DISHES ═══ -->
+<section class="dishes">
+  <div class="dishes-header">
+    <div>
+      <p class="section-tag reveal">From the Kitchen</p>
+      <h2 class="section-h reveal reveal-d1">Signature <em>Dishes</em></h2>
+    </div>
+    <a href="menu.html" class="btn btn-ghost reveal">See Full Menu →</a>
+  </div>
+
+  <div class="dishes-bento">
+
+    <!-- Dish 1: HERO — Grilled Branzino -->
+    <div class="dish dish-hero reveal">
+      <!-- 
+        PHOTO: Their signature grilled branzino/orata — most reviewed dish
+        Best source: @seagullmediterraneanseafood Instagram — look for the whole grilled fish shot
+        Save as: assets/images/dish-branzino.jpg
+      -->
+      <img src="assets/images/dish-branzino.jpg" 
+           alt="Whole grilled branzino with Mediterranean spices at Seagull"
+           onerror="this.style.display='none'">
+      <!-- Rich fallback for no-image state -->
+      <div class="dish-fallback" id="fb1" style="display:none">
+        <div class="dish-fallback-bg"></div>
+        <div class="dish-fallback-pattern"></div>
+        <div class="dish-label">
+          <div class="dish-name">Grilled Branzino</div>
+          <div class="dish-desc">Mediterranean sea bass · Egyptian spice rub · whole-grilled to order</div>
+        </div>
+      </div>
+      <div class="dish-label">
+        <div class="dish-name">Grilled Branzino</div>
+        <div class="dish-desc">Mediterranean sea bass · Egyptian spice rub · whole-grilled to order</div>
+      </div>
+      <div class="dish-tag">Chef's Choice</div>
+    </div>
+
+    <!-- Dish 2: Surf & Turf -->
+    <div class="dish reveal reveal-d1">
+      <img src="assets/images/dish-surf-turf.jpg" 
+           alt="Surf and turf — ribeye and butterfly shrimp"
+           onerror="this.style.display='none'">
+      <div class="dish-label">
+        <div class="dish-name">Surf &amp; Turf</div>
+        <div class="dish-desc">Bone-in ribeye + butterfly shrimp, flame-grilled</div>
+      </div>
+      <div class="dish-tag">Most Loved</div>
+    </div>
+
+    <!-- Dish 3: Lamb Chops -->
+    <div class="dish reveal reveal-d1">
+      <img src="assets/images/dish-lamb.jpg" 
+           alt="Flame-grilled lamb chops"
+           onerror="this.style.display='none'">
+      <div class="dish-label">
+        <div class="dish-name">Lamb Chops</div>
+        <div class="dish-desc">Flame-grilled · Mediterranean spices · tender &amp; juicy</div>
+      </div>
+    </div>
+
+    <!-- Dish 4: Garlic Shrimp -->
+    <div class="dish reveal reveal-d2">
+      <img src="assets/images/dish-shrimp.jpg" 
+           alt="Garlic butter butterfly shrimp"
+           onerror="this.style.display='none'">
+      <div class="dish-label">
+        <div class="dish-name">Garlic Butter Shrimp</div>
+        <div class="dish-desc">Jumbo shrimp · house lemon garlic butter sauce</div>
+      </div>
+    </div>
+
+    <!-- Dish 5: Mint Lemonade -->
+    <div class="dish reveal reveal-d2">
+      <img src="assets/images/dish-lemonade.jpg" 
+           alt="Fresh mint lemonade — a Seagull signature"
+           onerror="this.style.display='none'">
+      <div class="dish-label">
+        <div class="dish-name">Mint Lemonade</div>
+        <div class="dish-desc">House-made · the drink guests come back for</div>
+      </div>
+      <div class="dish-tag">Signature</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ HIGHLIGHTS ═══ -->
+<div class="highlights">
+  <div class="hl-card reveal">
+    <div class="hl-icon">🐟</div>
+    <h3>Fresh Catch Daily</h3>
+    <p>Our fish tank showcases what arrived this morning. Every dish is built around what's freshest — you can taste it in every bite.</p>
+  </div>
+  <div class="hl-card reveal reveal-d1">
+    <div class="hl-icon">☪</div>
+    <h3>100% Halal Certified</h3>
+    <p>No alcohol on premises. A welcoming table for every member of our community — without compromise.</p>
+  </div>
+  <div class="hl-card reveal reveal-d2">
+    <div class="hl-icon">🔥</div>
+    <h3>Egyptian Soul</h3>
+    <p>Recipes rooted in Alexandria's coastal tradition — the flavors, the hospitality, the warmth. This is the real thing.</p>
+  </div>
+</div>
+
+<!-- ═══ REVIEWS ═══ -->
+<section class="reviews">
+  <div class="reviews-header">
+    <p class="section-tag">What People Say</p>
+    <h2 class="section-h">Real Reviews from <em>Real Guests</em></h2>
+  </div>
+  <div class="reviews-inner">
+    <div class="review-card reveal">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"The food was beyond delicious. Every dish was bursting with freshness and flavor. You could tell everything was prepared with care and love."</p>
+      <p class="review-author">Google Review</p>
+    </div>
+    <div class="review-card reveal reveal-d1">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"Amazing food! Authentic Egyptian flavors — every dish was delicious. The staff and owners were incredibly welcoming. We felt right at home."</p>
+      <p class="review-author">Google Review</p>
+    </div>
+    <div class="review-card reveal reveal-d2">
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"NJ's best hidden gem. The fish is so fresh it practically swims to your plate. The mint lemonade alone is worth the trip from anywhere."</p>
+      <p class="review-author">TikTok · @patersonfoods</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ INSTAGRAM GRID ═══ -->
+<section class="insta-section">
+  <div class="insta-header">
+    <p class="section-tag">Follow Along</p>
+    <h2 class="section-h reveal">Fresh from the <em>Kitchen</em></h2>
+    <a href="https://www.instagram.com/seagullmediterraneanseafood/" target="_blank" class="insta-handle">
+      @seagullmediterraneanseafood →
+    </a>
+  </div>
+  <div class="insta-grid">
+    <!-- 
+      PHOTO INSTRUCTIONS FOR ALL 6 CELLS:
+      Pull the 6 best food photos from their Instagram or Facebook.
+      Save them as assets/images/insta-1.jpg through insta-6.jpg
+      The onerror fallback shows a styled card with the dish name if image is missing.
+      
+      Suggested photos to grab (match label below):
+      1. Grilled red snapper / full fish shot
+      2. Seafood platter / combination plate
+      3. Lamb chops close-up
+      4. Mint lemonade / drinks
+      5. Calamari or shrimp appetizer
+      6. Restaurant interior / fish tank
+    -->
+    <div class="insta-cell reveal">
+      <img src="assets/images/insta-1.jpg" alt="Grilled red snapper" onerror="this.style.display='none'">
+      <div class="insta-fallback">
+        <p>Grilled Red Snapper</p>
+        <span>Fresh daily · From the sea</span>
+      </div>
+      <div class="insta-cell-overlay">
+        <div class="insta-cell-label">
+          <p>Grilled Red Snapper</p>
+          <span>View on Instagram</span>
+        </div>
+      </div>
+    </div>
+    <div class="insta-cell reveal reveal-d1">
+      <img src="assets/images/insta-2.jpg" alt="Seafood combination platter" onerror="this.style.display='none'">
+      <div class="insta-fallback">
+        <p>Seafood Platter</p>
+        <span>Grilled &amp; fried combo</span>
+      </div>
+      <div class="insta-cell-overlay">
+        <div class="insta-cell-label">
+          <p>Seafood Platter</p>
+          <span>View on Instagram</span>
+        </div>
+      </div>
+    </div>
+    <div class="insta-cell reveal reveal-d2">
+      <img src="assets/images/insta-3.jpg" alt="Flame-grilled lamb chops" onerror="this.style.display='none'">
+      <div class="insta-fallback">
+        <p>Lamb Chops</p>
+        <span>Flame-grilled · Mediterranean</span>
+      </div>
+      <div class="insta-cell-overlay">
+        <div class="insta-cell-label">
+          <p>Lamb Chops</p>
+          <span>View on Instagram</span>
+        </div>
+      </div>
+    </div>
+    <div class="insta-cell reveal">
+      <img src="assets/images/insta-4.jpg" alt="Fresh mint lemonade" onerror="this.style.display='none'">
+      <div class="insta-fallback">
+        <p>Fresh Mint Lemonade</p>
+        <span>The drink people drive for</span>
+      </div>
+      <div class="insta-cell-overlay">
+        <div class="insta-cell-label">
+          <p>Mint Lemonade</p>
+          <span>View on Instagram</span>
+        </div>
+      </div>
+    </div>
+    <div class="insta-cell reveal reveal-d1">
+      <img src="assets/images/insta-5.jpg" alt="Crispy fried calamari" onerror="this.style.display='none'">
+      <div class="insta-fallback">
+        <p>Fried Calamari</p>
+        <span>Golden crispy · tahini sauce</span>
+      </div>
+      <div class="insta-cell-overlay">
+        <div class="insta-cell-label">
+          <p>Fried Calamari</p>
+          <span>View on Instagram</span>
+        </div>
+      </div>
+    </div>
+    <div class="insta-cell reveal reveal-d2">
+      <img src="assets/images/insta-6.jpg" alt="Seagull restaurant interior and fish tank" onerror="this.style.display='none'">
+      <div class="insta-fallback">
+        <p>Come Visit Us</p>
+        <span>864 Main St · Paterson, NJ</span>
+      </div>
+      <div class="insta-cell-overlay">
+        <div class="insta-cell-label">
+          <p>The Experience</p>
+          <span>View on Instagram</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA STRIP ═══ -->
+<section class="cta-strip">
+  <div class="cta-bg"></div>
+  <div class="cta-bg-img"></div>
+  <div class="cta-ring"></div>
+  <div class="cta-ring"></div>
+  <div class="cta-ring"></div>
+  <div class="cta-content">
+    <p class="section-tag">Ready to Eat?</p>
+    <h2 class="section-h reveal">Come In or <em>Order Now</em></h2>
+    <p class="reveal reveal-d1">Open daily noon to 10pm · 864 Main St, Paterson · <a href="tel:+19733330006" style="color:var(--teal3)">(973) 333-0006</a></p>
+    <div class="cta-buttons reveal reveal-d2">
+      <a href="https://order.toasttab.com/online/seagull-mediterranean-seafood-864-main-st" target="_blank" class="btn btn-primary">Order Online</a>
+      <a href="contact.html#reserve" class="btn btn-teal">Reserve a Table</a>
+      <a href="menu.html" class="btn btn-ghost">View Menu</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-logo-wrap">
+      <div class="nav-logo">
+        <svg width="36" height="36" viewBox="0 0 120 120" fill="none">
+          <circle cx="72" cy="42" r="22" fill="#f26522" opacity=".9"/>
+          <path d="M35 95 Q32 70 38 55 Q30 48 20 45 Q28 52 36 50 Q30 40 22 36 Q31 42 38 42 Q34 32 28 28 Q36 35 40 38 Q42 25 38 18 Q44 30 42 42 Q50 35 56 30 Q52 40 44 45 Q50 55 46 95Z" fill="#1a7a8a"/>
+          <path d="M60 28 Q75 20 90 24 Q80 26 78 30 Q85 26 95 28 Q84 32 75 30 Q70 34 60 28Z" fill="#1a7a8a"/>
+          <path d="M25 88 Q40 80 55 88 Q70 96 85 88 Q100 80 110 84" stroke="#2ec4db" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="nav-logo-text">Seagull<span>Mediterranean Seafood</span></div>
+      </div>
+      <p>Egyptian-inspired seafood in the heart of Paterson, New Jersey. From Alexandria's coast to your table.</p>
+      <div class="footer-halal">☪ Halal Certified</div>
+    </div>
+    <div class="footer-col">
+      <h4>Pages</h4>
+      <ul>
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="about.html">Our Story</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="https://order.toasttab.com/online/seagull-mediterranean-seafood-864-main-st" target="_blank">Order Online</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Follow</h4>
+      <ul>
+        <li><a href="https://www.instagram.com/seagullmediterraneanseafood/" target="_blank">Instagram</a></li>
+        <li><a href="https://www.tiktok.com/@seagullmediterranean" target="_blank">TikTok</a></li>
+        <li><a href="https://www.facebook.com/p/Seagull-Mediterranean-Seafood-100095014026221/" target="_blank">Facebook</a></li>
+      </ul>
+    </div>
+    <div class="footer-col footer-contact">
+      <h4>Find Us</h4>
+      <p>864 Main St<br>Paterson, NJ 07503</p>
+      <a href="tel:+19733330006">(973) 333-0006</a><br>
+      <a href="mailto:seagullmediterranean@gmail.com">seagullmediterranean@gmail.com</a>
+      <p style="margin-top:.75rem;font-size:.8rem">Open Daily<br>12:00 PM – 10:00 PM</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Seagull Mediterranean Seafood · Paterson, NJ · All rights reserved</p>
+    <div class="social-row">
+      <a href="https://www.instagram.com/seagullmediterraneanseafood/" target="_blank">Instagram</a>
+      <a href="https://www.tiktok.com/@seagullmediterranean" target="_blank">TikTok</a>
+      <a href="https://www.facebook.com/p/Seagull-Mediterranean-Seafood-100095014026221/" target="_blank">Facebook</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Nav scroll
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>60));
+
+// Mobile nav
+function toggleNav(){
+  const nl=document.getElementById('navLinks');
+  nl.classList.toggle('open');
+}
+
+// Show fallback divs for missing images
+document.querySelectorAll('.dish img, .insta-cell img, .story-img img').forEach(img=>{
+  img.addEventListener('error',function(){
+    // show fallback sibling if exists
+    const fallback=this.parentElement.querySelector('.dish-fallback, .insta-fallback');
+    if(fallback) fallback.style.display='flex';
+  });
+});
+
+// Scroll reveal
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

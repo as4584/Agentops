@@ -1,0 +1,49 @@
+{
+  "_meta": "Scene blueprint — read by animation_engine.py and frame_generator.py",
+  "_version": "1.0",
+  "id": "scene_04",
+  "campaign": "xpel_ad",
+
+  "dialogue": {
+    "character": "Xpel",
+    "voice": "VideoGenerator/voices/Xpel/voice.json",
+    "line": "Dandelion root, Uva Ursi, Buchu leaf — all natural herbal ingredients working together to help your body shed that water weight fast."
+  },
+
+  "frame": {
+    "file": "frames/xpel_ad/approved/scene_04.png",
+    "seed_frame": "frames/xpel_ad/frame_4.png",
+    "characters_present": ["MrWilly", "Xpel"],
+    "MrWilly_pose": "standing right of frame, arms open wide in impressed gesture, nodding slowly, leaning back slightly",
+    "MrWilly_expression": "genuinely impressed, eyebrows raised, open mouth slight smile",
+    "Xpel_pose": "standing on table left of frame, chest puffed out proudly, one tiny arm bent pointing at itself",
+    "Xpel_expression": "maximum pride, confident squinted happy eyes, big smile",
+    "camera_angle": "medium two-shot, centered on both",
+    "background": "VideoGenerator/backgrounds/lab_corridor/background.json"
+  },
+
+  "camera_motion": {
+    "start": "medium two-shot",
+    "movement": "very slow pan from Xpel to MrWilly and back, settling centered",
+    "end": "medium two-shot centered",
+    "speed": "slow, smooth"
+  },
+
+  "character_motion": {
+    "MrWilly": "slow impressed nod, arms sway open slightly wider, weight shifts back, breathing visible",
+    "Xpel": "tiny arm gestures while speaking, chest stays puffed, feet do small proud shuffle — no spinning, no particles, no glow"
+  },
+
+  "kling_settings": {
+    "motion_bucket_id": 12,
+    "cfg_scale": 0.5,
+    "seed": 1004,
+    "duration": 10,
+    "aspect_ratio": "9:16"
+  },
+
+  "transition_out": {
+    "type": "xfade dissolve",
+    "duration": 0.4
+  }
+}

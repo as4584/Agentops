@@ -22,7 +22,7 @@ from backend.config import (
     A2UI_MAX_WIDGETS_PER_TARGET,
 )
 from backend.utils import logger
-from backend.ws.hub import ws_hub  # noqa: E402 — placed after logger to respect init order
+from backend.websocket.hub import ws_hub  # noqa: E402 — placed after logger to respect init order
 
 
 # ---------------------------------------------------------------------------

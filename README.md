@@ -361,3 +361,23 @@ python -m backend.port_guard kill 8000
 5. **Drift-resistant**: Architectural invariants enforced automatically
 6. **Modular**: Clean separation of concerns with no circular dependencies
 7. **Typed**: Full Python type hints, TypeScript frontend
+
+---
+
+## Acknowledgments & Inspirations
+
+Agentop stands on the shoulders of some excellent open-source projects. We study their architectures, learn from their design decisions, and implement our own solutions informed by their work.
+
+| Project | What We Learned | Link |
+|---|---|---|
+| **DeerFlow** (ByteDance) | Ordered middleware chains, progressive skill loading, LLM-powered persistent memory with fact extraction, sub-agent delegation with isolated contexts, harness/app layer separation | [github.com/bytedance/deer-flow](https://github.com/bytedance/deer-flow) |
+| **LangGraph** (LangChain) | Stateful graph-based agent orchestration, checkpointing, conditional routing | [github.com/langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) |
+| **LangChain** | LLM abstractions, tool system patterns, chain composition | [github.com/langchain-ai/langchain](https://github.com/langchain-ai/langchain) |
+
+See [docs/INSPIRATIONS.md](docs/INSPIRATIONS.md) for a detailed breakdown of patterns we studied and how Agentop's implementations differ.
+
+---
+
+## License
+
+MIT

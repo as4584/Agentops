@@ -430,7 +430,7 @@ export default function DashboardPage() {
                 </Group>
               </Card>
 
-              <Tabs.List mb="lg">
+              <Tabs.List mb="lg" style={{ overflowX: 'auto', flexWrap: 'nowrap' }}>
                 <Tabs.Tab value="overview" leftSection={<IconLayout size={16} />}>Overview</Tabs.Tab>
                 <Tabs.Tab value="command" leftSection={<IconBrain size={16} />}>Command</Tabs.Tab>
                 <Tabs.Tab value="agents" leftSection={<IconHexagon size={16} />} rightSection={<Badge size="xs" variant="filled" circle>{agents.length}</Badge>}>Agents</Tabs.Tab>

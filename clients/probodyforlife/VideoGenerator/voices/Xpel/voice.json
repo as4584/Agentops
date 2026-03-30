@@ -1,0 +1,39 @@
+{
+  "_meta": "LOCKED — edit only via vault_manager.py. Never edit manually.",
+  "_version": "1.0",
+  "_character": "Xpel",
+
+  "provider": "elevenlabs",
+  "voice_id": "EXAVITQu4vr4xnSDxMaL",
+  "voice_name": "Bella",
+
+  "settings": {
+    "model": "eleven_turbo_v2",
+    "stability": 0.60,
+    "similarity_boost": 0.75,
+    "style": 0.60,
+    "use_speaker_boost": true,
+    "speed": 1.1
+  },
+
+  "character": {
+    "tone": "energetic, punchy, proud, slightly nervous when challenged",
+    "pacing": "fast and enthusiastic, slows down when listing ingredients",
+    "delivery": "like an excited product spokesperson who LOVES what they are"
+  },
+
+  "audio_processing": {
+    "layer_1_raw_output": "audio/[campaign]/raw/[scene]_xpel.mp3",
+    "layer_2_enhanced": {
+      "noise_reduction": true,
+      "eq_boost_hz": "3000-5000",
+      "compression_ratio": "4:1",
+      "normalize_db": -3
+    },
+    "layer_3_mix": {
+      "voice_db": -3,
+      "music_db": -18,
+      "sfx_db": -12
+    }
+  }
+}

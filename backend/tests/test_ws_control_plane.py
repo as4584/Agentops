@@ -27,14 +27,14 @@ from starlette.testclient import WebSocketTestSession
 @pytest.fixture()
 def fresh_manager():
     """Return a brand-new ConnectionManager (not the module singleton)."""
-    from backend.ws.hub import ConnectionManager
+    from backend.websocket.hub import ConnectionManager
     return ConnectionManager()
 
 
 @pytest.fixture()
 def ws_app(fresh_manager):
     """Minimal FastAPI app with a /ws/test endpoint using fresh_manager."""
-    from backend.ws.hub import handle_ws_connection
+    from backend.websocket.hub import handle_ws_connection
 
     app = FastAPI()
 
@@ -94,7 +94,7 @@ def test_ws_unknown_message_type_returns_error(ws_app) -> None:
 
 def test_ws_reconnect_same_client_id_replaces_slot(ws_app) -> None:
     """Reconnecting with the same client_id should not duplicate the entry."""
-    from backend.ws.hub import ConnectionManager, handle_ws_connection
+    from backend.websocket.hub import ConnectionManager, handle_ws_connection
 
     app = FastAPI()
     mgr = ConnectionManager()
