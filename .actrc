@@ -1,0 +1,13 @@
+# act configuration — runs automatically for every `act` invocation
+#
+# Runner image: catthehacker/ubuntu:act-22.04
+#   - ~500 MB; has Python 3.x, Node.js, npm, git pre-installed
+#   - Does NOT auto-pull on every run (--no-pull keeps pushes fast)
+#   - First run: `act --pull` once to cache the image
+#
+# To pull the image manually the first time:
+#   act push -W .github/workflows/ci.yml --pull
+#
+-P ubuntu-latest=catthehacker/ubuntu:act-22.04
+--no-pull
+--bind

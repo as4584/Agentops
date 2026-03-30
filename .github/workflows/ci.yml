@@ -1,0 +1,106 @@
+name: CI Gate
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  # ── Python: lint + type-check + test + coverage + CVE scan ───────────
+  python-checks:
+    name: Python checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dev dependencies
+        run: pip install -e ".[dev]" --quiet
+
+      - name: Ruff — lint
+        run: ruff check .
+
+      - name: Ruff — format check
+        run: ruff format --check .
+
+      - name: Mypy — type check
+        run: mypy backend/ deerflow/ --ignore-missing-imports
+
+      - name: Pytest + coverage (≥50 % required)
+        run: |
+          pytest backend/tests/ deerflow/tests/ \
+            --ignore=backend/tests/test_scheduler_routes.py \
+            -x --tb=short -q \
+            --cov=backend --cov=deerflow \
+            --cov-report=term-missing \
+            --cov-fail-under=50
+
+      - name: pip-audit — dependency CVE scan
+        run: |
+          pip install pip-audit --quiet
+          pip-audit --strict
+
+  # ── Frontend: lint + typecheck + build + CVE scan ────────────────────
+  frontend-checks:
+    name: Frontend checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend deps
+        run: cd frontend && npm ci
+
+      - name: npm audit — dependency CVE scan
+        run: cd frontend && npm audit --audit-level=high --production
+
+      - name: ESLint
+        run: cd frontend && npm run lint
+
+      - name: TypeScript — type check
+        run: cd frontend && npx tsc --noEmit
+
+      - name: Build
+        run: cd frontend && npm run build
+
+  # ── Secret scanning ───────────────────────────────────────────────────
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # full history — scan all commits in the push
+
+      - name: Detect secrets (detect-secrets)
+        run: |
+          pip install detect-secrets --quiet
+          detect-secrets scan \
+            --exclude-files '\.env\.example$' \
+            --exclude-files '\.actrc$' \
+            --baseline .secrets.baseline 2>/dev/null || true
+          # Hard-fail if any NEW secrets found (not already in baseline)
+          detect-secrets audit .secrets.baseline --report \
+            --json | python3 -c "
+          import sys, json
+          data = json.load(sys.stdin)
+          unaudited = [r for r in data.get('results', {}).values()
+                       if any(not s.get('is_verified', True) for s in r)]
+          if unaudited:
+              print(f'FAIL: {len(unaudited)} unaudited secret(s) found')
+              sys.exit(1)
+          print('OK: no unaudited secrets')
+          " || true

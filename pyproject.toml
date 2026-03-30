@@ -11,13 +11,16 @@ requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.111.0",
     "uvicorn[standard]>=0.30.0",
+    "python-dotenv>=1.0.0",
     "pydantic>=2.7.0",
     "httpx>=0.27.0",
     "langgraph>=0.2.0",
     "langchain-core>=0.3.0",
     "qrcode[pil]>=8.0",
+    "cryptography>=43.0.0",
     "apscheduler>=3.10.0",
     "sqlalchemy>=2.0.0",
+    "playwright>=1.40.0",
 ]
 
 [project.optional-dependencies]
@@ -39,3 +42,27 @@ select = ["E", "F", "I", "N", "W", "UP"]
 python_version = "3.11"
 strict = true
 warn_unused_configs = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "-x --tb=short -q --cov=backend --cov=deerflow --cov-report=term-missing"
+
+[tool.coverage.run]
+omit = [
+    "*/tests/*",
+    "*/migrations/*",
+    "backend/__pycache__/*",
+    # Integration-only: requires live external services (Ollama, APIs, Playwright)
+    "backend/mcp/higgsfield_playwright_server.py",
+    "backend/port_guard.py",
+    "backend/gateway/adapters/anthropic.py",
+    "backend/gateway/adapters/openrouter.py",
+    "backend/gateway/adapters/openai.py",
+    "backend/gateway/adapters/ollama.py",
+    # Animation cost logger: writes to hardcoded paths in animation_salvage_lab/
+    "backend/utils/cost_logger.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+
