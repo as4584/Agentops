@@ -82,3 +82,5 @@ playground
 # Higgsfield — session cookies (contain auth tokens, never commit)
 data/higgsfield/.session_cookies.json
 data/higgsfield/evidence/
+*.coverage
+backend/ml/experiments/

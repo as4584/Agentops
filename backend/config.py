@@ -73,6 +73,24 @@ ML_ACCURACY_THRESHOLD: float = float(os.getenv("ML_ACCURACY_THRESHOLD", "0.85"))
 ML_LATENCY_THRESHOLD_MS: float = float(os.getenv("ML_LATENCY_THRESHOLD_MS", "2000"))
 ML_DRIFT_THRESHOLD: float = float(os.getenv("ML_DRIFT_THRESHOLD", "0.1"))
 
+# MLflow tracking (local file store by default)
+MLFLOW_TRACKING_URI: str = os.getenv("MLFLOW_TRACKING_URI", str(ML_EXPERIMENTS_DIR / "mlruns"))
+MLFLOW_EXPERIMENT_NAME: str = os.getenv("MLFLOW_EXPERIMENT_NAME", "agentop")
+
+# Qdrant vector store
+QDRANT_HOST: str = os.getenv("QDRANT_HOST", "localhost")
+QDRANT_PORT: int = int(os.getenv("QDRANT_PORT", "6333"))
+QDRANT_IN_MEMORY: bool = os.getenv("QDRANT_IN_MEMORY", "false").lower() == "true"
+QDRANT_DEFAULT_DIM: int = int(os.getenv("QDRANT_DEFAULT_DIM", "384"))
+
+# Eval thresholds
+EVAL_PASS_SCORE: float = float(os.getenv("EVAL_PASS_SCORE", "0.7"))
+EVAL_LATENCY_THRESHOLD_MS: float = float(os.getenv("EVAL_LATENCY_THRESHOLD_MS", "2000"))
+EVAL_MAX_TOKENS: int = int(os.getenv("EVAL_MAX_TOKENS", "4096"))
+
+# TurboQuant embedding quantization
+TURBOQUANT_BITS: int = int(os.getenv("TURBOQUANT_BITS", "4"))
+
 # ---------------------------------------------------------------------------
 # Server Configuration
 # ---------------------------------------------------------------------------

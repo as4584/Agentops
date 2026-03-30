@@ -79,6 +79,7 @@ from backend.routes.gsd import router as gsd_router
 from backend.routes.gateway import router as gateway_router
 from backend.routes.gateway_admin import router as gateway_admin_router
 from backend.routes.ml import router as ml_router
+from backend.routes.ml_eval import router as ml_eval_router
 from backend.config_gateway import GATEWAY_ENABLED
 from backend.gateway.middleware import GatewayAuthMiddleware
 from backend.gateway.ratelimit import GatewayRateLimitMiddleware
@@ -293,6 +294,7 @@ app.include_router(higgsfield_router)
 app.include_router(a2ui_router)
 app.include_router(gsd_router)
 app.include_router(ml_router)
+app.include_router(ml_eval_router)
 
 # Gateway — OpenAI-compatible API + admin endpoints
 if GATEWAY_ENABLED:
