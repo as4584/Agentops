@@ -41,7 +41,7 @@ jobs:
             -x --tb=short -q \
             --cov=backend --cov=deerflow \
             --cov-report=term-missing \
-            --cov-fail-under=50
+            --cov-fail-under=56
 
       - name: pip-audit — dependency CVE scan
         run: |
