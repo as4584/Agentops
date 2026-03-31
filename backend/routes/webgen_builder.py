@@ -138,7 +138,7 @@ async def generate_site(payload: GenerateSiteRequest) -> dict[str, Any]:
 
     if payload.customer_id:
         project.metadata["customer_id"] = payload.customer_id
-        _store.save(project)
+    _store.save(project)
 
     project_dir, html_file = _project_first_html(_slugify(payload.business_name))
     html = html_file.read_text(encoding="utf-8", errors="ignore")
