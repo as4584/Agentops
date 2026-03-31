@@ -14,13 +14,12 @@ from __future__ import annotations
 import asyncio
 import time
 from pathlib import Path
-from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_mock_page() -> MagicMock:
     page = AsyncMock()
@@ -67,6 +66,7 @@ def _make_playwright_stack(page: MagicMock | None = None) -> tuple:
 # Sprint 4.1 — Session Lifecycle
 # ---------------------------------------------------------------------------
 
+
 def test_browser_session_start_close(tmp_path: Path) -> None:
     """close() should clear _started and not raise."""
     from backend.browser.session import BrowserSession
@@ -92,7 +92,7 @@ def test_browser_session_start_close(tmp_path: Path) -> None:
 
 
 def test_browser_session_is_idle_false_when_fresh() -> None:
-    from backend.browser.session import BrowserSession, TTL_SECONDS
+    from backend.browser.session import BrowserSession
 
     session = BrowserSession(agent_id="freshie")
     assert not session.is_idle()
@@ -110,41 +110,52 @@ def test_browser_session_is_idle_true_when_stale() -> None:
 # Sprint 4.2 — URL allowlist + SSRF blocking
 # ---------------------------------------------------------------------------
 
+
 def test_validate_url_allows_http() -> None:
     from backend.browser.session import _validate_url
+
     _validate_url("http://example.com/page")  # should not raise
 
 
 def test_validate_url_allows_https() -> None:
     from backend.browser.session import _validate_url
+
     _validate_url("https://example.com/page")
 
 
 def test_validate_url_rejects_ftp() -> None:
-    from backend.browser.session import _validate_url
     import pytest
+
+    from backend.browser.session import _validate_url
+
     with pytest.raises(ValueError, match="scheme"):
         _validate_url("ftp://example.com/file")
 
 
 def test_validate_url_rejects_javascript() -> None:
-    from backend.browser.session import _validate_url
     import pytest
+
+    from backend.browser.session import _validate_url
+
     with pytest.raises(ValueError, match="scheme"):
         _validate_url("javascript:alert(1)")
 
 
 def test_validate_url_rejects_ssrf_blocked_prefix() -> None:
-    from backend.browser.session import _validate_url
     import pytest
+
+    from backend.browser.session import _validate_url
+
     # 169.254.x.x is in SSRF_BLOCKED_PREFIXES
     with pytest.raises(ValueError, match="SSRF"):
         _validate_url("http://169.254.169.254/latest/meta-data/")
 
 
 def test_validate_url_rejects_localhost() -> None:
-    from backend.browser.session import _validate_url
     import pytest
+
+    from backend.browser.session import _validate_url
+
     with pytest.raises(ValueError, match="SSRF"):
         _validate_url("http://localhost:8080/admin")
 
@@ -153,8 +164,10 @@ def test_validate_url_rejects_localhost() -> None:
 # Sprint 4.2 — navigate and interactions
 # ---------------------------------------------------------------------------
 
+
 def test_browser_navigate_validates_url(tmp_path: Path) -> None:
     import pytest
+
     from backend.browser.session import BrowserSession
 
     async def _run():
@@ -219,18 +232,22 @@ def test_browser_click_retries_on_transient_error(tmp_path: Path) -> None:
 # Sprint 4.3 — Redaction of secret fields
 # ---------------------------------------------------------------------------
 
+
 def test_redact_text_for_password_selector() -> None:
     from backend.browser.session import _redact_text
+
     assert _redact_text("#password", "supersecret") == "[REDACTED]"
 
 
 def test_redact_text_for_token_selector() -> None:
     from backend.browser.session import _redact_text
+
     assert _redact_text("input[name='api_token']", "tok-123") == "[REDACTED]"
 
 
 def test_redact_text_for_normal_selector() -> None:
     from backend.browser.session import _redact_text
+
     assert _redact_text("#username", "alice") == "alice"
 
 
@@ -264,9 +281,11 @@ def test_browser_screenshot_saves_to_session_dir(tmp_path: Path) -> None:
 # Sprint 4.4 — Agent permissioning
 # ---------------------------------------------------------------------------
 
+
 def test_browser_tool_blocked_for_unauthorised_agent(tmp_path: Path) -> None:
     """When BROWSER_ALLOWED_AGENTS is set, unlisted agents are rejected."""
     import pytest
+
     from backend.browser import tooling as browser_tooling
 
     async def _run():
@@ -296,20 +315,27 @@ def test_browser_tool_allowed_when_list_empty() -> None:
 # Tool registry integration
 # ---------------------------------------------------------------------------
 
+
 def test_browser_tools_registered_in_tool_registry() -> None:
     from backend.tools import get_tool_definitions
 
     names = {t.name for t in get_tool_definitions()}
     expected = {
-        "browser_open", "browser_click", "browser_type", "browser_select",
-        "browser_snapshot", "browser_screenshot", "browser_upload", "browser_close",
+        "browser_open",
+        "browser_click",
+        "browser_type",
+        "browser_select",
+        "browser_snapshot",
+        "browser_screenshot",
+        "browser_upload",
+        "browser_close",
     }
     assert expected.issubset(names)
 
 
 def test_browser_tools_are_state_modify_except_snapshot() -> None:
-    from backend.tools import TOOL_REGISTRY
     from backend.models import ModificationType
+    from backend.tools import TOOL_REGISTRY
 
     assert TOOL_REGISTRY["browser_snapshot"].modification_type == ModificationType.READ_ONLY
     assert TOOL_REGISTRY["browser_open"].modification_type == ModificationType.STATE_MODIFY

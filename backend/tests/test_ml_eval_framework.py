@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 
+import pytest
+
 from backend.ml.eval_framework import (
-    LLMEvalFramework,
     EvalCase,
     EvalDimension,
     EvalResult,
+    LLMEvalFramework,
 )
 
 
@@ -31,7 +32,7 @@ def _make_case(**overrides) -> EvalCase:
         "tokens_out": 5,
     }
     defaults.update(overrides)
-    return EvalCase(**defaults)
+    return EvalCase(**defaults)  # type: ignore[arg-type]
 
 
 class TestEvalFramework:
@@ -59,10 +60,12 @@ class TestEvalFramework:
         assert result.score == 1.0  # skipped
 
     def test_retrieval_accuracy(self, framework: LLMEvalFramework) -> None:
-        case = _make_case(context={
-            "expected_docs": ["a.md", "b.md", "c.md"],
-            "actual_docs": ["a.md", "b.md"],
-        })
+        case = _make_case(
+            context={
+                "expected_docs": ["a.md", "b.md", "c.md"],
+                "actual_docs": ["a.md", "b.md"],
+            }
+        )
         result = framework.evaluate_retrieval(case)
         assert 0.0 < result.score <= 1.0
         assert result.metadata["recall"] == pytest.approx(2 / 3)

@@ -1,24 +1,112 @@
 /**
  * Agentop Dashboard — Global Styles (Mantine v7)
  *
- * Most component styling is now handled by Mantine.
- * This file contains only base overrides and animations.
+ * Premium dark UI with visible structure, subtle glow, and polished feel.
  */
 
 /* ── Dark background base ──────────────────────────────── */
 html, body {
-  background: #0a0a0f;
+  background: #141417;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* ── Scrollbar customization ───────────────────────────── */
+/* ── Glass-morphism helper ─────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ── Scrollbar customization (thin, minimal) ───────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2a2a3e; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #606078; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+/* ── Smooth hover transitions everywhere ───────────────── */
+button, a, [role="button"] {
+  transition: all 0.2s ease;
+}
 
 /* ── Animations ────────────────────────────────────────── */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Mantine Card — visible, glassy, elevated ──────────── */
+.mantine-Card-root {
+  background: rgba(30, 30, 34, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.mantine-Card-root:hover {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Mantine Paper — subtle elevation ──────────────────── */
+.mantine-Paper-root {
+  transition: border-color 0.15s ease;
+}
+
+/* ── Mantine Tabs — prominent pills ───────────────────── */
+.mantine-Tabs-tab {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mantine-Tabs-tab:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.mantine-Tabs-tab[data-active] {
+  font-weight: 600;
+  background: rgba(26, 130, 255, 0.15) !important;
+  color: #3d96ff !important;
+  box-shadow: inset 0 0 0 1px rgba(26, 130, 255, 0.3);
+}
+
+/* ── Mantine Badge — crisp ─────────────────────────────── */
+.mantine-Badge-root {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ── Table styling ─────────────────────────────────────── */
+.mantine-Table-tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ── Button polish ─────────────────────────────────────── */
+.mantine-Button-root {
+  transition: all 0.15s ease;
+}
+.mantine-Button-root:active {
+  transform: scale(0.97);
+}
+
+/* ── Stat card glow on hover (for interactive cards) ───── */
+.mantine-Card-root[style*="cursor: pointer"]:hover {
+  border-color: rgba(26, 130, 255, 0.25) !important;
+  box-shadow: 0 0 20px rgba(26, 130, 255, 0.08), 0 4px 20px rgba(0, 0, 0, 0.4);
 }

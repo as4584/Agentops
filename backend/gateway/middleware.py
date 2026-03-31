@@ -10,19 +10,28 @@ key validity (timing-safe).
 
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from backend.gateway.auth import APIKey, get_key_manager, SCOPE_ADMIN
+from backend.gateway.auth import SCOPE_ADMIN, APIKey, get_key_manager
 
 
 class GatewayContext:
     """Attached to request.state.gateway_context after successful auth."""
 
-    __slots__ = ("key_id", "key_prefix", "owner", "scopes", "quota_rpm",
-                 "quota_tpm", "quota_tpd", "quota_daily_usd", "quota_monthly_usd")
+    __slots__ = (
+        "key_id",
+        "key_prefix",
+        "owner",
+        "scopes",
+        "quota_rpm",
+        "quota_tpm",
+        "quota_tpd",
+        "quota_daily_usd",
+        "quota_monthly_usd",
+    )
 
     def __init__(self, api_key: APIKey) -> None:
         self.key_id = api_key.key_id
@@ -104,7 +113,8 @@ def _forbidden(detail: str) -> Response:
 # FastAPI dependency (alternative to middleware — for explicit injection)
 # ---------------------------------------------------------------------------
 
-from fastapi import HTTPException, Request as FRequest
+from fastapi import HTTPException
+from fastapi import Request as FRequest
 
 
 async def require_gateway_auth(request: FRequest) -> GatewayContext:
@@ -130,8 +140,9 @@ async def require_admin_auth(request: FRequest) -> GatewayContext:
     admin_secret = request.headers.get("X-Admin-Secret", "")
     if GATEWAY_ADMIN_SECRET and admin_secret == GATEWAY_ADMIN_SECRET:
         # Create a synthetic admin context
-        from backend.gateway.auth import APIKey, ALL_SCOPES
         import time
+
+        from backend.gateway.auth import ALL_SCOPES, APIKey
 
         synthetic = APIKey(
             key_id="admin-bootstrap",

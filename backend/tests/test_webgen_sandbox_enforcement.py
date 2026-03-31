@@ -29,15 +29,15 @@ def test_webgen_export_blocks_without_all_three_checks(monkeypatch, tmp_path: Pa
     sandbox_root.mkdir(parents=True, exist_ok=True)
     playbox_root.mkdir(parents=True, exist_ok=True)
 
-    import sandbox.session_manager as session_manager
     import backend.webgen.pipeline as pipeline_module
+    import sandbox.session_manager as session_manager
 
     monkeypatch.setattr(session_manager, "SANDBOX_ROOT_DIR", sandbox_root)
     monkeypatch.setattr(session_manager, "PLAYBOX_DIR", playbox_root)
     monkeypatch.setattr(pipeline_module, "PROJECT_ROOT", project_root)
     monkeypatch.setattr(pipeline_module, "SANDBOX_ENFORCEMENT_ENABLED", True)
 
-    pipeline = WebGenPipeline(llm=_FakeLocalLLM(), site_store=SiteStore(base_dir=tmp_path / "site-store"))
+    pipeline = WebGenPipeline(llm=_FakeLocalLLM(), site_store=SiteStore(base_dir=tmp_path / "site-store"))  # type: ignore[arg-type]
     project = _build_project(project_root)
 
     export_path = pipeline.export(project, quality_checks={"tests_ok": True})
@@ -45,8 +45,7 @@ def test_webgen_export_blocks_without_all_three_checks(monkeypatch, tmp_path: Pa
     assert project.metadata.get("release_blocked") is True
     assert "sandbox_session_id" in project.metadata
     assert any(
-        "Required quality check failed or missing" in item
-        for item in project.metadata.get("release_violations", [])
+        "Required quality check failed or missing" in item for item in project.metadata.get("release_violations", [])
     )
 
     rel_index = Path("output/webgen/acme/index.html")
@@ -66,15 +65,15 @@ def test_webgen_export_releases_when_all_three_checks_pass(monkeypatch, tmp_path
     sandbox_root.mkdir(parents=True, exist_ok=True)
     playbox_root.mkdir(parents=True, exist_ok=True)
 
-    import sandbox.session_manager as session_manager
     import backend.webgen.pipeline as pipeline_module
+    import sandbox.session_manager as session_manager
 
     monkeypatch.setattr(session_manager, "SANDBOX_ROOT_DIR", sandbox_root)
     monkeypatch.setattr(session_manager, "PLAYBOX_DIR", playbox_root)
     monkeypatch.setattr(pipeline_module, "PROJECT_ROOT", project_root)
     monkeypatch.setattr(pipeline_module, "SANDBOX_ENFORCEMENT_ENABLED", True)
 
-    pipeline = WebGenPipeline(llm=_FakeLocalLLM(), site_store=SiteStore(base_dir=tmp_path / "site-store"))
+    pipeline = WebGenPipeline(llm=_FakeLocalLLM(), site_store=SiteStore(base_dir=tmp_path / "site-store"))  # type: ignore[arg-type]
     project = _build_project(project_root)
 
     export_path = pipeline.export(

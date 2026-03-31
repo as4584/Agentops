@@ -1,7 +1,24 @@
 # Agentop — CLAUDE.md
 
 > Local-first multi-agent control center. Documentation-first governance model.
-> Last updated: 2026-03-22
+> Last updated: 2026-03-30
+
+---
+
+## Git Workflow & Branch Rules
+
+| Branch | Purpose | Push Policy |
+|--------|---------|-------------|
+| `main` | Production — career-fair-ready | **NEVER push directly.** Merge only via PR from `dev` after CI is green. |
+| `dev` | Active development | Push freely. All feature work happens here. |
+| `feature/*` | Optional feature branches off `dev` | Merge into `dev` via PR or fast-forward. |
+
+**Rules for ALL agents and contributors:**
+1. **Do NOT push to `main` until CI is green on `dev`.** No exceptions.
+2. Every push to `dev` must pass: `ruff check`, `ruff format --check`, `mypy`, `pytest` (≥58% coverage), frontend `npm run build`, and `tsc --noEmit`.
+3. Commit messages follow conventional commits: `feat(scope):`, `fix(scope):`, `docs:`, `test:`, `chore:`.
+4. Run `python -m pytest backend/tests/ deerflow/tests/ -x --tb=short -q` locally before pushing.
+5. When in doubt, commit to `dev` and let CI validate. Never force-push `main`.
 
 ---
 

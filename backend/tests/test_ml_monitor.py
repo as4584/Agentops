@@ -4,7 +4,6 @@ Tests for ML Monitor — latency, accuracy, drift, endpoint health, alerts.
 
 from __future__ import annotations
 
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -79,9 +78,12 @@ class TestMLMonitor:
     # ── Data Drift ───────────────────────────────────
 
     def test_set_baseline_and_no_drift(self, monitor: MLMonitor) -> None:
-        monitor.set_baseline("model_x", {
-            "feature_a": {"mean": 0.5, "std": 0.1},
-        })
+        monitor.set_baseline(
+            "model_x",
+            {
+                "feature_a": {"mean": 0.5, "std": 0.1},
+            },
+        )
         for _ in range(20):
             monitor.record_features("model_x", {"feature_a": 0.51})
 
@@ -90,9 +92,12 @@ class TestMLMonitor:
         assert results[0]["drifted"] is False
 
     def test_data_drift_detected(self, monitor: MLMonitor) -> None:
-        monitor.set_baseline("model_y", {
-            "feature_b": {"mean": 0.5, "std": 0.1},
-        })
+        monitor.set_baseline(
+            "model_y",
+            {
+                "feature_b": {"mean": 0.5, "std": 0.1},
+            },
+        )
         # Far from baseline
         for _ in range(20):
             monitor.record_features("model_y", {"feature_b": 5.0})

@@ -18,7 +18,6 @@ while preserving semantic search quality.
 from __future__ import annotations
 
 import struct
-from typing import Optional
 
 import numpy as np
 
@@ -48,7 +47,7 @@ class TurboQuantizer:
         self._rng = np.random.RandomState(seed)
         # Generate random rotation matrix via QR decomposition of random Gaussian
         # This is the key TurboQuant insight: rotation makes coordinates ~ Beta(1/2, (d-1)/2)
-        self._rotation: Optional[np.ndarray] = None
+        self._rotation: np.ndarray | None = None
         self._rotation_seed = seed
         logger.info(f"[TurboQuant] Initialized: dim={dim}, bits={bits}, levels={self.levels}")
 
@@ -106,7 +105,7 @@ class TurboQuantizer:
             return np.zeros(self.dim, dtype=np.float32)
 
         packed = data[4:]
-        codes = self._unpack_bits(packed)[:self.dim]
+        codes = self._unpack_bits(packed)[: self.dim]
 
         # Inverse scale: codes → [-1, 1]
         restored = (codes.astype(np.float32) / (self.levels - 1)) * 2.0 - 1.0

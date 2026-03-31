@@ -3,10 +3,12 @@ Tests for backend/models/__init__.py and backend/models/gsd.py.
 
 Pure Pydantic models — no external dependencies.
 """
+
 from __future__ import annotations
 
+from datetime import datetime
+
 import pytest
-from datetime import datetime, timezone
 
 from backend.models import (
     AgentDefinition,
@@ -46,10 +48,10 @@ from backend.models.gsd import (
     WaveResult,
 )
 
-
 # ---------------------------------------------------------------------------
 # Enum tests
 # ---------------------------------------------------------------------------
+
 
 class TestEnums:
     def test_modification_type_values(self):
@@ -88,6 +90,7 @@ class TestEnums:
 # ---------------------------------------------------------------------------
 # AgentDefinition
 # ---------------------------------------------------------------------------
+
 
 class TestAgentDefinition:
     def _make(self, **kwargs):
@@ -130,6 +133,7 @@ class TestAgentDefinition:
 # AgentState
 # ---------------------------------------------------------------------------
 
+
 class TestAgentState:
     def test_defaults(self):
         state = AgentState(agent_id="soul_core")
@@ -147,6 +151,7 @@ class TestAgentState:
 # ---------------------------------------------------------------------------
 # ToolDefinition
 # ---------------------------------------------------------------------------
+
 
 class TestToolDefinition:
     def test_creation(self):
@@ -171,6 +176,7 @@ class TestToolDefinition:
 # ---------------------------------------------------------------------------
 # ToolExecutionRecord
 # ---------------------------------------------------------------------------
+
 
 class TestToolExecutionRecord:
     def test_defaults(self):
@@ -199,6 +205,7 @@ class TestToolExecutionRecord:
 # ---------------------------------------------------------------------------
 # DriftEvent + DriftReport
 # ---------------------------------------------------------------------------
+
 
 class TestDriftModels:
     def test_drift_event_defaults(self):
@@ -231,6 +238,7 @@ class TestDriftModels:
 # ChangeLogEntry
 # ---------------------------------------------------------------------------
 
+
 class TestChangeLogEntry:
     def test_creation(self):
         entry = ChangeLogEntry(
@@ -246,6 +254,7 @@ class TestChangeLogEntry:
 # ---------------------------------------------------------------------------
 # Chat models
 # ---------------------------------------------------------------------------
+
 
 class TestChatModels:
     def test_chat_request(self):
@@ -266,6 +275,7 @@ class TestChatModels:
 # ---------------------------------------------------------------------------
 # Intake models
 # ---------------------------------------------------------------------------
+
 
 class TestIntakeModels:
     def test_intake_start_request(self):
@@ -300,6 +310,7 @@ class TestIntakeModels:
 # Campaign models
 # ---------------------------------------------------------------------------
 
+
 class TestCampaignModels:
     def test_campaign_generate_request_defaults(self):
         req = CampaignGenerateRequest(
@@ -326,6 +337,7 @@ class TestCampaignModels:
 # ---------------------------------------------------------------------------
 # GSD models
 # ---------------------------------------------------------------------------
+
 
 class TestGSDModels:
     def test_gsd_task_defaults(self):

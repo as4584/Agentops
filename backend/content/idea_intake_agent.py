@@ -9,12 +9,9 @@ LLM: Used for topic expansion/refinement (local Ollama).
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Optional
-
-from backend.content.base_agent import ContentAgent
-from backend.content.video_job import VideoJob, JobStatus
 from backend.config import MEMORY_DIR
+from backend.content.base_agent import ContentAgent
+from backend.content.video_job import JobStatus, VideoJob
 from backend.utils import logger
 
 NOTES_DIR = MEMORY_DIR / "content_notes"
@@ -26,7 +23,7 @@ class IdeaIntakeAgent(ContentAgent):
     name = "IdeaIntakeAgent"
     trigger_status = None  # Creates new jobs, not triggered by status
 
-    async def process(self, job: VideoJob) -> Optional[VideoJob]:
+    async def process(self, job: VideoJob) -> VideoJob | None:
         return None
 
     async def run(self) -> list[VideoJob]:
@@ -52,9 +49,7 @@ class IdeaIntakeAgent(ContentAgent):
                 existing.add(topic)
                 unique.append(idea)
 
-        logger.info(
-            f"[{self.name}] {len(unique)} unique (filtered {len(raw_ideas) - len(unique)})"
-        )
+        logger.info(f"[{self.name}] {len(unique)} unique (filtered {len(raw_ideas) - len(unique)})")
 
         to_create = unique[:DAILY_TARGET]
 
@@ -80,11 +75,13 @@ class IdeaIntakeAgent(ContentAgent):
             for line in f.read_text().splitlines():
                 line = line.strip()
                 if line and not line.startswith("#"):
-                    ideas.append({
-                        "topic": line,
-                        "pillar": "",
-                        "source": "notes",
-                    })
+                    ideas.append(
+                        {
+                            "topic": line,
+                            "pillar": "",
+                            "source": "notes",
+                        }
+                    )
             # Archive processed
             archive = NOTES_DIR / "processed"
             archive.mkdir(exist_ok=True)
@@ -116,11 +113,13 @@ class IdeaIntakeAgent(ContentAgent):
             for line in raw.strip().splitlines():
                 line = line.strip().lstrip("-•*0123456789.)")
                 if line and len(line) > 5:
-                    ideas.append({
-                        "topic": line.strip(),
-                        "pillar": "",
-                        "source": "llm_generated",
-                    })
+                    ideas.append(
+                        {
+                            "topic": line.strip(),
+                            "pillar": "",
+                            "source": "llm_generated",
+                        }
+                    )
             return ideas
         except Exception as e:
             logger.warning(f"[{self.name}] LLM topic expansion failed: {e}")

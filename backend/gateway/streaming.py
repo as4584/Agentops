@@ -9,13 +9,12 @@ wire format.  Tool call IDs are sanitized on outbound requests
 from __future__ import annotations
 
 import json
-import re
 import uuid
-from typing import Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Any
 
-from backend.gateway.adapters.base import StreamChunk, UsageInfo
+from backend.gateway.adapters.base import StreamChunk
 from backend.utils.tool_ids import sanitize_tool_id
-
 
 # ---------------------------------------------------------------------------
 # Tool call ID sanitization
@@ -23,9 +22,10 @@ from backend.utils.tool_ids import sanitize_tool_id
 # Some providers emit long/complex IDs; we normalize to agp_tc_{hex12}
 # and maintain a per-request mapping table.
 
+
 class ToolIdSanitizer:
     """Bidirectional mapping of canonical ↔ sanitized tool call IDs.
-    
+
     All sanitized IDs match the OpenAI/Copilot pattern: ^[a-zA-Z0-9_-]{1,64}$
     This pattern is also compatible with Anthropic's API requirements.
     """
@@ -36,7 +36,7 @@ class ToolIdSanitizer:
 
     def sanitize(self, canonical_id: str) -> str:
         """Return a safe ID for an outbound tool call.
-        
+
         The returned ID matches ^[a-zA-Z0-9_-]+$ pattern required by
         OpenAI, Copilot, and Anthropic APIs.
         """
@@ -75,6 +75,7 @@ class ToolIdSanitizer:
 # ---------------------------------------------------------------------------
 # SSE stream normalization
 # ---------------------------------------------------------------------------
+
 
 async def stream_to_openai_sse(
     chunks: AsyncIterator[StreamChunk],
@@ -128,6 +129,7 @@ async def stream_to_openai_sse(
 # Combine parallel tool calls (for providers that split across chunks)
 # ---------------------------------------------------------------------------
 
+
 class ToolCallAccumulator:
     """Accumulate streaming tool call deltas into complete tool calls."""
 
@@ -138,10 +140,7 @@ class ToolCallAccumulator:
         for tc in tool_call_deltas:
             idx = tc.get("index", 0)
             if idx not in self._by_index:
-                self._by_index[idx] = {
-                    "id": "", "type": "function",
-                    "function": {"name": "", "arguments": ""}
-                }
+                self._by_index[idx] = {"id": "", "type": "function", "function": {"name": "", "arguments": ""}}
             entry = self._by_index[idx]
             if tc.get("id"):
                 entry["id"] = tc["id"]

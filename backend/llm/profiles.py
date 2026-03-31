@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
 import json
 import os
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -51,7 +51,7 @@ class ProfileRotator:
                 keys.append(value)
 
         monthly_budget = float(os.getenv("LLM_PROFILE_MONTHLY_BUDGET_USD", "10.0"))
-        now_epoch = datetime.now(timezone.utc).timestamp()
+        now_epoch = datetime.now(UTC).timestamp()
 
         profiles: list[CredentialProfile] = []
         for idx, key in enumerate(keys, start=1):
@@ -70,21 +70,21 @@ class ProfileRotator:
         return profiles
 
     def _current_month_token(self) -> tuple[int, int]:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         return now.year, now.month
 
     def _month_token_from_epoch(self, epoch_seconds: float) -> tuple[int, int]:
-        dt = datetime.fromtimestamp(epoch_seconds, tz=timezone.utc)
+        dt = datetime.fromtimestamp(epoch_seconds, tz=UTC)
         return dt.year, dt.month
 
     def _ensure_month_reset(self, profile: CredentialProfile) -> None:
         if profile.last_reset_epoch <= 0:
-            profile.last_reset_epoch = datetime.now(timezone.utc).timestamp()
+            profile.last_reset_epoch = datetime.now(UTC).timestamp()
             return
 
         if self._month_token_from_epoch(profile.last_reset_epoch) != self._current_month_token():
             profile.spend_this_month = 0.0
-            profile.last_reset_epoch = datetime.now(timezone.utc).timestamp()
+            profile.last_reset_epoch = datetime.now(UTC).timestamp()
             profile.active = True
 
     def _apply_persisted_state(self) -> None:

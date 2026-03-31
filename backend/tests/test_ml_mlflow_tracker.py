@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import json
-import pytest
 from pathlib import Path
+
+import pytest
 
 from backend.ml.mlflow_tracker import MLflowTracker
 
@@ -61,7 +61,7 @@ class TestMLflowTracker:
 
     def test_exception_in_run(self, tracker: MLflowTracker) -> None:
         with pytest.raises(ValueError):
-            with tracker.start_run("error_run") as run_id:
+            with tracker.start_run("error_run"):
                 raise ValueError("intentional error")
 
     def test_log_metrics_unknown_run(self, tracker: MLflowTracker) -> None:

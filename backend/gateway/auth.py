@@ -16,12 +16,10 @@ from __future__ import annotations
 
 import hashlib
 import hmac
-import os
 import secrets
 import sqlite3
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -46,17 +44,18 @@ DEFAULT_SCOPES = {SCOPE_CHAT, SCOPE_MODELS}
 # Data model
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class APIKey:
-    key_id: str          # opaque stable ID (uuid-ish hex)
-    name: str            # human label
-    owner: str           # owner identifier (user / service)
-    key_hash: str        # SHA-256(raw_key) — never the raw key
-    key_prefix: str      # first 8 chars of raw key (for display / logs)
-    created_at: float    # Unix timestamp
-    expires_at: float    # Unix timestamp, 0 = no expiry
+    key_id: str  # opaque stable ID (uuid-ish hex)
+    name: str  # human label
+    owner: str  # owner identifier (user / service)
+    key_hash: str  # SHA-256(raw_key) — never the raw key
+    key_prefix: str  # first 8 chars of raw key (for display / logs)
+    created_at: float  # Unix timestamp
+    expires_at: float  # Unix timestamp, 0 = no expiry
     disabled: bool
-    scopes: set[str]     # permission scopes
+    scopes: set[str]  # permission scopes
     quota_rpm: int
     quota_tpm: int
     quota_tpd: int
@@ -71,6 +70,7 @@ class APIKey:
 # ---------------------------------------------------------------------------
 # Database helpers
 # ---------------------------------------------------------------------------
+
 
 def _get_conn(path: Path = DB_PATH) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -112,6 +112,7 @@ def _create_schema(conn: sqlite3.Connection) -> None:
 # Key generation
 # ---------------------------------------------------------------------------
 
+
 def _hash_key(raw_key: str) -> str:
     """Return SHA-256 hex digest of raw_key."""
     return hashlib.sha256(raw_key.encode()).hexdigest()
@@ -123,7 +124,7 @@ def generate_api_key(variant: str = "sk") -> tuple[str, str]:
     Returns (raw_key, key_prefix).
     raw_key format: agp_{variant}_{8hex}_{24hex}
     """
-    part1 = secrets.token_hex(4)   # 8 hex chars
+    part1 = secrets.token_hex(4)  # 8 hex chars
     part2 = secrets.token_hex(12)  # 24 hex chars
     raw_key = f"{KEY_PREFIX}_{variant}_{part1}_{part2}"
     prefix = f"{KEY_PREFIX}_{variant}_{part1}"  # first visible portion
@@ -133,6 +134,7 @@ def generate_api_key(variant: str = "sk") -> tuple[str, str]:
 # ---------------------------------------------------------------------------
 # APIKeyManager
 # ---------------------------------------------------------------------------
+
 
 class APIKeyManager:
     """Create, validate, and manage gateway API keys."""
@@ -208,14 +210,10 @@ class APIKeyManager:
         api_key = self._row_to_key(row)
 
         # Timing-safe compare (prevent oracle attacks)
-        primary_ok = hmac.compare_digest(
-            candidate_hash.encode(), api_key.key_hash.encode()
-        )
+        primary_ok = hmac.compare_digest(candidate_hash.encode(), api_key.key_hash.encode())
         secondary_ok = False
         if api_key.secondary_hash:
-            secondary_ok = hmac.compare_digest(
-                candidate_hash.encode(), api_key.secondary_hash.encode()
-            )
+            secondary_ok = hmac.compare_digest(candidate_hash.encode(), api_key.secondary_hash.encode())
         if not (primary_ok or secondary_ok):
             return None
 
@@ -227,9 +225,7 @@ class APIKeyManager:
         return api_key
 
     def get_by_id(self, key_id: str) -> APIKey | None:
-        row = self._conn.execute(
-            "SELECT * FROM gateway_keys WHERE key_id = ?", (key_id,)
-        ).fetchone()
+        row = self._conn.execute("SELECT * FROM gateway_keys WHERE key_id = ?", (key_id,)).fetchone()
         return self._row_to_key(row) if row else None
 
     def list_keys(self) -> list[APIKey]:
@@ -239,9 +235,17 @@ class APIKeyManager:
     def update_key(self, key_id: str, **kwargs: Any) -> bool:
         """Update mutable fields: name, owner, scopes, quotas, disabled, expires_at."""
         allowed = {
-            "name", "owner", "scopes", "quota_rpm", "quota_tpm",
-            "quota_tpd", "quota_daily_usd", "quota_monthly_usd",
-            "disabled", "expires_at", "metadata",
+            "name",
+            "owner",
+            "scopes",
+            "quota_rpm",
+            "quota_tpm",
+            "quota_tpd",
+            "quota_daily_usd",
+            "quota_monthly_usd",
+            "disabled",
+            "expires_at",
+            "metadata",
         }
         updates: dict[str, Any] = {}
         for k, v in kwargs.items():
@@ -251,6 +255,7 @@ class APIKeyManager:
                 updates[k] = ",".join(sorted(v))
             elif k == "metadata" and isinstance(v, dict):
                 import json
+
                 updates[k] = json.dumps(v)
             elif k == "disabled":
                 updates[k] = int(bool(v))
@@ -271,9 +276,7 @@ class APIKeyManager:
 
     def delete_key(self, key_id: str) -> bool:
         """Hard delete a key."""
-        cur = self._conn.execute(
-            "DELETE FROM gateway_keys WHERE key_id = ?", (key_id,)
-        )
+        cur = self._conn.execute("DELETE FROM gateway_keys WHERE key_id = ?", (key_id,))
         self._conn.commit()
         return cur.rowcount > 0
 
@@ -297,9 +300,7 @@ class APIKeyManager:
 
     def promote_rotation(self, key_id: str) -> bool:
         """Promote secondary key to primary, invalidating the old primary."""
-        row = self._conn.execute(
-            "SELECT * FROM gateway_keys WHERE key_id = ?", (key_id,)
-        ).fetchone()
+        row = self._conn.execute("SELECT * FROM gateway_keys WHERE key_id = ?", (key_id,)).fetchone()
         if not row or not row["secondary_hash"]:
             return False
         self._conn.execute(
@@ -324,12 +325,22 @@ class APIKeyManager:
                 quota_rpm, quota_tpm, quota_tpd, quota_daily_usd, quota_monthly_usd, metadata)
                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
-                key.key_id, key.name, key.owner, key.key_hash, key.key_prefix,
-                key.secondary_hash, key.secondary_prefix,
-                key.created_at, key.expires_at, int(key.disabled),
+                key.key_id,
+                key.name,
+                key.owner,
+                key.key_hash,
+                key.key_prefix,
+                key.secondary_hash,
+                key.secondary_prefix,
+                key.created_at,
+                key.expires_at,
+                int(key.disabled),
                 ",".join(sorted(key.scopes)),
-                key.quota_rpm, key.quota_tpm, key.quota_tpd,
-                key.quota_daily_usd, key.quota_monthly_usd,
+                key.quota_rpm,
+                key.quota_tpm,
+                key.quota_tpd,
+                key.quota_daily_usd,
+                key.quota_monthly_usd,
                 json.dumps(key.metadata),
             ),
         )

@@ -19,21 +19,32 @@ import os
 import time
 import uuid
 from collections import defaultdict
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any, AsyncGenerator
+from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request, Depends, WebSocket
+from fastapi import FastAPI, HTTPException, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, RedirectResponse, StreamingResponse
 
 from backend.config import (
-    BACKEND_HOST, BACKEND_PORT, OLLAMA_MODEL,
-    API_SECRET, MAX_CHAT_MESSAGE_LENGTH, RATE_LIMIT_RPM, LLM_RATE_LIMIT_RPM,
+    API_SECRET,
+    BACKEND_HOST,
+    BACKEND_PORT,
     CORS_ORIGINS,
+    LLM_MONTHLY_BUDGET,
+    LLM_RATE_LIMIT_RPM,
+    MAX_CHAT_MESSAGE_LENGTH,
+    OLLAMA_MODEL,
+    PROJECT_ROOT,
+    RATE_LIMIT_RPM,
 )
-from backend.security_middleware import RateLimitMiddleware, TieredRateLimitMiddleware, SecurityHeadersMiddleware
+from backend.config_gateway import GATEWAY_ENABLED
+from backend.gateway.middleware import GatewayAuthMiddleware
+from backend.gateway.ratelimit import GatewayRateLimitMiddleware
 from backend.llm import OllamaClient
+from backend.mcp import mcp_bridge
 from backend.memory import memory_store
 from backend.middleware import drift_guard
 from backend.models import (
@@ -49,42 +60,43 @@ from backend.models import (
     IntakeStatusResponse,
     SystemStatus,
 )
-from backend.mcp import mcp_bridge
 from backend.orchestrator import AgentOrchestrator
+from backend.routes.a2ui import router as a2ui_router
+from backend.routes.agent_control import (
+    a2a_router,
+)
+from backend.routes.agent_control import (
+    router as agent_control_router,
+)
+from backend.routes.agent_control import (
+    set_orchestrator as set_agent_control_orchestrator,
+)
+from backend.routes.content_pipeline import router as content_pipeline_router
+from backend.routes.customers import router as customers_router
+from backend.routes.gateway import router as gateway_router
+from backend.routes.gateway_admin import router as gateway_admin_router
+from backend.routes.gsd import router as gsd_router
+from backend.routes.higgsfield import router as higgsfield_router
+from backend.routes.llm_registry import router as llm_registry_router
+from backend.routes.marketing import router as marketing_router
+from backend.routes.memory_management import router as memory_management_router
+from backend.routes.ml import router as ml_router
+from backend.routes.ml_eval import router as ml_eval_router
+from backend.routes.ml_training import router as ml_training_router
+from backend.routes.sandbox import router as sandbox_router
+from backend.routes.schedule_routes import router as scheduler_router
+from backend.routes.skills import router as skills_router
+from backend.routes.task_management import router as task_management_router
+from backend.routes.webgen_builder import router as webgen_builder_router
+from backend.routes.webhooks import router as webhooks_router
+from backend.routes.webhooks import set_dispatcher as set_webhook_dispatcher
+from backend.scheduler import scheduler
+from backend.security_middleware import SecurityHeadersMiddleware, TieredRateLimitMiddleware
 from backend.tasks import task_tracker
 from backend.tools import execute_tool, get_tool_definitions
 from backend.utils import logger
-from backend.config import PROJECT_ROOT, LLM_MONTHLY_BUDGET
-from backend.scheduler import scheduler
-from backend.routes.agent_control import (
-    router as agent_control_router,
-    a2a_router,
-    set_orchestrator as set_agent_control_orchestrator,
-)
-from backend.routes.task_management import router as task_management_router
-from backend.routes.memory_management import router as memory_management_router
-from backend.routes.content_pipeline import router as content_pipeline_router
-from backend.routes.customers import router as customers_router
-from backend.routes.llm_registry import router as llm_registry_router
-from backend.routes.webgen_builder import router as webgen_builder_router
-from backend.routes.marketing import router as marketing_router
-from backend.routes.sandbox import router as sandbox_router
-from backend.routes.schedule_routes import router as scheduler_router
-from backend.routes.webhooks import router as webhooks_router, set_dispatcher as set_webhook_dispatcher
-from backend.routes.skills import router as skills_router
-from backend.routes.higgsfield import router as higgsfield_router
-from backend.websocket.hub import ws_hub, handle_ws_connection
-from backend.routes.a2ui import router as a2ui_router
-from backend.routes.gsd import router as gsd_router
-from backend.routes.gateway import router as gateway_router
-from backend.routes.gateway_admin import router as gateway_admin_router
-from backend.routes.ml import router as ml_router
-from backend.routes.ml_eval import router as ml_eval_router
-from backend.config_gateway import GATEWAY_ENABLED
-from backend.gateway.middleware import GatewayAuthMiddleware
-from backend.gateway.ratelimit import GatewayRateLimitMiddleware
-from deerflow.execution import ExecutionRecorder, ExecutionAnalyzer
-
+from backend.websocket.hub import handle_ws_connection, ws_hub
+from deerflow.execution import ExecutionAnalyzer, ExecutionRecorder
 
 # ---------------------------------------------------------------------------
 # Application State (module-level singletons)
@@ -137,6 +149,7 @@ async def _verify_auth(request: Request) -> None:
 # Lifespan Management
 # ---------------------------------------------------------------------------
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
@@ -158,8 +171,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.info(f"Ollama connected. Available models: {models}")
     else:
         logger.warning(
-            "Ollama not available at startup. "
-            "Ensure 'ollama serve' is running. Agents will fail on LLM calls."
+            "Ollama not available at startup. Ensure 'ollama serve' is running. Agents will fail on LLM calls."
         )
 
     # Initialize orchestrator with LangGraph state machine
@@ -203,12 +215,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Log configuration vs actual bind
     # Uvicorn may bind to a different port than configured if --port is overridden
     logger.info(f"Agentop backend configured for {BACKEND_HOST}:{BACKEND_PORT}")
-    logger.info(f"To verify actual bind port, check Uvicorn startup logs above")
+    logger.info("To verify actual bind port, check Uvicorn startup logs above")
 
     # Initialise MCP Gateway bridge (non-fatal if docker CLI absent)
     await mcp_bridge.initialise()
     mcp_status = mcp_bridge.get_status()
-    logger.info(f"MCP Gateway: enabled={mcp_status['enabled']}, cli={mcp_status['cli_available']}, tools={mcp_status['discovered_tools']}/{mcp_status['declared_tool_count']}")
+    logger.info(
+        f"MCP Gateway: enabled={mcp_status['enabled']}, cli={mcp_status['cli_available']}, tools={mcp_status['discovered_tools']}/{mcp_status['declared_tool_count']}"
+    )
 
     # WebSocket hub — heartbeat + task event emitter
     async def _ws_task_event_emitter() -> None:
@@ -295,6 +309,7 @@ app.include_router(a2ui_router)
 app.include_router(gsd_router)
 app.include_router(ml_router)
 app.include_router(ml_eval_router)
+app.include_router(ml_training_router)
 
 # Gateway — OpenAI-compatible API + admin endpoints
 if GATEWAY_ENABLED:
@@ -305,6 +320,7 @@ if GATEWAY_ENABLED:
 # ---------------------------------------------------------------------------
 # WebSocket — Control Plane
 # ---------------------------------------------------------------------------
+
 
 @app.websocket("/ws/control")
 async def ws_control(
@@ -328,6 +344,7 @@ async def ws_control(
 # Global Exception Handlers — sanitise error details (Sprint 3)
 # ---------------------------------------------------------------------------
 
+
 @app.exception_handler(Exception)
 async def catchall_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Catch unhandled exceptions and return a sanitised response.
@@ -337,10 +354,7 @@ async def catchall_exception_handler(request: Request, exc: Exception) -> JSONRe
     logs without exposing details.
     """
     request_id = str(uuid.uuid4())[:8]
-    logger.error(
-        f"Unhandled exception [{request_id}] {request.method} {request.url.path}: "
-        f"{type(exc).__name__}: {exc}"
-    )
+    logger.error(f"Unhandled exception [{request_id}] {request.method} {request.url.path}: {type(exc).__name__}: {exc}")
     return JSONResponse(
         status_code=500,
         content={"error": "Internal server error", "request_id": request_id},
@@ -360,6 +374,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
 # ---------------------------------------------------------------------------
 # Global Security Middleware (rate limiting + auth)
 # ---------------------------------------------------------------------------
+
 
 @app.middleware("http")
 async def security_middleware(request: Request, call_next):
@@ -408,6 +423,7 @@ async def security_middleware(request: Request, call_next):
 # Health & Status Endpoints
 # ---------------------------------------------------------------------------
 
+
 @app.get("/")
 async def root_redirect() -> RedirectResponse:
     """Redirect bare API root to the dashboard."""
@@ -449,6 +465,7 @@ async def system_status() -> SystemStatus:
 # Agent Endpoints
 # ---------------------------------------------------------------------------
 
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
     """
@@ -471,7 +488,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
             detail=f"Message too long ({len(request.message)} bytes, max {MAX_CHAT_MESSAGE_LENGTH})",
         )
     # Lightweight prompt-injection heuristic — block common override phrases
-    _INJECTION_PATTERNS = (
+    _injection_patterns = (
         "ignore previous instructions",
         "ignore all previous",
         "disregard previous",
@@ -480,12 +497,12 @@ async def chat(request: ChatRequest) -> ChatResponse:
         "new system prompt",
         "### instruction",
         "[system]",
-        "</s>",      # common LLM EOS token injection
+        "</s>",  # common LLM EOS token injection
         "<|im_start|>",
         "<|endoftext|>",
     )
     msg_lower = request.message.lower()
-    for pattern in _INJECTION_PATTERNS:
+    for pattern in _injection_patterns:
         if pattern in msg_lower:
             raise HTTPException(
                 status_code=400,
@@ -617,6 +634,7 @@ async def campaign_generate(request: CampaignGenerateRequest) -> CampaignGenerat
 # Tool Endpoints
 # ---------------------------------------------------------------------------
 
+
 @app.get("/tools")
 async def list_tools() -> list[dict[str, Any]]:
     """Return all registered tool definitions."""
@@ -638,14 +656,18 @@ async def run_tool(
     system user gets a restricted toolset (read-only tools only).
     """
     # System user is restricted to read-only tools for safety
-    SYSTEM_ALLOWED_TOOLS = [
-        "file_reader", "system_info", "git_ops", "health_check",
-        "log_tail", "secret_scanner", "db_query", "folder_analyzer",
+    system_allowed_tools = [
+        "file_reader",
+        "system_info",
+        "git_ops",
+        "health_check",
+        "log_tail",
+        "secret_scanner",
+        "db_query",
+        "folder_analyzer",
     ]
     kwargs = body or {}
-    result = await execute_tool(
-        tool_name, agent_id=agent_id, allowed_tools=SYSTEM_ALLOWED_TOOLS, **kwargs
-    )
+    result = await execute_tool(tool_name, agent_id=agent_id, allowed_tools=system_allowed_tools, **kwargs)
     return result if isinstance(result, dict) else {"result": result}
 
 
@@ -659,6 +681,7 @@ async def mcp_status() -> dict[str, Any]:
 # Folder Analysis Endpoints
 # ---------------------------------------------------------------------------
 
+
 @app.get("/folders/browse")
 async def browse_folders(path: str = ".") -> dict[str, Any]:
     """
@@ -667,6 +690,7 @@ async def browse_folders(path: str = ".") -> dict[str, Any]:
     Only browsable within PROJECT_ROOT.
     """
     from pathlib import Path as _Path
+
     raw = _Path(path)
     # Use normpath (no symlink resolution) to neutralise ".." traversal sequences
     if raw.is_absolute():
@@ -687,12 +711,14 @@ async def browse_folders(path: str = ".") -> dict[str, Any]:
                 continue
             if child.name.startswith(".") and child.name not in {".env.example", ".gitignore"}:
                 continue
-            entries.append({
-                "name": child.name,
-                "is_dir": child.is_dir(),
-                "size_bytes": child.stat().st_size if child.is_file() else None,
-                "path": str(child.relative_to(PROJECT_ROOT)),
-            })
+            entries.append(
+                {
+                    "name": child.name,
+                    "is_dir": child.is_dir(),
+                    "size_bytes": child.stat().st_size if child.is_file() else None,
+                    "path": str(child.relative_to(PROJECT_ROOT)),
+                }
+            )
     except PermissionError:
         raise HTTPException(status_code=403, detail="Permission denied")
 
@@ -722,6 +748,7 @@ async def analyze_folder(body: dict[str, Any]) -> dict[str, Any]:
 
     # Run the folder analyzer tool
     from backend.tools import folder_analyzer as _fa
+
     analysis = await _fa(
         folder_path=folder_path,
         agent_id=agent_id or "system",
@@ -762,6 +789,7 @@ async def analyze_folder(body: dict[str, Any]) -> dict[str, Any]:
 # Task Activity Endpoints
 # ---------------------------------------------------------------------------
 
+
 @app.get("/tasks")
 async def list_tasks(limit: int = 50, status: str | None = None) -> dict[str, Any]:
     """Return recent tasks for the Task Activity Panel."""
@@ -773,6 +801,7 @@ async def list_tasks(limit: int = 50, status: str | None = None) -> dict[str, An
 # ---------------------------------------------------------------------------
 # Live Activity Stream (Server-Sent Events)
 # ---------------------------------------------------------------------------
+
 
 @app.get("/stream/activity")
 async def stream_activity():
@@ -793,15 +822,15 @@ async def stream_activity():
     async def event_generator():
         try:
             # Send initial connection event
-            yield f"event: connected\ndata: {{\"status\": \"ok\", \"timestamp\": \"{datetime.utcnow().isoformat()}\"}}\n\n"
+            yield f'event: connected\ndata: {{"status": "ok", "timestamp": "{datetime.utcnow().isoformat()}"}}\n\n'
             while True:
                 try:
                     # Wait for next event with timeout for heartbeat
                     event = await asyncio.wait_for(queue.get(), timeout=15.0)
                     yield event.to_sse()
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     # Send heartbeat to keep connection alive
-                    yield f"event: heartbeat\ndata: {{\"timestamp\": \"{datetime.utcnow().isoformat()}\"}}\n\n"
+                    yield f'event: heartbeat\ndata: {{"timestamp": "{datetime.utcnow().isoformat()}"}}\n\n'
         except asyncio.CancelledError:
             pass
         finally:
@@ -822,10 +851,12 @@ async def stream_activity():
 # LLM Model Knowledge Endpoints
 # ---------------------------------------------------------------------------
 
+
 @app.get("/models/registry")
 async def list_model_registry() -> dict[str, Any]:
     """Return the compact unified model registry for the UI model switcher."""
     from backend.llm.unified_registry import UNIFIED_MODEL_REGISTRY
+
     available: list[str] = []
     if _llm_client:
         try:
@@ -853,9 +884,10 @@ async def list_model_registry() -> dict[str, Any]:
 async def list_models() -> dict[str, Any]:
     """Return the full LLM model knowledge base."""
     from backend.knowledge.llm_models import (
-        get_model_knowledge,
         RECOMMENDED_AGENT_MODELS,
+        get_model_knowledge,
     )
+
     models = get_model_knowledge()
     # Also check which models are actually available in Ollama right now
     available: list[str] = []
@@ -876,6 +908,7 @@ async def list_models() -> dict[str, Any]:
 async def recommend_model(agent_id: str) -> dict[str, Any]:
     """Return recommended models for a specific agent."""
     from backend.knowledge.llm_models import get_agent_model_recommendation
+
     recs = get_agent_model_recommendation(agent_id)
     return {"agent_id": agent_id, "recommendations": recs}
 
@@ -884,6 +917,7 @@ async def recommend_model(agent_id: str) -> dict[str, Any]:
 async def get_model(model_id: str) -> dict[str, Any]:
     """Return details for a specific model."""
     from backend.knowledge.llm_models import get_model_by_id
+
     model = get_model_by_id(model_id)
     if not model:
         raise HTTPException(status_code=404, detail=f"Model '{model_id}' not in knowledge base")
@@ -906,6 +940,7 @@ async def knowledge_reindex() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # LLM Token Usage & Capacity Endpoints
 # ---------------------------------------------------------------------------
+
 
 @app.get("/llm/stats")
 async def llm_stats() -> dict[str, Any]:
@@ -968,9 +1003,7 @@ async def llm_stats() -> dict[str, Any]:
             "monthly_limit_usd": LLM_MONTHLY_BUDGET,
             "spent_usd": router_stats.get("estimated_cost_usd", 0),
             "remaining_usd": budget_remaining,
-            "percent_used": round(
-                (router_stats.get("estimated_cost_usd", 0) / max(LLM_MONTHLY_BUDGET, 0.01)) * 100, 1
-            ),
+            "percent_used": round((router_stats.get("estimated_cost_usd", 0) / max(LLM_MONTHLY_BUDGET, 0.01)) * 100, 1),
         },
         "tokens": {
             "total_in": router_stats.get("tokens_in", 0),
@@ -987,8 +1020,8 @@ async def llm_capacity() -> dict[str, Any]:
     context window sizes, and throughput estimates.
     Includes both local (Ollama) and cloud (OpenRouter) models.
     """
-    from lib.localllm.models import MODELS
     from lib.localllm.cloud_client import CLOUD_MODELS
+    from lib.localllm.models import MODELS
 
     available: list[str] = []
     if _llm_client:
@@ -1020,39 +1053,44 @@ async def llm_capacity() -> dict[str, Any]:
         tps_estimates = {"fast": 40, "medium": 25, "slow": 15, "very_slow": 8}
         est_tps = tps_estimates.get(speed_tier, 20)
 
-        model_capacities.append({
-            "model_id": model_id,
-            "family": profile.family,
-            "parameters": profile.parameters,
-            "vram_gb": profile.vram_gb,
-            "context_window": profile.context_window,
-            "speed_tier": speed_tier,
-            "quality_tier": quality_tier,
-            "available": is_available,
-            "estimated_tokens_per_second": est_tps,
-            "best_for": profile.best_for,
-            "provider": "local",
-        })
+        model_capacities.append(
+            {
+                "model_id": model_id,
+                "family": profile.family,
+                "parameters": profile.parameters,
+                "vram_gb": profile.vram_gb,
+                "context_window": profile.context_window,
+                "speed_tier": speed_tier,
+                "quality_tier": quality_tier,
+                "available": is_available,
+                "estimated_tokens_per_second": est_tps,
+                "best_for": profile.best_for,
+                "provider": "local",
+            }
+        )
 
     # ── Cloud models (OpenRouter) ─────────────────────────────────────
     import os as _os
+
     cloud_configured = bool(_os.getenv("OPENROUTER_API_KEY", ""))
     for cloud_key, cloud_info in CLOUD_MODELS.items():
-        model_capacities.append({
-            "model_id": cloud_key,
-            "family": cloud_info.get("name", cloud_key),
-            "parameters": "cloud",
-            "vram_gb": 0,
-            "context_window": cloud_info.get("context_window", 128000),
-            "speed_tier": "fast",
-            "quality_tier": "premium",
-            "available": cloud_configured,
-            "estimated_tokens_per_second": 80,
-            "best_for": cloud_info.get("strengths", []),
-            "provider": "cloud",
-            "cost_per_m_in": cloud_info.get("input_cost_per_m", 0),
-            "cost_per_m_out": cloud_info.get("output_cost_per_m", 0),
-        })
+        model_capacities.append(
+            {
+                "model_id": cloud_key,
+                "family": cloud_info.get("name", cloud_key),
+                "parameters": "cloud",
+                "vram_gb": 0,
+                "context_window": cloud_info.get("context_window", 128000),
+                "speed_tier": "fast",
+                "quality_tier": "premium",
+                "available": cloud_configured,
+                "estimated_tokens_per_second": 80,
+                "best_for": cloud_info.get("strengths", []),
+                "provider": "cloud",
+                "cost_per_m_in": cloud_info.get("input_cost_per_m", 0),
+                "cost_per_m_out": cloud_info.get("output_cost_per_m", 0),
+            }
+        )
 
     return {
         "available_models": available,
@@ -1102,18 +1140,18 @@ async def llm_estimate(prompt_tokens: int = 500, max_tokens: int = 2048) -> dict
         total_tokens = prompt_tokens + max_tokens
         fits_context = total_tokens <= profile.context_window
         est_seconds = round(max_tokens / max(est_tps, 1), 1)
-        estimates.append({
-            "model_id": model_id,
-            "estimated_tps": est_tps,
-            "estimated_seconds": est_seconds,
-            "estimated_time_human": (
-                f"{int(est_seconds // 60)}m {int(est_seconds % 60)}s"
-                if est_seconds >= 60
-                else f"{est_seconds}s"
-            ),
-            "fits_context": fits_context,
-            "context_window": profile.context_window,
-        })
+        estimates.append(
+            {
+                "model_id": model_id,
+                "estimated_tps": est_tps,
+                "estimated_seconds": est_seconds,
+                "estimated_time_human": (
+                    f"{int(est_seconds // 60)}m {int(est_seconds % 60)}s" if est_seconds >= 60 else f"{est_seconds}s"
+                ),
+                "fits_context": fits_context,
+                "context_window": profile.context_window,
+            }
+        )
 
     return {
         "prompt_tokens": prompt_tokens,
@@ -1125,6 +1163,7 @@ async def llm_estimate(prompt_tokens: int = 500, max_tokens: int = 2048) -> dict
 # ---------------------------------------------------------------------------
 # Projects / Outputs Endpoints
 # ---------------------------------------------------------------------------
+
 
 @app.get("/projects")
 async def list_projects() -> dict[str, Any]:
@@ -1151,23 +1190,26 @@ async def list_projects() -> dict[str, Any]:
                     try:
                         content = index_html.read_text(errors="ignore")[:2000]
                         import re
+
                         title_match = re.search(r"<title>(.*?)</title>", content, re.IGNORECASE)
                         if title_match:
                             name = title_match.group(1).strip()
                     except Exception:
                         pass
 
-                projects.append({
-                    "id": child.name,
-                    "name": name,
-                    "type": "webgen",
-                    "path": str(child.relative_to(PROJECT_ROOT)),
-                    "file_count": file_count,
-                    "total_size_bytes": total_size,
-                    "total_size_mb": round(total_size / (1024 * 1024), 2),
-                    "created_at": datetime.fromtimestamp(child.stat().st_ctime).isoformat(),
-                    "modified_at": datetime.fromtimestamp(child.stat().st_mtime).isoformat(),
-                })
+                projects.append(
+                    {
+                        "id": child.name,
+                        "name": name,
+                        "type": "webgen",
+                        "path": str(child.relative_to(PROJECT_ROOT)),
+                        "file_count": file_count,
+                        "total_size_bytes": total_size,
+                        "total_size_mb": round(total_size / (1024 * 1024), 2),
+                        "created_at": datetime.fromtimestamp(child.stat().st_ctime).isoformat(),
+                        "modified_at": datetime.fromtimestamp(child.stat().st_mtime).isoformat(),
+                    }
+                )
 
     # --- Content pipeline jobs from memory/content_jobs/ ---
     content_jobs_dir = PROJECT_ROOT / "backend" / "memory" / "content_jobs"
@@ -1175,16 +1217,18 @@ async def list_projects() -> dict[str, Any]:
         for jf in sorted(content_jobs_dir.glob("*.json")):
             try:
                 data = _json.loads(jf.read_text())
-                projects.append({
-                    "id": data.get("id", jf.stem),
-                    "name": data.get("topic", jf.stem.replace("-", " ").replace("_", " ").title()),
-                    "type": "content",
-                    "path": str(jf.relative_to(PROJECT_ROOT)),
-                    "status": data.get("status", "unknown"),
-                    "platform_targets": data.get("platform_targets", []),
-                    "created_at": data.get("created_at", ""),
-                    "modified_at": data.get("updated_at", ""),
-                })
+                projects.append(
+                    {
+                        "id": data.get("id", jf.stem),
+                        "name": data.get("topic", jf.stem.replace("-", " ").replace("_", " ").title()),
+                        "type": "content",
+                        "path": str(jf.relative_to(PROJECT_ROOT)),
+                        "status": data.get("status", "unknown"),
+                        "platform_targets": data.get("platform_targets", []),
+                        "created_at": data.get("created_at", ""),
+                        "modified_at": data.get("updated_at", ""),
+                    }
+                )
             except Exception:
                 pass
 
@@ -1194,16 +1238,18 @@ async def list_projects() -> dict[str, Any]:
         for pf in sorted(webgen_projects_dir.glob("*.json")):
             try:
                 data = _json.loads(pf.read_text())
-                projects.append({
-                    "id": data.get("id", pf.stem),
-                    "name": data.get("business_name", pf.stem.replace("-", " ").replace("_", " ").title()),
-                    "type": "webgen_project",
-                    "path": str(pf.relative_to(PROJECT_ROOT)),
-                    "status": data.get("status", "unknown"),
-                    "pages": data.get("page_count", 0),
-                    "created_at": data.get("created_at", ""),
-                    "modified_at": data.get("updated_at", ""),
-                })
+                projects.append(
+                    {
+                        "id": data.get("id", pf.stem),
+                        "name": data.get("business_name", pf.stem.replace("-", " ").replace("_", " ").title()),
+                        "type": "webgen_project",
+                        "path": str(pf.relative_to(PROJECT_ROOT)),
+                        "status": data.get("status", "unknown"),
+                        "pages": data.get("page_count", 0),
+                        "created_at": data.get("created_at", ""),
+                        "modified_at": data.get("updated_at", ""),
+                    }
+                )
             except Exception:
                 pass
 
@@ -1237,12 +1283,14 @@ async def list_project_files(project_id: str, project_type: str = "webgen") -> d
     files: list[dict[str, Any]] = []
     for f in sorted(project_dir.rglob("*")):
         if f.is_file():
-            files.append({
-                "name": f.name,
-                "path": str(f.relative_to(PROJECT_ROOT)),
-                "size_bytes": f.stat().st_size,
-                "extension": f.suffix,
-            })
+            files.append(
+                {
+                    "name": f.name,
+                    "path": str(f.relative_to(PROJECT_ROOT)),
+                    "size_bytes": f.stat().st_size,
+                    "extension": f.suffix,
+                }
+            )
 
     return {
         "project_id": project_id,
@@ -1255,6 +1303,7 @@ async def list_project_files(project_id: str, project_type: str = "webgen") -> d
 # ---------------------------------------------------------------------------
 # Drift & Governance Endpoints
 # ---------------------------------------------------------------------------
+
 
 @app.get("/drift", response_model=DriftReport)
 async def drift_status() -> DriftReport:
@@ -1273,11 +1322,12 @@ async def drift_events() -> list[dict[str, Any]]:
 # Log Endpoints
 # ---------------------------------------------------------------------------
 
+
 @app.get("/logs")
 async def get_logs(limit: int = 50) -> list[dict[str, Any]]:
     """Return recent tool execution logs."""
     logs = logger.get_recent_tool_logs(limit)
-    return [l.model_dump(mode="json") for l in logs]
+    return [entry.model_dump(mode="json") for entry in logs]
 
 
 @app.get("/logs/general")
@@ -1289,6 +1339,7 @@ async def get_general_logs(limit: int = 100) -> list[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Memory Endpoints (read-only for dashboard — INV-8)
 # ---------------------------------------------------------------------------
+
 
 @app.get("/memory")
 async def list_memory_namespaces() -> dict[str, Any]:
@@ -1343,6 +1394,7 @@ async def get_shared_events(limit: int = 50) -> list[dict[str, Any]]:
 # Soul Agent Endpoints
 # ---------------------------------------------------------------------------
 
+
 @app.post("/soul/reflect")
 async def soul_reflect(trigger: str = "manual") -> dict[str, Any]:
     """Trigger a Soul Agent self-reflection and return the result."""
@@ -1381,6 +1433,7 @@ async def soul_add_goal(request: dict[str, Any]) -> dict[str, Any]:
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "backend.server:app",
         host=BACKEND_HOST,

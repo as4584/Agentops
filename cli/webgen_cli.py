@@ -24,13 +24,13 @@ try:
     from rich.console import Console
     from rich.panel import Panel
     from rich.table import Table
+
     HAS_RICH = True
 except ImportError:
     HAS_RICH = False
 
 from backend.webgen.models import BusinessType, ClientBrief
 from backend.webgen.pipeline import WebGenPipeline
-
 
 # ---------------------------------------------------------------------------
 # Setup
@@ -56,6 +56,7 @@ def _run(coro):
         loop = None
     if loop and loop.is_running():
         import concurrent.futures
+
         with concurrent.futures.ThreadPoolExecutor() as pool:
             return pool.submit(asyncio.run, coro).result()
     return asyncio.run(coro)
@@ -100,8 +101,10 @@ if HAS_RICH:
         console.print(table)
 
     @app.command()
-    def components(category: str = typer.Option("", "--cat", "-c", help="Filter by category"),
-                   business_type: str = typer.Option("", "--type", "-t", help="Filter by business type")):
+    def components(
+        category: str = typer.Option("", "--cat", "-c", help="Filter by category"),
+        business_type: str = typer.Option("", "--type", "-t", help="Filter by business type"),
+    ):
         """List learned components."""
         pipeline = _get_pipeline()
         comps = pipeline.list_components(category, business_type)
@@ -135,8 +138,12 @@ if HAS_RICH:
         table.add_column("Created")
         for p in projs:
             table.add_row(
-                p.id, p.brief.business_name, p.brief.business_type.value,
-                p.status.value, str(len(p.pages)), p.created_at[:10],
+                p.id,
+                p.brief.business_name,
+                p.brief.business_type.value,
+                p.status.value,
+                str(len(p.pages)),
+                p.created_at[:10],
             )
         console.print(table)
 
@@ -152,14 +159,16 @@ if HAS_RICH:
 
         try:
             template = _run(pipeline.learn_site(source, business_type, name))
-            console.print(Panel(
-                f"[green]Template learned![/green]\n"
-                f"ID: {template.id}\n"
-                f"Name: {template.name}\n"
-                f"Components: {len(template.component_ids)}\n"
-                f"Sections: {', '.join(template.section_order)}",
-                title="Template Learned",
-            ))
+            console.print(
+                Panel(
+                    f"[green]Template learned![/green]\n"
+                    f"ID: {template.id}\n"
+                    f"Name: {template.name}\n"
+                    f"Components: {len(template.component_ids)}\n"
+                    f"Sections: {', '.join(template.section_order)}",
+                    title="Template Learned",
+                )
+            )
         except Exception as e:
             console.print(f"[red]Error:[/red] {e}")
             raise typer.Exit(1)
@@ -176,6 +185,7 @@ if HAS_RICH:
 
         try:
             import httpx
+
             resp = httpx.get(url, follow_redirects=True, timeout=30)
             resp.raise_for_status()
             html = resp.text
@@ -185,13 +195,15 @@ if HAS_RICH:
 
         try:
             template = _run(pipeline.learn_html(html, url, business_type, name))
-            console.print(Panel(
-                f"[green]Template learned from URL![/green]\n"
-                f"ID: {template.id}\n"
-                f"Name: {template.name}\n"
-                f"Components: {len(template.component_ids)}",
-                title="Template Learned",
-            ))
+            console.print(
+                Panel(
+                    f"[green]Template learned from URL![/green]\n"
+                    f"ID: {template.id}\n"
+                    f"Name: {template.name}\n"
+                    f"Components: {len(template.component_ids)}",
+                    title="Template Learned",
+                )
+            )
         except Exception as e:
             console.print(f"[red]Error:[/red] {e}")
             raise typer.Exit(1)
@@ -243,12 +255,14 @@ if HAS_RICH:
         )
 
         pipeline = _get_pipeline()
-        console.print(Panel(
-            f"[cyan]Generating website for:[/cyan] {name}\n"
-            f"Type: {bt.value} | Tone: {tone}\n"
-            f"Services: {', '.join(brief.services) or 'Auto-detect'}",
-            title="WebGen Pipeline",
-        ))
+        console.print(
+            Panel(
+                f"[cyan]Generating website for:[/cyan] {name}\n"
+                f"Type: {bt.value} | Tone: {tone}\n"
+                f"Services: {', '.join(brief.services) or 'Auto-detect'}",
+                title="WebGen Pipeline",
+            )
+        )
 
         try:
             project = _run(
@@ -266,15 +280,17 @@ if HAS_RICH:
 
             # Summary
             issues = len(project.errors)
-            console.print(Panel(
-                f"[green]Website generated![/green]\n"
-                f"Project ID: {project.id}\n"
-                f"Pages: {len(project.pages)}\n"
-                f"Status: {project.status.value}\n"
-                f"QA Issues: {issues}\n"
-                f"Output: {project.output_dir}",
-                title="Generation Complete",
-            ))
+            console.print(
+                Panel(
+                    f"[green]Website generated![/green]\n"
+                    f"Project ID: {project.id}\n"
+                    f"Pages: {len(project.pages)}\n"
+                    f"Status: {project.status.value}\n"
+                    f"QA Issues: {issues}\n"
+                    f"Output: {project.output_dir}",
+                    title="Generation Complete",
+                )
+            )
 
             if project.errors:
                 console.print("\n[yellow]QA Issues:[/yellow]")
@@ -286,6 +302,7 @@ if HAS_RICH:
         except Exception as e:
             console.print(f"[red]Pipeline error:[/red] {e}")
             import traceback
+
             traceback.print_exc()
             raise typer.Exit(1)
 
@@ -298,18 +315,20 @@ if HAS_RICH:
             console.print(f"[red]Project not found:[/red] {project_id}")
             raise typer.Exit(1)
 
-        console.print(Panel(
-            f"Business: {project.brief.business_name}\n"
-            f"Type: {project.brief.business_type.value}\n"
-            f"Status: {project.status.value}\n"
-            f"Pages: {len(project.pages)}\n"
-            f"Templates used: {len(project.template_ids)}\n"
-            f"Output: {project.output_dir}\n"
-            f"Errors: {len(project.errors)}\n"
-            f"Created: {project.created_at}\n"
-            f"Updated: {project.updated_at}",
-            title=f"Project {project.id}",
-        ))
+        console.print(
+            Panel(
+                f"Business: {project.brief.business_name}\n"
+                f"Type: {project.brief.business_type.value}\n"
+                f"Status: {project.status.value}\n"
+                f"Pages: {len(project.pages)}\n"
+                f"Templates used: {len(project.template_ids)}\n"
+                f"Output: {project.output_dir}\n"
+                f"Errors: {len(project.errors)}\n"
+                f"Created: {project.created_at}\n"
+                f"Updated: {project.updated_at}",
+                title=f"Project {project.id}",
+            )
+        )
 
         if project.pages:
             table = Table(title="Pages")
@@ -319,7 +338,9 @@ if HAS_RICH:
             table.add_column("HTML Size", justify="right")
             for p in project.pages:
                 table.add_row(
-                    p.slug, p.title, str(len(p.sections)),
+                    p.slug,
+                    p.title,
+                    str(len(p.sections)),
                     f"{len(p.html):,}" if p.html else "—",
                 )
             console.print(table)
@@ -328,6 +349,7 @@ if HAS_RICH:
     def health():
         """Check Ollama connection and model availability."""
         from backend.llm import OllamaClient
+
         llm = OllamaClient()
 
         async def _check():
@@ -351,6 +373,7 @@ if HAS_RICH:
 # Fallback CLI (no typer/rich)
 # ---------------------------------------------------------------------------
 
+
 def _fallback_cli():
     """Minimal CLI when typer/rich are not installed."""
     if len(sys.argv) < 2:
@@ -369,6 +392,7 @@ def _fallback_cli():
 
     elif cmd == "health":
         from backend.llm import OllamaClient
+
         llm = OllamaClient()
         available = asyncio.run(llm.is_available())
         print(f"Ollama: {'online' if available else 'OFFLINE'} ({llm.base_url})")

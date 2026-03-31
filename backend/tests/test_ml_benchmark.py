@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 
+import pytest
+
 from backend.ml.benchmark import (
-    BenchmarkSuite,
     BenchmarkCase,
     BenchmarkResult,
-    SuiteReport,
+    BenchmarkSuite,
 )
 
 
@@ -45,8 +45,14 @@ def mock_runner_degraded(case: BenchmarkCase) -> BenchmarkResult:
 
 
 CASES = [
-    {"case_id": "c1", "suite_id": "s", "task_type": "code",
-     "input_prompt": "Write hello world", "expected_output": "print('hello')", "tags": ["python"]},
+    {
+        "case_id": "c1",
+        "suite_id": "s",
+        "task_type": "code",
+        "input_prompt": "Write hello world",
+        "expected_output": "print('hello')",
+        "tags": ["python"],
+    },
 ]
 
 

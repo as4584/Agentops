@@ -170,8 +170,9 @@ const fmt = {
 // ---------------------------------------------------------------------------
 function StatCard({ label, value, color, onClick }: { label: string; value: string | number; color?: string; onClick?: () => void }) {
   return (
-    <Card shadow="sm" padding="lg" withBorder style={{ cursor: onClick ? 'pointer' : undefined }} onClick={onClick}>
-      <Text size="xs" c="dimmed" tt="uppercase" fw={600}>{label}</Text>
+    <Card shadow="sm" padding="lg" withBorder style={{ cursor: onClick ? 'pointer' : undefined, position: 'relative', overflow: 'hidden' }} onClick={onClick}>
+      <Box style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: color || 'var(--mantine-color-dark-4)', borderRadius: '12px 12px 0 0' }} />
+      <Text size="xs" c="dimmed" tt="uppercase" fw={600} mt={4}>{label}</Text>
       <Text size={rem(28)} fw={700} ff="monospace" c={color} mt={4}>{value}</Text>
     </Card>
   );
@@ -234,6 +235,13 @@ export default function DashboardPage() {
   const [llmStats, setLlmStats] = useState<LLMStats | null>(null);
   const [llmCapacity, setLlmCapacity] = useState<LLMCapacity | null>(null);
 
+  // ML state
+  const [mlEvalSummary, setMlEvalSummary] = useState<{ total_cases: number; avg_score: number; pass_rate: number; by_dimension: Record<string, number>; by_model: Record<string, unknown> } | null>(null);
+  const [mlEvalResults, setMlEvalResults] = useState<Array<{ case_id: string; task_type: string; model: string; score: number; pass_fail: boolean; timestamp: string }>>([]);
+  const [mlAbExperiments, setMlAbExperiments] = useState<Array<{ experiment_id: string; name: string; status: string; variants: unknown[] }>>([]);
+  const [mlGoldenTasks, setMlGoldenTasks] = useState<Array<{ task_id: string; task_type: string; description: string; difficulty: string }>>([]);
+  const [mlTrainingFiles, setMlTrainingFiles] = useState<{ files: Array<{ name: string; size_bytes: number; line_count: number }>; total_files: number; total_lines: number } | null>(null);
+
   // Projects state
   const [projects, setProjects] = useState<ProjectEntry[]>([]);
   const [projectTypes, setProjectTypes] = useState<Record<string, number>>({});
@@ -247,24 +255,34 @@ export default function DashboardPage() {
   // ── Data fetching ──────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
     try {
-      const [h, a, t, d, l, mem, goals] = await Promise.all([
-        api.health(),
-        api.agents(),
-        api.tools(),
-        api.drift(),
-        api.logs(30),
+      // Health is the minimum required for "connected" status
+      const h = await api.health();
+      setHealth(h); setConnected(true); setError(null);
+
+      // Everything else is best-effort — don't block on any single failure
+      const [a, t, d, l, mem, goals] = await Promise.all([
+        api.agents().catch(() => [] as AgentDefinition[]),
+        api.tools().catch(() => [] as ToolDefinition[]),
+        api.drift().catch(() => null),
+        api.logs(30).catch(() => [] as ToolLog[]),
         api.memoryAgents().catch(() => ({ agents: [], total_size_bytes: 0, total_size_mb: 0 })),
         api.soulGoals().catch(() => ({ goals: [], count: 0 })),
       ]);
-      setHealth(h); setAgents(a); setTools(t); setDrift(d); setLogs(l);
+      setAgents(a); setTools(t); if (d) setDrift(d); setLogs(l);
       setMemoryUsage(mem?.agents ?? []); setSoulGoals(goals?.goals ?? []);
-      setConnected(true); setError(null);
 
       try { const td = await api.tasks(30); setTasks(td.tasks); setTaskStats(td.stats); } catch {}
       try { const st = await api.status(); setAgentStates(st.agents); } catch {}
       try { setLlmStats(await api.llmStats()); } catch {}
       try { setLlmCapacity(await api.llmCapacity()); } catch {}
       try { const p = await api.projects(); setProjects(p.projects); setProjectTypes(p.types); } catch {}
+
+      // ML data
+      try { setMlEvalSummary(await api.mlEvalSummary()); } catch {}
+      try { setMlEvalResults(await api.mlEvalResults(20)); } catch {}
+      try { setMlAbExperiments(await api.mlAbExperiments()); } catch {}
+      try { setMlGoldenTasks(await api.mlGoldenTasks()); } catch {}
+      try { setMlTrainingFiles(await api.mlTrainingFiles()); } catch {}
 
       if (a.length > 0 && !a.some((ag) => ag.agent_id === chatAgent)) setChatAgent(a[0].agent_id);
     } catch (e) {
@@ -384,10 +402,15 @@ export default function DashboardPage() {
       <AppShell.Main>
         <Container size="xl" px="md">
           {/* ── Header ──────────────────────────────────────────────── */}
-          <Group justify="space-between" mb="lg" pb="md" style={{ borderBottom: '1px solid var(--mantine-color-dark-4)' }}>
+          <Group justify="space-between" mb="lg" pb="md" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <div>
-              <Title order={2} fw={700}>Agentop Control Center</Title>
-              <Text size="xs" c="dimmed">Local-first multi-agent system · soul-driven · drift governed</Text>
+              <Group gap="sm" align="center">
+                <Box w={8} h={28} style={{ borderRadius: 4, background: 'linear-gradient(180deg, #3d96ff, #1a82ff)' }} />
+                <div>
+                  <Title order={2} fw={700} style={{ letterSpacing: '-0.02em' }}>Agentop</Title>
+                  <Text size="xs" c="dimmed" mt={-2}>Local AI Control Center</Text>
+                </div>
+              </Group>
             </div>
             <Group gap="md">
               {health && (
@@ -413,14 +436,18 @@ export default function DashboardPage() {
             </Paper>
           )}
           {!connected && !error && (
-            <Flex justify="center" align="center" py={60}><Loader size="lg" /><Text ml="md" c="dimmed">Connecting to backend…</Text></Flex>
+            <Flex direction="column" justify="center" align="center" py={80} gap="md">
+              <Loader size="lg" color="agentop" />
+              <Text c="dimmed" size="sm">Connecting to backend…</Text>
+              <Text c="dimmed" size="xs">Waiting for http://localhost:8000</Text>
+            </Flex>
           )}
 
           {connected && (
             <Tabs value={activeTab} onChange={setActiveTab} variant="pills" radius="md" keepMounted={false}>
-              <Card mb="lg" withBorder>
+              <Card mb="lg" withBorder style={{ background: 'rgba(26, 130, 255, 0.04)', borderColor: 'rgba(26, 130, 255, 0.12)' }}>
                 <Group justify="space-between" align="center" wrap="wrap">
-                  <Text size="sm" c="dimmed">Quick Launch</Text>
+                  <Text size="sm" c="dimmed" fw={500}>Quick Launch</Text>
                   <Group gap="xs">
                     <Button component={Link} href="/customers" size="xs" variant="light">Customers</Button>
                     <Button component={Link} href="/pricing" size="xs" variant="light">Pricing</Button>
@@ -437,6 +464,7 @@ export default function DashboardPage() {
                 <Tabs.Tab value="chat" leftSection={<IconMessage size={16} />}>Chat</Tabs.Tab>
                 <Tabs.Tab value="projects" leftSection={<IconFolder size={16} />} rightSection={<Badge size="xs" variant="filled" circle>{projects.length}</Badge>}>Projects</Tabs.Tab>
                 <Tabs.Tab value="tokens" leftSection={<IconChartBar size={16} />} rightSection={llmStats ? <Badge size="xs" variant="filled">{fmt.num(llmStats.tokens.total)}</Badge> : undefined}>Token Usage</Tabs.Tab>
+                <Tabs.Tab value="ml" leftSection={<IconDatabase size={16} />}>ML Lab</Tabs.Tab>
                 <Tabs.Tab value="system" leftSection={<IconSettings size={16} />}>System</Tabs.Tab>
               </Tabs.List>
 
@@ -529,7 +557,7 @@ export default function DashboardPage() {
                       <Stack gap={2}>
                         {liveEvents.slice(-20).map((ev, i) => {
                           const isError = ev.type === 'task_failed';
-                          const color = isError ? 'red' : ev.type === 'llm_response' ? 'violet' : ev.type === 'task_completed' ? 'green' : 'dimmed';
+                          const color = isError ? 'red' : ev.type === 'llm_response' ? 'blue' : ev.type === 'task_completed' ? 'green' : 'dimmed';
                           return (
                             <Group key={i} gap="xs" wrap="nowrap" px="xs" py={2}>
                               <Text size="xs" ff="monospace" c="dimmed" style={{ flexShrink: 0, width: 60 }}>{new Date(ev.timestamp).toLocaleTimeString()}</Text>
@@ -627,7 +655,7 @@ export default function DashboardPage() {
                               const isSoul = agent.agent_id === 'soul_core';
                               return (
                                 <Card key={agent.agent_id} shadow="sm" withBorder padding="md"
-                                  style={{ cursor: 'pointer', ...(isSoul ? { borderColor: 'var(--mantine-color-agentop-5)', boxShadow: '0 0 16px rgba(108,99,255,0.15)' } : {}) }}
+                                  style={{ cursor: 'pointer', ...(isSoul ? { borderColor: 'var(--mantine-color-agentop-5)', boxShadow: '0 0 16px rgba(26,130,255,0.15)' } : {}) }}
                                   onClick={() => setSelectedAgent(agent.agent_id)}
                                 >
                                   <Group justify="space-between" mb={4}>
@@ -1098,6 +1126,153 @@ export default function DashboardPage() {
                     )}
                   </>
                 )}
+              </Tabs.Panel>
+
+              {/* ============================================================ */}
+              {/* ML LAB TAB                                                    */}
+              {/* ============================================================ */}
+              <Tabs.Panel value="ml">
+                {/* Summary Stats */}
+                <SimpleGrid cols={{ base: 2, md: 4 }} mb="lg">
+                  <StatCard label="Eval Cases" value={mlEvalSummary?.total_cases ?? 0} color="var(--mantine-color-agentop-5)" />
+                  <StatCard label="Avg Score" value={mlEvalSummary ? `${(mlEvalSummary.avg_score * 100).toFixed(1)}%` : '—'} color="var(--mantine-color-blue-5)" />
+                  <StatCard label="Pass Rate" value={mlEvalSummary ? `${(mlEvalSummary.pass_rate * 100).toFixed(1)}%` : '—'} color="var(--mantine-color-green-5)" />
+                  <StatCard label="Training Files" value={mlTrainingFiles?.total_files ?? 0} color="var(--mantine-color-yellow-5)" />
+                </SimpleGrid>
+
+                <Grid mb="lg">
+                  {/* Training Data */}
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                    <Card shadow="sm" withBorder h="100%">
+                      <Group justify="space-between" mb="sm">
+                        <Text fw={600} size="sm" tt="uppercase" c="dimmed">Training Data</Text>
+                        {mlTrainingFiles && <Badge size="xs" variant="light">{fmt.num(mlTrainingFiles.total_lines)} total lines</Badge>}
+                      </Group>
+                      {!mlTrainingFiles || mlTrainingFiles.files.length === 0 ? (
+                        <Text c="dimmed" ta="center" py="xl" size="sm">No training files found in data/training/</Text>
+                      ) : (
+                        <ScrollArea h={260}>
+                          <Table striped highlightOnHover fz="xs">
+                            <Table.Thead>
+                              <Table.Tr><Table.Th>File</Table.Th><Table.Th style={{ textAlign: 'right' }}>Lines</Table.Th><Table.Th style={{ textAlign: 'right' }}>Size</Table.Th></Table.Tr>
+                            </Table.Thead>
+                            <Table.Tbody>
+                              {mlTrainingFiles.files.map(f => (
+                                <Table.Tr key={f.name}>
+                                  <Table.Td><Group gap={6}><IconFileText size={14} /><Text size="xs">{f.name}</Text></Group></Table.Td>
+                                  <Table.Td style={{ textAlign: 'right' }}><Text size="xs" ff="monospace">{fmt.num(f.line_count)}</Text></Table.Td>
+                                  <Table.Td style={{ textAlign: 'right' }}><Text size="xs" ff="monospace">{fmt.size(f.size_bytes)}</Text></Table.Td>
+                                </Table.Tr>
+                              ))}
+                            </Table.Tbody>
+                          </Table>
+                        </ScrollArea>
+                      )}
+                    </Card>
+                  </Grid.Col>
+
+                  {/* Dimension Scores */}
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                    <Card shadow="sm" withBorder h="100%">
+                      <Text fw={600} size="sm" tt="uppercase" c="dimmed" mb="sm">Eval Dimensions</Text>
+                      {!mlEvalSummary || !mlEvalSummary.by_dimension || Object.keys(mlEvalSummary.by_dimension).length === 0 ? (
+                        <Text c="dimmed" ta="center" py="xl" size="sm">No evaluation data yet</Text>
+                      ) : (
+                        <Stack gap="sm">
+                          {Object.entries(mlEvalSummary.by_dimension).map(([dim, score]) => (
+                            <div key={dim}>
+                              <Group justify="space-between" mb={4}>
+                                <Text size="xs" tt="capitalize">{dim.replace(/_/g, ' ')}</Text>
+                                <Text size="xs" ff="monospace" fw={600}>{(Number(score) * 100).toFixed(1)}%</Text>
+                              </Group>
+                              <Progress value={Number(score) * 100} size="sm" color={Number(score) >= 0.8 ? 'green' : Number(score) >= 0.5 ? 'yellow' : 'red'} />
+                            </div>
+                          ))}
+                        </Stack>
+                      )}
+                    </Card>
+                  </Grid.Col>
+                </Grid>
+
+                {/* Recent Eval Results */}
+                <Title order={4} mb="sm">Recent Evaluations</Title>
+                <Card shadow="sm" withBorder mb="lg">
+                  {mlEvalResults.length === 0 ? (
+                    <Text c="dimmed" ta="center" py="md" size="sm">No evaluation results yet</Text>
+                  ) : (
+                    <ScrollArea>
+                      <Table striped highlightOnHover withTableBorder fz="xs">
+                        <Table.Thead>
+                          <Table.Tr><Table.Th>Case</Table.Th><Table.Th>Type</Table.Th><Table.Th>Model</Table.Th><Table.Th>Score</Table.Th><Table.Th>Result</Table.Th><Table.Th>Time</Table.Th></Table.Tr>
+                        </Table.Thead>
+                        <Table.Tbody>
+                          {mlEvalResults.map((r, i) => (
+                            <Table.Tr key={i}>
+                              <Table.Td><Text size="xs" ff="monospace">{r.case_id}</Text></Table.Td>
+                              <Table.Td><Badge size="xs" variant="light">{r.task_type}</Badge></Table.Td>
+                              <Table.Td><Text size="xs">{r.model}</Text></Table.Td>
+                              <Table.Td><Text size="xs" ff="monospace" fw={600} c={r.score >= 0.8 ? 'green' : r.score >= 0.5 ? 'yellow' : 'red'}>{(r.score * 100).toFixed(0)}%</Text></Table.Td>
+                              <Table.Td>
+                                <Badge size="xs" color={r.pass_fail ? 'green' : 'red'}>{r.pass_fail ? 'PASS' : 'FAIL'}</Badge>
+                              </Table.Td>
+                              <Table.Td><Text size="xs" c="dimmed">{fmt.time(r.timestamp)}</Text></Table.Td>
+                            </Table.Tr>
+                          ))}
+                        </Table.Tbody>
+                      </Table>
+                    </ScrollArea>
+                  )}
+                </Card>
+
+                {/* A/B Experiments & Golden Tasks */}
+                <Grid>
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                    <Title order={4} mb="sm">A/B Experiments</Title>
+                    <Card shadow="sm" withBorder>
+                      {mlAbExperiments.length === 0 ? (
+                        <Text c="dimmed" ta="center" py="md" size="sm">No experiments yet</Text>
+                      ) : (
+                        <Stack gap="xs">
+                          {mlAbExperiments.map(exp => (
+                            <Paper key={exp.experiment_id} p="sm" withBorder>
+                              <Group justify="space-between">
+                                <div>
+                                  <Text size="sm" fw={600}>{exp.name}</Text>
+                                  <Text size="xs" c="dimmed" ff="monospace">{exp.experiment_id}</Text>
+                                </div>
+                                <Badge color={exp.status === 'running' ? 'green' : exp.status === 'completed' ? 'blue' : 'gray'}>{exp.status}</Badge>
+                              </Group>
+                              <Text size="xs" c="dimmed" mt={4}>{exp.variants.length} variant{exp.variants.length !== 1 ? 's' : ''}</Text>
+                            </Paper>
+                          ))}
+                        </Stack>
+                      )}
+                    </Card>
+                  </Grid.Col>
+
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                    <Title order={4} mb="sm">Golden Tasks</Title>
+                    <Card shadow="sm" withBorder>
+                      {mlGoldenTasks.length === 0 ? (
+                        <Text c="dimmed" ta="center" py="md" size="sm">No golden tasks defined</Text>
+                      ) : (
+                        <ScrollArea h={300}>
+                          <Stack gap="xs">
+                            {mlGoldenTasks.map(gt => (
+                              <Paper key={gt.task_id} p="sm" withBorder>
+                                <Group justify="space-between" mb={4}>
+                                  <Badge size="xs" variant="light">{gt.task_type}</Badge>
+                                  <Badge size="xs" color={gt.difficulty === 'hard' ? 'red' : gt.difficulty === 'medium' ? 'yellow' : 'green'}>{gt.difficulty}</Badge>
+                                </Group>
+                                <Text size="xs">{gt.description}</Text>
+                              </Paper>
+                            ))}
+                          </Stack>
+                        </ScrollArea>
+                      )}
+                    </Card>
+                  </Grid.Col>
+                </Grid>
               </Tabs.Panel>
 
               {/* ============================================================ */}

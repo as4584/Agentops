@@ -1,12 +1,12 @@
 """
 Tests for GSDStore — backend/database/gsd_store.py
 """
+
 from __future__ import annotations
 
 import json
-import tempfile
 from collections.abc import Generator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -19,8 +19,6 @@ from backend.models.gsd import (
     GSDStateFile,
     GSDTask,
     GSDVerifyReport,
-    PhaseStatus,
-    TaskStatus,
     VerifyCheckItem,
 )
 
@@ -28,7 +26,7 @@ from backend.models.gsd import (
 @pytest.fixture()
 def tmp_store(tmp_path: Path) -> Generator[GSDStore, None, None]:
     """A GSDStore with all paths redirected to a temp directory."""
-    store = GSDStore()
+    GSDStore()
     # Patch all path constants to use tmp_path
     import backend.database.gsd_store as mod
 
@@ -44,6 +42,7 @@ def tmp_store(tmp_path: Path) -> Generator[GSDStore, None, None]:
 # ---------------------------------------------------------------------------
 # _atomic_write
 # ---------------------------------------------------------------------------
+
 
 def test_atomic_write_creates_file(tmp_path: Path):
     target = tmp_path / "output.json"
@@ -76,8 +75,10 @@ def test_atomic_write_creates_parents(tmp_path: Path):
 # State
 # ---------------------------------------------------------------------------
 
+
 def test_save_and_load_state(tmp_path: Path):
     import backend.database.gsd_store as mod
+
     with (
         patch.object(mod, "_STATE_PATH", tmp_path / "gsd_state.json"),
         patch.object(mod, "_GSD_ROOT", tmp_path),
@@ -92,6 +93,7 @@ def test_save_and_load_state(tmp_path: Path):
 
 def test_load_state_missing_returns_default(tmp_path: Path):
     import backend.database.gsd_store as mod
+
     with patch.object(mod, "_STATE_PATH", tmp_path / "nonexistent.json"):
         store = GSDStore()
         state = store.load_state()
@@ -101,7 +103,8 @@ def test_load_state_missing_returns_default(tmp_path: Path):
 
 def test_save_state_updates_last_updated(tmp_path: Path):
     import backend.database.gsd_store as mod
-    before = datetime.now(timezone.utc)
+
+    before = datetime.now(UTC)
     with (
         patch.object(mod, "_STATE_PATH", tmp_path / "gsd_state.json"),
         patch.object(mod, "_GSD_ROOT", tmp_path),
@@ -117,6 +120,7 @@ def test_save_state_updates_last_updated(tmp_path: Path):
 # Plan
 # ---------------------------------------------------------------------------
 
+
 def _make_plan(phase: int = 1) -> GSDPlan:
     return GSDPlan(
         phase=phase,
@@ -131,6 +135,7 @@ def _make_plan(phase: int = 1) -> GSDPlan:
 
 def test_save_and_load_plan(tmp_path: Path):
     import backend.database.gsd_store as mod
+
     with patch.object(mod, "_PHASES_ROOT", tmp_path / "phases"):
         store = GSDStore()
         plan = _make_plan(1)
@@ -144,6 +149,7 @@ def test_save_and_load_plan(tmp_path: Path):
 
 def test_save_plan_writes_markdown(tmp_path: Path):
     import backend.database.gsd_store as mod
+
     with patch.object(mod, "_PHASES_ROOT", tmp_path / "phases"):
         store = GSDStore()
         store.save_plan(1, _make_plan(1))
@@ -155,6 +161,7 @@ def test_save_plan_writes_markdown(tmp_path: Path):
 
 def test_load_plan_missing_returns_none(tmp_path: Path):
     import backend.database.gsd_store as mod
+
     with patch.object(mod, "_PHASES_ROOT", tmp_path / "phases"):
         store = GSDStore()
         assert store.load_plan(99) is None
@@ -162,6 +169,7 @@ def test_load_plan_missing_returns_none(tmp_path: Path):
 
 def test_list_phases(tmp_path: Path):
     import backend.database.gsd_store as mod
+
     with patch.object(mod, "_PHASES_ROOT", tmp_path / "phases"):
         store = GSDStore()
         for n in (3, 1, 2):
@@ -174,8 +182,10 @@ def test_list_phases(tmp_path: Path):
 # Execution log
 # ---------------------------------------------------------------------------
 
+
 def test_append_and_read_execution_log(tmp_path: Path):
     import backend.database.gsd_store as mod
+
     with patch.object(mod, "_PHASES_ROOT", tmp_path / "phases"):
         store = GSDStore()
         store.append_execution_log(1, "## Wave 1")
@@ -187,6 +197,7 @@ def test_append_and_read_execution_log(tmp_path: Path):
 
 def test_read_execution_log_missing_returns_empty(tmp_path: Path):
     import backend.database.gsd_store as mod
+
     with patch.object(mod, "_PHASES_ROOT", tmp_path / "phases"):
         store = GSDStore()
         assert store.read_execution_log(42) == ""
@@ -195,6 +206,7 @@ def test_read_execution_log_missing_returns_empty(tmp_path: Path):
 # ---------------------------------------------------------------------------
 # Map docs
 # ---------------------------------------------------------------------------
+
 
 def test_save_and_load_map_docs(tmp_path: Path):
     import backend.database.gsd_store as mod
@@ -236,6 +248,7 @@ def test_save_and_load_map_docs(tmp_path: Path):
 
 def test_load_map_docs_missing_returns_none(tmp_path: Path):
     import backend.database.gsd_store as mod
+
     with patch.object(mod, "_MAP_PATH", tmp_path / "missing.json"):
         store = GSDStore()
         assert store.load_map_docs() is None
@@ -245,8 +258,10 @@ def test_load_map_docs_missing_returns_none(tmp_path: Path):
 # Verify report
 # ---------------------------------------------------------------------------
 
+
 def test_save_and_load_verify_report(tmp_path: Path):
     import backend.database.gsd_store as mod
+
     with patch.object(mod, "_PHASES_ROOT", tmp_path / "phases"):
         store = GSDStore()
         report = GSDVerifyReport(

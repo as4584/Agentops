@@ -3,10 +3,11 @@ from __future__ import annotations
 import json
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
+
 from backend.models.customer import Customer, CustomerService, ServiceStatus, ServiceType
 
 
@@ -123,9 +124,7 @@ class CustomerStore:
 
     def list_customers(self) -> list[Customer]:
         with self.connection() as conn:
-            rows = conn.execute(
-                "SELECT * FROM customers WHERE active = 1 ORDER BY created_at DESC"
-            ).fetchall()
+            rows = conn.execute("SELECT * FROM customers WHERE active = 1 ORDER BY created_at DESC").fetchall()
 
         return [self._hydrate_customer(row) for row in rows]
 
@@ -183,7 +182,7 @@ class CustomerStore:
                     service_id,
                     event_type,
                     detail,
-                    datetime.now(timezone.utc).isoformat(),
+                    datetime.now(UTC).isoformat(),
                     json.dumps(metadata or {}),
                 ),
             )
@@ -235,7 +234,7 @@ class CustomerStore:
                     project_slug,
                     deployed_url,
                     qr_path,
-                    datetime.now(timezone.utc).isoformat(),
+                    datetime.now(UTC).isoformat(),
                     json.dumps(metadata or {}),
                 ),
             )
@@ -267,7 +266,9 @@ class CustomerStore:
             for row in rows
         ]
 
-    def update_service_status(self, service_id: str, status: ServiceStatus, progress_percent: int | None = None) -> None:
+    def update_service_status(
+        self, service_id: str, status: ServiceStatus, progress_percent: int | None = None
+    ) -> None:
         with self.connection() as conn:
             if progress_percent is None:
                 conn.execute(
@@ -282,7 +283,7 @@ class CustomerStore:
             if status == ServiceStatus.COMPLETED:
                 conn.execute(
                     "UPDATE customer_services SET completed_at = ? WHERE id = ?",
-                    (datetime.now(timezone.utc).isoformat(), service_id),
+                    (datetime.now(UTC).isoformat(), service_id),
                 )
             conn.commit()
 
@@ -300,9 +301,9 @@ class CustomerStore:
 
     def dashboard_stats(self) -> dict[str, int]:
         with self.connection() as conn:
-            total_customers = conn.execute(
-                "SELECT COUNT(*) AS count FROM customers WHERE active = 1"
-            ).fetchone()["count"]
+            total_customers = conn.execute("SELECT COUNT(*) AS count FROM customers WHERE active = 1").fetchone()[
+                "count"
+            ]
             total_tokens = conn.execute(
                 "SELECT COALESCE(SUM(tokens_used_this_month), 0) AS total FROM customers WHERE active = 1"
             ).fetchone()["total"]
@@ -335,7 +336,9 @@ class CustomerStore:
                     assigned_agents=json.loads(service_row["assigned_agents"] or "[]"),
                     notes=service_row["notes"] or "",
                     created_at=datetime.fromisoformat(service_row["created_at"]),
-                    completed_at=datetime.fromisoformat(service_row["completed_at"]) if service_row["completed_at"] else None,
+                    completed_at=datetime.fromisoformat(service_row["completed_at"])
+                    if service_row["completed_at"]
+                    else None,
                 )
             )
 

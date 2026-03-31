@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, Awaitable, Callable
+from typing import Any
 
 logger = logging.getLogger("deerflow.middleware")
 
@@ -27,6 +27,7 @@ logger = logging.getLogger("deerflow.middleware")
 # ---------------------------------------------------------------------------
 # Context objects passed through the chain
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class ToolContext:
@@ -54,6 +55,7 @@ class LLMContext:
 # Base middleware class — override any hook you need
 # ---------------------------------------------------------------------------
 
+
 class Middleware:
     """Base class for chain middleware. Override only the hooks you need."""
 
@@ -64,9 +66,7 @@ class Middleware:
         """Return ctx to continue, or None to block the tool call."""
         return ctx
 
-    async def after_tool(
-        self, ctx: ToolContext, result: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def after_tool(self, ctx: ToolContext, result: dict[str, Any]) -> dict[str, Any]:
         return result
 
     async def before_llm(
@@ -84,6 +84,7 @@ class Middleware:
 # Adapter: wrap Agentop's existing DriftGuard as a Middleware
 # ---------------------------------------------------------------------------
 
+
 class DriftGuardMiddleware(Middleware):
     """Wraps Agentop's DriftGuard singleton so it participates in the chain."""
 
@@ -97,7 +98,8 @@ class DriftGuardMiddleware(Middleware):
     def _get_guard(self):
         if self._guard is None:
             from backend.middleware import drift_guard
-            self._guard = drift_guard
+
+            self._guard = drift_guard  # type: ignore[assignment]
         return self._guard
 
     async def before_tool(self, ctx: ToolContext) -> ToolContext | None:
@@ -108,9 +110,7 @@ class DriftGuardMiddleware(Middleware):
             return None
         return ctx
 
-    async def after_tool(
-        self, ctx: ToolContext, result: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def after_tool(self, ctx: ToolContext, result: dict[str, Any]) -> dict[str, Any]:
         guard = self._get_guard()
         report = guard.check_invariants()
         result["_drift_status"] = report.status.value
@@ -121,6 +121,7 @@ class DriftGuardMiddleware(Middleware):
 # Logging middleware — records timing & outcomes
 # ---------------------------------------------------------------------------
 
+
 class LoggingMiddleware(Middleware):
     """Structured logging for every tool and LLM call passing through the chain."""
 
@@ -129,14 +130,10 @@ class LoggingMiddleware(Middleware):
 
     async def before_tool(self, ctx: ToolContext) -> ToolContext:
         ctx.metadata["_start_ns"] = time.perf_counter_ns()
-        logger.info(
-            "tool.start agent=%s tool=%s", ctx.agent_id, ctx.tool_name
-        )
+        logger.info("tool.start agent=%s tool=%s", ctx.agent_id, ctx.tool_name)
         return ctx
 
-    async def after_tool(
-        self, ctx: ToolContext, result: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def after_tool(self, ctx: ToolContext, result: dict[str, Any]) -> dict[str, Any]:
         start = ctx.metadata.get("_start_ns", 0)
         elapsed_ms = (time.perf_counter_ns() - start) / 1_000_000
         logger.info(
@@ -178,6 +175,7 @@ class LoggingMiddleware(Middleware):
 # Rate-limit middleware — per-agent tool call throttle
 # ---------------------------------------------------------------------------
 
+
 class RateLimitMiddleware(Middleware):
     """Per-agent rate limiter. Blocks tools if agent exceeds call budget."""
 
@@ -198,10 +196,7 @@ class RateLimitMiddleware(Middleware):
 
         if len(window) >= self._max:
             ctx.blocked = True
-            ctx.block_reason = (
-                f"Rate limit: {ctx.agent_id} exceeded "
-                f"{self._max} tool calls/min"
-            )
+            ctx.block_reason = f"Rate limit: {ctx.agent_id} exceeded {self._max} tool calls/min"
             logger.warning("rate_limit.blocked agent=%s", ctx.agent_id)
             return None
 
@@ -212,6 +207,7 @@ class RateLimitMiddleware(Middleware):
 # ---------------------------------------------------------------------------
 # The chain itself
 # ---------------------------------------------------------------------------
+
 
 class MiddlewareChain:
     """
@@ -243,7 +239,7 @@ class MiddlewareChain:
 
     # -- registration -------------------------------------------------------
 
-    def add(self, mw: Middleware) -> "MiddlewareChain":
+    def add(self, mw: Middleware) -> MiddlewareChain:
         """Add a middleware to the chain. Returns self for chaining."""
         self._middlewares.append(mw)
         self._sorted = False
@@ -280,9 +276,7 @@ class MiddlewareChain:
             ctx = result
         return ctx
 
-    async def run_after_tool(
-        self, ctx: ToolContext, result: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def run_after_tool(self, ctx: ToolContext, result: dict[str, Any]) -> dict[str, Any]:
         """Run after_tool hooks in reverse priority order."""
         self._ensure_sorted()
         for mw in reversed(self._middlewares):

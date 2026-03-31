@@ -10,16 +10,16 @@ and post-execution analysis — all wired into Agentop's governance model
 See docs/INSPIRATIONS.md for attribution and design rationale.
 """
 
-from deerflow.middleware.chain import MiddlewareChain, Middleware
-from deerflow.memory.facts import FactMemory, Fact
-from deerflow.middleware.summarization import SummarizationMiddleware
-from deerflow.delegation.task import TaskDelegator, SubTask, TaskResult
-from deerflow.skills.progressive import ProgressiveSkillLoader
-from deerflow.tools.health import ToolHealthMonitor, ToolFailureRecord, ToolHealthStats
-from deerflow.tools.repair import ToolRepairEngine, RepairSuggestion
-from deerflow.tools.middleware import detect_tool_failure, ToolHealthMiddleware
+from deerflow.delegation.task import SubTask, TaskDelegator, TaskResult
+from deerflow.execution.analyzer import AnalysisJudgment, ExecutionAnalyzer
 from deerflow.execution.recorder import ExecutionRecorder, RunRecord, ToolCallEntry
-from deerflow.execution.analyzer import ExecutionAnalyzer, AnalysisJudgment
+from deerflow.memory.facts import Fact, FactMemory
+from deerflow.middleware.chain import Middleware, MiddlewareChain
+from deerflow.middleware.summarization import SummarizationMiddleware
+from deerflow.skills.progressive import ProgressiveSkillLoader
+from deerflow.tools.health import ToolFailureRecord, ToolHealthMonitor, ToolHealthStats
+from deerflow.tools.middleware import ToolHealthMiddleware, detect_tool_failure
+from deerflow.tools.repair import RepairSuggestion, ToolRepairEngine
 
 __all__ = [
     "MiddlewareChain",

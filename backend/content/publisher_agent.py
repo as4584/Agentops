@@ -20,13 +20,11 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import datetime, timezone, timedelta
-from pathlib import Path
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
-from backend.content.base_agent import ContentAgent
-from backend.content.video_job import VideoJob, JobStatus
 from backend.config import MEMORY_DIR
+from backend.content.base_agent import ContentAgent
+from backend.content.video_job import JobStatus, VideoJob
 from backend.utils import logger
 
 PUBLISH_DIR = MEMORY_DIR / "content_publish"
@@ -37,7 +35,7 @@ class PublisherAgent(ContentAgent):
     name = "PublisherAgent"
     trigger_status = JobStatus.APPROVED
 
-    async def process(self, job: VideoJob) -> Optional[VideoJob]:
+    async def process(self, job: VideoJob) -> VideoJob | None:
         logger.info(f"[{self.name}] Publishing job {job.job_id}")
 
         # Generate hashtags via local LLM
@@ -73,8 +71,7 @@ class PublisherAgent(ContentAgent):
                     f"Return them space-separated on one line, each starting with #."
                 ),
                 system=(
-                    "You are a social media hashtag expert. "
-                    "Output only hashtags, space-separated, starting with #."
+                    "You are a social media hashtag expert. Output only hashtags, space-separated, starting with #."
                 ),
                 temperature=0.7,
                 max_tokens=200,
@@ -102,7 +99,7 @@ class PublisherAgent(ContentAgent):
             logger.warning(f"[{self.name}] Caption generation failed: {e}")
             return topic
 
-    def _calculate_post_time(self, job: Optional[VideoJob] = None) -> datetime:  # noqa: F841
+    def _calculate_post_time(self, job: VideoJob | None = None) -> datetime:  # noqa: F841
         """
         Jack Craig upload timing rules:
           1. Never post within UPLOAD_INTERVAL_HOURS of the last post
@@ -114,23 +111,17 @@ class PublisherAgent(ContentAgent):
         velocity_threshold = int(os.getenv("VIEW_VELOCITY_THRESHOLD", "100"))
         velocity_window = int(os.getenv("VIEW_VELOCITY_WINDOW_HOURS", "12"))
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # --- Rule 1: 48-hour interval from last posted video ---
         last_post_time = self._get_last_post_time()
-        earliest_by_interval = (
-            last_post_time + timedelta(hours=interval_hours)
-            if last_post_time
-            else now
-        )
+        earliest_by_interval = last_post_time + timedelta(hours=interval_hours) if last_post_time else now
 
         # --- Rule 2: View velocity window ---
         # Check the most recent posted video's velocity data.
         # If channel_views_per_hr < threshold and held for velocity_window hours,
         # the algorithm has finished cycling — we're clear to post.
-        velocity_clear = self._check_velocity_window(
-            velocity_threshold, velocity_window
-        )
+        velocity_clear = self._check_velocity_window(velocity_threshold, velocity_window)
 
         # --- Rule 3: Align to optimal upload hour (14:00 UTC default) ---
         optimal_hour = int(os.getenv("UPLOAD_HOUR_UTC", "14"))
@@ -151,7 +142,7 @@ class PublisherAgent(ContentAgent):
         )
         return candidate
 
-    def _get_last_post_time(self) -> Optional[datetime]:
+    def _get_last_post_time(self) -> datetime | None:
         """Return the posted_time of the most recently posted video."""
         try:
             posted = self.store.get_by_status(JobStatus.POSTED)
@@ -159,16 +150,14 @@ class PublisherAgent(ContentAgent):
                 return None
             latest = max(
                 (j for j in posted if j.posted_time),
-                key=lambda j: j.posted_time,
+                key=lambda j: j.posted_time,  # type: ignore[arg-type,return-value]
                 default=None,
             )
             return latest.posted_time if latest else None
         except Exception:
             return None
 
-    def _check_velocity_window(
-        self, threshold: int, window_hours: int
-    ) -> bool:
+    def _check_velocity_window(self, threshold: int, window_hours: int) -> bool:
         """
         Returns True if the most recent posted video's view velocity has been
         below `threshold` for at least `window_hours` consecutive hours.
@@ -185,7 +174,7 @@ class PublisherAgent(ContentAgent):
 
             latest = max(
                 (j for j in posted if j.posted_time),
-                key=lambda j: j.posted_time,
+                key=lambda j: j.posted_time,  # type: ignore[arg-type,return-value]
                 default=None,
             )
             if not latest:
@@ -200,13 +189,10 @@ class PublisherAgent(ContentAgent):
                 return True
 
             # Fallback heuristic: assume velocity window opens 36h after post
-            hours_since_post = (
-                datetime.now(timezone.utc) - latest.posted_time
-            ).total_seconds() / 3600
+            hours_since_post = (datetime.now(UTC) - latest.posted_time).total_seconds() / 3600  # type: ignore[operator]
             if hours_since_post >= 36:
                 logger.info(
-                    f"[{self.name}] Velocity heuristic: "
-                    f"{hours_since_post:.1f}h since last post (>= 36h threshold)"
+                    f"[{self.name}] Velocity heuristic: {hours_since_post:.1f}h since last post (>= 36h threshold)"
                 )
                 return True
 

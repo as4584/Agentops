@@ -17,21 +17,20 @@ Covers:
 
 from __future__ import annotations
 
-import json
 import pytest
 
 from backend.memory import MemoryStore
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def store(tmp_path, monkeypatch):
     """MemoryStore backed by a temp directory — no pollution between tests."""
-    import backend.memory as mem_module
     import backend.config as cfg
+    import backend.memory as mem_module
 
     mem_dir = tmp_path / "memory"
     monkeypatch.setattr(cfg, "MEMORY_DIR", mem_dir)
@@ -45,6 +44,7 @@ def store(tmp_path, monkeypatch):
 # ---------------------------------------------------------------------------
 # Basic read / write
 # ---------------------------------------------------------------------------
+
 
 def test_write_and_read_round_trip(store):
     store.write("soul_core", "goal", "achieve alignment")
@@ -73,6 +73,7 @@ def test_write_complex_value(store):
 # read_all
 # ---------------------------------------------------------------------------
 
+
 def test_read_all_returns_all_keys(store):
     store.write("code_review_agent", "last_pr", 42)
     store.write("code_review_agent", "last_branch", "main")
@@ -90,6 +91,7 @@ def test_read_all_empty_namespace(store):
 # delete
 # ---------------------------------------------------------------------------
 
+
 def test_delete_removes_key(store):
     store.write("security_agent", "cve_flag", "CVE-1234")
     assert store.delete("security_agent", "cve_flag") is True
@@ -103,6 +105,7 @@ def test_delete_missing_key_returns_false(store):
 # ---------------------------------------------------------------------------
 # Namespace isolation (INV-4)
 # ---------------------------------------------------------------------------
+
 
 def test_namespace_isolation(store):
     store.write("agent_a", "secret", "for_a_only")
@@ -121,6 +124,7 @@ def test_namespace_isolation(store):
 # ---------------------------------------------------------------------------
 # Shared events (append-only, INV-9)
 # ---------------------------------------------------------------------------
+
 
 def test_append_and_read_shared_event(store):
     store.append_shared_event({"type": "agent_started", "agent": "soul_core"})
@@ -156,6 +160,7 @@ def test_empty_shared_events(store):
 # Namespace metadata
 # ---------------------------------------------------------------------------
 
+
 def test_get_namespace_size_after_write(store):
     store.write("data_agent", "schema", {"table": "customers", "rows": 100})
     size = store.get_namespace_size("data_agent")
@@ -184,6 +189,7 @@ def test_list_namespaces_excludes_shared(store):
 # ---------------------------------------------------------------------------
 # Resilience — corrupt JSON store
 # ---------------------------------------------------------------------------
+
 
 def test_corrupted_store_resets_gracefully(store, tmp_path, monkeypatch):
     import backend.config as cfg

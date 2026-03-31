@@ -6,12 +6,11 @@ Single source of truth. All agents read/write through here.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from datetime import datetime, timezone, timedelta
-from typing import Optional
 
-from backend.content.video_job import VideoJob, JobStatus
 from backend.config import MEMORY_DIR
+from backend.content.video_job import JobStatus, VideoJob
 from backend.utils import logger
 
 CONTENT_JOBS_DIR = MEMORY_DIR / "content_jobs"
@@ -20,7 +19,7 @@ CONTENT_JOBS_DIR = MEMORY_DIR / "content_jobs"
 class JobStore:
     """Persist VideoJob records as individual JSON files."""
 
-    def __init__(self, jobs_dir: Optional[Path] = None):
+    def __init__(self, jobs_dir: Path | None = None):
         self._dir = jobs_dir or CONTENT_JOBS_DIR
         self._dir.mkdir(parents=True, exist_ok=True)
 
@@ -34,7 +33,7 @@ class JobStore:
         tmp.rename(p)
         logger.info(f"[JobStore] Saved {job.job_id} [{job.status.value}]")
 
-    def load(self, job_id: str) -> Optional[VideoJob]:
+    def load(self, job_id: str) -> VideoJob | None:
         p = self._path(job_id)
         if not p.exists():
             return None
@@ -64,16 +63,10 @@ class JobStore:
         return [j for j in self.list_all() if j.status == status]
 
     def get_recent_topics(self, days: int = 30) -> set[str]:
-        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
-        return {
-            j.topic.lower().strip()
-            for j in self.list_all()
-            if j.created_at >= cutoff and j.topic
-        }
+        cutoff = datetime.now(UTC) - timedelta(days=days)
+        return {j.topic.lower().strip() for j in self.list_all() if j.created_at >= cutoff and j.topic}
 
-    def transition_job(
-        self, job_id: str, new_status: JobStatus, **updates: object
-    ) -> VideoJob:
+    def transition_job(self, job_id: str, new_status: JobStatus, **updates: object) -> VideoJob:
         job = self.load(job_id)
         if job is None:
             raise FileNotFoundError(f"Job {job_id} not found")

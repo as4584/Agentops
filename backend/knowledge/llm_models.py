@@ -905,7 +905,7 @@ def get_model_by_id(model_id: str) -> dict[str, Any] | None:
 def get_models_for_task(task_category: str) -> list[dict[str, Any]]:
     """
     Return models ranked by relevance for a task category.
-    
+
     Categories: code, reasoning, creative, multilingual, speed, embedding
     """
     score_key = {

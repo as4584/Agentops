@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from _pytest.monkeypatch import MonkeyPatch
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 

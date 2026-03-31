@@ -5,16 +5,17 @@ All httpx calls are mocked; no real Ollama server required.
 
 from __future__ import annotations
 
-import pytest
-import httpx
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from backend.llm import OllamaClient, HybridClient
+import httpx
+import pytest
 
+from backend.llm import HybridClient, OllamaClient
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _ok_response(json_data: dict) -> MagicMock:
     """Create a mock httpx response that returns json_data and does not raise."""
@@ -42,6 +43,7 @@ def _error_response(status_code: int = 500) -> MagicMock:
 # OllamaClient fixture
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mock_http() -> AsyncMock:
     return AsyncMock()
@@ -50,13 +52,14 @@ def mock_http() -> AsyncMock:
 @pytest.fixture
 def ollama(mock_http: AsyncMock):
     with patch("backend.llm.httpx.AsyncClient", return_value=mock_http):
-        client = OllamaClient(base_url="http://localhost:11434", model="llama3.2", timeout=30.0)
+        client = OllamaClient(base_url="http://localhost:11434", model="llama3.2", timeout=30.0)  # type: ignore[arg-type]
     return client, mock_http
 
 
 # ---------------------------------------------------------------------------
 # OllamaClient — generate
 # ---------------------------------------------------------------------------
+
 
 class TestOllamaClientGenerate:
     async def test_success_returns_response_text(self, ollama):
@@ -115,12 +118,11 @@ class TestOllamaClientGenerate:
 # OllamaClient — chat
 # ---------------------------------------------------------------------------
 
+
 class TestOllamaClientChat:
     async def test_success_returns_message_content(self, ollama):
         client, mock_http = ollama
-        mock_http.post.return_value = _ok_response({
-            "message": {"content": "I can help with that."}
-        })
+        mock_http.post.return_value = _ok_response({"message": {"content": "I can help with that."}})
 
         result = await client.chat([{"role": "user", "content": "hello"}])
 
@@ -128,9 +130,7 @@ class TestOllamaClientChat:
 
     async def test_multiple_messages(self, ollama):
         client, mock_http = ollama
-        mock_http.post.return_value = _ok_response({
-            "message": {"content": "Yes, I remember."}
-        })
+        mock_http.post.return_value = _ok_response({"message": {"content": "Yes, I remember."}})
 
         msgs = [
             {"role": "user", "content": "hello"},
@@ -162,6 +162,7 @@ class TestOllamaClientChat:
 # OllamaClient — embed
 # ---------------------------------------------------------------------------
 
+
 class TestOllamaClientEmbed:
     async def test_empty_input_returns_empty_list(self, ollama):
         client, mock_http = ollama
@@ -187,7 +188,7 @@ class TestOllamaClientEmbed:
     async def test_fallback_legacy_api(self, ollama):
         client, mock_http = ollama
         # First call: no "embeddings" key → KeyError → falls back to legacy
-        first = _ok_response({})   # missing "embeddings" key
+        first = _ok_response({})  # missing "embeddings" key
         second = _ok_response({"embedding": [0.4, 0.5, 0.6]})
         mock_http.post.side_effect = [first, second]
 
@@ -218,6 +219,7 @@ class TestOllamaClientEmbed:
 # ---------------------------------------------------------------------------
 # OllamaClient — is_available
 # ---------------------------------------------------------------------------
+
 
 class TestOllamaClientIsAvailable:
     async def test_available_when_200(self, ollama):
@@ -253,12 +255,11 @@ class TestOllamaClientIsAvailable:
 # OllamaClient — list_models
 # ---------------------------------------------------------------------------
 
+
 class TestOllamaClientListModels:
     async def test_returns_model_names(self, ollama):
         client, mock_http = ollama
-        mock_http.get.return_value = _ok_response({
-            "models": [{"name": "llama3.2"}, {"name": "mistral"}]
-        })
+        mock_http.get.return_value = _ok_response({"models": [{"name": "llama3.2"}, {"name": "mistral"}]})
 
         result = await client.list_models()
 
@@ -283,6 +284,7 @@ class TestOllamaClientListModels:
 # OllamaClient — close
 # ---------------------------------------------------------------------------
 
+
 class TestOllamaClientClose:
     async def test_close_calls_aclose(self, ollama):
         client, mock_http = ollama
@@ -295,6 +297,7 @@ class TestOllamaClientClose:
 # ---------------------------------------------------------------------------
 # HybridClient — local_only mode
 # ---------------------------------------------------------------------------
+
 
 class TestHybridClientLocalOnly:
     @pytest.fixture

@@ -37,6 +37,7 @@ logger = logging.getLogger("deerflow.delegation")
 # Data models
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class SubTask:
     """A single unit of work to delegate to a specialist agent."""
@@ -73,6 +74,7 @@ class TaskResult:
 # ---------------------------------------------------------------------------
 # TaskDelegator
 # ---------------------------------------------------------------------------
+
 
 class TaskDelegator:
     """
@@ -200,7 +202,7 @@ class TaskDelegator:
                 ),
                 timeout=st.timeout_seconds,
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return TaskOutcome(
                 agent_id=st.agent_id,
                 instruction=st.instruction,
@@ -223,21 +225,16 @@ class TaskDelegator:
             drift_status=resp.get("drift_status", "GREEN"),
         )
 
-    async def _synthesize(
-        self, parent_agent: str, outcomes: list[TaskOutcome]
-    ) -> str:
+    async def _synthesize(self, parent_agent: str, outcomes: list[TaskOutcome]) -> str:
         """Combine subtask results into a concise synthesis."""
         parts = []
         for o in outcomes:
             status = "OK" if o.success else f"FAILED: {o.error}"
-            parts.append(
-                f"[{o.agent_id}] ({status}) {o.response[:500]}"
-            )
+            parts.append(f"[{o.agent_id}] ({status}) {o.response[:500]}")
 
         prompt = (
             "Synthesize these subtask results into a brief summary "
-            "highlighting key findings and any failures:\n\n"
-            + "\n---\n".join(parts)
+            "highlighting key findings and any failures:\n\n" + "\n---\n".join(parts)
         )
 
         try:
@@ -248,7 +245,4 @@ class TaskDelegator:
             ).get("response", "")  # type: ignore[union-attr]
         except Exception:
             # Fallback: just concatenate
-            return " | ".join(
-                f"{o.agent_id}: {'ok' if o.success else 'fail'}"
-                for o in outcomes
-            )
+            return " | ".join(f"{o.agent_id}: {'ok' if o.success else 'fail'}" for o in outcomes)

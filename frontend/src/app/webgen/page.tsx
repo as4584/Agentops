@@ -2,7 +2,9 @@
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import {
+  ActionIcon,
   Box,
   Button,
   Card,
@@ -16,6 +18,7 @@ import {
   Textarea,
   Title,
 } from '@mantine/core';
+import { IconArrowLeft } from '@tabler/icons-react';
 
 import { api, type CustomerRecord, type WebgenProjectItem } from '@/lib/api';
 
@@ -144,7 +147,12 @@ function WebgenPageInner() {
 
   return (
     <Stack p="xl" gap="lg">
-      <Title order={2}>Website Maker</Title>
+      <Group gap="sm">
+        <ActionIcon component={Link} href="/" variant="subtle" size="lg" aria-label="Back to dashboard">
+          <IconArrowLeft size={20} />
+        </ActionIcon>
+        <Title order={2}>Website Maker</Title>
+      </Group>
       <Text c="dimmed">Generate 90%, edit final details, deploy to Vercel, and generate QR code.</Text>
 
       <Card style={glassStyle}>

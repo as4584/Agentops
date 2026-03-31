@@ -28,10 +28,10 @@ const PERSONAS = {
     agentIds: ['soul_core'],
     label: 'Orchad',
     subtitle: 'Strategic Orchestrator',
-    color: '#7c5cfc',
-    accent: 'rgba(124,92,252,0.12)',
+    color: '#1a82ff',
+    accent: 'rgba(26,130,255,0.10)',
     icon: IconBrain,
-    defaultModel: 'kimi-k2',
+    defaultModel: 'lex',
     chatAgent: 'soul_core',
   },
   dev: {
@@ -435,7 +435,7 @@ export default function OrchestrationHub({ agents }: { agents: AgentDefinition[]
                         <IconBrain size={12} />
                       </ThemeIcon>
                       <Paper p="sm" radius="md" style={{ background: 'var(--mantine-color-dark-7)', border: '1px solid var(--mantine-color-dark-5)' }}>
-                        <Group gap={6}><Loader size="xs" color="violet" /><Text size="xs" c="dimmed">Thinking… {elapsed}s</Text></Group>
+                        <Group gap={6}><Loader size="xs" color="blue" /><Text size="xs" c="dimmed">Thinking… {elapsed}s</Text></Group>
                       </Paper>
                     </Group>
                   )}
@@ -490,7 +490,7 @@ export default function OrchestrationHub({ agents }: { agents: AgentDefinition[]
                           cursor: loading ? 'not-allowed' : 'pointer',
                         }}
                       >
-                        {loading ? <Loader size={14} color="violet" /> : <IconSend size={14} color="white" />}
+                        {loading ? <Loader size={14} color="blue" /> : <IconSend size={14} color="white" />}
                       </Paper>
                     </Group>
                   </Group>
@@ -504,7 +504,7 @@ export default function OrchestrationHub({ agents }: { agents: AgentDefinition[]
             <Stack gap={0} style={{ height: 380 }}>
               <Group justify="space-between" mb={6}>
                 <Text size="xs" c="dimmed" fw={600} tt="uppercase">Queue</Text>
-                <Badge size="xs" variant="light" color="violet">{orchadTasks.length} active</Badge>
+                <Badge size="xs" variant="light" color="blue">{orchadTasks.length} active</Badge>
               </Group>
               <ScrollArea style={{ flex: 1 }} type="auto">
                 <Stack gap={4}>
@@ -515,7 +515,7 @@ export default function OrchestrationHub({ agents }: { agents: AgentDefinition[]
                     <Paper key={t.id} p={8} radius="sm"
                       style={{ background: 'var(--mantine-color-dark-7)', border: `1px solid ${t.status === 'RUNNING' ? PERSONAS.orchad.color + '50' : 'var(--mantine-color-dark-5)'}` }}>
                       <Group gap={6} mb={2}>
-                        <Badge size="xs" color={t.status === 'RUNNING' ? 'violet' : 'gray'} variant={t.status === 'RUNNING' ? 'filled' : 'light'}>
+                        <Badge size="xs" color={t.status === 'RUNNING' ? 'blue' : 'gray'} variant={t.status === 'RUNNING' ? 'filled' : 'light'}>
                           {t.status}
                         </Badge>
                       </Group>

@@ -8,14 +8,13 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, timezone
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 from backend.config import ML_EXPERIMENTS_DIR
 from backend.utils import logger
-
 
 # ── Scorer Protocol ──────────────────────────────────────
 
@@ -23,13 +22,13 @@ from backend.utils import logger
 class Scorer(Protocol):
     """Interface for all scoring strategies."""
 
-    def score(self, expected: str, actual: str, context: dict[str, Any]) -> ScoringResult:
-        ...
+    def score(self, expected: str, actual: str, context: dict[str, Any]) -> ScoringResult: ...
 
 
 @dataclass
 class ScoringResult:
     """Result from any scorer."""
+
     method: str
     score: float  # 0.0 – 1.0
     passed: bool
@@ -74,6 +73,7 @@ class ExactMatchScorer:
 @dataclass
 class RubricCriterion:
     """A single rubric criterion with weight."""
+
     name: str
     description: str
     weight: float = 1.0
@@ -154,7 +154,7 @@ class AgentJudgeScorer:
 
     def __init__(
         self,
-        judge_fn: Optional[Any] = None,  # Callable[[str], str]
+        judge_fn: Any | None = None,  # Callable[[str], str]
         judge_prompt_template: str = "",
     ) -> None:
         self.judge_fn = judge_fn
@@ -224,7 +224,7 @@ class AgentJudgeScorer:
             "Task: {task}\n\n"
             "Expected output:\n{expected}\n\n"
             "Actual output:\n{actual}\n\n"
-            "Respond with JSON: {{\"score\": <float>, \"reasoning\": \"<explanation>\"}}"
+            'Respond with JSON: {{"score": <float>, "reasoning": "<explanation>"}}'
         )
 
 
@@ -234,6 +234,7 @@ class AgentJudgeScorer:
 @dataclass
 class GoldenTask:
     """A curated reference task with known-correct output for regression testing."""
+
     task_id: str
     task_type: str  # tool_selection, retrieval, code, summarization, etc.
     description: str
@@ -248,7 +249,7 @@ class GoldenTask:
 
     def __post_init__(self) -> None:
         if not self.created_at:
-            self.created_at = datetime.now(timezone.utc).isoformat()
+            self.created_at = datetime.now(UTC).isoformat()
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -257,7 +258,7 @@ class GoldenTask:
 class GoldenTaskRegistry:
     """Manages a curated set of golden tasks for regression testing."""
 
-    def __init__(self, storage_dir: Optional[Path] = None) -> None:
+    def __init__(self, storage_dir: Path | None = None) -> None:
         self._storage_dir = storage_dir or (ML_EXPERIMENTS_DIR / "golden_tasks")
         self._storage_dir.mkdir(parents=True, exist_ok=True)
         self._tasks: dict[str, GoldenTask] = {}
@@ -278,9 +279,9 @@ class GoldenTaskRegistry:
 
     def list_tasks(
         self,
-        task_type: Optional[str] = None,
-        difficulty: Optional[str] = None,
-        tags: Optional[list[str]] = None,
+        task_type: str | None = None,
+        difficulty: str | None = None,
+        tags: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         tasks = list(self._tasks.values())
         if task_type:

@@ -7,18 +7,16 @@ Docker is NOT required — all tests patch exec_in_container directly.
 
 from __future__ import annotations
 
-import json
 import asyncio
+import json
 from pathlib import Path
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
-
+from unittest.mock import MagicMock, patch
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_session_stub(tmp_path: Path, container_id: str | None = None, status: str = "not_started") -> Any:
     from sandbox.session_manager import SandboxSession
@@ -56,15 +54,18 @@ def _make_session_stub(tmp_path: Path, container_id: str | None = None, status: 
 # Registry — sandbox_exec is registered
 # ---------------------------------------------------------------------------
 
+
 def test_sandbox_exec_in_registry() -> None:
     from backend.tools import get_tool_definition
+
     tool = get_tool_definition("sandbox_exec")
     assert tool is not None
     assert tool.name == "sandbox_exec"
 
 
 def test_sandbox_exec_is_state_modify() -> None:
-    from backend.tools import get_tool_definition, ModificationType
+    from backend.tools import ModificationType, get_tool_definition
+
     tool = get_tool_definition("sandbox_exec")
     assert tool is not None
     assert tool.modification_type == ModificationType.STATE_MODIFY
@@ -73,6 +74,7 @@ def test_sandbox_exec_is_state_modify() -> None:
 # ---------------------------------------------------------------------------
 # execute_tool routing — missing args
 # ---------------------------------------------------------------------------
+
 
 def test_sandbox_exec_missing_session_id() -> None:
     from backend.tools import execute_tool
@@ -111,6 +113,7 @@ def test_sandbox_exec_missing_command() -> None:
 # execute_tool routing — local fallback (SANDBOX_DOCKER_ENABLED=False)
 # ---------------------------------------------------------------------------
 
+
 def test_sandbox_exec_local_fallback(tmp_path: Path) -> None:
     from backend.tools import execute_tool
 
@@ -148,6 +151,7 @@ def test_sandbox_exec_local_fallback(tmp_path: Path) -> None:
 # execute_tool routing — container mode (SANDBOX_DOCKER_ENABLED=True)
 # ---------------------------------------------------------------------------
 
+
 def test_sandbox_exec_container_mode(tmp_path: Path) -> None:
     from backend.tools import execute_tool
 
@@ -179,14 +183,13 @@ def test_sandbox_exec_container_mode(tmp_path: Path) -> None:
     result = asyncio.run(_run())
     assert result.get("mode") == "container"
     assert result.get("container_id") == "abc123"
-    session.exec_in_container.assert_called_once_with(
-        command=["ls", "-la"], timeout=15
-    )
+    session.exec_in_container.assert_called_once_with(command=["ls", "-la"], timeout=15)
 
 
 # ---------------------------------------------------------------------------
 # execute_tool routing — agent not authorised
 # ---------------------------------------------------------------------------
+
 
 def test_sandbox_exec_unauthorised_agent() -> None:
     from backend.tools import execute_tool
@@ -195,7 +198,7 @@ def test_sandbox_exec_unauthorised_agent() -> None:
         return await execute_tool(
             "sandbox_exec",
             agent_id="agent-x",
-            allowed_tools=["safe_shell"],   # sandbox_exec not permitted
+            allowed_tools=["safe_shell"],  # sandbox_exec not permitted
             session_id="sess-1",
             command=["echo", "hi"],
         )
@@ -209,14 +212,17 @@ def test_sandbox_exec_unauthorised_agent() -> None:
 # Dockerfile exists and contains non-root user
 # ---------------------------------------------------------------------------
 
+
 def test_sandbox_dockerfile_exists() -> None:
     from backend.config import PROJECT_ROOT
+
     dockerfile = PROJECT_ROOT / "sandbox" / "Dockerfile"
     assert dockerfile.exists(), "sandbox/Dockerfile must exist"
 
 
 def test_sandbox_dockerfile_has_nonroot_user() -> None:
     from backend.config import PROJECT_ROOT
+
     dockerfile = PROJECT_ROOT / "sandbox" / "Dockerfile"
     content = dockerfile.read_text(encoding="utf-8")
     assert "USER agent" in content, "Dockerfile must switch to non-root 'agent' user"
@@ -225,5 +231,6 @@ def test_sandbox_dockerfile_has_nonroot_user() -> None:
 
 def test_sandbox_build_script_exists() -> None:
     from backend.config import PROJECT_ROOT
+
     build_sh = PROJECT_ROOT / "sandbox" / "build.sh"
     assert build_sh.exists(), "sandbox/build.sh must exist"

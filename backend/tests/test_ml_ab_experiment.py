@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 from backend.ml.ab_experiment import ABExperimentHarness, Variant
 
@@ -32,33 +33,66 @@ class TestABExperimentHarness:
 
     def test_record_variant_case(self, harness: ABExperimentHarness) -> None:
         exp_id = harness.create_experiment("test_ab", VARIANTS)
-        harness.record_variant_case(exp_id, "llama3", {
-            "case_id": "c1", "passed": True, "overall_score": 0.9,
-            "latency_ms": 100, "tokens_in": 50, "tokens_out": 80, "cost_usd": 0.001,
-        })
+        harness.record_variant_case(
+            exp_id,
+            "llama3",
+            {
+                "case_id": "c1",
+                "passed": True,
+                "overall_score": 0.9,
+                "latency_ms": 100,
+                "tokens_in": 50,
+                "tokens_out": 80,
+                "cost_usd": 0.001,
+            },
+        )
         exp = harness.get_experiment(exp_id)
         assert exp["status"] == "running"
 
     def test_complete_experiment(self, harness: ABExperimentHarness) -> None:
         exp_id = harness.create_experiment("test_ab", VARIANTS)
-        harness.record_variant_case(exp_id, "llama3", {
-            "passed": True, "overall_score": 0.9, "latency_ms": 100,
-            "tokens_in": 50, "tokens_out": 80, "cost_usd": 0.001,
-        })
-        harness.record_variant_case(exp_id, "qwen", {
-            "passed": True, "overall_score": 0.85, "latency_ms": 200,
-            "tokens_in": 60, "tokens_out": 90, "cost_usd": 0.002,
-        })
+        harness.record_variant_case(
+            exp_id,
+            "llama3",
+            {
+                "passed": True,
+                "overall_score": 0.9,
+                "latency_ms": 100,
+                "tokens_in": 50,
+                "tokens_out": 80,
+                "cost_usd": 0.001,
+            },
+        )
+        harness.record_variant_case(
+            exp_id,
+            "qwen",
+            {
+                "passed": True,
+                "overall_score": 0.85,
+                "latency_ms": 200,
+                "tokens_in": 60,
+                "tokens_out": 90,
+                "cost_usd": 0.002,
+            },
+        )
         result = harness.complete_experiment(exp_id)
         assert result["status"] == "completed"
         assert result["winner"] == "llama3"
 
     def test_compare_variants(self, harness: ABExperimentHarness) -> None:
         exp_id = harness.create_experiment("test_ab", VARIANTS)
-        harness.record_variant_case(exp_id, "llama3", {
-            "passed": True, "overall_score": 0.9, "latency_ms": 100,
-            "tokens_in": 50, "tokens_out": 80, "cost_usd": 0.001,
-        })
+        harness.record_variant_case(
+            exp_id,
+            "llama3",
+            {
+                "passed": True,
+                "overall_score": 0.9,
+                "latency_ms": 100,
+                "tokens_in": 50,
+                "tokens_out": 80,
+                "cost_usd": 0.001,
+            },
+        )
         comparison = harness.compare_variants(exp_id)
         assert "llama3" in comparison["variants"]
 

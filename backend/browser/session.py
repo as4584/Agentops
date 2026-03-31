@@ -26,10 +26,10 @@ from backend.utils import logger
 # Constants
 # ---------------------------------------------------------------------------
 
-TTL_SECONDS: int = 600          # 10-minute idle eviction
-NAV_TIMEOUT_MS: int = 30_000   # max navigation wait
+TTL_SECONDS: int = 600  # 10-minute idle eviction
+NAV_TIMEOUT_MS: int = 30_000  # max navigation wait
 ACTION_TIMEOUT_MS: int = 10_000  # max click / fill / select wait
-MAX_RETRIES: int = 2            # retries for transient action failures
+MAX_RETRIES: int = 2  # retries for transient action failures
 
 # URL scheme allowlist
 _SCHEME_RE = re.compile(r"^https?://", re.IGNORECASE)
@@ -64,10 +64,10 @@ class BrowserSession:
     def __init__(self, agent_id: str) -> None:
         self.agent_id = agent_id
         self.session_id = str(uuid.uuid4())
-        self._pw: Any = None          # playwright instance
-        self._browser: Any = None     # Browser
-        self._context: Any = None     # BrowserContext (isolated)
-        self._page: Any = None        # current Page
+        self._pw: Any = None  # playwright instance
+        self._browser: Any = None  # Browser
+        self._context: Any = None  # BrowserContext (isolated)
+        self._page: Any = None  # current Page
         self._started = False
         self.created_at = time.monotonic()
         self.last_action_at = time.monotonic()
@@ -104,7 +104,7 @@ class BrowserSession:
         self._started = True
         self._touch()
         logger.info(
-            f"browser_session_started",
+            "browser_session_started",
             extra={
                 "event_type": "browser_session_started",
                 "agent_id": self.agent_id,
@@ -124,7 +124,10 @@ class BrowserSession:
             if self._pw:
                 await self._pw.stop()
         except Exception as exc:
-            logger.warning(f"browser_session_close_error: {exc}", extra={"event_type": "browser_session_close_error", "agent_id": self.agent_id})
+            logger.warning(
+                f"browser_session_close_error: {exc}",
+                extra={"event_type": "browser_session_close_error", "agent_id": self.agent_id},
+            )
         finally:
             self._started = False
         logger.info(
@@ -166,7 +169,10 @@ class BrowserSession:
             except Exception as exc:
                 if attempt > MAX_RETRIES:
                     raise
-                logger.info(f"browser_click retry {attempt}: {exc}", extra={"event_type": "browser_click_retry", "agent_id": self.agent_id})
+                logger.info(
+                    f"browser_click retry {attempt}: {exc}",
+                    extra={"event_type": "browser_click_retry", "agent_id": self.agent_id},
+                )
         return {"ok": False, "selector": selector}
 
     async def type_text(self, selector: str, text: str) -> dict[str, Any]:
@@ -181,7 +187,10 @@ class BrowserSession:
             except Exception as exc:
                 if attempt > MAX_RETRIES:
                     raise
-                logger.info(f"browser_type retry {attempt}: {exc}", extra={"event_type": "browser_type_retry", "agent_id": self.agent_id})
+                logger.info(
+                    f"browser_type retry {attempt}: {exc}",
+                    extra={"event_type": "browser_type_retry", "agent_id": self.agent_id},
+                )
         return {"ok": False, "selector": selector}
 
     async def select_option(self, selector: str, value: str) -> dict[str, Any]:
@@ -195,7 +204,10 @@ class BrowserSession:
             except Exception as exc:
                 if attempt > MAX_RETRIES:
                     raise
-                logger.info(f"browser_select retry {attempt}: {exc}", extra={"event_type": "browser_select_retry", "agent_id": self.agent_id})
+                logger.info(
+                    f"browser_select retry {attempt}: {exc}",
+                    extra={"event_type": "browser_select_retry", "agent_id": self.agent_id},
+                )
         return {"ok": False, "selector": selector}
 
     # ------------------------------------------------------------------

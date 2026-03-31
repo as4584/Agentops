@@ -7,7 +7,6 @@ route correctly choose between container-mode and local-mode execution.
 from __future__ import annotations
 
 import json
-import subprocess
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -15,10 +14,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _bootstrap_session(tmp_path: Path, container_id: str | None = None, status: str = "not_started") -> Any:
     """Create a minimal session directory + meta.json and return a SandboxSession."""
@@ -60,6 +59,7 @@ def _bootstrap_session(tmp_path: Path, container_id: str | None = None, status: 
 # Unit: exec_in_container — local fallback (no Docker)
 # ---------------------------------------------------------------------------
 
+
 def test_exec_falls_back_to_local_when_docker_disabled(tmp_path: Path) -> None:
     """When SANDBOX_DOCKER_ENABLED=False exec runs locally in workspace."""
     session = _bootstrap_session(tmp_path, container_id=None, status="not_started")
@@ -78,9 +78,7 @@ def test_exec_local_captures_stderr(tmp_path: Path) -> None:
 
     with patch("sandbox.session_manager.SANDBOX_DOCKER_ENABLED", False):
         # python -c prints to stderr via sys.stderr.write
-        result = session.exec_in_container(
-            ["python3", "-c", "import sys; sys.stderr.write('errout')"]
-        )
+        result = session.exec_in_container(["python3", "-c", "import sys; sys.stderr.write('errout')"])
 
     assert result["mode"] == "local"
     assert "errout" in result["stderr"]
@@ -99,6 +97,7 @@ def test_exec_local_nonzero_returncode(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # Unit: exec_in_container — container path
 # ---------------------------------------------------------------------------
+
 
 def test_exec_routes_through_docker_exec_when_container_running(tmp_path: Path) -> None:
     """When container is running, docker exec is called with --no-new-privileges."""
@@ -183,9 +182,11 @@ def test_exec_raises_on_empty_command(tmp_path: Path) -> None:
 # Integration: POST /sandbox/{session_id}/exec route
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def sandbox_client(tmp_path: Path) -> TestClient:
     from fastapi import FastAPI
+
     from backend.routes.sandbox import router as sandbox_router
 
     app = FastAPI()
@@ -193,7 +194,9 @@ def sandbox_client(tmp_path: Path) -> TestClient:
     return TestClient(app, raise_server_exceptions=True)
 
 
-def test_exec_route_returns_local_result(tmp_path: Path, sandbox_client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_exec_route_returns_local_result(
+    tmp_path: Path, sandbox_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """POST /sandbox/{id}/exec returns stdout/mode/returncode from local exec."""
     from backend.routes import sandbox as sandbox_route_module
 
@@ -217,6 +220,7 @@ def test_exec_route_returns_local_result(tmp_path: Path, sandbox_client: TestCli
 
     # Patch PROJECT_ROOT and SANDBOX_ROOT_DIR so _session() finds the right dirs
     import sandbox.session_manager as sm
+
     monkeypatch.setattr(sm, "PLAYBOX_DIR", tmp_path / "playbox")
     monkeypatch.setattr(sm, "SANDBOX_ROOT_DIR", tmp_path)
     monkeypatch.setattr(sandbox_route_module, "PROJECT_ROOT", tmp_path)

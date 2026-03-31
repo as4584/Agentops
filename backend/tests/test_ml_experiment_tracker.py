@@ -4,13 +4,11 @@ Tests for ML Experiment Tracker.
 
 from __future__ import annotations
 
-import json
-import tempfile
 from pathlib import Path
 
 import pytest
 
-from backend.ml.experiment_tracker import ExperimentTracker, ExperimentRun
+from backend.ml.experiment_tracker import ExperimentRun, ExperimentTracker
 
 
 @pytest.fixture
@@ -169,7 +167,7 @@ class TestExperimentTracker:
 
     def test_list_by_status(self, tracker: ExperimentTracker) -> None:
         r1 = tracker.start_run("status_a", {})
-        r2 = tracker.start_run("status_b", {})
+        tracker.start_run("status_b", {})
         tracker.end_run(r1, status="completed")
 
         running = tracker.list_runs(status="running")

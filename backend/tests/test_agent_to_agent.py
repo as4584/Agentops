@@ -2,14 +2,18 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+if TYPE_CHECKING:
+    from backend.orchestrator import AgentOrchestrator
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 
-def _orchestrator_stub() -> "AgentOrchestrator":
+def _orchestrator_stub() -> AgentOrchestrator:
     from backend.orchestrator import AgentOrchestrator
 
     orchestrator: AgentOrchestrator = object.__new__(AgentOrchestrator)
@@ -22,8 +26,8 @@ def _orchestrator_stub() -> "AgentOrchestrator":
 
 
 def test_send_list_history_and_dedupe(monkeypatch):
-    from backend.orchestrator import AgentOrchestrator
     import backend.orchestrator as orchestrator_module
+    from backend.orchestrator import AgentOrchestrator
 
     orchestrator = _orchestrator_stub()
 
@@ -86,9 +90,9 @@ def test_send_list_history_and_dedupe(monkeypatch):
 
 
 def test_depth_and_self_send_policy(monkeypatch):
+    import backend.orchestrator as orchestrator_module
     from backend.config import A2A_MAX_DEPTH
     from backend.orchestrator import AgentOrchestrator
-    import backend.orchestrator as orchestrator_module
 
     orchestrator = _orchestrator_stub()
 

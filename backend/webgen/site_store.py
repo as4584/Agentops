@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Optional
 
 from backend.webgen.models import SiteProject
 
@@ -33,7 +32,7 @@ class SiteStore:
         path = self.base_dir / f"{project.id}.json"
         path.write_text(json.dumps(project.model_dump(), indent=2))
 
-    def load(self, project_id: str) -> Optional[SiteProject]:
+    def load(self, project_id: str) -> SiteProject | None:
         """Load a project by ID."""
         path = self.base_dir / f"{project_id}.json"
         if not path.exists():

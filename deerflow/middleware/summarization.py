@@ -97,13 +97,8 @@ class SummarizationMiddleware(Middleware):
 
         return system_msgs + [recap_msg] + to_keep
 
-    async def _summarize(
-        self, messages: list[dict[str, str]]
-    ) -> str:
-        conversation = "\n".join(
-            f"{m.get('role', 'user')}: {m.get('content', '')}"
-            for m in messages
-        )
+    async def _summarize(self, messages: list[dict[str, str]]) -> str:
+        conversation = "\n".join(f"{m.get('role', 'user')}: {m.get('content', '')}" for m in messages)
 
         try:
             return await self._llm.generate(

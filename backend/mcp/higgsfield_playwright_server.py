@@ -26,9 +26,9 @@ import base64
 import json
 import os
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
@@ -39,15 +39,17 @@ from pydantic import BaseModel
 # Optional Playwright import — degrade gracefully if not installed
 # ---------------------------------------------------------------------------
 try:
-    from playwright.async_api import async_playwright, Browser, Page, BrowserContext
+    from playwright.async_api import Browser, BrowserContext, Page, async_playwright
+
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     from typing import Any as _Any
-    async_playwright: _Any = None  # noqa: N816 — runtime fallback only
+
+    async_playwright: _Any = None  # type: ignore[no-redef]  # noqa: N816 — runtime fallback only
     PLAYWRIGHT_AVAILABLE = False
-    Browser = Any  # type: ignore[misc]
-    Page = Any  # type: ignore[misc]
-    BrowserContext = Any  # type: ignore[misc]
+    Browser = Any  # type: ignore[misc,assignment]
+    Page = Any  # type: ignore[misc,assignment]
+    BrowserContext = Any  # type: ignore[misc,assignment]
 
 # ---------------------------------------------------------------------------
 # Config
@@ -77,6 +79,7 @@ _BLOCKED_PATH_FRAGMENTS = [
 # Exceptions
 # ---------------------------------------------------------------------------
 
+
 class PurchaseBlockedError(RuntimeError):
     """Raised when an agent attempts to navigate to a purchase/billing URL."""
 
@@ -96,9 +99,7 @@ async def _get_page() -> Any:
     global _playwright_handle, _browser, _context, _page
 
     if not PLAYWRIGHT_AVAILABLE:
-        raise RuntimeError(
-            "Playwright is not installed. Run: pip install playwright && playwright install chromium"
-        )
+        raise RuntimeError("Playwright is not installed. Run: pip install playwright && playwright install chromium")
 
     if _page is None:
         _playwright_handle = await async_playwright().start()
@@ -109,8 +110,7 @@ async def _get_page() -> Any:
         _context = await _browser.new_context(
             viewport={"width": 1280, "height": 900},
             user_agent=(
-                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             ),
         )
         _page = await _context.new_page()
@@ -161,7 +161,7 @@ async def _dispatch_alert(message: str) -> None:
         events_path = Path("data/shared_events.jsonl")
         events_path.parent.mkdir(parents=True, exist_ok=True)
         entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "severity": "CRITICAL",
             "source": "hf_mcp_server",
             "message": message,
@@ -183,6 +183,7 @@ app = FastAPI(title="Higgsfield MCP Server", version="1.0.0")
 # Request/Response models
 # ---------------------------------------------------------------------------
 
+
 class LoginRequest(BaseModel):
     force_relogin: bool = False
 
@@ -192,17 +193,17 @@ class NavigateRequest(BaseModel):
 
 
 class CreateSoulIdRequest(BaseModel):
-    character_id: str           # e.g. "char_xpel"
-    character_name: str         # display name in Higgsfield UI
-    image_folder: str = ""      # project-root-relative folder path — uploads ALL images inside
-    image_path: str = ""        # single image path (fallback if image_folder not set)
+    character_id: str  # e.g. "char_xpel"
+    character_name: str  # display name in Higgsfield UI
+    image_folder: str = ""  # project-root-relative folder path — uploads ALL images inside
+    image_path: str = ""  # single image path (fallback if image_folder not set)
     model_preference: str = "soul_2"  # "soul_2", "soul_1", "auto" (first available non-Soul-2)
 
 
 class SubmitVideoRequest(BaseModel):
     character_id: str
-    soul_id_url: str            # Higgsfield character URL to use
-    model: str                  # e.g. "kling_3_0", "veo_3_1", "hailuo_02"
+    soul_id_url: str  # Higgsfield character URL to use
+    model: str  # e.g. "kling_3_0", "veo_3_1", "hailuo_02"
     prompt: str
     duration_s: int = 5
     campaign: str = "untagged"
@@ -210,26 +211,27 @@ class SubmitVideoRequest(BaseModel):
 
 
 class PollResultRequest(BaseModel):
-    job_url: str                # Higgsfield URL of the queued job
+    job_url: str  # Higgsfield URL of the queued job
     timeout_s: int = POLL_TIMEOUT_S
 
 
 class LogEvidenceRequest(BaseModel):
     run_id: str
-    label: str = "evidence"     # short label for the screenshot filename
+    label: str = "evidence"  # short label for the screenshot filename
     notes: str = ""
 
 
 class ClickRequest(BaseModel):
-    selector: str               # CSS selector or text selector e.g. "button:has-text('Continue with Google')"
+    selector: str  # CSS selector or text selector e.g. "button:has-text('Continue with Google')"
     timeout_ms: int = 5000
-    force: bool = False         # bypass visibility/stability checks (use when element is found but "not visible")
-    js: bool = False            # use JS dispatchEvent click instead of Playwright action
+    force: bool = False  # bypass visibility/stability checks (use when element is found but "not visible")
+    js: bool = False  # use JS dispatchEvent click instead of Playwright action
 
 
 # ---------------------------------------------------------------------------
 # Tool: hf_click  (utility — click any visible element)
 # ---------------------------------------------------------------------------
+
 
 @app.post("/tools/hf_click")
 async def hf_click(req: ClickRequest) -> JSONResponse:
@@ -254,9 +256,10 @@ async def hf_click(req: ClickRequest) -> JSONResponse:
 # Tool: hf_eval  (run JS on the page and return the result)
 # ---------------------------------------------------------------------------
 
+
 class EvalRequest(BaseModel):
-    script: str          # JS expression — evaluated as: await page.evaluate(script)
-    truncate: int = 4000 # max chars of result to return
+    script: str  # JS expression — evaluated as: await page.evaluate(script)
+    truncate: int = 4000  # max chars of result to return
 
 
 @app.post("/tools/hf_eval")
@@ -266,7 +269,7 @@ async def hf_eval(req: EvalRequest) -> JSONResponse:
         page = await _get_page()
         result = await page.evaluate(req.script)
         text = json.dumps(result) if not isinstance(result, str) else result
-        return JSONResponse({"status": "ok", "result": text[:req.truncate]})
+        return JSONResponse({"status": "ok", "result": text[: req.truncate]})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"hf_eval failed: {e}")
 
@@ -275,9 +278,10 @@ async def hf_eval(req: EvalRequest) -> JSONResponse:
 # Tool: hf_set_files  (set files on a file input)
 # ---------------------------------------------------------------------------
 
+
 class SetFilesRequest(BaseModel):
     selector: str = "input[type='file']"
-    file_paths: List[str]       # absolute or project-root-relative paths
+    file_paths: list[str]  # absolute or project-root-relative paths
 
 
 @app.post("/tools/hf_set_files")
@@ -305,6 +309,7 @@ async def hf_set_files(req: SetFilesRequest) -> JSONResponse:
 # Tool: hf_fill  (fill a text input)
 # ---------------------------------------------------------------------------
 
+
 class FillRequest(BaseModel):
     selector: str
     value: str
@@ -326,6 +331,7 @@ async def hf_fill(req: FillRequest) -> JSONResponse:
 # Tool: hf_save_session  (save cookies after manual login)
 # ---------------------------------------------------------------------------
 
+
 @app.post("/tools/hf_save_session")
 async def hf_save_session() -> JSONResponse:
     """
@@ -338,12 +344,16 @@ async def hf_save_session() -> JSONResponse:
         # Check if truly logged in now
         login_btn = await page.query_selector("a:has-text('Login'), button:has-text('Login')")
         logged_in = login_btn is None
-        return JSONResponse({
-            "status": "ok",
-            "logged_in": logged_in,
-            "url": page.url,
-            "message": "Session saved" if logged_in else "Cookies saved but Login button still visible — may not be authenticated",
-        })
+        return JSONResponse(
+            {
+                "status": "ok",
+                "logged_in": logged_in,
+                "url": page.url,
+                "message": "Session saved"
+                if logged_in
+                else "Cookies saved but Login button still visible — may not be authenticated",
+            }
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"hf_save_session failed: {e}")
 
@@ -352,13 +362,14 @@ async def hf_save_session() -> JSONResponse:
 # Tool: hf_login
 # ---------------------------------------------------------------------------
 
+
 async def _dismiss_popup(page: Any) -> bool:
     """Dismiss any modal/popup overlays on the page. Returns True if one was closed."""
     selectors = [
         "button[aria-label='Close']",
         "button[aria-label='close']",
         "[data-testid='modal-close']",
-        ".modal button svg",          # icon-only close buttons inside modals
+        ".modal button svg",  # icon-only close buttons inside modals
         "dialog button:has(svg)",
         # Generic: any X/close button inside an overlay
         "div[role='dialog'] button",
@@ -399,7 +410,9 @@ async def hf_login(req: LoginRequest) -> JSONResponse:
                 await page.goto(HF_BASE_URL, wait_until="domcontentloaded", timeout=30_000)
                 await asyncio.sleep(1)
                 # Truly authenticated = no Login/Sign up buttons visible
-                login_btn = await page.query_selector("a:has-text('Login'), button:has-text('Login'), a[href*='/login']")
+                login_btn = await page.query_selector(
+                    "a:has-text('Login'), button:has-text('Login'), a[href*='/login']"
+                )
                 if login_btn is None:
                     return JSONResponse({"status": "ok", "session": "restored", "url": page.url})
 
@@ -419,12 +432,14 @@ async def hf_login(req: LoginRequest) -> JSONResponse:
 
         await _save_cookies()
 
-        return JSONResponse({
-            "status": "ok",
-            "session": "login_page",
-            "url": page.url,
-            "message": "Login page is open — click 'Continue with Google' in the browser window to authenticate",
-        })
+        return JSONResponse(
+            {
+                "status": "ok",
+                "session": "login_page",
+                "url": page.url,
+                "message": "Login page is open — click 'Continue with Google' in the browser window to authenticate",
+            }
+        )
 
     except PurchaseBlockedError as e:
         await _dispatch_alert(str(e))
@@ -436,6 +451,7 @@ async def hf_login(req: LoginRequest) -> JSONResponse:
 # ---------------------------------------------------------------------------
 # Tool: hf_navigate
 # ---------------------------------------------------------------------------
+
 
 @app.post("/tools/hf_navigate")
 async def hf_navigate(req: NavigateRequest) -> JSONResponse:
@@ -467,6 +483,7 @@ async def hf_navigate(req: NavigateRequest) -> JSONResponse:
 # Tool: hf_create_soul_id
 # ---------------------------------------------------------------------------
 
+
 @app.post("/tools/hf_create_soul_id")
 async def hf_create_soul_id(req: CreateSoulIdRequest) -> JSONResponse:
     """
@@ -488,13 +505,14 @@ async def hf_create_soul_id(req: CreateSoulIdRequest) -> JSONResponse:
     root = Path(__file__).parent.parent.parent
 
     # Resolve image files
-    image_files: List[str] = []
+    image_files: list[str] = []
     if req.image_folder:
         folder = Path(req.image_folder) if Path(req.image_folder).is_absolute() else root / req.image_folder
         if not folder.is_dir():
             raise HTTPException(status_code=400, detail=f"image_folder not found: {folder}")
-        image_files = [str(p) for p in sorted(folder.iterdir())
-                       if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp", ".heic"}]
+        image_files = [
+            str(p) for p in sorted(folder.iterdir()) if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp", ".heic"}
+        ]
         if not image_files:
             raise HTTPException(status_code=400, detail=f"No image files found in: {folder}")
     elif req.image_path:
@@ -563,8 +581,7 @@ async def hf_create_soul_id(req: CreateSoulIdRequest) -> JSONResponse:
                     label_map = {"soul_1": "Soul 1.0", "soul_1_5": "Soul 1.5", "basic": "Basic"}
                     target_label = label_map.get(req.model_preference, req.model_preference)
                     opt = await page.query_selector(
-                        f"[role='option']:has-text('{target_label}'), "
-                        f"[role='menuitem']:has-text('{target_label}')"
+                        f"[role='option']:has-text('{target_label}'), [role='menuitem']:has-text('{target_label}')"
                     )
                     if opt:
                         await opt.click()
@@ -627,6 +644,7 @@ async def hf_create_soul_id(req: CreateSoulIdRequest) -> JSONResponse:
 
         # Update DB
         from backend.database.higgsfield_store import HighgsfieldStore
+
         store = HighgsfieldStore()
         store.set_soul_id(
             character_id=req.character_id,
@@ -634,15 +652,17 @@ async def hf_create_soul_id(req: CreateSoulIdRequest) -> JSONResponse:
             status=status,
         )
 
-        return JSONResponse({
-            "status": "ok",
-            "character_id": req.character_id,
-            "soul_id_url": final_url,
-            "images_uploaded": len(image_files),
-            "soul_id_status": status,
-            "evidence_before": str(before_path),
-            "evidence_after": str(after_path),
-        })
+        return JSONResponse(
+            {
+                "status": "ok",
+                "character_id": req.character_id,
+                "soul_id_url": final_url,
+                "images_uploaded": len(image_files),
+                "soul_id_status": status,
+                "evidence_before": str(before_path),
+                "evidence_after": str(after_path),
+            }
+        )
 
     except PurchaseBlockedError as e:
         raise HTTPException(status_code=403, detail=str(e))
@@ -656,6 +676,7 @@ async def hf_create_soul_id(req: CreateSoulIdRequest) -> JSONResponse:
 # Tool: hf_submit_video
 # ---------------------------------------------------------------------------
 
+
 @app.post("/tools/hf_submit_video")
 async def hf_submit_video(req: SubmitVideoRequest) -> JSONResponse:
     """
@@ -667,6 +688,7 @@ async def hf_submit_video(req: SubmitVideoRequest) -> JSONResponse:
     """
     # Verify Soul ID is ready
     from backend.database.higgsfield_store import HighgsfieldStore
+
     store = HighgsfieldStore()
     char = store.get_character(req.character_id)
     if char is None:
@@ -705,23 +727,31 @@ async def hf_submit_video(req: SubmitVideoRequest) -> JSONResponse:
         # Select Soul ID character
         if char["soul_id_url"]:
             # Navigate to character in the sidebar/picker
-            char_picker = await page.query_selector("[data-testid='character-picker'], .character-select, button:has-text('Character')")
+            char_picker = await page.query_selector(
+                "[data-testid='character-picker'], .character-select, button:has-text('Character')"
+            )
             if char_picker:
                 await char_picker.click()
                 await asyncio.sleep(1)
                 # Find the character card by name
                 char_name = char["name"]
-                char_card = await page.query_selector(f"[aria-label*='{char_name}'], .character-card:has-text('{char_name}')")
+                char_card = await page.query_selector(
+                    f"[aria-label*='{char_name}'], .character-card:has-text('{char_name}')"
+                )
                 if char_card:
                     await char_card.click()
 
         # Fill prompt
-        prompt_input = await page.query_selector("textarea[placeholder*='prompt'], textarea[name='prompt'], .prompt-input")
+        prompt_input = await page.query_selector(
+            "textarea[placeholder*='prompt'], textarea[name='prompt'], .prompt-input"
+        )
         if prompt_input:
             await prompt_input.fill(req.prompt)
 
         # Set duration if control exists
-        duration_input = await page.query_selector("input[name='duration'], select[name='duration'], [data-testid='duration']")
+        duration_input = await page.query_selector(
+            "input[name='duration'], select[name='duration'], [data-testid='duration']"
+        )
         if duration_input:
             tag = await duration_input.evaluate("el => el.tagName.toLowerCase()")
             if tag == "select":
@@ -730,12 +760,16 @@ async def hf_submit_video(req: SubmitVideoRequest) -> JSONResponse:
                 await duration_input.fill(str(req.duration_s))
 
         # Screenshot before submit
-        evidence_path = EVIDENCE_DIR / req.character_id / f"pre_submit_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}.png"
+        evidence_path = (
+            EVIDENCE_DIR / req.character_id / f"pre_submit_{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}.png"
+        )
         evidence_path.parent.mkdir(parents=True, exist_ok=True)
         await page.screenshot(path=str(evidence_path))
 
         # Submit
-        submit_btn = await page.query_selector("button[type='submit'], button:has-text('Generate'), button:has-text('Create Video')")
+        submit_btn = await page.query_selector(
+            "button[type='submit'], button:has-text('Generate'), button:has-text('Create Video')"
+        )
         if submit_btn:
             await submit_btn.click()
         else:
@@ -748,6 +782,7 @@ async def hf_submit_video(req: SubmitVideoRequest) -> JSONResponse:
 
         # Log generation run in DB
         from backend.database.higgsfield_store import HighgsfieldStore
+
         store = HighgsfieldStore()
         run_id = store.create_run(
             character_id=req.character_id,
@@ -757,12 +792,14 @@ async def hf_submit_video(req: SubmitVideoRequest) -> JSONResponse:
             tags=[req.scene_id] if req.scene_id else [],
         )
 
-        return JSONResponse({
-            "status": "ok",
-            "run_id": run_id,
-            "job_url": job_url,
-            "evidence_screenshot": str(evidence_path),
-        })
+        return JSONResponse(
+            {
+                "status": "ok",
+                "run_id": run_id,
+                "job_url": job_url,
+                "evidence_screenshot": str(evidence_path),
+            }
+        )
 
     except PurchaseBlockedError as e:
         await _dispatch_alert(str(e))
@@ -776,6 +813,7 @@ async def hf_submit_video(req: SubmitVideoRequest) -> JSONResponse:
 # ---------------------------------------------------------------------------
 # Tool: hf_poll_result
 # ---------------------------------------------------------------------------
+
 
 @app.post("/tools/hf_poll_result")
 async def hf_poll_result(req: PollResultRequest) -> JSONResponse:
@@ -819,18 +857,20 @@ async def hf_poll_result(req: PollResultRequest) -> JSONResponse:
 
         # Final screenshot
         screenshot_b64 = await page.screenshot()
-        ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+        ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
         screenshot_path = EVIDENCE_DIR / f"poll_{ts}.png"
         screenshot_path.parent.mkdir(parents=True, exist_ok=True)
         screenshot_path.write_bytes(screenshot_b64)
 
-        return JSONResponse({
-            "status": status,
-            "result_url": result_url,
-            "job_url": req.job_url,
-            "elapsed_s": round(time.time() - start),
-            "screenshot": str(screenshot_path),
-        })
+        return JSONResponse(
+            {
+                "status": status,
+                "result_url": result_url,
+                "job_url": req.job_url,
+                "elapsed_s": round(time.time() - start),
+                "screenshot": str(screenshot_path),
+            }
+        )
 
     except PurchaseBlockedError as e:
         await _dispatch_alert(str(e))
@@ -843,6 +883,7 @@ async def hf_poll_result(req: PollResultRequest) -> JSONResponse:
 # Tool: hf_log_evidence
 # ---------------------------------------------------------------------------
 
+
 @app.post("/tools/hf_log_evidence")
 async def hf_log_evidence(req: LogEvidenceRequest) -> JSONResponse:
     """
@@ -851,7 +892,7 @@ async def hf_log_evidence(req: LogEvidenceRequest) -> JSONResponse:
     """
     try:
         page = await _get_page()
-        ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+        ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
 
         # Screenshot
         screenshot_bytes = await page.screenshot(full_page=False)
@@ -860,13 +901,13 @@ async def hf_log_evidence(req: LogEvidenceRequest) -> JSONResponse:
         shot_path.write_bytes(screenshot_bytes)
 
         # Also save base64 inline for JSON log
-        b64 = base64.b64encode(screenshot_bytes).decode()
+        base64.b64encode(screenshot_bytes).decode()
 
         # RAG corpus entry
         rag_dir = Path("data/higgsfield/rag_corpus")
         rag_dir.mkdir(parents=True, exist_ok=True)
         entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "run_id": req.run_id,
             "label": req.label,
             "notes": req.notes,
@@ -876,12 +917,14 @@ async def hf_log_evidence(req: LogEvidenceRequest) -> JSONResponse:
         rag_file = rag_dir / f"{req.run_id}_{req.label}_{ts}.json"
         rag_file.write_text(json.dumps(entry, indent=2))
 
-        return JSONResponse({
-            "status": "ok",
-            "screenshot_path": str(shot_path),
-            "rag_entry_path": str(rag_file),
-            "url_at_capture": page.url,
-        })
+        return JSONResponse(
+            {
+                "status": "ok",
+                "screenshot_path": str(shot_path),
+                "rag_entry_path": str(rag_file),
+                "url_at_capture": page.url,
+            }
+        )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"hf_log_evidence failed: {e}")
@@ -891,31 +934,37 @@ async def hf_log_evidence(req: LogEvidenceRequest) -> JSONResponse:
 # Health + status
 # ---------------------------------------------------------------------------
 
+
 @app.get("/health")
 async def health() -> JSONResponse:
-    return JSONResponse({
-        "status": "ok",
-        "playwright_available": PLAYWRIGHT_AVAILABLE,
-        "headless": HEADLESS,
-        "browser_active": _page is not None,
-        "port": PORT,
-    })
+    return JSONResponse(
+        {
+            "status": "ok",
+            "playwright_available": PLAYWRIGHT_AVAILABLE,
+            "headless": HEADLESS,
+            "browser_active": _page is not None,
+            "port": PORT,
+        }
+    )
 
 
 @app.get("/status")
 async def status() -> JSONResponse:
     page = _page
-    return JSONResponse({
-        "browser_open": page is not None,
-        "current_url": page.url if page else None,
-        "cookie_file_exists": COOKIE_FILE.exists(),
-        "headless": HEADLESS,
-    })
+    return JSONResponse(
+        {
+            "browser_open": page is not None,
+            "current_url": page.url if page else None,
+            "cookie_file_exists": COOKIE_FILE.exists(),
+            "headless": HEADLESS,
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
 # Teardown
 # ---------------------------------------------------------------------------
+
 
 @app.on_event("shutdown")
 async def on_shutdown() -> None:

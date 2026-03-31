@@ -14,7 +14,9 @@ class _FakeScheduler:
     def __init__(self) -> None:
         self.jobs: dict[str, dict[str, Any]] = {}
 
-    def add_cron_job(self, job_id: str, agent_id: str, message: str, cron_expr: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
+    def add_cron_job(
+        self, job_id: str, agent_id: str, message: str, cron_expr: str, context: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         job = {
             "job_id": job_id,
             "agent_id": agent_id,
@@ -27,7 +29,9 @@ class _FakeScheduler:
         self.jobs[job_id] = job
         return job
 
-    def add_interval_job(self, job_id: str, agent_id: str, message: str, seconds: int, context: dict[str, Any] | None = None) -> dict[str, Any]:
+    def add_interval_job(
+        self, job_id: str, agent_id: str, message: str, seconds: int, context: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         job = {
             "job_id": job_id,
             "agent_id": agent_id,
@@ -69,7 +73,7 @@ class _FakeScheduler:
 
 
 def _client_with_fake_scheduler() -> TestClient:
-    from backend.routes import scheduler as scheduler_routes
+    from backend.routes import scheduler as scheduler_routes  # type: ignore[attr-defined]
 
     fake = _FakeScheduler()
     scheduler_routes.job_scheduler = fake  # type: ignore[assignment]

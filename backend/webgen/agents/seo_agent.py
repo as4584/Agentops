@@ -8,9 +8,7 @@ sitemaps, robots.txt, and internal linking.
 from __future__ import annotations
 
 import json
-from typing import Any, Optional
 
-from backend.llm import OllamaClient
 from backend.utils import logger
 from backend.webgen.agents.base_agent import WebAgentBase
 from backend.webgen.models import (
@@ -63,8 +61,8 @@ Page: {page.slug} — {page.title}
 Purpose: {page.purpose}
 Business: {brief.business_name}
 Type: {brief.business_type.value}
-Services: {', '.join(brief.services) if brief.services else 'Various'}
-Location: {brief.address or 'Not specified'}
+Services: {", ".join(brief.services) if brief.services else "Various"}
+Location: {brief.address or "Not specified"}
 
 Generate:
 1. SEO title (50-60 characters, includes business name)
@@ -167,19 +165,14 @@ Return JSON:
 
         return (
             '<?xml version="1.0" encoding="UTF-8"?>\n'
-            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-            + "\n".join(urls) + "\n"
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(urls) + "\n"
             "</urlset>"
         )
 
     @staticmethod
     def _generate_robots(base_url: str) -> str:
         """Generate robots.txt."""
-        return (
-            "User-agent: *\n"
-            "Allow: /\n"
-            f"Sitemap: {base_url}/sitemap.xml\n"
-        )
+        return f"User-agent: *\nAllow: /\nSitemap: {base_url}/sitemap.xml\n"
 
     @staticmethod
     def _escape_attr(text: str) -> str:

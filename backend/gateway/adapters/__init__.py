@@ -9,9 +9,9 @@ from backend.gateway.adapters.base import (
     ChatCompletionRequest,
     ChatCompletionResponse,
     ChatMessage,
+    ProviderError,
     StreamChunk,
     UsageInfo,
-    ProviderError,
 )
 
 __all__ = [
@@ -29,10 +29,10 @@ __all__ = [
 
 def get_adapter(provider: str) -> BaseProviderAdapter:
     """Return an adapter instance for *provider*."""
-    from backend.gateway.adapters.ollama import OllamaAdapter
-    from backend.gateway.adapters.openrouter import OpenRouterAdapter
-    from backend.gateway.adapters.openai import OpenAIAdapter
     from backend.gateway.adapters.anthropic import AnthropicAdapter
+    from backend.gateway.adapters.ollama import OllamaAdapter
+    from backend.gateway.adapters.openai import OpenAIAdapter
+    from backend.gateway.adapters.openrouter import OpenRouterAdapter
 
     registry: dict[str, type[BaseProviderAdapter]] = {
         "ollama": OllamaAdapter,

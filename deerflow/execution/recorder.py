@@ -42,9 +42,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-
-_MAX_RUNS_PER_AGENT = 10   # JSONL files to keep per agent (prune oldest)
-_MAX_RESULT_CHARS = 2000   # truncate large tool results in the trace
+_MAX_RUNS_PER_AGENT = 10  # JSONL files to keep per agent (prune oldest)
+_MAX_RESULT_CHARS = 2000  # truncate large tool results in the trace
 
 
 @dataclass
@@ -124,13 +123,18 @@ class ExecutionRecorder:
 
         path = self._run_path(agent_id, run_id)
         with path.open("w", encoding="utf-8") as fh:
-            fh.write(json.dumps({
-                "_type": "run_start",
-                "run_id": run_id,
-                "agent_id": agent_id,
-                "message": message[:500],
-                "timestamp": record.started_at,
-            }) + "\n")
+            fh.write(
+                json.dumps(
+                    {
+                        "_type": "run_start",
+                        "run_id": run_id,
+                        "agent_id": agent_id,
+                        "message": message[:500],
+                        "timestamp": record.started_at,
+                    }
+                )
+                + "\n"
+            )
 
         return run_id
 
@@ -233,6 +237,7 @@ class ExecutionRecorder:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _truncate_result(result: Any) -> dict:
     """Return a truncated copy of a tool result dict safe for disk storage."""

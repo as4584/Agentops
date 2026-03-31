@@ -7,13 +7,12 @@ Uses local Ollama LLM for performance analysis and recommendations.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
-from backend.content.base_agent import ContentAgent
-from backend.content.video_job import VideoJob, JobStatus
 from backend.config import MEMORY_DIR
+from backend.content.base_agent import ContentAgent
+from backend.content.video_job import JobStatus, VideoJob
 from backend.utils import logger
 
 REPORTS_DIR = MEMORY_DIR / "content_reports"
@@ -24,19 +23,17 @@ class AnalyticsAgent(ContentAgent):
     name = "AnalyticsAgent"
     trigger_status = None  # weekly schedule, not per-job
 
-    async def process(self, job: VideoJob) -> Optional[VideoJob]:
+    async def process(self, job: VideoJob) -> VideoJob | None:
         return None
 
     async def run(self) -> list[VideoJob]:
         logger.info(f"[{self.name}] Starting weekly analytics...")
 
         posted = self.store.get_by_status(JobStatus.POSTED)
-        week_ago = datetime.now(timezone.utc) - timedelta(days=7)
+        week_ago = datetime.now(UTC) - timedelta(days=7)
         recent = [j for j in posted if j.posted_time and j.posted_time >= week_ago]
 
-        logger.info(
-            f"[{self.name}] {len(recent)} videos this week ({len(posted)} total)"
-        )
+        logger.info(f"[{self.name}] {len(recent)} videos this week ({len(posted)} total)")
 
         report = self._build_report(recent, posted)
         report_path = self._save_report(report)
@@ -71,7 +68,7 @@ class AnalyticsAgent(ContentAgent):
 
         return {
             "period": "last_7_days",
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "total_videos": len(recent),
             "aggregate": {
                 "total_views": total_views,
@@ -80,14 +77,8 @@ class AnalyticsAgent(ContentAgent):
                 "total_saves": sum(j.analytics.saves for j in recent),
                 "followers_gained": sum(j.analytics.followers_gained for j in recent),
             },
-            "top_by_views": [
-                {"job_id": j.job_id, "topic": j.topic, "views": j.analytics.views}
-                for j in by_views[:5]
-            ],
-            "top_hooks": [
-                {"hook": j.hook, "views": j.analytics.views}
-                for j in by_views[:5] if j.hook
-            ],
+            "top_by_views": [{"job_id": j.job_id, "topic": j.topic, "views": j.analytics.views} for j in by_views[:5]],
+            "top_hooks": [{"hook": j.hook, "views": j.analytics.views} for j in by_views[:5] if j.hook],
             "pillar_breakdown": pillars,
         }
 
@@ -124,6 +115,7 @@ class AnalyticsAgent(ContentAgent):
             )
             # Try to parse JSON from response
             import re
+
             match = re.search(r"\{[\s\S]*\}", raw)
             if match:
                 return json.loads(match.group())
@@ -133,7 +125,7 @@ class AnalyticsAgent(ContentAgent):
             return {"recommendations": [], "error": str(e)}
 
     def _save_report(self, report: dict) -> Path:
-        ts = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        ts = datetime.now(UTC).strftime("%Y-%m-%d")
         path = REPORTS_DIR / f"weekly_{ts}.json"
         path.write_text(json.dumps(report, indent=2))
         return path

@@ -4,11 +4,13 @@ load_legacy_json_skill.
 
 Uses tmp_path for filesystem isolation.
 """
+
 from __future__ import annotations
 
 import json
-import pytest
 from pathlib import Path
+
+import pytest
 
 from backend.skills.loader import (
     LoadedSkill,
@@ -17,10 +19,10 @@ from backend.skills.loader import (
     load_manifest_skill,
 )
 
-
 # ---------------------------------------------------------------------------
 # SkillManifest validation
 # ---------------------------------------------------------------------------
+
 
 class TestSkillManifest:
     def test_minimal_valid_manifest(self):
@@ -61,6 +63,7 @@ class TestSkillManifest:
 # LoadedSkill
 # ---------------------------------------------------------------------------
 
+
 class TestLoadedSkill:
     def _make(self, **kwargs) -> LoadedSkill:
         defaults = {
@@ -76,7 +79,7 @@ class TestLoadedSkill:
             "source_type": "manifest",
         }
         defaults.update(kwargs)
-        return LoadedSkill(**defaults)
+        return LoadedSkill(**defaults)  # type: ignore[arg-type]
 
     def test_defaults(self):
         skill = self._make()
@@ -130,6 +133,7 @@ class TestLoadedSkill:
 # load_manifest_skill
 # ---------------------------------------------------------------------------
 
+
 class TestLoadManifestSkill:
     def _write_manifest(self, skill_dir: Path, data: dict) -> None:
         skill_dir.mkdir(parents=True, exist_ok=True)
@@ -137,11 +141,14 @@ class TestLoadManifestSkill:
 
     def test_loads_minimal_manifest(self, tmp_path):
         skill_dir = tmp_path / "my_skill"
-        self._write_manifest(skill_dir, {
-            "id": "my_skill",
-            "name": "My Skill",
-            "version": "1.0.0",
-        })
+        self._write_manifest(
+            skill_dir,
+            {
+                "id": "my_skill",
+                "name": "My Skill",
+                "version": "1.0.0",
+            },
+        )
         skill = load_manifest_skill(skill_dir)
         assert skill.skill_id == "my_skill"
         assert skill.source_type == "manifest"
@@ -150,11 +157,14 @@ class TestLoadManifestSkill:
 
     def test_loads_skill_md_if_present(self, tmp_path):
         skill_dir = tmp_path / "rich_skill"
-        self._write_manifest(skill_dir, {
-            "id": "rich_skill",
-            "name": "Rich",
-            "version": "1.0",
-        })
+        self._write_manifest(
+            skill_dir,
+            {
+                "id": "rich_skill",
+                "name": "Rich",
+                "version": "1.0",
+            },
+        )
         (skill_dir / "SKILL.md").write_text("## How to use\nStep 1.", encoding="utf-8")
         skill = load_manifest_skill(skill_dir)
         assert "Step 1." in skill.skill_md
@@ -175,35 +185,44 @@ class TestLoadManifestSkill:
 
     def test_respects_manifest_allowed_agents(self, tmp_path):
         skill_dir = tmp_path / "agents_skill"
-        self._write_manifest(skill_dir, {
-            "id": "agents_skill",
-            "name": "Agents",
-            "version": "1.0",
-            "allowed_agents": ["gsd", "monitor"],
-        })
+        self._write_manifest(
+            skill_dir,
+            {
+                "id": "agents_skill",
+                "name": "Agents",
+                "version": "1.0",
+                "allowed_agents": ["gsd", "monitor"],
+            },
+        )
         skill = load_manifest_skill(skill_dir)
         assert "gsd" in skill.allowed_agents
         assert "monitor" in skill.allowed_agents
 
     def test_respects_enabled_flag(self, tmp_path):
         skill_dir = tmp_path / "disabled_skill"
-        self._write_manifest(skill_dir, {
-            "id": "disabled_skill",
-            "name": "Disabled",
-            "version": "1.0",
-            "enabled": False,
-        })
+        self._write_manifest(
+            skill_dir,
+            {
+                "id": "disabled_skill",
+                "name": "Disabled",
+                "version": "1.0",
+                "enabled": False,
+            },
+        )
         skill = load_manifest_skill(skill_dir)
         assert skill.enabled is False
 
     def test_respects_risk_level(self, tmp_path):
         skill_dir = tmp_path / "risky_skill"
-        self._write_manifest(skill_dir, {
-            "id": "risky_skill",
-            "name": "Risky",
-            "version": "1.0",
-            "risk_level": "critical",
-        })
+        self._write_manifest(
+            skill_dir,
+            {
+                "id": "risky_skill",
+                "name": "Risky",
+                "version": "1.0",
+                "risk_level": "critical",
+            },
+        )
         skill = load_manifest_skill(skill_dir)
         assert skill.risk_level == "critical"
 
@@ -225,6 +244,7 @@ class TestLoadManifestSkill:
 # load_legacy_json_skill
 # ---------------------------------------------------------------------------
 
+
 class TestLoadLegacyJsonSkill:
     def _make_legacy(self, tmp_path: Path, stem: str, data: dict) -> Path:
         p = tmp_path / f"{stem}.json"
@@ -232,10 +252,14 @@ class TestLoadLegacyJsonSkill:
         return p
 
     def test_loads_minimal_legacy(self, tmp_path):
-        p = self._make_legacy(tmp_path, "business_analysis", {
-            "title": "Business Analysis",
-            "domain": "Business strategy",
-        })
+        p = self._make_legacy(
+            tmp_path,
+            "business_analysis",
+            {
+                "title": "Business Analysis",
+                "domain": "Business strategy",
+            },
+        )
         skill = load_legacy_json_skill(p)
         assert skill.skill_id == "business_analysis"
         assert skill.source_type == "legacy_json"
@@ -260,48 +284,68 @@ class TestLoadLegacyJsonSkill:
         assert skill.name == "fallback_skill"
 
     def test_populates_skill_md_from_people_and_frameworks(self, tmp_path):
-        p = self._make_legacy(tmp_path, "expert_skill", {
-            "title": "Expert Skill",
-            "people": ["Alice", "Bob"],
-            "frameworks": ["DDD", "CQRS"],
-        })
+        p = self._make_legacy(
+            tmp_path,
+            "expert_skill",
+            {
+                "title": "Expert Skill",
+                "people": ["Alice", "Bob"],
+                "frameworks": ["DDD", "CQRS"],
+            },
+        )
         skill = load_legacy_json_skill(p)
         assert "Alice" in skill.skill_md
         assert "DDD" in skill.skill_md
 
     def test_populates_tools_md_from_power_phrases(self, tmp_path):
-        p = self._make_legacy(tmp_path, "phrase_skill", {
-            "title": "Phrase Skill",
-            "power_phrases": ["Ship it.", "Done is better than perfect."],
-        })
+        p = self._make_legacy(
+            tmp_path,
+            "phrase_skill",
+            {
+                "title": "Phrase Skill",
+                "power_phrases": ["Ship it.", "Done is better than perfect."],
+            },
+        )
         skill = load_legacy_json_skill(p)
         assert "Ship it." in skill.tools_md
 
     def test_populates_soul_md_from_context(self, tmp_path):
-        p = self._make_legacy(tmp_path, "soul_skill", {
-            "title": "Soul Skill",
-            "context": "Always be helpful.",
-        })
+        p = self._make_legacy(
+            tmp_path,
+            "soul_skill",
+            {
+                "title": "Soul Skill",
+                "context": "Always be helpful.",
+            },
+        )
         skill = load_legacy_json_skill(p)
         assert "helpful" in skill.soul_md
 
     def test_handles_empty_lists(self, tmp_path):
-        p = self._make_legacy(tmp_path, "empty_skill", {
-            "title": "Empty",
-            "people": [],
-            "frameworks": [],
-            "concepts": [],
-            "power_phrases": [],
-        })
+        p = self._make_legacy(
+            tmp_path,
+            "empty_skill",
+            {
+                "title": "Empty",
+                "people": [],
+                "frameworks": [],
+                "concepts": [],
+                "power_phrases": [],
+            },
+        )
         skill = load_legacy_json_skill(p)
         assert skill.skill_md  # at least the title line
         assert skill.tools_md == ""
 
     def test_concepts_included_in_skill_md(self, tmp_path):
-        p = self._make_legacy(tmp_path, "concepts_skill", {
-            "title": "Concepts",
-            "concepts": ["event sourcing", "CQRS"],
-        })
+        p = self._make_legacy(
+            tmp_path,
+            "concepts_skill",
+            {
+                "title": "Concepts",
+                "concepts": ["event sourcing", "CQRS"],
+            },
+        )
         skill = load_legacy_json_skill(p)
         assert "event sourcing" in skill.skill_md
 

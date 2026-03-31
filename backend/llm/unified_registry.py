@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from enum import Enum
 import logging
 import os
 import time
+from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, cast
 
 from backend.config import (
@@ -55,7 +55,30 @@ logger = logging.getLogger(__name__)
 
 
 UNIFIED_MODEL_REGISTRY: dict[str, ModelSpec] = {
-    # Local models (no variable token billing)
+    # ── Fine-tuned local models ──
+    "lex": ModelSpec(
+        model_id="lex",
+        provider=ModelProvider.OLLAMA,
+        display_name="Lex (Fine-tuned)",
+        context_window=128000,
+        input_cost_per_m=0.0,
+        output_cost_per_m=0.0,
+        best_for=["orchestration", "agent_tasks", "reasoning", "code"],
+        fallback_chain=["mistral:7b", "llama3.2"],
+        supports_tools=True,
+    ),
+    "webgen": ModelSpec(
+        model_id="webgen",
+        provider=ModelProvider.OLLAMA,
+        display_name="WebGen (Fine-tuned)",
+        context_window=128000,
+        input_cost_per_m=0.0,
+        output_cost_per_m=0.0,
+        best_for=["web_generation", "html", "css", "frontend"],
+        fallback_chain=["qwen2.5", "mistral:7b"],
+        supports_tools=True,
+    ),
+    # ── Local base models ──
     "llama3.2:1b": ModelSpec(
         model_id="llama3.2:1b",
         provider=ModelProvider.OLLAMA,
@@ -254,10 +277,7 @@ class UnifiedModelRouter:
             return bool(os.getenv("OPENROUTER_API_KEY", "").strip())
 
         if spec.provider == ModelProvider.OPENAI:
-            return bool(
-                os.getenv("OPENAI_API_KEY", "").strip()
-                or os.getenv("OPENROUTER_API_KEY", "").strip()
-            )
+            return bool(os.getenv("OPENAI_API_KEY", "").strip() or os.getenv("OPENROUTER_API_KEY", "").strip())
 
         if spec.provider == ModelProvider.COPILOT:
             return True
@@ -281,17 +301,19 @@ class UnifiedModelRouter:
     def list_models(self) -> list[dict[str, Any]]:
         models: list[dict[str, Any]] = []
         for spec in UNIFIED_MODEL_REGISTRY.values():
-            models.append({
-                "model_id": spec.model_id,
-                "provider": spec.provider.value,
-                "display_name": spec.display_name,
-                "context_window": spec.context_window,
-                "input_cost_per_m": spec.input_cost_per_m,
-                "output_cost_per_m": spec.output_cost_per_m,
-                "best_for": spec.best_for,
-                "fallback_chain": spec.fallback_chain,
-                "supports_tools": spec.supports_tools,
-            })
+            models.append(
+                {
+                    "model_id": spec.model_id,
+                    "provider": spec.provider.value,
+                    "display_name": spec.display_name,
+                    "context_window": spec.context_window,
+                    "input_cost_per_m": spec.input_cost_per_m,
+                    "output_cost_per_m": spec.output_cost_per_m,
+                    "best_for": spec.best_for,
+                    "fallback_chain": spec.fallback_chain,
+                    "supports_tools": spec.supports_tools,
+                }
+            )
         return models
 
     def resolve_model(self, task: str = "general", override_model: str | None = None) -> ModelSpec:
@@ -351,10 +373,7 @@ class UnifiedModelRouter:
             )
             est_in = len(prompt + system) // 4
             est_out = len(output) // 4
-            cost = (
-                (est_in / 1_000_000) * spec.input_cost_per_m
-                + (est_out / 1_000_000) * spec.output_cost_per_m
-            )
+            cost = (est_in / 1_000_000) * spec.input_cost_per_m + (est_out / 1_000_000) * spec.output_cost_per_m
             return {
                 "model_id": spec.model_id,
                 "provider": spec.provider.value,
@@ -409,10 +428,7 @@ class UnifiedModelRouter:
 
             est_in = sum(len(str(m)) for m in messages) // 4
             est_out = len(result.get("output", "")) // 4
-            cost = (
-                (est_in / 1_000_000) * spec.input_cost_per_m
-                + (est_out / 1_000_000) * spec.output_cost_per_m
-            )
+            cost = (est_in / 1_000_000) * spec.input_cost_per_m + (est_out / 1_000_000) * spec.output_cost_per_m
             return {
                 "model_id": spec.model_id,
                 "provider": spec.provider.value,
@@ -503,9 +519,8 @@ class UnifiedModelRouter:
         if violations:
             # Log violations but continue — sanitization will fix them below.
             import logging as _logging
-            _logging.getLogger(__name__).warning(
-                "Tool definition violations before sanitization: %s", violations
-            )
+
+            _logging.getLogger(__name__).warning("Tool definition violations before sanitization: %s", violations)
 
         reg = registry or ToolIdRegistry()
 

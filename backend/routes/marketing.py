@@ -4,7 +4,7 @@ import json
 import re
 import shutil
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from importlib import import_module
 from pathlib import Path
 from typing import Any
@@ -113,15 +113,16 @@ def _build_customer_context(customer_id: str | None) -> str:
     if customer is None:
         return f"Customer '{customer_id}' was requested but not found."
 
-    services_summary = ", ".join(
-        f"{service.type.value}:{service.status.value}:{service.progress_percent}%"
-        for service in customer.services
-    ) or "none"
+    services_summary = (
+        ", ".join(
+            f"{service.type.value}:{service.status.value}:{service.progress_percent}%" for service in customer.services
+        )
+        or "none"
+    )
 
-    social_summary = ", ".join(
-        f"{platform}={url}"
-        for platform, url in customer.social_media_accounts.items()
-    ) or "none"
+    social_summary = (
+        ", ".join(f"{platform}={url}" for platform, url in customer.social_media_accounts.items()) or "none"
+    )
 
     return (
         f"Customer ID: {customer.id}\n"
@@ -238,5 +239,5 @@ async def deploy_marketing(payload: DeployMarketingRequest) -> dict[str, Any]:
         "target": payload.target,
         "deployed_url": deployed_url,
         "qr_path": str(qr_path.relative_to(PROJECT_ROOT)),
-        "deployed_at": datetime.now(timezone.utc).isoformat(),
+        "deployed_at": datetime.now(UTC).isoformat(),
     }

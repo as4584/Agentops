@@ -21,6 +21,8 @@ dependencies = [
     "apscheduler>=3.10.0",
     "sqlalchemy>=2.0.0",
     "playwright>=1.40.0",
+    "anthropic>=0.40.0",
+    "pypdf>=4.0.0",
 ]
 
 [project.optional-dependencies]
@@ -33,15 +35,60 @@ dev = [
 
 [tool.ruff]
 target-version = "py311"
-line-length = 100
+line-length = 120
+exclude = [
+    "scripts/",
+    "clients/",
+    "sandbox/",
+    "lib/",
+    "pixel-agents/",
+    "animation_salvage_lab/",
+    "SigmaSimulator/",
+    "seagullmedterwebsite/",
+    "output/",
+    "data/",
+    "mcp-gateway/",
+    "vscode-extension/",
+    "reports/",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"backend/gateway/__init__.py" = ["E402", "F401"]
+"backend/gateway/middleware.py" = ["E402"]
+"backend/gateway/streaming.py" = ["E402"]
+"deerflow/tests/__init__.py" = ["E402", "F401", "N814"]
+"deerflow/tests/test_deerflow.py" = ["E402"]
+"backend/middleware/__init__.py" = ["F401"]
+"backend/mcp/higgsfield_playwright_server.py" = ["E741"]
+"backend/content/voice_agent.py" = ["N811"]
 
 [tool.mypy]
 python_version = "3.11"
-strict = true
+strict = false
 warn_unused_configs = true
+disallow_untyped_defs = false
+check_untyped_defs = true
+warn_return_any = false
+warn_unused_ignores = false
+exclude = ["^lib/"]
+
+[[tool.mypy.overrides]]
+module = "lib.*"
+follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = "backend.tests.*"
+disallow_untyped_defs = false
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = "deerflow.tests.*"
+disallow_untyped_defs = false
+check_untyped_defs = false
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

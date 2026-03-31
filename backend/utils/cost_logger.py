@@ -26,11 +26,10 @@ Or run directly from terminal to log a quick manual entry:
         --campaign xpel_ad
 """
 
-import json
-import os
-import sys
 import argparse
-from datetime import datetime, timezone
+import json
+import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
@@ -40,19 +39,19 @@ RECEIPTS_DIR = REPO_ROOT / "animation_salvage_lab" / "07_docs" / "receipts"
 
 # ── Model cost table (USD per second of output) ────────────────────────────────
 COST_PER_SECOND: dict[str, float] = {
-    "hailuo":            0.018,
+    "hailuo": 0.018,
     "kling_v1_standard": 0.013,
-    "kling_v1_6_pro":    0.023,
-    "kling_v2_master":   0.042,
-    "veo3_1_fast":       0.022,
-    "veo3_1_standard":   0.350,
-    "runway_gen2":       0.017,
-    "other":             0.020,
+    "kling_v1_6_pro": 0.023,
+    "kling_v2_master": 0.042,
+    "veo3_1_fast": 0.022,
+    "veo3_1_standard": 0.350,
+    "runway_gen2": 0.017,
+    "other": 0.020,
 }
 
 
 def _load_tracker() -> dict:
-    with open(TRACKER_PATH, "r") as f:
+    with open(TRACKER_PATH) as f:
         return json.load(f)
 
 
@@ -92,7 +91,7 @@ def log_generation(
     total_seconds = clips * seconds_per_clip
     total_cost = cost_override_usd if cost_override_usd is not None else round(total_seconds * cost_per_second, 4)
 
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(UTC).isoformat()
     receipt_id = f"{timestamp[:19].replace(':', '').replace('-', '')}_{model_key}"
 
     receipt = {
@@ -117,9 +116,7 @@ def log_generation(
 
     # Update tracker
     tracker = _load_tracker()
-    tracker["totals"]["all_time_spent_usd"] = round(
-        tracker["totals"]["all_time_spent_usd"] + total_cost, 4
-    )
+    tracker["totals"]["all_time_spent_usd"] = round(tracker["totals"]["all_time_spent_usd"] + total_cost, 4)
     tracker["totals"]["all_time_clips_generated"] += clips
     tracker["totals"]["all_time_seconds_generated"] = round(
         tracker["totals"]["all_time_seconds_generated"] + total_seconds, 2
@@ -140,16 +137,18 @@ def log_generation(
     )
 
     tracker["meta"]["last_updated"] = timestamp
-    tracker["sessions"].append({
-        "receipt_id": receipt_id,
-        "timestamp": timestamp,
-        "campaign": campaign,
-        "model": model_key,
-        "clips": clips,
-        "total_seconds": total_seconds,
-        "cost_usd": total_cost,
-        "receipt_file": receipt["receipt_file"],
-    })
+    tracker["sessions"].append(
+        {
+            "receipt_id": receipt_id,
+            "timestamp": timestamp,
+            "campaign": campaign,
+            "model": model_key,
+            "clips": clips,
+            "total_seconds": total_seconds,
+            "cost_usd": total_cost,
+            "receipt_file": receipt["receipt_file"],
+        }
+    )
 
     _save_tracker(tracker)
 

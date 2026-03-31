@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any, Optional
 
 from backend.llm import OllamaClient
 from backend.utils import logger
@@ -38,8 +37,8 @@ class TemplateLearnerAgent(WebAgentBase):
 
     def __init__(
         self,
-        llm: Optional[OllamaClient] = None,
-        store: Optional[TemplateStore] = None,
+        llm: OllamaClient | None = None,
+        store: TemplateStore | None = None,
     ) -> None:
         super().__init__(llm)
         self.store = store or TemplateStore()
@@ -103,10 +102,7 @@ class TemplateLearnerAgent(WebAgentBase):
         )
 
         self.store.add_template(template)
-        logger.info(
-            f"[{self.name}] Template '{template.name}' stored with "
-            f"{len(component_ids)} components"
-        )
+        logger.info(f"[{self.name}] Template '{template.name}' stored with {len(component_ids)} components")
         return template
 
     # ── HTML collection ──────────────────────────────────
@@ -134,8 +130,9 @@ class TemplateLearnerAgent(WebAgentBase):
                 pages[rel] = f.read_text(errors="ignore")
         return pages
 
-    async def learn_from_html(self, html: str, source_name: str = "pasted",
-                               business_type: str = "custom", name: str = "") -> TemplateRecord:
+    async def learn_from_html(
+        self, html: str, source_name: str = "pasted", business_type: str = "custom", name: str = ""
+    ) -> TemplateRecord:
         """Learn from raw HTML string (e.g., fetched from a URL)."""
         html_pages = {source_name: html}
 

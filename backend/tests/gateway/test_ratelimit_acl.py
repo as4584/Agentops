@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import pytest
 
+from backend.gateway.acl import ModelACL, ModelTier
 from backend.gateway.ratelimit import MemoryRateLimiter
-from backend.gateway.acl import ModelACL, TIER_MODELS, ModelTier
 
 
 class TestMemoryRateLimiter:
@@ -48,6 +48,7 @@ class TestMemoryRateLimiter:
         lim.check_tpd("key1", tokens=500, limit=1000)
         # Simulate day rollover by manipulating bucket
         from datetime import date, timedelta
+
         past = (date.today() - timedelta(days=1)).isoformat()
         lim._buckets["key1"].tpd_day = past
         ok, _ = lim.check_tpd("key1", tokens=800, limit=1000)

@@ -1,7 +1,9 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
+  ActionIcon,
   Accordion,
   Badge,
   Button,
@@ -14,6 +16,7 @@ import {
   Textarea,
   Title,
 } from '@mantine/core';
+import { IconArrowLeft } from '@tabler/icons-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -135,7 +138,12 @@ export default function MarketingPage() {
 
   return (
     <Stack p="xl" gap="lg">
-      <Title order={2}>Marketing Site Console</Title>
+      <Group gap="sm">
+        <ActionIcon component={Link} href="/" variant="subtle" size="lg" aria-label="Back to dashboard">
+          <IconArrowLeft size={20} />
+        </ActionIcon>
+        <Title order={2}>Marketing Site Console</Title>
+      </Group>
       <Text c="dimmed">Business-owner-ready page with FAQ wall + AI assistant. Keep messaging direct and practical.</Text>
 
       <Card style={glassStyle}>

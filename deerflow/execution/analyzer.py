@@ -40,7 +40,6 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-
 _ANALYSIS_SYSTEM = (
     "You are an AI agent performance auditor. "
     "Read the execution trajectory and return a JSON analysis. "
@@ -141,7 +140,7 @@ class ExecutionAnalyzer:
         if not tool_calls:
             return None
 
-        run_meta = next((e for e in entries if e.get("_type") == "run_start"), {})
+        run_meta: dict[str, Any] = next((e for e in entries if e.get("_type") == "run_start"), {})
         message = run_meta.get("message", "")
 
         prompt = self._build_prompt(agent_id, message, tool_calls)
@@ -162,10 +161,7 @@ class ExecutionAnalyzer:
         for entry in tool_calls[-_MAX_TOOL_SUMMARY_LINES:]:
             status = "FAIL" if entry.get("failed") else "OK"
             err = f" | error: {entry['error']}" if entry.get("error") else ""
-            lines.append(
-                f"  [{status}] {entry['tool_name']} "
-                f"({entry.get('duration_ms', 0):.0f}ms){err}"
-            )
+            lines.append(f"  [{status}] {entry['tool_name']} ({entry.get('duration_ms', 0):.0f}ms){err}")
         return _ANALYSIS_PROMPT.format(
             agent_id=agent_id,
             message=message[:200],
@@ -188,9 +184,7 @@ class ExecutionAnalyzer:
             raw = re.sub(r"```(?:json)?\n?", "", raw).strip().rstrip("`").strip()
             data = json.loads(raw)
             judgment.tool_judgments = data.get("tool_judgments") or []
-            judgment.skill_judgments = self._validate_skill_judgments(
-                data.get("skill_judgments") or []
-            )
+            judgment.skill_judgments = self._validate_skill_judgments(data.get("skill_judgments") or [])
             judgment.escalate = bool(data.get("escalate"))
             judgment.escalation_reason = data.get("escalation_reason")
         except Exception:
@@ -287,6 +281,7 @@ class ExecutionAnalyzer:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _fuzzy_match(target: str, candidates: set[str], max_distance: int = 3) -> str | None:
     """

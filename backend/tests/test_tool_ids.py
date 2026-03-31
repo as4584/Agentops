@@ -16,7 +16,6 @@ Run with::
 from __future__ import annotations
 
 import re
-import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pytest
@@ -40,6 +39,7 @@ VALID_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
 # Helper
 # ---------------------------------------------------------------------------
 
+
 def is_valid(tool_id: str) -> bool:
     return bool(VALID_PATTERN.match(tool_id))
 
@@ -48,29 +48,31 @@ def is_valid(tool_id: str) -> bool:
 # 1. sanitize_tool_id — property tests
 # ===========================================================================
 
+
 class TestSanitizeToolId:
     """Every output must satisfy the OpenAI/Copilot pattern."""
 
-    @pytest.mark.parametrize("raw", [
-        "planner.step:1",
-        "agent_call/2",
-        "tool-call-1.3",
-        "model:ollama-qwen",
-        "safe_shell",
-        "file_reader",
-        "a" * 100,           # overly long
-        "!@#$%^&*()",        # all invalid chars
-        "hello world",       # space
-        "üñïcödé",           # Unicode
-        "step__double",      # double underscore (valid — collapsed)
-        "UPPER_CASE",        # uppercase (valid, preserved)
-        "mix.of/all:types!", # multiple different separators
-    ])
+    @pytest.mark.parametrize(
+        "raw",
+        [
+            "planner.step:1",
+            "agent_call/2",
+            "tool-call-1.3",
+            "model:ollama-qwen",
+            "safe_shell",
+            "file_reader",
+            "a" * 100,  # overly long
+            "!@#$%^&*()",  # all invalid chars
+            "hello world",  # space
+            "üñïcödé",  # Unicode
+            "step__double",  # double underscore (valid — collapsed)
+            "UPPER_CASE",  # uppercase (valid, preserved)
+            "mix.of/all:types!",  # multiple different separators
+        ],
+    )
     def test_output_matches_pattern(self, raw: str) -> None:
         result = sanitize_tool_id(raw)
-        assert is_valid(result), (
-            f"sanitize_tool_id({raw!r}) = {result!r} does not match valid pattern"
-        )
+        assert is_valid(result), f"sanitize_tool_id({raw!r}) = {result!r} does not match valid pattern"
 
     def test_empty_string_returns_valid(self) -> None:
         result = sanitize_tool_id("")
@@ -115,6 +117,7 @@ class TestSanitizeToolId:
 # 2. is_valid_tool_id
 # ===========================================================================
 
+
 class TestIsValidToolId:
     def test_valid_ids(self) -> None:
         assert is_valid_tool_id("safe_shell")
@@ -134,6 +137,7 @@ class TestIsValidToolId:
 # ===========================================================================
 # 3. ToolIdRegistry — round-trip + collision tests
 # ===========================================================================
+
 
 class TestToolIdRegistry:
     """Round-trip and collision-free guarantees."""
@@ -239,15 +243,14 @@ class TestToolIdRegistry:
 
         # No two different canonicals should share a sanitized ID.
         all_sanitized = reg.all_sanitized()
-        assert len(all_sanitized) == n, (
-            f"Expected {n} unique sanitized IDs, got {len(all_sanitized)}"
-        )
+        assert len(all_sanitized) == n, f"Expected {n} unique sanitized IDs, got {len(all_sanitized)}"
         assert len(set(all_sanitized)) == n, "Duplicate sanitized IDs detected"
 
 
 # ===========================================================================
 # 4. make_tool_call_id
 # ===========================================================================
+
 
 class TestMakeToolCallId:
     def test_basic(self) -> None:
@@ -279,6 +282,7 @@ class TestMakeToolCallId:
 # 5. validate_tool_definitions
 # ===========================================================================
 
+
 class TestValidateToolDefinitions:
     def test_valid_tools_no_violations(self) -> None:
         tools = [
@@ -307,6 +311,7 @@ class TestValidateToolDefinitions:
 # 6. ToolValidator — hallucination prevention
 # ===========================================================================
 
+
 class TestToolValidator:
     def test_valid_tool_passes(self) -> None:
         v = ToolValidator(["safe_shell", "file_reader"])
@@ -321,7 +326,7 @@ class TestToolValidator:
 
     def test_fuzzy_suggestion_within_threshold(self) -> None:
         v = ToolValidator(["safe_shell", "file_reader"])
-        result = v.validate("file_raeder")   # 2 edits away
+        result = v.validate("file_raeder")  # 2 edits away
         assert not result.valid
         assert "file_reader" in result.suggestions
 
@@ -339,7 +344,7 @@ class TestToolValidator:
 
     def test_error_message_did_you_mean(self) -> None:
         v = ToolValidator(["safe_shell"])
-        result = v.validate("safe_shel")   # 1 edit
+        result = v.validate("safe_shel")  # 1 edit
         assert "Did you mean" in result.error_message
         assert "safe_shell" in result.error_message
 
@@ -376,6 +381,7 @@ class TestToolValidator:
 # 7. Levenshtein distance unit tests
 # ===========================================================================
 
+
 class TestLevenshtein:
     def test_identical(self) -> None:
         assert _levenshtein("abc", "abc") == 0
@@ -403,6 +409,7 @@ class TestLevenshtein:
 # 8. Integration: sanitization pipeline (canonical → API → response)
 # ===========================================================================
 
+
 class TestSanitizationPipeline:
     """
     Simulate the full round-trip:
@@ -414,12 +421,12 @@ class TestSanitizationPipeline:
 
     def test_full_round_trip_pipeline(self) -> None:
         reg = ToolIdRegistry()
-        validator = ToolValidator(["planner.step:1", "agent_call/2"])
+        ToolValidator(["planner.step:1", "agent_call/2"])
 
         # Step 1: tool definitions with invalid names (as they exist internally).
         raw_tools = [
             {"type": "function", "function": {"name": "planner.step:1", "description": "Plan next step"}},
-            {"type": "function", "function": {"name": "agent_call/2",  "description": "Delegate to agent"}},
+            {"type": "function", "function": {"name": "agent_call/2", "description": "Delegate to agent"}},
         ]
 
         # Step 2: sanitize before API call.
@@ -431,8 +438,7 @@ class TestSanitizationPipeline:
 
         # Step 3: simulate API response calling back with sanitized names.
         api_tool_calls = [
-            {"function": {"name": tool["function"]["name"], "arguments": "{}"}}
-            for tool in sanitized_tools
+            {"function": {"name": tool["function"]["name"], "arguments": "{}"}} for tool in sanitized_tools
         ]
 
         # Step 4: desanitize → back to canonical.
@@ -465,6 +471,4 @@ class TestSanitizationPipeline:
         ]
         for raw in problematic_ids:
             result = sanitize_tool_id(raw)
-            assert is_valid(result), (
-                f"Previously-problematic ID {raw!r} → {result!r} still invalid"
-            )
+            assert is_valid(result), f"Previously-problematic ID {raw!r} → {result!r} still invalid"

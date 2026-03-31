@@ -15,11 +15,11 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Generator
 from contextlib import contextmanager
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 from threading import Lock
-from typing import Any, Generator, Optional
+from typing import Any
 
 from backend.config import ML_EXPERIMENTS_DIR
 from backend.utils import logger
@@ -38,7 +38,7 @@ class MLflowTracker:
 
     def __init__(
         self,
-        tracking_uri: Optional[str] = None,
+        tracking_uri: str | None = None,
         experiment_name: str = "agentop",
     ) -> None:
         self._lock = Lock()
@@ -62,8 +62,8 @@ class MLflowTracker:
     def start_run(
         self,
         run_name: str,
-        params: Optional[dict[str, Any]] = None,
-        tags: Optional[dict[str, str]] = None,
+        params: dict[str, Any] | None = None,
+        tags: dict[str, str] | None = None,
     ) -> Generator[str, None, None]:
         """Context manager to start and auto-close an MLflow run."""
         if not MLFLOW_AVAILABLE:
@@ -74,7 +74,7 @@ class MLflowTracker:
                 "tags": tags or {},
                 "metrics": {},
                 "artifacts": [],
-                "started_at": datetime.now(timezone.utc).isoformat(),
+                "started_at": datetime.now(UTC).isoformat(),
             }
             try:
                 yield run_id
@@ -107,7 +107,7 @@ class MLflowTracker:
             with self._lock:
                 self._active_runs.pop(run_id, None)
 
-    def log_metrics(self, run_id: str, metrics: dict[str, float], step: Optional[int] = None) -> None:
+    def log_metrics(self, run_id: str, metrics: dict[str, float], step: int | None = None) -> None:
         """Log multiple metrics at once."""
         if not MLFLOW_AVAILABLE:
             if run_id in self._active_runs:
@@ -132,8 +132,8 @@ class MLflowTracker:
         tokens_in: int = 0,
         tokens_out: int = 0,
         cost_usd: float = 0.0,
-        eval_score: Optional[float] = None,
-        pass_fail: Optional[bool] = None,
+        eval_score: float | None = None,
+        pass_fail: bool | None = None,
         task_type: str = "",
     ) -> None:
         """Log a single LLM invocation with full metadata."""
@@ -174,7 +174,7 @@ class MLflowTracker:
                         "response": response[:2000],
                         "temperature": temperature,
                         "task_type": task_type,
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "timestamp": datetime.now(UTC).isoformat(),
                     }
                     log_path = artifact_dir / f"llm_call_{int(time.time() * 1000)}.json"
                     log_path.write_text(json.dumps(call_log, indent=2))
@@ -194,7 +194,7 @@ class MLflowTracker:
 
     def search_runs(
         self,
-        experiment_name: Optional[str] = None,
+        experiment_name: str | None = None,
         filter_string: str = "",
         max_results: int = 100,
     ) -> list[dict[str, Any]]:
@@ -209,11 +209,11 @@ class MLflowTracker:
             return results
 
         exp_name = experiment_name or self._experiment_name
-        experiment = self._client.get_experiment_by_name(exp_name)
+        experiment = self._client.get_experiment_by_name(exp_name)  # type: ignore[union-attr]
         if not experiment:
             return []
 
-        runs = self._client.search_runs(
+        runs = self._client.search_runs(  # type: ignore[union-attr]
             experiment_ids=[experiment.experiment_id],
             filter_string=filter_string,
             max_results=max_results,
@@ -236,10 +236,9 @@ class MLflowTracker:
         self,
         metric: str = "eval_score",
         higher_is_better: bool = True,
-        experiment_name: Optional[str] = None,
-    ) -> Optional[dict[str, Any]]:
+        experiment_name: str | None = None,
+    ) -> dict[str, Any] | None:
         """Find the best run by a metric."""
-        order = "DESC" if higher_is_better else "ASC"
         runs = self.search_runs(
             experiment_name=experiment_name,
             filter_string=f"metrics.{metric} > 0",
@@ -262,7 +261,7 @@ class MLflowTracker:
         if run_id not in self._active_runs:
             return
         run_data = self._active_runs.pop(run_id)
-        run_data["ended_at"] = datetime.now(timezone.utc).isoformat()
+        run_data["ended_at"] = datetime.now(UTC).isoformat()
         run_data["run_id"] = run_id
         fallback_dir = ML_EXPERIMENTS_DIR / "mlflow_fallback"
         fallback_dir.mkdir(parents=True, exist_ok=True)

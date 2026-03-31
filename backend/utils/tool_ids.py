@@ -28,8 +28,6 @@ from __future__ import annotations
 import hashlib
 import re
 from threading import Lock
-from typing import Dict, Optional
-
 
 # ---------------------------------------------------------------------------
 # Pattern constants
@@ -54,6 +52,7 @@ _SUFFIX_LEN: int = 5  # "_" + 4 hex chars
 # ---------------------------------------------------------------------------
 # Core sanitization function
 # ---------------------------------------------------------------------------
+
 
 def sanitize_tool_id(raw_id: str) -> str:
     """
@@ -111,6 +110,7 @@ def is_valid_tool_id(tool_id: str) -> bool:
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _fallback_id(raw_id: str) -> str:
     """Generate a deterministic, valid ID from a hash when sanitization yields nothing."""
     digest = hashlib.sha256(raw_id.encode()).hexdigest()[:8]
@@ -123,7 +123,7 @@ def _truncate_with_hash(sanitized: str, original: str) -> str:
     that two different originals that truncate to the same prefix remain distinct.
     """
     digest = hashlib.sha256(original.encode()).hexdigest()[:4]
-    suffix = f"_{digest}"                          # 5 chars total
+    suffix = f"_{digest}"  # 5 chars total
     avail = _MAX_LEN - len(suffix)
     return sanitized[:avail] + suffix
 
@@ -131,6 +131,7 @@ def _truncate_with_hash(sanitized: str, original: str) -> str:
 # ---------------------------------------------------------------------------
 # ToolIdRegistry — bidirectional canonical ↔ sanitized mapping
 # ---------------------------------------------------------------------------
+
 
 class ToolIdRegistry:
     """
@@ -156,9 +157,9 @@ class ToolIdRegistry:
     def __init__(self) -> None:
         self._lock: Lock = Lock()
         # canonical → sanitized
-        self._canon_to_sanitized: Dict[str, str] = {}
+        self._canon_to_sanitized: dict[str, str] = {}
         # sanitized → canonical  (the first canonical that claimed this sanitized form)
-        self._sanitized_to_canon: Dict[str, str] = {}
+        self._sanitized_to_canon: dict[str, str] = {}
 
     # ── Public API ───────────────────────────────────────
 
@@ -186,7 +187,7 @@ class ToolIdRegistry:
             self._sanitized_to_canon[sanitized] = canonical
             return sanitized
 
-    def get_canonical(self, sanitized: str) -> Optional[str]:
+    def get_canonical(self, sanitized: str) -> str | None:
         """
         Look up the canonical ID for a sanitized tool name.
 
@@ -195,7 +196,7 @@ class ToolIdRegistry:
         with self._lock:
             return self._sanitized_to_canon.get(sanitized)
 
-    def get_sanitized(self, canonical: str) -> Optional[str]:
+    def get_sanitized(self, canonical: str) -> str | None:
         """
         Look up the sanitized form for a canonical tool name.
 
@@ -204,9 +205,7 @@ class ToolIdRegistry:
         with self._lock:
             return self._canon_to_sanitized.get(canonical)
 
-    def sanitize_tool_definitions(
-        self, tools: list[dict]
-    ) -> tuple[list[dict], "ToolIdRegistry"]:
+    def sanitize_tool_definitions(self, tools: list[dict]) -> tuple[list[dict], ToolIdRegistry]:
         """
         Sanitize a list of OpenAI-format tool definitions in-place.
 
@@ -229,9 +228,7 @@ class ToolIdRegistry:
             sanitized.append(tool_copy)
         return sanitized, self
 
-    def desanitize_tool_calls(
-        self, tool_calls: list[dict]
-    ) -> list[dict]:
+    def desanitize_tool_calls(self, tool_calls: list[dict]) -> list[dict]:
         """
         Map sanitized tool names in an LLM response back to canonical names.
 
@@ -302,6 +299,7 @@ class ToolIdRegistry:
 # Deterministic tool call ID generator
 # ---------------------------------------------------------------------------
 
+
 def make_tool_call_id(
     agent_id: str,
     tool_name: str,
@@ -341,6 +339,7 @@ def make_tool_call_id(
 # Utility: validate a batch of tool definitions
 # ---------------------------------------------------------------------------
 
+
 def validate_tool_definitions(tools: list[dict]) -> list[str]:
     """
     Check every ``function.name`` in a list of OpenAI tool definitions against
@@ -359,9 +358,7 @@ def validate_tool_definitions(tools: list[dict]) -> list[str]:
         if not name:
             violations.append(f"tools[{idx}]: missing function.name")
         elif not is_valid_tool_id(name):
-            violations.append(
-                f"tools[{idx}] name={name!r}: does not match ^[a-zA-Z0-9_-]{{1,64}}$"
-            )
+            violations.append(f"tools[{idx}] name={name!r}: does not match ^[a-zA-Z0-9_-]{{1,64}}$")
     return violations
 
 
@@ -369,9 +366,11 @@ def validate_tool_definitions(tools: list[dict]) -> list[str]:
 # Local helper
 # ---------------------------------------------------------------------------
 
+
 def _deep_copy_tool(tool: dict) -> dict:
     """Shallow-copy a tool dict, deep-copying the nested 'function' sub-dict."""
     import copy
+
     result = dict(tool)
     if "function" in result:
         result["function"] = dict(result["function"])

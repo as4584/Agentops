@@ -7,8 +7,6 @@ Uses matching templates when available.
 
 from __future__ import annotations
 
-from typing import Any, Optional
-
 from backend.llm import OllamaClient
 from backend.utils import logger
 from backend.webgen.agents.base_agent import WebAgentBase
@@ -34,8 +32,8 @@ class SitePlannerAgent(WebAgentBase):
 
     def __init__(
         self,
-        llm: Optional[OllamaClient] = None,
-        store: Optional[TemplateStore] = None,
+        llm: OllamaClient | None = None,
+        store: TemplateStore | None = None,
     ) -> None:
         super().__init__(llm)
         self.store = store or TemplateStore()
@@ -88,7 +86,7 @@ Business: {brief.business_name}
 Type: {brief.business_type.value}
 Tagline: {brief.tagline}
 Description: {brief.description}
-Services: {', '.join(brief.services) if brief.services else 'Not specified'}
+Services: {", ".join(brief.services) if brief.services else "Not specified"}
 Target Audience: {brief.target_audience}
 Tone: {brief.tone}
 {pages_hint}
@@ -146,21 +144,25 @@ Return JSON:
         for i, rp in enumerate(raw_pages):
             sections = []
             for j, rs in enumerate(rp.get("sections", [])):
-                sections.append(SectionSpec(
-                    name=rs.get("name", f"section-{j}"),
-                    component_type=rs.get("component_type", "generic"),
-                    content=rs.get("content_hints", {}),
-                    order=j,
-                ))
+                sections.append(
+                    SectionSpec(
+                        name=rs.get("name", f"section-{j}"),
+                        component_type=rs.get("component_type", "generic"),
+                        content=rs.get("content_hints", {}),
+                        order=j,
+                    )
+                )
 
-            pages.append(PageSpec(
-                slug=rp.get("slug", f"page-{i}"),
-                title=rp.get("title", ""),
-                purpose=rp.get("purpose", ""),
-                sections=sections,
-                nav_label=rp.get("nav_label", rp.get("title", "")),
-                nav_order=rp.get("nav_order", i + 1),
-            ))
+            pages.append(
+                PageSpec(
+                    slug=rp.get("slug", f"page-{i}"),
+                    title=rp.get("title", ""),
+                    purpose=rp.get("purpose", ""),
+                    sections=sections,
+                    nav_label=rp.get("nav_label", rp.get("title", "")),
+                    nav_order=rp.get("nav_order", i + 1),
+                )
+            )
 
         return pages
 
@@ -175,18 +177,17 @@ Return JSON:
 
         pages = []
         for i, (slug, title, purpose, section_names) in enumerate(default_pages):
-            sections = [
-                SectionSpec(name=s, component_type=s, order=j)
-                for j, s in enumerate(section_names)
-            ]
-            pages.append(PageSpec(
-                slug=slug,
-                title=f"{title} - {brief.business_name}",
-                purpose=purpose,
-                sections=sections,
-                nav_label=title,
-                nav_order=i + 1,
-            ))
+            sections = [SectionSpec(name=s, component_type=s, order=j) for j, s in enumerate(section_names)]
+            pages.append(
+                PageSpec(
+                    slug=slug,
+                    title=f"{title} - {brief.business_name}",
+                    purpose=purpose,
+                    sections=sections,
+                    nav_label=title,
+                    nav_order=i + 1,
+                )
+            )
         return pages
 
     def _format_template_context(self, template) -> str:

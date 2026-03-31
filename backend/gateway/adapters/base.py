@@ -11,13 +11,14 @@ Each provider implements:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import Any, AsyncIterator
+from typing import Any
 
 
 @dataclass
 class ChatMessage:
-    role: str          # system | user | assistant | tool
+    role: str  # system | user | assistant | tool
     content: str | list[dict[str, Any]]  # str or multipart
     name: str | None = None
     tool_call_id: str | None = None
@@ -81,16 +82,12 @@ class BaseProviderAdapter(ABC):
     provider_name: str = "base"
 
     @abstractmethod
-    async def chat_complete(
-        self, request: ChatCompletionRequest
-    ) -> ChatCompletionResponse:
+    async def chat_complete(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
         """Return a full (non-streaming) chat completion."""
         ...
 
     @abstractmethod
-    async def chat_stream(
-        self, request: ChatCompletionRequest
-    ) -> AsyncIterator[StreamChunk]:
+    async def chat_stream(self, request: ChatCompletionRequest) -> AsyncIterator[StreamChunk]:
         """Yield SSE-compatible stream chunks."""
         ...
 

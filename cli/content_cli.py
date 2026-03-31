@@ -26,17 +26,17 @@ from __future__ import annotations
 
 import asyncio
 import sys
-import json
 
 # Ensure project root is on path
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from backend.llm import OllamaClient
 from backend.config import SANDBOX_ENFORCEMENT_ENABLED
-from backend.content.pipeline import ContentPipeline
 from backend.content.job_store import job_store
+from backend.content.pipeline import ContentPipeline
 from backend.content.video_job import JobStatus
+from backend.llm import OllamaClient
 
 
 def _get_pipeline() -> ContentPipeline:
@@ -50,10 +50,7 @@ def _extract_quality_checks(argv: list[str]) -> tuple[list[str], dict[str, bool]
         "playwright_ok": "--playwright-ok" in argv,
         "lighthouse_mobile_ok": "--lighthouse-mobile-ok" in argv,
     }
-    filtered = [
-        item for item in argv
-        if item not in {"--tests-ok", "--playwright-ok", "--lighthouse-mobile-ok"}
-    ]
+    filtered = [item for item in argv if item not in {"--tests-ok", "--playwright-ok", "--lighthouse-mobile-ok"}]
     return filtered, checks
 
 

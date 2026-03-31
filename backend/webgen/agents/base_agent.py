@@ -11,7 +11,7 @@ import asyncio
 import json
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 from backend.llm import OllamaClient
 from backend.utils import logger
@@ -27,7 +27,7 @@ class WebAgentBase(ABC):
 
     name: str = "WebAgentBase"
 
-    def __init__(self, llm: Optional[OllamaClient] = None) -> None:
+    def __init__(self, llm: OllamaClient | None = None) -> None:
         self.llm = llm or OllamaClient()
 
     @abstractmethod
@@ -66,7 +66,7 @@ class WebAgentBase(ABC):
         self,
         prompt: str,
         system: str = "",
-        schema: Optional[dict] = None,
+        schema: dict | None = None,
         temperature: float = 0.5,
         max_tokens: int = 4096,
     ) -> dict:
@@ -76,9 +76,7 @@ class WebAgentBase(ABC):
         Injects JSON formatting instructions and parses the response.
         """
         json_instruction = (
-            "\n\nYou MUST respond with valid JSON only. "
-            "No markdown, no explanation, no code fences. "
-            "Output raw JSON."
+            "\n\nYou MUST respond with valid JSON only. No markdown, no explanation, no code fences. Output raw JSON."
         )
         if schema:
             json_instruction += f"\n\nExpected schema:\n{json.dumps(schema, indent=2)}"
@@ -149,6 +147,7 @@ class WebAgentBase(ABC):
 
         if loop and loop.is_running():
             import concurrent.futures
+
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 return pool.submit(asyncio.run, coro).result()
         else:

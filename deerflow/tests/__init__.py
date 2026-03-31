@@ -101,8 +101,8 @@ class TestMiddlewareChain:
         )
 
         chain = MiddlewareChain()
-        chain.add(LoggingMiddleware())      # priority 20
-        chain.add(RateLimitMiddleware())    # priority 15
+        chain.add(LoggingMiddleware())  # priority 20
+        chain.add(RateLimitMiddleware())  # priority 15
 
         # Should be sorted by priority
         assert chain.stack == ["rate_limit", "logging"]
@@ -212,10 +212,12 @@ class TestFactMemory:
         from deerflow.memory.facts import FactMemory
 
         llm = MockLLM(
-            response=json.dumps([
-                {"content": "User prefers Python", "category": "preference", "confidence": 0.9},
-                {"content": "Deploys on Fridays", "category": "behavior", "confidence": 0.7},
-            ])
+            response=json.dumps(
+                [
+                    {"content": "User prefers Python", "category": "preference", "confidence": 0.9},
+                    {"content": "Deploys on Fridays", "category": "behavior", "confidence": 0.7},
+                ]
+            )
         )
         mem = MockMemoryStore()
         fm = FactMemory(llm, mem)
@@ -236,9 +238,11 @@ class TestFactMemory:
         from deerflow.memory.facts import FactMemory
 
         llm = MockLLM(
-            response=json.dumps([
-                {"content": "User prefers Python", "category": "preference", "confidence": 0.9},
-            ])
+            response=json.dumps(
+                [
+                    {"content": "User prefers Python", "category": "preference", "confidence": 0.9},
+                ]
+            )
         )
         mem = MockMemoryStore()
         fm = FactMemory(llm, mem)
@@ -252,9 +256,13 @@ class TestFactMemory:
         from deerflow.memory.facts import Fact, FactCategory, FactMemory
 
         mem = MockMemoryStore()
-        mem.write("a1", "deerflow_facts", [
-            Fact("User likes tests", FactCategory.PREFERENCE, 0.95, "a1").to_dict(),
-        ])
+        mem.write(
+            "a1",
+            "deerflow_facts",
+            [
+                Fact("User likes tests", FactCategory.PREFERENCE, 0.95, "a1").to_dict(),
+            ],
+        )
         fm = FactMemory(MockLLM(), mem)
 
         section = fm.build_prompt_section("a1")
@@ -405,9 +413,7 @@ class TestProgressiveSkills:
 
         loader = ProgressiveSkillLoader(MockSkillRegistry())
         # This message should match multiple patterns
-        matches = loader.classify_intent(
-            "Deploy frontend React CI/CD pipeline with state machine"
-        )
+        matches = loader.classify_intent("Deploy frontend React CI/CD pipeline with state machine")
         assert len(matches) <= 3  # default max
 
     def test_build_prompt(self):
@@ -458,13 +464,13 @@ class TestSetup:
         )
 
         assert len(chain.stack) == 7
-        assert chain.stack[0] == "tool_health"        # priority 8
-        assert chain.stack[1] == "drift_guard"        # priority 10
-        assert chain.stack[2] == "rate_limit"         # priority 15
-        assert chain.stack[3] == "logging"            # priority 20
-        assert chain.stack[4] == "fact_memory"        # priority 40
-        assert chain.stack[5] == "progressive_skills" # priority 45
-        assert chain.stack[6] == "summarization"      # priority 50
+        assert chain.stack[0] == "tool_health"  # priority 8
+        assert chain.stack[1] == "drift_guard"  # priority 10
+        assert chain.stack[2] == "rate_limit"  # priority 15
+        assert chain.stack[3] == "logging"  # priority 20
+        assert chain.stack[4] == "fact_memory"  # priority 40
+        assert chain.stack[5] == "progressive_skills"  # priority 45
+        assert chain.stack[6] == "summarization"  # priority 50
 
         assert hasattr(chain, "fact_memory")
         assert hasattr(chain, "skill_loader")
@@ -503,7 +509,7 @@ class TestToolHealthMonitor:
         assert stats.failure_rate == 1.0
 
     def test_is_chronic_detection(self):
-        from deerflow.tools.health import ToolHealthMonitor, _CHRONIC_THRESHOLD
+        from deerflow.tools.health import _CHRONIC_THRESHOLD, ToolHealthMonitor
 
         monitor = ToolHealthMonitor(MockMemoryStore())
         # Record enough failures to trigger chronic detection
@@ -606,45 +612,44 @@ class TestDetectToolFailure:
 class TestToolRepairEngine:
     @pytest.mark.asyncio
     async def test_suggest_repair_valid_json(self):
-        from deerflow.tools.repair import ToolRepairEngine, RepairSuggestion
-        from deerflow.tools.health import ToolHealthMonitor
         import json
 
-        repair_json = json.dumps({
-            "strategy": "mutate",
-            "suggested_kwargs": {"command": "docker info"},
-            "rationale": "Try docker info instead",
-            "confidence": 0.85,
-        })
+        from deerflow.tools.health import ToolHealthMonitor
+        from deerflow.tools.repair import RepairSuggestion, ToolRepairEngine
+
+        repair_json = json.dumps(
+            {
+                "strategy": "mutate",
+                "suggested_kwargs": {"command": "docker info"},
+                "rationale": "Try docker info instead",
+                "confidence": 0.85,
+            }
+        )
         llm = MockLLM(response=repair_json)
         monitor = ToolHealthMonitor(MockMemoryStore())
         engine = ToolRepairEngine(llm, monitor)
 
-        suggestion = await engine.suggest_repair(
-            "safe_shell", "devops_agent", "exit code 1", {"command": "docker ps"}
-        )
+        suggestion = await engine.suggest_repair("safe_shell", "devops_agent", "exit code 1", {"command": "docker ps"})
         assert suggestion.strategy == "mutate"
         assert suggestion.confidence == 0.85
 
     @pytest.mark.asyncio
     async def test_chronic_tool_escalates_immediately(self):
+        from deerflow.tools.health import _CHRONIC_THRESHOLD, ToolHealthMonitor
         from deerflow.tools.repair import ToolRepairEngine
-        from deerflow.tools.health import ToolHealthMonitor, _CHRONIC_THRESHOLD
 
         monitor = ToolHealthMonitor(MockMemoryStore())
         for _ in range(_CHRONIC_THRESHOLD):
             monitor.record_failure("broken_tool", "agent", "always fails")
 
         engine = ToolRepairEngine(MockLLM(), monitor)
-        suggestion = await engine.suggest_repair(
-            "broken_tool", "agent", "failed again", {}
-        )
+        suggestion = await engine.suggest_repair("broken_tool", "agent", "failed again", {})
         assert suggestion.strategy == "escalate"
 
     @pytest.mark.asyncio
     async def test_llm_error_falls_back_to_skip(self):
-        from deerflow.tools.repair import ToolRepairEngine
         from deerflow.tools.health import ToolHealthMonitor
+        from deerflow.tools.repair import ToolRepairEngine
 
         class BrokenLLM:
             async def generate(self, *a, **kw):
@@ -664,9 +669,9 @@ class TestToolRepairEngine:
 class TestToolHealthMiddleware:
     @pytest.mark.asyncio
     async def test_records_successful_call(self):
-        from deerflow.tools.middleware import ToolHealthMiddleware, detect_tool_failure
-        from deerflow.tools.health import ToolHealthMonitor
         from deerflow.middleware.chain import ToolContext
+        from deerflow.tools.health import ToolHealthMonitor
+        from deerflow.tools.middleware import ToolHealthMiddleware, detect_tool_failure
 
         monitor = ToolHealthMonitor(MockMemoryStore())
         mw = ToolHealthMiddleware(monitor)
@@ -684,9 +689,9 @@ class TestToolHealthMiddleware:
 
     @pytest.mark.asyncio
     async def test_records_failure_and_annotates(self):
-        from deerflow.tools.middleware import ToolHealthMiddleware
-        from deerflow.tools.health import ToolHealthMonitor
         from deerflow.middleware.chain import ToolContext
+        from deerflow.tools.health import ToolHealthMonitor
+        from deerflow.tools.middleware import ToolHealthMiddleware
 
         monitor = ToolHealthMonitor(MockMemoryStore())
         mw = ToolHealthMiddleware(monitor)
@@ -757,16 +762,19 @@ class TestAntiLoopGuard:
     @pytest.mark.asyncio
     async def test_second_attempt_escalates(self):
         """Same (tool, error) pair should escalate on the second call."""
-        from deerflow.tools.repair import ToolRepairEngine, RepairSuggestion
-        from deerflow.tools.health import ToolHealthMonitor
         import json
 
-        repair_json = json.dumps({
-            "strategy": "retry",
-            "suggested_kwargs": {},
-            "rationale": "transient",
-            "confidence": 0.8,
-        })
+        from deerflow.tools.health import ToolHealthMonitor
+        from deerflow.tools.repair import RepairSuggestion, ToolRepairEngine
+
+        repair_json = json.dumps(
+            {
+                "strategy": "retry",
+                "suggested_kwargs": {},
+                "rationale": "transient",
+                "confidence": 0.8,
+            }
+        )
         llm = MockLLM(response=repair_json)
         monitor = ToolHealthMonitor(MockMemoryStore())
         engine = ToolRepairEngine(llm, monitor)
@@ -780,13 +788,14 @@ class TestAntiLoopGuard:
     @pytest.mark.asyncio
     async def test_different_errors_not_blocked(self):
         """Different error fingerprints should not be treated as a loop."""
-        from deerflow.tools.repair import ToolRepairEngine
-        from deerflow.tools.health import ToolHealthMonitor
         import json
 
-        llm = MockLLM(response=json.dumps({
-            "strategy": "retry", "suggested_kwargs": {}, "rationale": "ok", "confidence": 0.8
-        }))
+        from deerflow.tools.health import ToolHealthMonitor
+        from deerflow.tools.repair import ToolRepairEngine
+
+        llm = MockLLM(
+            response=json.dumps({"strategy": "retry", "suggested_kwargs": {}, "rationale": "ok", "confidence": 0.8})
+        )
         monitor = ToolHealthMonitor(MockMemoryStore())
         engine = ToolRepairEngine(llm, monitor)
 
@@ -836,7 +845,7 @@ class TestExecutionRecorder:
         assert tool_entries[0]["tool_name"] == "health_check"
 
     def test_prunes_old_runs(self, tmp_path):
-        from deerflow.execution.recorder import ExecutionRecorder, _MAX_RUNS_PER_AGENT
+        from deerflow.execution.recorder import _MAX_RUNS_PER_AGENT, ExecutionRecorder
 
         recorder = ExecutionRecorder(base_dir=tmp_path)
         # Create MAX + 2 runs to force pruning
@@ -863,8 +872,8 @@ class TestExecutionRecorder:
 class TestExecutionAnalyzer:
     @pytest.mark.asyncio
     async def test_analyze_run_no_tool_calls_returns_none(self, tmp_path):
-        from deerflow.execution.recorder import ExecutionRecorder
         from deerflow.execution.analyzer import ExecutionAnalyzer
+        from deerflow.execution.recorder import ExecutionRecorder
         from deerflow.tools.health import ToolHealthMonitor
 
         recorder = ExecutionRecorder(base_dir=tmp_path)
@@ -879,29 +888,36 @@ class TestExecutionAnalyzer:
     @pytest.mark.asyncio
     async def test_analyze_run_parses_judgments(self, tmp_path):
         import json
-        from deerflow.execution.recorder import ExecutionRecorder
+
         from deerflow.execution.analyzer import ExecutionAnalyzer
+        from deerflow.execution.recorder import ExecutionRecorder
         from deerflow.tools.health import ToolHealthMonitor
 
-        analysis_json = json.dumps({
-            "tool_judgments": [
-                {
-                    "tool_name": "safe_shell",
-                    "status": "degraded",
-                    "issue": "intermittent exit code 1",
-                    "suggested_fix": "check docker daemon",
-                }
-            ],
-            "skill_judgments": [],
-            "escalate": False,
-            "escalation_reason": None,
-        })
+        analysis_json = json.dumps(
+            {
+                "tool_judgments": [
+                    {
+                        "tool_name": "safe_shell",
+                        "status": "degraded",
+                        "issue": "intermittent exit code 1",
+                        "suggested_fix": "check docker daemon",
+                    }
+                ],
+                "skill_judgments": [],
+                "escalate": False,
+                "escalation_reason": None,
+            }
+        )
         recorder = ExecutionRecorder(base_dir=tmp_path)
         run_id = recorder.start_run("devops_agent", "run docker ps")
         recorder.record_tool_call(
-            run_id=run_id, agent_id="devops_agent",
-            tool_name="safe_shell", kwargs={"command": "docker ps"},
-            result={"return_code": 1}, failed=True, error="exit code 1",
+            run_id=run_id,
+            agent_id="devops_agent",
+            tool_name="safe_shell",
+            kwargs={"command": "docker ps"},
+            result={"return_code": 1},
+            failed=True,
+            error="exit code 1",
         )
         recorder.end_run(run_id, "devops_agent")
 
@@ -918,8 +934,8 @@ class TestExecutionAnalyzer:
 
     @pytest.mark.asyncio
     async def test_llm_error_returns_empty_judgment(self, tmp_path):
-        from deerflow.execution.recorder import ExecutionRecorder
         from deerflow.execution.analyzer import ExecutionAnalyzer
+        from deerflow.execution.recorder import ExecutionRecorder
         from deerflow.tools.health import ToolHealthMonitor
 
         class BrokenLLM:
@@ -929,9 +945,13 @@ class TestExecutionAnalyzer:
         recorder = ExecutionRecorder(base_dir=tmp_path)
         run_id = recorder.start_run("agent", "msg")
         recorder.record_tool_call(
-            run_id=run_id, agent_id="agent",
-            tool_name="health_check", kwargs={}, result={"reachable": False},
-            failed=True, error="unreachable",
+            run_id=run_id,
+            agent_id="agent",
+            tool_name="health_check",
+            kwargs={},
+            result={"reachable": False},
+            failed=True,
+            error="unreachable",
         )
         recorder.end_run(run_id, "agent")
 

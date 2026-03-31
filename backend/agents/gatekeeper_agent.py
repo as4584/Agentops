@@ -25,12 +25,10 @@ class GatekeeperAgent:
             return GatekeeperResult(approved=False, violations=violations)
 
         touched_runtime = any(
-            str(path).startswith("frontend/src/") or str(path).startswith("backend/")
-            for path in files_changed
+            str(path).startswith("frontend/src/") or str(path).startswith("backend/") for path in files_changed
         )
         touched_tests = any(
-            str(path).startswith("frontend/tests/") or str(path).startswith("backend/tests/")
-            for path in files_changed
+            str(path).startswith("frontend/tests/") or str(path).startswith("backend/tests/") for path in files_changed
         )
         if touched_runtime and not touched_tests:
             violations.append("TDD violation: runtime code changed without corresponding tests")

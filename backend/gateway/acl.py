@@ -12,18 +12,15 @@ Design:
 from __future__ import annotations
 
 import fnmatch
-import json
 import sqlite3
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator
 
-from backend.gateway.auth import DB_PATH, _get_conn, _create_schema
-
+from backend.gateway.auth import DB_PATH, _create_schema, _get_conn
 
 # ---------------------------------------------------------------------------
 # Model tier definitions
 # ---------------------------------------------------------------------------
+
 
 class ModelTier:
     BUDGET = "budget"
@@ -84,6 +81,7 @@ def _ensure_acl_schema(conn: sqlite3.Connection) -> None:
 # ModelACL
 # ---------------------------------------------------------------------------
 
+
 class ModelACL:
     """Manage per-key model access control lists."""
 
@@ -124,9 +122,7 @@ class ModelACL:
 
     def is_allowed(self, key_id: str, model_id: str) -> bool:
         """Return True if *key_id* is allowed to access *model_id*."""
-        rows = self._conn.execute(
-            "SELECT pattern FROM gateway_key_acl WHERE key_id = ?", (key_id,)
-        ).fetchall()
+        rows = self._conn.execute("SELECT pattern FROM gateway_key_acl WHERE key_id = ?", (key_id,)).fetchall()
         patterns = [r[0] for r in rows]
         return _matches_any(model_id, patterns)
 
@@ -149,6 +145,7 @@ class ModelACL:
 # ---------------------------------------------------------------------------
 # Pattern matching helpers
 # ---------------------------------------------------------------------------
+
 
 def _matches_any(model_id: str, patterns: list[str]) -> bool:
     for pattern in patterns:

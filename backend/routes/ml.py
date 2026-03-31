@@ -7,15 +7,15 @@ and documentation enforcement via REST API.
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Any, Optional
 
-from backend.ml.experiment_tracker import ExperimentTracker
-from backend.ml.monitor import MLMonitor
 from backend.ml.data_version import DataVersioner
 from backend.ml.doc_enforcer import MLDocEnforcer
-from backend.utils import logger
+from backend.ml.experiment_tracker import ExperimentTracker
+from backend.ml.monitor import MLMonitor
 
 router = APIRouter(prefix="/ml", tags=["ml"])
 
@@ -40,7 +40,7 @@ class StartRunRequest(BaseModel):
 class LogMetricRequest(BaseModel):
     name: str
     value: float
-    step: Optional[int] = None
+    step: int | None = None
 
 
 class EndRunRequest(BaseModel):
@@ -72,13 +72,13 @@ class RecordPredictionRequest(BaseModel):
     model_name: str
     predicted: Any
     actual: Any = None
-    confidence: Optional[float] = None
+    confidence: float | None = None
 
 
 class RecordEndpointRequest(BaseModel):
     endpoint: str
     status_code: int
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class SetBaselineRequest(BaseModel):
@@ -138,8 +138,8 @@ async def get_experiment(run_id: str) -> dict[str, Any]:
 
 @router.get("/experiments")
 async def list_experiments(
-    experiment_name: Optional[str] = None,
-    status: Optional[str] = None,
+    experiment_name: str | None = None,
+    status: str | None = None,
 ) -> list[dict[str, Any]]:
     return _tracker.list_runs(experiment_name=experiment_name, status=status)
 
@@ -197,7 +197,7 @@ async def health_report(model_name: str = "") -> dict[str, Any]:
 
 
 @router.get("/monitoring/latency")
-async def check_latency(endpoint: Optional[str] = None) -> dict[str, Any]:
+async def check_latency(endpoint: str | None = None) -> dict[str, Any]:
     return _monitor.check_latency(endpoint=endpoint)
 
 
@@ -218,15 +218,15 @@ async def check_endpoints() -> dict[str, Any]:
 
 @router.get("/monitoring/alerts")
 async def get_alerts(
-    alert_type: Optional[str] = None,
-    severity: Optional[str] = None,
+    alert_type: str | None = None,
+    severity: str | None = None,
     limit: int = 50,
 ) -> list[dict[str, Any]]:
     return _monitor.get_alerts(alert_type=alert_type, severity=severity, limit=limit)
 
 
 @router.post("/monitoring/alerts/acknowledge")
-async def acknowledge_alerts(alert_type: Optional[str] = None) -> dict[str, int]:
+async def acknowledge_alerts(alert_type: str | None = None) -> dict[str, int]:
     count = _monitor.acknowledge_alerts(alert_type=alert_type)
     return {"acknowledged": count}
 

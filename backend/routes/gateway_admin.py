@@ -29,14 +29,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from backend.gateway.acl import ModelACL, ModelTier, TIER_MODELS, get_acl
+from backend.gateway.acl import TIER_MODELS, get_acl
 from backend.gateway.audit import get_audit_logger
 from backend.gateway.auth import (
-    APIKey, APIKeyManager, get_key_manager,
-    ALL_SCOPES, DEFAULT_SCOPES, SCOPE_CHAT, SCOPE_MODELS, SCOPE_ADMIN,
+    DEFAULT_SCOPES,
+    APIKey,
+    get_key_manager,
 )
-from backend.gateway.health import get_health_monitor, all_circuit_status
-from backend.gateway.middleware import require_admin_auth, GatewayContext
+from backend.gateway.health import all_circuit_status, get_health_monitor
+from backend.gateway.middleware import GatewayContext, require_admin_auth
 from backend.gateway.secrets import get_vault
 from backend.gateway.usage import get_usage_tracker
 from backend.llm.unified_registry import UNIFIED_MODEL_REGISTRY
@@ -48,6 +49,7 @@ router = APIRouter(prefix="/admin", tags=["Gateway Admin"])
 # Pydantic schemas
 # ---------------------------------------------------------------------------
 
+
 class CreateKeyRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     owner: str = ""
@@ -58,8 +60,8 @@ class CreateKeyRequest(BaseModel):
     quota_tpd: int = Field(1_000_000, ge=0)
     quota_daily_usd: float = Field(5.0, ge=0)
     quota_monthly_usd: float = Field(50.0, ge=0)
-    models: list[str] = []          # explicit model patterns
-    tier: str | None = None         # "budget" | "standard" | "premium"
+    models: list[str] = []  # explicit model patterns
+    tier: str | None = None  # "budget" | "standard" | "premium"
     metadata: dict[str, Any] = {}
 
 
@@ -110,6 +112,7 @@ def _key_to_dict(k: APIKey, include_hashes: bool = False) -> dict[str, Any]:
 # Key management
 # ---------------------------------------------------------------------------
 
+
 @router.post("/keys")
 async def create_key(
     body: CreateKeyRequest,
@@ -137,13 +140,16 @@ async def create_key(
     if body.models:
         acl.grant(api_key.key_id, body.models)
 
-    return JSONResponse({
-        "key": raw_key,          # shown ONCE — never retrievable again
-        "key_id": api_key.key_id,
-        "prefix": api_key.key_prefix,
-        "message": "Store this key securely — it will not be shown again.",
-        **_key_to_dict(api_key),
-    }, status_code=201)
+    return JSONResponse(
+        {
+            "key": raw_key,  # shown ONCE — never retrievable again
+            "key_id": api_key.key_id,
+            "prefix": api_key.key_prefix,
+            "message": "Store this key securely — it will not be shown again.",
+            **_key_to_dict(api_key),
+        },
+        status_code=201,
+    )
 
 
 @router.get("/keys")
@@ -191,10 +197,7 @@ async def update_key(
     if body.disabled is not None:
         updates["disabled"] = body.disabled
     if body.expires_in_days is not None:
-        updates["expires_at"] = (
-            0.0 if body.expires_in_days == 0
-            else time.time() + body.expires_in_days * 86400
-        )
+        updates["expires_at"] = 0.0 if body.expires_in_days == 0 else time.time() + body.expires_in_days * 86400
     for q in ("quota_rpm", "quota_tpm", "quota_tpd", "quota_daily_usd", "quota_monthly_usd"):
         val = getattr(body, q)
         if val is not None:
@@ -213,7 +216,7 @@ async def update_key(
         acl.grant(key_id, body.add_models)
 
     updated = mgr.get_by_id(key_id)
-    return JSONResponse(_key_to_dict(updated))
+    return JSONResponse(_key_to_dict(updated))  # type: ignore[arg-type]
 
 
 @router.delete("/keys/{key_id}")
@@ -243,11 +246,14 @@ async def rotate_key(
     if not result:
         raise HTTPException(status_code=404, detail="Key not found")
     new_raw, new_prefix = result
-    return JSONResponse({
-        "new_key": new_raw,
-        "new_prefix": new_prefix,
-        "message": "New secondary key generated. Call /promote when ready to switch.",
-    }, status_code=201)
+    return JSONResponse(
+        {
+            "new_key": new_raw,
+            "new_prefix": new_prefix,
+            "message": "New secondary key generated. Call /promote when ready to switch.",
+        },
+        status_code=201,
+    )
 
 
 @router.post("/keys/{key_id}/promote")
@@ -272,28 +278,31 @@ async def get_key_usage(
     top = tracker.top_models(key_id, days=days)
     daily_cost = tracker.get_today_cost(key_id)
     monthly_cost = tracker.get_monthly_cost(key_id)
-    return JSONResponse({
-        "key_id": key_id,
-        "today_cost_usd": round(daily_cost, 6),
-        "month_cost_usd": round(monthly_cost, 6),
-        "top_models": top,
-        "daily_breakdown": [
-            {
-                "day": r.period,
-                "model": r.model,
-                "requests": r.requests,
-                "tokens_in": r.tokens_in,
-                "tokens_out": r.tokens_out,
-                "cost_usd": round(r.cost_usd, 6),
-            }
-            for r in summary
-        ],
-    })
+    return JSONResponse(
+        {
+            "key_id": key_id,
+            "today_cost_usd": round(daily_cost, 6),
+            "month_cost_usd": round(monthly_cost, 6),
+            "top_models": top,
+            "daily_breakdown": [
+                {
+                    "day": r.period,
+                    "model": r.model,
+                    "requests": r.requests,
+                    "tokens_in": r.tokens_in,
+                    "tokens_out": r.tokens_out,
+                    "cost_usd": round(r.cost_usd, 6),
+                }
+                for r in summary
+            ],
+        }
+    )
 
 
 # ---------------------------------------------------------------------------
 # Model catalogue
 # ---------------------------------------------------------------------------
+
 
 @router.get("/models")
 async def list_all_models(
@@ -301,16 +310,18 @@ async def list_all_models(
 ) -> Any:
     models = []
     for mid, spec in UNIFIED_MODEL_REGISTRY.items():
-        models.append({
-            "id": mid,
-            "provider": spec.provider.value,
-            "display_name": spec.display_name,
-            "context_window": spec.context_window,
-            "input_cost_per_m": spec.input_cost_per_m,
-            "output_cost_per_m": spec.output_cost_per_m,
-            "supports_tools": spec.supports_tools,
-            "best_for": spec.best_for,
-        })
+        models.append(
+            {
+                "id": mid,
+                "provider": spec.provider.value,
+                "display_name": spec.display_name,
+                "context_window": spec.context_window,
+                "input_cost_per_m": spec.input_cost_per_m,
+                "output_cost_per_m": spec.output_cost_per_m,
+                "supports_tools": spec.supports_tools,
+                "best_for": spec.best_for,
+            }
+        )
     tiers = {tier: patterns for tier, patterns in TIER_MODELS.items()}
     return JSONResponse({"models": models, "tiers": tiers})
 
@@ -319,6 +330,7 @@ async def list_all_models(
 # Provider secrets vault
 # ---------------------------------------------------------------------------
 
+
 @router.post("/secrets")
 async def set_provider_secret(
     body: SetSecretRequest,
@@ -326,11 +338,13 @@ async def set_provider_secret(
 ) -> Any:
     vault = get_vault()
     vault.set(f"provider:{body.provider}", body.api_key)
-    return JSONResponse({
-        "stored": True,
-        "provider": body.provider,
-        "message": "Key encrypted and stored in vault.",
-    })
+    return JSONResponse(
+        {
+            "stored": True,
+            "provider": body.provider,
+            "message": "Key encrypted and stored in vault.",
+        }
+    )
 
 
 @router.delete("/secrets/{provider}")
@@ -358,6 +372,7 @@ async def list_secret_providers(
 # Audit log
 # ---------------------------------------------------------------------------
 
+
 @router.get("/audit")
 async def get_audit_log(
     n: int = 100,
@@ -370,6 +385,7 @@ async def get_audit_log(
 # ---------------------------------------------------------------------------
 # Health & circuit status
 # ---------------------------------------------------------------------------
+
 
 @router.get("/health")
 async def admin_health(

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+
 import pytest
 
 from backend.ml.vector_store import VectorStore
@@ -44,7 +45,10 @@ class TestVectorStore:
         store.ensure_collection(col, dim=4)
         id_x = _uid("x")
         store.upsert(
-            vectors=[[1, 0, 0, 0]], payloads=[{"k": "v"}], ids=[id_x], collection=col,
+            vectors=[[1, 0, 0, 0]],
+            payloads=[{"k": "v"}],
+            ids=[id_x],
+            collection=col,
         )
         point = store.get_by_id(id_x, collection=col)
         assert point is not None
@@ -61,7 +65,10 @@ class TestVectorStore:
         store.ensure_collection(col, dim=4)
         id_d1 = _uid("d1")
         store.upsert(
-            vectors=[[1, 0, 0, 0]], payloads=[{}], ids=[id_d1], collection=col,
+            vectors=[[1, 0, 0, 0]],
+            payloads=[{}],
+            ids=[id_d1],
+            collection=col,
         )
         assert store.count(col) == 1
         store.delete(ids=[id_d1], collection=col)
@@ -117,12 +124,16 @@ class TestVectorStore:
 
     def test_recall_by_memory_type(self, store: VectorStore) -> None:
         store.store_memory(
-            agent_name="soul_core", content="Deep thought",
-            embedding=[1, 0, 0, 0], memory_type="reflection",
+            agent_name="soul_core",
+            content="Deep thought",
+            embedding=[1, 0, 0, 0],
+            memory_type="reflection",
         )
         store.store_memory(
-            agent_name="soul_core", content="Task done",
-            embedding=[0, 1, 0, 0], memory_type="task_result",
+            agent_name="soul_core",
+            content="Task done",
+            embedding=[0, 1, 0, 0],
+            memory_type="task_result",
         )
         reflections = store.recall_memories(
             agent_name="soul_core",
@@ -146,7 +157,10 @@ class TestVectorStore:
             collection=col,
         )
         results = store.search(
-            query_vector=[1, 0, 0, 0], limit=10, collection=col, filters={"category": "b"},
+            query_vector=[1, 0, 0, 0],
+            limit=10,
+            collection=col,
+            filters={"category": "b"},
         )
         assert len(results) == 1
         assert results[0]["id"] == id_f2

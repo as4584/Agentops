@@ -11,13 +11,13 @@ Each experiment defines variants and runs them against the same eval suite.
 
 from __future__ import annotations
 
-import json
 import hashlib
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, timezone
+import json
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from threading import Lock
-from typing import Any, Optional
+from typing import Any
 
 from backend.config import ML_EXPERIMENTS_DIR
 from backend.utils import logger
@@ -26,6 +26,7 @@ from backend.utils import logger
 @dataclass
 class Variant:
     """A single configuration variant in an A/B experiment."""
+
     name: str
     model: str = ""
     system_prompt: str = ""
@@ -46,6 +47,7 @@ class Variant:
 @dataclass
 class VariantResult:
     """Aggregated results for one variant across all test cases."""
+
     variant_name: str
     total_cases: int = 0
     passed: int = 0
@@ -64,20 +66,21 @@ class VariantResult:
 @dataclass
 class ABExperiment:
     """An A/B experiment comparing multiple variants."""
+
     experiment_id: str
     name: str
     description: str = ""
     variants: list[Variant] = field(default_factory=list)
     status: str = "created"  # created, running, completed
     created_at: str = ""
-    completed_at: Optional[str] = None
+    completed_at: str | None = None
     results: dict[str, VariantResult] = field(default_factory=dict)
-    winner: Optional[str] = None
+    winner: str | None = None
     metric_for_winner: str = "avg_score"
 
     def __post_init__(self) -> None:
         if not self.created_at:
-            self.created_at = datetime.now(timezone.utc).isoformat()
+            self.created_at = datetime.now(UTC).isoformat()
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
@@ -89,7 +92,7 @@ class ABExperiment:
 class ABExperimentHarness:
     """Manages A/B experiments: create, run variants, determine winners."""
 
-    def __init__(self, storage_dir: Optional[Path] = None) -> None:
+    def __init__(self, storage_dir: Path | None = None) -> None:
         self._storage_dir = storage_dir or (ML_EXPERIMENTS_DIR / "ab_experiments")
         self._storage_dir.mkdir(parents=True, exist_ok=True)
         self._lock = Lock()
@@ -104,7 +107,7 @@ class ABExperimentHarness:
         metric_for_winner: str = "avg_score",
     ) -> str:
         """Create a new A/B experiment. Returns experiment_id."""
-        ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        ts = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
         h = hashlib.sha256(f"{name}:{ts}".encode()).hexdigest()[:8]
         experiment_id = f"ab_{ts}_{h}"
 
@@ -165,7 +168,7 @@ class ABExperimentHarness:
         with self._lock:
             exp = self._get_experiment(experiment_id)
             exp.status = "completed"
-            exp.completed_at = datetime.now(timezone.utc).isoformat()
+            exp.completed_at = datetime.now(UTC).isoformat()
 
             # Determine winner
             if exp.results:
@@ -186,7 +189,7 @@ class ABExperimentHarness:
     def get_experiment(self, experiment_id: str) -> dict[str, Any]:
         return self._get_experiment(experiment_id).to_dict()
 
-    def list_experiments(self, status: Optional[str] = None) -> list[dict[str, Any]]:
+    def list_experiments(self, status: str | None = None) -> list[dict[str, Any]]:
         exps = list(self._experiments.values())
         if status:
             exps = [e for e in exps if e.status == status]
@@ -195,7 +198,7 @@ class ABExperimentHarness:
     def compare_variants(self, experiment_id: str) -> dict[str, Any]:
         """Side-by-side comparison of all variants in an experiment."""
         exp = self._get_experiment(experiment_id)
-        comparison = {
+        comparison: dict[str, Any] = {
             "experiment_id": experiment_id,
             "name": exp.name,
             "status": exp.status,

@@ -23,19 +23,19 @@ Usage::
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
-
 
 # ---------------------------------------------------------------------------
 # Data classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ValidationResult:
     """Result of a single tool name validation."""
+
     valid: bool
     tool_name: str
-    canonical_name: Optional[str] = None      # Set when valid or fuzzy-matched
+    canonical_name: str | None = None  # Set when valid or fuzzy-matched
     suggestions: list[str] = field(default_factory=list)
     error_message: str = ""
 
@@ -43,6 +43,7 @@ class ValidationResult:
 # ---------------------------------------------------------------------------
 # Levenshtein distance (pure Python, no dependencies)
 # ---------------------------------------------------------------------------
+
 
 def _levenshtein(a: str, b: str) -> int:
     """
@@ -67,9 +68,9 @@ def _levenshtein(a: str, b: str) -> int:
         for i, ca in enumerate(a, 1):
             cost = 0 if ca == cb else 1
             curr[i] = min(
-                prev[i] + 1,        # deletion
-                curr[i - 1] + 1,    # insertion
-                prev[i - 1] + cost, # substitution
+                prev[i] + 1,  # deletion
+                curr[i - 1] + 1,  # insertion
+                prev[i - 1] + cost,  # substitution
             )
         prev = curr
 
@@ -79,6 +80,7 @@ def _levenshtein(a: str, b: str) -> int:
 # ---------------------------------------------------------------------------
 # ToolValidator
 # ---------------------------------------------------------------------------
+
 
 class ToolValidator:
     """
@@ -128,11 +130,7 @@ class ToolValidator:
         else:
             did_you_mean = ""
 
-        error_message = (
-            f"Tool '{tool_name}' is not available. "
-            f"{did_you_mean}"
-            f"Available tools: {available_str}"
-        )
+        error_message = f"Tool '{tool_name}' is not available. {did_you_mean}Available tools: {available_str}"
 
         return ValidationResult(
             valid=False,
@@ -187,6 +185,7 @@ class ToolValidator:
 # ---------------------------------------------------------------------------
 # Convenience: build a validator from agent tool_permissions
 # ---------------------------------------------------------------------------
+
 
 def validator_for_agent(tool_permissions: list[str]) -> ToolValidator:
     """

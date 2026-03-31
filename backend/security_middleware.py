@@ -6,22 +6,24 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
-from typing import Callable
+from collections.abc import Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from backend.config import RATE_LIMIT_RPM, LLM_RATE_LIMIT_RPM
+from backend.config import LLM_RATE_LIMIT_RPM, RATE_LIMIT_RPM
 
 # LLM-backed endpoints that should receive stricter per-IP rate limits
-_LLM_ENDPOINTS: frozenset[str] = frozenset({
-    "/chat",
-    "/agents/message",
-    "/llm/generate",
-    "/campaign/generate",
-    "/intake/start",
-    "/intake/answer",
-})
+_LLM_ENDPOINTS: frozenset[str] = frozenset(
+    {
+        "/chat",
+        "/agents/message",
+        "/llm/generate",
+        "/campaign/generate",
+        "/intake/start",
+        "/intake/answer",
+    }
+)
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
@@ -44,10 +46,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         now = time.time()
 
         # Clean old requests (older than 60 seconds)
-        self.requests[client_ip] = [
-            t for t in self.requests[client_ip]
-            if now - t < 60
-        ]
+        self.requests[client_ip] = [t for t in self.requests[client_ip] if now - t < 60]
 
         # Check rate limit
         if len(self.requests[client_ip]) >= self.rpm:
@@ -55,7 +54,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 content='{"detail":"Rate limit exceeded"}',
                 status_code=429,
                 media_type="application/json",
-                headers={"Retry-After": "60"}
+                headers={"Retry-After": "60"},
             )
 
         # Record this request
@@ -155,16 +154,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         # Content Security Policy — tightened for an API-only backend
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; "
-            "script-src 'self'; "
-            "object-src 'none'; "
-            "frame-ancestors 'none'; "
-            "base-uri 'self';"
+            "default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self';"
         )
         # HTTP Strict Transport Security (safe for local TLS / proxied deployments)
-        response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
-        )
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         # Disable intrusive browser features that this API never uses
         response.headers["Permissions-Policy"] = (
             "accelerometer=(), camera=(), geolocation=(), "

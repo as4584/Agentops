@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import pytest
 
-from backend.gateway.secrets import SecretsVault, SecretStr, _encrypt, _decrypt
+from backend.gateway.secrets import SecretStr, SecretsVault, _decrypt, _encrypt
 
 
 @pytest.fixture

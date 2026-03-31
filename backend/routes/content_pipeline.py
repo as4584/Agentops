@@ -1,20 +1,18 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from backend.content.pipeline import ContentPipeline
 from backend.content.job_store import job_store
-from backend.content.video_job import VideoJob, JobStatus
+from backend.content.pipeline import ContentPipeline
+from backend.content.video_job import JobStatus
 from backend.llm import OllamaClient
 from backend.utils import logger
 
 router = APIRouter(prefix="/content", tags=["content-pipeline"])
 
 # Lazily initialised; real app wires this up at startup
-_pipeline: Optional[ContentPipeline] = None
+_pipeline: ContentPipeline | None = None
 
 
 def get_pipeline() -> ContentPipeline:
@@ -26,12 +24,14 @@ def get_pipeline() -> ContentPipeline:
 
 # ── Health ─────────────────────────────────────────────────────────────────────
 
+
 @router.get("/health")
 async def content_health() -> dict[str, str]:
     return {"status": "ok"}
 
 
 # ── Dashboard ──────────────────────────────────────────────────────────────────
+
 
 @router.get("/status")
 async def pipeline_status() -> dict:
@@ -40,7 +40,7 @@ async def pipeline_status() -> dict:
 
 
 @router.get("/jobs")
-async def list_jobs(status: Optional[str] = None) -> list[dict]:
+async def list_jobs(status: str | None = None) -> list[dict]:
     """List all jobs, optionally filtered by status."""
     jobs = job_store.list_all()
     if status:
@@ -61,6 +61,7 @@ async def get_job(job_id: str) -> dict:
 
 
 # ── Idea approval gate (Jack Craig Step 1 greenlight) ─────────────────────────
+
 
 @router.get("/ideas")
 async def list_pending_ideas() -> list[dict]:
@@ -86,7 +87,7 @@ async def list_pending_ideas() -> list[dict]:
 
 
 class ApproveRequest(BaseModel):
-    reason: Optional[str] = None  # optional note — not used for approval
+    reason: str | None = None  # optional note — not used for approval
 
 
 class RejectRequest(BaseModel):
@@ -120,6 +121,7 @@ async def reject_idea(job_id: str, body: RejectRequest = RejectRequest()) -> dic
 
 # ── Script + frames review ─────────────────────────────────────────────────────
 
+
 @router.get("/jobs/{job_id}/frames")
 async def get_prompt_frames(job_id: str) -> dict:
     """
@@ -132,11 +134,17 @@ async def get_prompt_frames(job_id: str) -> dict:
     if not job:
         raise HTTPException(404, f"Job {job_id} not found")
     arc_labels = [
-        "Hook", "Rising Action", "Conflict", "Comeback 1",
-        "Second Rising", "Second Conflict", "Final Comeback", "Payoff",
+        "Hook",
+        "Rising Action",
+        "Conflict",
+        "Comeback 1",
+        "Second Rising",
+        "Second Conflict",
+        "Final Comeback",
+        "Payoff",
     ]
     frames_with_labels = [
-        {"beat": arc_labels[i] if i < len(arc_labels) else f"Frame {i+1}", "prompt": p}
+        {"beat": arc_labels[i] if i < len(arc_labels) else f"Frame {i + 1}", "prompt": p}
         for i, p in enumerate(job.prompt_frames)
     ]
     return {
@@ -148,6 +156,7 @@ async def get_prompt_frames(job_id: str) -> dict:
 
 
 # ── Pipeline triggers ──────────────────────────────────────────────────────────
+
 
 @router.post("/run/research")
 async def run_research() -> dict:
@@ -181,6 +190,7 @@ async def run_agent(name: str) -> dict:
 
 # ── QA approval ───────────────────────────────────────────────────────────────
 
+
 @router.patch("/jobs/{job_id}/approve")
 async def approve_job(job_id: str) -> dict:
     """Approve a QA-passed job → APPROVED (ready for scheduling)."""
@@ -202,6 +212,7 @@ async def reject_job(job_id: str, body: RejectRequest = RejectRequest()) -> dict
 
 # ── Upload timing ──────────────────────────────────────────────────────────────
 
+
 @router.get("/upload-window")
 async def check_upload_window() -> dict:
     """
@@ -212,8 +223,10 @@ async def check_upload_window() -> dict:
     """
     from backend.content.publisher_agent import PublisherAgent
     from backend.llm import OllamaClient
+
     pub = PublisherAgent(OllamaClient())
     import os
+
     velocity_threshold = int(os.getenv("VIEW_VELOCITY_THRESHOLD", "100"))
     velocity_window = int(os.getenv("VIEW_VELOCITY_WINDOW_HOURS", "12"))
     interval_hours = int(os.getenv("UPLOAD_INTERVAL_HOURS", "48"))
@@ -232,4 +245,3 @@ async def check_upload_window() -> dict:
             "velocity_window_hours": velocity_window,
         },
     }
-

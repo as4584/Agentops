@@ -15,15 +15,15 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from backend.routes.skills import router as skills_router
 from backend.routes.memory_management import router as memory_router
+from backend.routes.skills import router as skills_router
 from backend.skills.loader import LoadedSkill
 from backend.skills.registry import SkillRegistry
-
 
 # ---------------------------------------------------------------------------
 # Minimal skill factory
 # ---------------------------------------------------------------------------
+
 
 def _make_skill(skill_id: str, enabled: bool = True) -> LoadedSkill:
     return LoadedSkill(
@@ -45,6 +45,7 @@ def _make_skill(skill_id: str, enabled: bool = True) -> LoadedSkill:
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture()
 def mock_registry(monkeypatch, tmp_path):
@@ -81,6 +82,7 @@ def client(app):
 # GET /skills
 # ---------------------------------------------------------------------------
 
+
 def test_list_skills_returns_all(client, mock_registry):
     response = client.get("/skills")
     assert response.status_code == 200
@@ -106,6 +108,7 @@ def test_list_skills_returns_empty_list_when_no_skills(monkeypatch):
 # GET /skills/{skill_id}
 # ---------------------------------------------------------------------------
 
+
 def test_get_skill_returns_correct_record(client):
     response = client.get("/skills/skill_alpha")
     assert response.status_code == 200
@@ -124,6 +127,7 @@ def test_get_skill_not_found(client):
 # ---------------------------------------------------------------------------
 # PATCH /skills/{skill_id}
 # ---------------------------------------------------------------------------
+
 
 def test_toggle_skill_enable(client, mock_registry):
     # skill_beta starts disabled
@@ -158,6 +162,7 @@ def test_toggle_skill_invalid_body(client):
 # POST /skills/reload
 # ---------------------------------------------------------------------------
 
+
 def test_reload_skills_returns_dict(client, mock_registry, monkeypatch):
     monkeypatch.setattr(mock_registry, "reload", lambda: {"reloaded": 2})
     response = client.post("/skills/reload")
@@ -168,6 +173,7 @@ def test_reload_skills_returns_dict(client, mock_registry, monkeypatch):
 # ---------------------------------------------------------------------------
 # Memory management routes
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture()
 def memory_app(tmp_path, monkeypatch):
@@ -183,6 +189,7 @@ def memory_app(tmp_path, monkeypatch):
     monkeypatch.setattr(mem_module, "memory_store", new_store)
     # Also patch the import inside the route module
     import backend.routes.memory_management as mm_routes
+
     monkeypatch.setattr(mm_routes, "memory_store", new_store)
 
     application = FastAPI()

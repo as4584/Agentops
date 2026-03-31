@@ -8,7 +8,6 @@ Fact memory middleware — hooks FactMemory into the MiddlewareChain.
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from deerflow.memory.facts import FactMemory
 from deerflow.middleware.chain import LLMContext, Middleware
@@ -34,9 +33,7 @@ class FactMemoryMiddleware(Middleware):
         meta: LLMContext,
     ) -> list[dict[str, str]]:
         # Inject facts into the system prompt
-        section = self._fm.build_prompt_section(
-            meta.agent_id, limit=self._inject_limit
-        )
+        section = self._fm.build_prompt_section(meta.agent_id, limit=self._inject_limit)
         if section:
             for m in messages:
                 if m.get("role") == "system":

@@ -16,7 +16,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
@@ -31,6 +31,7 @@ logger = logging.getLogger("gateway.health")
 # ---------------------------------------------------------------------------
 # Circuit Breaker
 # ---------------------------------------------------------------------------
+
 
 class CircuitState(str, Enum):
     CLOSED = "closed"
@@ -76,9 +77,7 @@ class ProviderCircuit:
             "provider": self.provider,
             "state": self.state.value,
             "failure_count": self.failure_count,
-            "last_failure_ago_s": round(time.monotonic() - self.last_failure_ts, 1)
-            if self.last_failure_ts
-            else None,
+            "last_failure_ago_s": round(time.monotonic() - self.last_failure_ts, 1) if self.last_failure_ts else None,
         }
 
 
@@ -111,6 +110,7 @@ def all_circuit_status() -> list[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Provider Health Monitor
 # ---------------------------------------------------------------------------
+
 
 class ProviderHealthMonitor:
     """Periodically pings all configured providers."""
@@ -175,6 +175,7 @@ def get_health_monitor() -> ProviderHealthMonitor:
 # Fallback selection
 # ---------------------------------------------------------------------------
 
+
 async def select_provider_with_fallback(
     preferred_provider: str,
     fallback_order: list[str] | None = None,
@@ -182,10 +183,7 @@ async def select_provider_with_fallback(
     """Return the first available provider, starting with *preferred_provider*."""
     from backend.config_gateway import GATEWAY_FALLBACK_ORDER
 
-    order = [preferred_provider] + [
-        p for p in (fallback_order or GATEWAY_FALLBACK_ORDER)
-        if p != preferred_provider
-    ]
+    order = [preferred_provider] + [p for p in (fallback_order or GATEWAY_FALLBACK_ORDER) if p != preferred_provider]
 
     for provider in order:
         circuit = get_circuit(provider)

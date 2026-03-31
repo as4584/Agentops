@@ -24,10 +24,10 @@ from backend.config import (
 from backend.utils import logger
 from backend.websocket.hub import ws_hub  # noqa: E402 — placed after logger to respect init order
 
-
 # ---------------------------------------------------------------------------
 # Quota / permissioning errors
 # ---------------------------------------------------------------------------
+
 
 class A2UIQuotaError(Exception):
     """Raised when a session or target exceeds its quota."""
@@ -40,6 +40,7 @@ class A2UIPermissionError(Exception):
 # ---------------------------------------------------------------------------
 # A2UIBus
 # ---------------------------------------------------------------------------
+
 
 class A2UIBus:
     """Singleton bus for delivering A2UI events to the WebSocket hub."""
@@ -70,21 +71,15 @@ class A2UIBus:
         count = self._event_counts.get(msg.session_id, 0)
         if count >= A2UI_MAX_EVENTS_PER_SESSION:
             raise A2UIQuotaError(
-                f"Session '{msg.session_id}' has reached the A2UI event quota "
-                f"({A2UI_MAX_EVENTS_PER_SESSION} events)."
+                f"Session '{msg.session_id}' has reached the A2UI event quota ({A2UI_MAX_EVENTS_PER_SESSION} events)."
             )
 
         # Widget count check for render ops
         if msg.op == "render" and msg.widget_id:
-            target_widgets = (
-                self._canvas
-                .get(msg.session_id, {})
-                .get(msg.target, {})
-            )
+            target_widgets = self._canvas.get(msg.session_id, {}).get(msg.target, {})
             if len(target_widgets) >= A2UI_MAX_WIDGETS_PER_TARGET:
                 raise A2UIQuotaError(
-                    f"Target '{msg.target}' has reached the widget limit "
-                    f"({A2UI_MAX_WIDGETS_PER_TARGET} widgets)."
+                    f"Target '{msg.target}' has reached the widget limit ({A2UI_MAX_WIDGETS_PER_TARGET} widgets)."
                 )
 
         # Assign sequence number
@@ -106,7 +101,7 @@ class A2UIBus:
         )
 
         logger.info(
-            f"a2ui_event_emitted",
+            "a2ui_event_emitted",
             extra={
                 "event_type": "a2ui_event_emitted",
                 "session_id": msg.session_id,
@@ -131,10 +126,7 @@ class A2UIBus:
 
     async def clear_canvas(self, session_id: str) -> dict[str, Any]:
         """Remove all widget state for *session_id* and broadcast a clear event."""
-        old_count = sum(
-            len(widgets)
-            for widgets in self._canvas.get(session_id, {}).values()
-        )
+        old_count = sum(len(widgets) for widgets in self._canvas.get(session_id, {}).values())
         self._canvas.pop(session_id, None)
 
         await ws_hub.broadcast(
@@ -179,9 +171,7 @@ class A2UIBus:
 
     def _check_permission(self, agent_id: str) -> None:
         if A2UI_ALLOWED_AGENTS and agent_id not in A2UI_ALLOWED_AGENTS:
-            raise A2UIPermissionError(
-                f"Agent '{agent_id}' is not in A2UI_ALLOWED_AGENTS."
-            )
+            raise A2UIPermissionError(f"Agent '{agent_id}' is not in A2UI_ALLOWED_AGENTS.")
 
 
 # ---------------------------------------------------------------------------

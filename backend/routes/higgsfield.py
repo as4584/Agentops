@@ -5,6 +5,7 @@ REST endpoints for the Higgsfield video production system.
 Heavy logic lives in the higgsfield_playwright_server (port 8812) and
 higgsfield_agent; these routes are thin wrappers for dashboard/API consumers.
 """
+
 from __future__ import annotations
 
 import httpx
@@ -24,6 +25,7 @@ _HF_MCP = f"http://127.0.0.1:{HF_MCP_PORT}"
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 async def _call_mcp(tool: str, body: dict) -> dict:
     """Forward a tool call to the Higgsfield MCP server."""
@@ -47,6 +49,7 @@ async def _call_mcp(tool: str, body: dict) -> dict:
 # ---------------------------------------------------------------------------
 # Character endpoints
 # ---------------------------------------------------------------------------
+
 
 @router.get("/characters")
 async def list_characters():
@@ -72,17 +75,21 @@ class CreateSoulIdRequest(BaseModel):
 async def create_soul_id(character_id: str, req: CreateSoulIdRequest):
     """Navigate to Higgsfield and create a Soul ID for the character."""
     logger.info(f"[higgsfield] Creating Soul ID for character={character_id}")
-    result = await _call_mcp("hf_create_soul_id", {
-        "character_id": character_id,
-        "image_path": req.image_path,
-        "character_name": req.character_name,
-    })
+    result = await _call_mcp(
+        "hf_create_soul_id",
+        {
+            "character_id": character_id,
+            "image_path": req.image_path,
+            "character_name": req.character_name,
+        },
+    )
     return result
 
 
 # ---------------------------------------------------------------------------
 # Video generation endpoints
 # ---------------------------------------------------------------------------
+
 
 class SubmitVideoRequest(BaseModel):
     character_id: str
@@ -118,6 +125,7 @@ async def poll_job(req: PollRequest):
 # Run history endpoints
 # ---------------------------------------------------------------------------
 
+
 @router.get("/runs")
 async def list_runs(character_id: str | None = None, limit: int = 50):
     """List generation runs, optionally filtered by character."""
@@ -135,6 +143,7 @@ async def get_run(run_id: str):
 # ---------------------------------------------------------------------------
 # MCP server health
 # ---------------------------------------------------------------------------
+
 
 @router.get("/mcp/health")
 async def mcp_health():

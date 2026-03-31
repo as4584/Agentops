@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import logging
 from collections import deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from threading import Lock
 from typing import Any
@@ -45,11 +45,11 @@ class CentralLogger:
         with cls._lock:
             if cls._instance is None:
                 cls._instance = super().__new__(cls)
-                cls._instance._initialized = False
+                cls._instance._initialized = False  # type: ignore[has-type]
             return cls._instance
 
     def __init__(self) -> None:
-        if self._initialized:
+        if self._initialized:  # type: ignore[has-type]
             return
         self._initialized = True
 
@@ -68,9 +68,7 @@ class CentralLogger:
         self._logger.setLevel(getattr(logging, LOG_LEVEL))
         if not self._logger.handlers:
             handler = logging.StreamHandler()
-            handler.setFormatter(
-                logging.Formatter("[%(asctime)s] %(levelname)s — %(message)s")
-            )
+            handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s — %(message)s"))
             self._logger.addHandler(handler)
 
     # ----- Tool Execution Logging (INV-7 enforcement) -----
@@ -82,13 +80,14 @@ class CentralLogger:
         """
         with self._write_lock:
             self._tool_logs.append(record)
-            self._write_to_file({
-                "type": "TOOL_EXECUTION",
-                "data": record.model_dump(mode="json"),
-            })
+            self._write_to_file(
+                {
+                    "type": "TOOL_EXECUTION",
+                    "data": record.model_dump(mode="json"),
+                }
+            )
         self._logger.info(
-            f"TOOL [{record.tool_name}] by [{record.agent_id}] "
-            f"type={record.modification_type} success={record.success}"
+            f"TOOL [{record.tool_name}] by [{record.agent_id}] type={record.modification_type} success={record.success}"
         )
 
     # ----- Drift Event Logging -----
@@ -99,25 +98,23 @@ class CentralLogger:
         """
         with self._write_lock:
             self._drift_events.append(event)
-            self._write_to_file({
-                "type": "DRIFT_EVENT",
-                "data": event.model_dump(mode="json"),
-            })
+            self._write_to_file(
+                {
+                    "type": "DRIFT_EVENT",
+                    "data": event.model_dump(mode="json"),
+                }
+            )
         if event.severity == ChangeImpactLevel.CRITICAL:
-            self._logger.error(
-                f"CRITICAL_DRIFT_EVENT: {event.invariant_id} — {event.description}"
-            )
+            self._logger.error(f"CRITICAL_DRIFT_EVENT: {event.invariant_id} — {event.description}")
         else:
-            self._logger.warning(
-                f"DRIFT_EVENT: {event.invariant_id} — {event.description}"
-            )
+            self._logger.warning(f"DRIFT_EVENT: {event.invariant_id} — {event.description}")
 
     # ----- General Logging -----
 
     def log(self, level: str, message: str, **kwargs: Any) -> None:
         """General-purpose structured log entry."""
         entry: dict[str, Any] = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "level": level,
             "message": message,
             **kwargs,

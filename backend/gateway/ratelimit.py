@@ -20,8 +20,8 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -31,27 +31,28 @@ from backend.config_gateway import (
     GATEWAY_REDIS_URL,
 )
 
-
 # ---------------------------------------------------------------------------
 # Token bucket state
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class BucketState:
     """In-memory token bucket for a single API key."""
 
-    rpm_window: list[float] = field(default_factory=list)   # request timestamps
-    tpm_tokens: float = 0.0                                  # tokens used this minute
+    rpm_window: list[float] = field(default_factory=list)  # request timestamps
+    tpm_tokens: float = 0.0  # tokens used this minute
     tpm_window_start: float = field(default_factory=time.time)
-    tpd_tokens: float = 0.0                                  # tokens used today
-    tpd_day: str = ""                                        # YYYY-MM-DD
-    usd_hour: float = 0.0                                    # cost this hour
+    tpd_tokens: float = 0.0  # tokens used today
+    tpd_day: str = ""  # YYYY-MM-DD
+    usd_hour: float = 0.0  # cost this hour
     usd_hour_window_start: float = field(default_factory=time.time)
 
 
 # ---------------------------------------------------------------------------
 # In-memory rate limiter
 # ---------------------------------------------------------------------------
+
 
 class MemoryRateLimiter:
     """Thread-safe in-memory rate limiter keyed by API key_id."""
@@ -128,6 +129,7 @@ class MemoryRateLimiter:
 # Redis rate limiter stub (for future distributed deployments)
 # ---------------------------------------------------------------------------
 
+
 class RedisRateLimiter(MemoryRateLimiter):
     """Redis-backed rate limiter. Falls back to memory if Redis unavailable."""
 
@@ -142,7 +144,7 @@ class RedisRateLimiter(MemoryRateLimiter):
             import redis  # type: ignore
 
             self._redis = redis.from_url(self._redis_url, decode_responses=True, socket_timeout=1)
-            self._redis.ping()
+            self._redis.ping()  # type: ignore[attr-defined]
         except Exception:
             self._redis = None  # fall back to memory
 
@@ -150,6 +152,7 @@ class RedisRateLimiter(MemoryRateLimiter):
 # ---------------------------------------------------------------------------
 # Factory
 # ---------------------------------------------------------------------------
+
 
 def get_rate_limiter() -> MemoryRateLimiter:
     global _limiter
@@ -168,6 +171,7 @@ _limiter: MemoryRateLimiter | None = None
 # Middleware
 # ---------------------------------------------------------------------------
 
+
 class GatewayRateLimitMiddleware(BaseHTTPMiddleware):
     """Per-key RPM rate limiting. TPM/TPD enforced in route handlers
     after token counts are known."""
@@ -182,14 +186,17 @@ class GatewayRateLimitMiddleware(BaseHTTPMiddleware):
 
         if not allowed:
             import json
+
             return Response(
-                content=json.dumps({
-                    "error": {
-                        "message": "Rate limit exceeded (RPM)",
-                        "type": "rate_limit_error",
-                        "code": 429,
+                content=json.dumps(
+                    {
+                        "error": {
+                            "message": "Rate limit exceeded (RPM)",
+                            "type": "rate_limit_error",
+                            "code": 429,
+                        }
                     }
-                }),
+                ),
                 status_code=429,
                 media_type="application/json",
                 headers={"Retry-After": "60"},

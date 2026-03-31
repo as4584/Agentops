@@ -7,6 +7,7 @@ Provides controlled Playwright-backed browser sessions with:
 - Artifact capture under output/browser/<session_id>/
 - Full action auditing via structured logger
 """
+
 from backend.browser.session import BrowserSession
 from backend.browser.tooling import BrowserSessionRegistry, get_browser_registry
 

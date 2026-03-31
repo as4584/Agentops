@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from backend.config import BACKEND_DIR, PROJECT_ROOT
+from backend.config import BACKEND_DIR
 
 # ---------------------------------------------------------------------------
 # Feature Flag
@@ -21,10 +21,7 @@ GATEWAY_ENABLED: bool = os.getenv("GATEWAY_ENABLED", "true").lower() == "true"
 # Master Key — used to encrypt provider secrets at rest.
 # MUST be set in production. Falls back to a deterministic dev key only.
 # ---------------------------------------------------------------------------
-_DEV_KEY_WARNING = (
-    "AGENTOP_GATEWAY_MASTER_KEY is not set. "
-    "Using insecure dev key — DO NOT use in production."
-)
+_DEV_KEY_WARNING = "AGENTOP_GATEWAY_MASTER_KEY is not set. Using insecure dev key — DO NOT use in production."
 
 _master_key_raw: str = os.getenv("AGENTOP_GATEWAY_MASTER_KEY", "")
 if not _master_key_raw:
@@ -68,9 +65,7 @@ GATEWAY_MAX_RESPONSE_TOKENS: int = int(os.getenv("GATEWAY_MAX_RESPONSE_TOKENS", 
 # ---------------------------------------------------------------------------
 # Audit / Logging
 # ---------------------------------------------------------------------------
-GATEWAY_AUDIT_LOG_PATH: Path = Path(
-    os.getenv("GATEWAY_AUDIT_LOG_PATH", str(BACKEND_DIR / "logs" / "gateway.jsonl"))
-)
+GATEWAY_AUDIT_LOG_PATH: Path = Path(os.getenv("GATEWAY_AUDIT_LOG_PATH", str(BACKEND_DIR / "logs" / "gateway.jsonl")))
 GATEWAY_AUDIT_RETENTION_DAYS: int = int(os.getenv("GATEWAY_AUDIT_RETENTION_DAYS", "90"))
 # Set to "1" to emit prompts/completions in debug stream (NEVER in production!)
 GATEWAY_DEBUG_LOG_CONTENT: bool = os.getenv("GATEWAY_DEBUG_LOG_CONTENT", "0") == "1"
@@ -93,11 +88,7 @@ GATEWAY_CIRCUIT_BREAKER_TIMEOUT: int = int(os.getenv("GATEWAY_CIRCUIT_BREAKER_TI
 # ---------------------------------------------------------------------------
 # Providers tried in order when primary is unavailable
 GATEWAY_FALLBACK_ORDER: list[str] = [
-    p.strip()
-    for p in os.getenv(
-        "GATEWAY_FALLBACK_ORDER", "openrouter,openai,anthropic,ollama"
-    ).split(",")
-    if p.strip()
+    p.strip() for p in os.getenv("GATEWAY_FALLBACK_ORDER", "openrouter,openai,anthropic,ollama").split(",") if p.strip()
 ]
 
 # Ensure log directory exists

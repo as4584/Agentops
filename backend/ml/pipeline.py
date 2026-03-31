@@ -16,11 +16,12 @@ from __future__ import annotations
 
 import time
 import traceback
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Awaitable, Callable, Optional, Union
+from typing import Any
 
 from backend.config import ML_MODELS_DIR
 from backend.utils import logger
@@ -37,18 +38,20 @@ class StepStatus(str, Enum):
 @dataclass
 class StepResult:
     """Result of a single pipeline step."""
+
     name: str
     status: StepStatus
     duration_ms: float = 0.0
     output: Any = None
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
 class PipelineStep:
     """A single step in an ML pipeline."""
+
     name: str
-    fn: Union[Callable[..., Any], Callable[..., Awaitable[Any]]]
+    fn: Callable[..., Any] | Callable[..., Awaitable[Any]]
     description: str = ""
     skip_on_failure: bool = False
 
@@ -57,6 +60,7 @@ class PipelineStep:
         start = time.monotonic()
         try:
             import asyncio
+
             if asyncio.iscoroutinefunction(self.fn):
                 output = await self.fn(context)
             else:
@@ -68,7 +72,7 @@ class PipelineStep:
                 duration_ms=elapsed,
                 output=output,
             )
-        except Exception as e:
+        except Exception:
             elapsed = (time.monotonic() - start) * 1000
             return StepResult(
                 name=self.name,
@@ -81,6 +85,7 @@ class PipelineStep:
 @dataclass
 class PipelineRun:
     """Complete record of a pipeline execution."""
+
     pipeline_name: str
     run_id: str = ""
     steps: list[StepResult] = field(default_factory=list)
@@ -111,7 +116,7 @@ class MLPipeline:
         self,
         name: str,
         tracker: Any = None,
-        models_dir: Optional[Path] = None,
+        models_dir: Path | None = None,
     ) -> None:
         self.name = name
         self.tracker = tracker
@@ -124,10 +129,10 @@ class MLPipeline:
 
     async def run(
         self,
-        hyperparams: Optional[dict[str, Any]] = None,
+        hyperparams: dict[str, Any] | None = None,
         model_type: str = "",
         dataset_version: str = "",
-        tags: Optional[dict[str, str]] = None,
+        tags: dict[str, str] | None = None,
     ) -> PipelineRun:
         """Execute all steps in order. Integrates with ExperimentTracker if available."""
         hyperparams = hyperparams or {}
@@ -146,7 +151,7 @@ class MLPipeline:
         pipeline_run = PipelineRun(
             pipeline_name=self.name,
             run_id=run_id,
-            started_at=datetime.now(timezone.utc).isoformat(),
+            started_at=datetime.now(UTC).isoformat(),
         )
 
         context: dict[str, Any] = {
@@ -182,7 +187,7 @@ class MLPipeline:
 
         total_ms = (time.monotonic() - overall_start) * 1000
         pipeline_run.total_duration_ms = total_ms
-        pipeline_run.ended_at = datetime.now(timezone.utc).isoformat()
+        pipeline_run.ended_at = datetime.now(UTC).isoformat()
         pipeline_run.status = "failed" if failed else "completed"
 
         # Finalize experiment

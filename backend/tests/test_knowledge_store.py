@@ -7,19 +7,16 @@ from __future__ import annotations
 
 import json
 import math
-import tempfile
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from backend.knowledge import KnowledgeVectorStore, _cosine_similarity
-from backend.config import MEMORY_DIR
-
 
 # ---------------------------------------------------------------------------
 # _cosine_similarity (pure function)
 # ---------------------------------------------------------------------------
+
 
 class TestCosineSimilarity:
     def test_identical_vectors_returns_one(self):
@@ -68,6 +65,7 @@ class TestCosineSimilarity:
 # KnowledgeVectorStore fixture
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mock_llm() -> MagicMock:
     llm = MagicMock()
@@ -86,6 +84,7 @@ def store(mock_llm, tmp_path) -> KnowledgeVectorStore:
 # ---------------------------------------------------------------------------
 # KnowledgeVectorStore — _cosine_similarity (pure method)
 # ---------------------------------------------------------------------------
+
 
 class TestChunkText:
     def test_short_text_returns_single_chunk(self, store):
@@ -109,6 +108,7 @@ class TestChunkText:
 # KnowledgeVectorStore — stats
 # ---------------------------------------------------------------------------
 
+
 class TestKnowledgeStoreStats:
     def test_stats_empty_store(self, store):
         stats = store.stats()
@@ -127,12 +127,15 @@ class TestKnowledgeStoreStats:
 # KnowledgeVectorStore — search (with in-memory items)
 # ---------------------------------------------------------------------------
 
+
 class TestKnowledgeStoreSearch:
     @pytest.fixture(autouse=True)
     def _no_rebuild(self, store):
         """Prevent ensure_index from overwriting pre-populated items."""
+
         async def _noop(*a, **kw):
             pass
+
         with patch.object(store, "ensure_index", side_effect=_noop):
             yield
 
@@ -181,6 +184,7 @@ class TestKnowledgeStoreSearch:
 # KnowledgeVectorStore — upsert_business_answer
 # ---------------------------------------------------------------------------
 
+
 class TestUpsertBusinessAnswer:
     async def test_empty_content_skipped(self, store, mock_llm):
         await store.upsert_business_answer("biz1", "name", "")
@@ -220,6 +224,7 @@ class TestUpsertBusinessAnswer:
 # ---------------------------------------------------------------------------
 # KnowledgeVectorStore — search_business_profiles
 # ---------------------------------------------------------------------------
+
 
 class TestSearchBusinessProfiles:
     async def test_empty_profiles_returns_empty(self, store, mock_llm):
@@ -261,6 +266,7 @@ class TestSearchBusinessProfiles:
 # ---------------------------------------------------------------------------
 # KnowledgeVectorStore — disk persistence
 # ---------------------------------------------------------------------------
+
 
 class TestDiskPersistence:
     def test_load_from_disk_no_file(self, store):
@@ -309,13 +315,15 @@ class TestDiskPersistence:
 # KnowledgeVectorStore — ensure_index with pre-loaded state
 # ---------------------------------------------------------------------------
 
+
 class TestEnsureIndex:
     async def test_uses_cached_index_when_signature_matches(self, store, mock_llm):
         store._dir.mkdir(parents=True, exist_ok=True)
         sig = store._compute_signature()
-        payload = {"signature": sig, "items": [
-            {"id": "1", "path": "x.md", "chunk_index": 0, "text": "cached", "embedding": [0.1]}
-        ]}
+        payload = {
+            "signature": sig,
+            "items": [{"id": "1", "path": "x.md", "chunk_index": 0, "text": "cached", "embedding": [0.1]}],
+        }
         store._index_path.write_text(json.dumps(payload))
 
         await store.ensure_index()
@@ -330,9 +338,7 @@ class TestEnsureIndex:
         mock_llm.embed.return_value = [0.1, 0.2, 0.3]
 
         # Mock _collect_documents to return a small set
-        with patch.object(store, "_collect_documents", return_value=[
-            {"path": "test.md", "content": "small doc"}
-        ]):
+        with patch.object(store, "_collect_documents", return_value=[{"path": "test.md", "content": "small doc"}]):
             stats = await store.rebuild_index()
 
         assert isinstance(stats, dict)

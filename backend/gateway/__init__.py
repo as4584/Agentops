@@ -12,13 +12,20 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Any
 
 from backend.gateway.adapters import (
-    BaseProviderAdapter, ChatCompletionRequest, ChatCompletionResponse,
-    ChatMessage, StreamChunk, UsageInfo, ProviderError, get_adapter,
+    BaseProviderAdapter,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+    ChatMessage,
+    ProviderError,
+    StreamChunk,
+    UsageInfo,
+    get_adapter,
 )
-from backend.gateway.audit import get_audit_logger, RequestTimer
+from backend.gateway.audit import RequestTimer, get_audit_logger
 from backend.gateway.health import get_circuit, select_provider_with_fallback
 from backend.gateway.streaming import ToolIdSanitizer
 from backend.gateway.usage import get_usage_tracker
@@ -30,7 +37,7 @@ logger = logging.getLogger("gateway.router")
 
 def _sanitize_request(request: ChatCompletionRequest) -> ChatCompletionRequest:
     """Centralized tool ID sanitization applied before dispatching to any adapter.
-    
+
     This is a defense-in-depth measure — individual adapters also sanitize,
     but this ensures no unsanitized IDs ever reach any provider regardless
     of adapter implementation.
@@ -42,10 +49,7 @@ def _sanitize_request(request: ChatCompletionRequest) -> ChatCompletionRequest:
             new_tool_call_id = sanitize_tool_id(new_tool_call_id)
         new_tool_calls = m.tool_calls
         if new_tool_calls:
-            new_tool_calls = [
-                {**tc, "id": sanitize_tool_id(tc["id"])} if "id" in tc else tc
-                for tc in new_tool_calls
-            ]
+            new_tool_calls = [{**tc, "id": sanitize_tool_id(tc["id"])} if "id" in tc else tc for tc in new_tool_calls]
         sanitized_messages.append(
             ChatMessage(
                 role=m.role,
@@ -124,23 +128,31 @@ class GatewayRouter:
                 circuit.record_failure()
                 cost = 0.0
                 audit.log_request(
-                    key_id=key_id, model=request.model, provider=provider,
-                    latency_ms=timer.elapsed_ms, status=e.status_code, error=str(e),
+                    key_id=key_id,
+                    model=request.model,
+                    provider=provider,
+                    latency_ms=timer.elapsed_ms,
+                    status=e.status_code,
+                    error=str(e),
                 )
                 raise
 
-        cost = adapter.estimate_cost(
-            request.model, response.usage.prompt_tokens, response.usage.completion_tokens
-        )
+        cost = adapter.estimate_cost(request.model, response.usage.prompt_tokens, response.usage.completion_tokens)
 
         audit.log_request(
-            key_id=key_id, model=request.model, provider=provider,
+            key_id=key_id,
+            model=request.model,
+            provider=provider,
             tokens_in=response.usage.prompt_tokens,
             tokens_out=response.usage.completion_tokens,
-            cost_usd=cost, latency_ms=timer.elapsed_ms, status=200,
+            cost_usd=cost,
+            latency_ms=timer.elapsed_ms,
+            status=200,
         )
         tracker.record(
-            key_id=key_id, model=request.model, provider=provider,
+            key_id=key_id,
+            model=request.model,
+            provider=provider,
             tokens_in=response.usage.prompt_tokens,
             tokens_out=response.usage.completion_tokens,
             cost_usd=cost,
@@ -174,7 +186,7 @@ class GatewayRouter:
         error_str = ""
 
         try:
-            async for chunk in adapter.chat_stream(request):
+            async for chunk in adapter.chat_stream(request):  # type: ignore[attr-defined]
                 if chunk.usage:
                     tokens_in = chunk.usage.prompt_tokens
                     tokens_out = chunk.usage.completion_tokens
@@ -188,16 +200,25 @@ class GatewayRouter:
             latency_ms = int((time.perf_counter() - start) * 1000)
             cost = adapter.estimate_cost(request.model, tokens_in, tokens_out)
             audit.log_request(
-                key_id=key_id, model=request.model, provider=provider,
-                tokens_in=tokens_in, tokens_out=tokens_out,
-                cost_usd=cost, latency_ms=latency_ms,
+                key_id=key_id,
+                model=request.model,
+                provider=provider,
+                tokens_in=tokens_in,
+                tokens_out=tokens_out,
+                cost_usd=cost,
+                latency_ms=latency_ms,
                 status=200 if not error_str else 500,
-                stream=True, error=error_str,
+                stream=True,
+                error=error_str,
             )
             if tokens_in or tokens_out:
                 tracker.record(
-                    key_id=key_id, model=request.model, provider=provider,
-                    tokens_in=tokens_in, tokens_out=tokens_out, cost_usd=cost,
+                    key_id=key_id,
+                    model=request.model,
+                    provider=provider,
+                    tokens_in=tokens_in,
+                    tokens_out=tokens_out,
+                    cost_usd=cost,
                     error=bool(error_str),
                 )
 
