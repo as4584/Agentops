@@ -64,7 +64,9 @@ test('system tab shows LLM health badges and red circuit-open state', async ({ p
     if (pathname === '/projects') return json({ projects: [], total: 0, types: {} });
     if (pathname === '/folders/browse') return json({ current: '.', parent: null, entries: [] });
 
-    return json({});
+    // Abort unmocked endpoints (ML, SSE, etc.) so fetchData's try/catch
+    // keeps state at safe initial defaults instead of setting {} on arrays
+    return route.abort();
   });
 
   await page.goto('/');
