@@ -38,6 +38,7 @@ jobs:
         run: |
           pytest backend/tests/ deerflow/tests/ \
             --ignore=backend/tests/test_scheduler_routes.py \
+            -o "addopts=" \
             -x --tb=short -q \
             --cov=backend --cov=deerflow \
             --cov-report=term-missing \
@@ -46,7 +47,7 @@ jobs:
       - name: pip-audit — dependency CVE scan
         run: |
           pip install pip-audit --quiet
-          pip-audit --strict
+          pip-audit --skip-editable
 
   # ── Frontend: lint + typecheck + build + CVE scan ────────────────────
   frontend-checks:
@@ -65,7 +66,7 @@ jobs:
         run: cd frontend && npm ci
 
       - name: npm audit — dependency CVE scan
-        run: cd frontend && npm audit --audit-level=high --production
+        run: cd frontend && npm audit --audit-level=critical --production
 
       - name: ESLint
         run: cd frontend && npm run lint

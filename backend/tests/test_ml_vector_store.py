@@ -6,7 +6,16 @@ import uuid
 
 import pytest
 
-from backend.ml.vector_store import VectorStore
+try:
+    import qdrant_client  # noqa: F401
+
+    _has_qdrant = True
+except ImportError:
+    _has_qdrant = False
+
+pytestmark = pytest.mark.skipif(not _has_qdrant, reason="qdrant-client not installed")
+
+from backend.ml.vector_store import VectorStore  # noqa: E402
 
 
 @pytest.fixture
