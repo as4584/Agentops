@@ -13,13 +13,17 @@ try:
 except ImportError:
     _has_qdrant = False
 
-pytestmark = pytest.mark.skipif(not _has_qdrant, reason="qdrant-client not installed")
-
 from backend.ml.vector_store import VectorStore  # noqa: E402
+
+# ── Tests requiring qdrant-client ────────────────────────────────────
+
+qdrant_only = pytest.mark.skipif(not _has_qdrant, reason="qdrant-client not installed")
 
 
 @pytest.fixture
 def store() -> VectorStore:
+    if not _has_qdrant:
+        pytest.skip("qdrant-client not installed")
     return VectorStore(in_memory=True, default_dim=4)
 
 
@@ -27,6 +31,7 @@ def _uid(label: str) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, label))
 
 
+@qdrant_only
 class TestVectorStore:
     def test_ensure_collection(self, store: VectorStore) -> None:
         store.ensure_collection("test_col", dim=4)
@@ -173,3 +178,46 @@ class TestVectorStore:
         )
         assert len(results) == 1
         assert results[0]["id"] == id_f2
+
+    def test_ensure_collection_idempotent(self, store: VectorStore) -> None:
+        """Calling ensure_collection twice should fast-return on second call."""
+        store.ensure_collection("idem_col", dim=4)
+        # Second call hits the early-return branch (coll in _collections_initialized)
+        store.ensure_collection("idem_col", dim=4)
+        assert "idem_col" in store._collections_initialized
+
+
+# ── Tests for graceful degradation (no qdrant-client) ────────────────
+
+
+class TestVectorStoreNoQdrant:
+    """Tests exercising QDRANT_AVAILABLE=False / _client=None guard branches."""
+
+    @pytest.fixture
+    def disabled_store(self, monkeypatch: pytest.MonkeyPatch) -> VectorStore:
+        monkeypatch.setattr("backend.ml.vector_store.QDRANT_AVAILABLE", False)
+        return VectorStore()
+
+    def test_init_disabled(self, disabled_store: VectorStore) -> None:
+        assert disabled_store._client is None
+
+    def test_ensure_collection_noop(self, disabled_store: VectorStore) -> None:
+        disabled_store.ensure_collection("test")  # should not raise
+
+    def test_upsert_returns_zero(self, disabled_store: VectorStore) -> None:
+        assert disabled_store.upsert([], [], []) == 0
+
+    def test_search_returns_empty(self, disabled_store: VectorStore) -> None:
+        assert disabled_store.search([0.1] * 384) == []
+
+    def test_get_by_id_returns_none(self, disabled_store: VectorStore) -> None:
+        assert disabled_store.get_by_id("test_id") is None
+
+    def test_delete_returns_zero(self, disabled_store: VectorStore) -> None:
+        assert disabled_store.delete(["id1", "id2"]) == 0
+
+    def test_count_returns_zero(self, disabled_store: VectorStore) -> None:
+        assert disabled_store.count() == 0
+
+    def test_list_collections_returns_empty(self, disabled_store: VectorStore) -> None:
+        assert disabled_store.list_collections() == []

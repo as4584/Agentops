@@ -136,3 +136,12 @@ class TestABExperimentHarness:
         h2 = ABExperimentHarness(storage_dir=tmp_path / "ab")
         exp = h2.get_experiment(exp_id)
         assert exp["name"] == "persist_test"
+
+    def test_complete_tied_score(self, harness: ABExperimentHarness) -> None:
+        """When variants are tied, a winner is still selected deterministically."""
+        exp_id = harness.create_experiment("tie_test", VARIANTS)
+        harness.record_variant_case(exp_id, "llama3", {"passed": True, "overall_score": 0.9, "latency_ms": 100})
+        harness.record_variant_case(exp_id, "qwen", {"passed": True, "overall_score": 0.9, "latency_ms": 100})
+        result = harness.complete_experiment(exp_id)
+        assert result["status"] == "completed"
+        assert result["winner"] in ["llama3", "qwen"]

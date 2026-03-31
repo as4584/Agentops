@@ -46,6 +46,7 @@ jobs:
       - name: Run ML tests
         run: |
           pytest backend/tests/test_ml_*.py \
+            -o "addopts=" \
             -x --tb=short -q \
             --cov=backend/ml \
             --cov-report=term-missing \

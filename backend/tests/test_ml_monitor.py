@@ -194,3 +194,50 @@ class TestStdHelper:
         # std of [2, 4, 4, 4, 5, 5, 7, 9] = 2.0
         result = _std([2, 4, 4, 4, 5, 5, 7, 9])
         assert abs(result - 2.0) < 0.01
+
+
+class TestMonitorEdgeCases:
+    """Tests for uncovered edge cases in MLMonitor."""
+
+    def test_alerts_limit_500(self, monitor: MLMonitor) -> None:
+        """Alerts list should be trimmed to last 500."""
+        for i in range(510):
+            monitor._raise_alert(f"type_{i}", "warning", f"msg {i}", {})
+        assert len(monitor._alerts) == 500
+
+    def test_load_baseline_corrupted(self, tmp_path: Path) -> None:
+        """Corrupted baseline.json should not crash."""
+        mon_dir = tmp_path / "corrupt_monitoring"
+        mon_dir.mkdir()
+        (mon_dir / "baseline.json").write_text("{invalid json!!")
+        m = MLMonitor(monitoring_dir=mon_dir)
+        assert m._baseline_distributions == {}
+
+    def test_load_baseline_missing(self, tmp_path: Path) -> None:
+        """Missing baseline.json should initialize to empty dict."""
+        m = MLMonitor(monitoring_dir=tmp_path / "no_baseline")
+        assert m._baseline_distributions == {}
+
+    def test_check_accuracy_empty_window(self, monitor: MLMonitor) -> None:
+        result = monitor.check_accuracy("model_xyz", window=100)
+        assert result["sample_size"] == 0
+        assert result["accuracy"] is None
+
+    def test_data_drift_too_few_samples(self, monitor: MLMonitor) -> None:
+        """Fewer than 10 feature samples should be skipped."""
+        monitor.set_baseline("model_z", {"feat_a": {"mean": 0.5, "std": 0.1}})
+        for _ in range(5):  # Only 5 samples — less than the 10 minimum
+            monitor.record_features("model_z", {"feat_a": 0.5})
+        results = monitor.check_data_drift("model_z")
+        assert len(results) == 0  # skipped due to too few samples
+
+    def test_check_latency_single_value(self, monitor: MLMonitor) -> None:
+        monitor.record_latency("/ep", 42.0)
+        stats = monitor.check_latency()
+        assert stats["count"] == 1
+        assert stats["mean"] == 42.0
+
+    def test_check_endpoints_no_recent(self, monitor: MLMonitor) -> None:
+        health = monitor.check_endpoints(window=100)
+        assert health["total"] == 0
+        assert health["failing"] == []
