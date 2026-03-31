@@ -6,13 +6,12 @@ Uses FastAPI TestClient with mocked backends so no live Ollama needed.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
 
 # ---------------------------------------------------------------------------
 # 1. GSD route tests
@@ -61,7 +60,7 @@ class TestGSDRoutes:
             prompt="fix the README",
             response="Done — updated README.md",
             committed=False,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
         mock_agent = MagicMock()
         mock_agent.quick = AsyncMock(return_value=mock_result)
