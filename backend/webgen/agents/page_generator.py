@@ -7,8 +7,6 @@ Tailwind CSS, semantic HTML5, mobile-first responsive.
 
 from __future__ import annotations
 
-from typing import Any, Optional
-
 from backend.llm import OllamaClient
 from backend.utils import logger
 from backend.webgen.agents.base_agent import WebAgentBase
@@ -37,8 +35,8 @@ class PageGeneratorAgent(WebAgentBase):
 
     def __init__(
         self,
-        llm: Optional[OllamaClient] = None,
-        store: Optional[TemplateStore] = None,
+        llm: OllamaClient | None = None,
+        store: TemplateStore | None = None,
     ) -> None:
         super().__init__(llm)
         self.store = store or TemplateStore()
@@ -54,8 +52,7 @@ class PageGeneratorAgent(WebAgentBase):
 
         # Generate each page
         nav_items = [
-            {"label": p.nav_label, "href": f"{p.slug}.html"}
-            for p in sorted(project.pages, key=lambda p: p.nav_order)
+            {"label": p.nav_label, "href": f"{p.slug}.html"} for p in sorted(project.pages, key=lambda p: p.nav_order)
         ]
 
         for page in project.pages:
@@ -116,10 +113,7 @@ class PageGeneratorAgent(WebAgentBase):
             template_vars = comp.variables
 
         # Build context for LLM
-        nav_context = "\n".join(
-            f'  <a href="{n["href"]}">{n["label"]}</a>'
-            for n in nav_items
-        )
+        nav_context = "\n".join(f'  <a href="{n["href"]}">{n["label"]}</a>' for n in nav_items)
 
         content_hints = ""
         if section.content:
@@ -138,7 +132,7 @@ class PageGeneratorAgent(WebAgentBase):
 Business: {brief.business_name}
 Type: {brief.business_type.value}
 Tagline: {brief.tagline}
-Services: {', '.join(brief.services) if brief.services else 'Various services'}
+Services: {", ".join(brief.services) if brief.services else "Various services"}
 Tone: {brief.tone}
 Phone: {brief.phone}
 Email: {brief.email}
@@ -178,9 +172,9 @@ Return ONLY the HTML for this section, no explanation."""
     async def _generate_global_css(self, brief: ClientBrief) -> str:
         """Generate global CSS custom properties based on brand."""
         colors = brief.colors or {}
-        primary = colors.get("primary", "#2563eb")     # blue-600
+        primary = colors.get("primary", "#2563eb")  # blue-600
         secondary = colors.get("secondary", "#1e40af")  # blue-800
-        accent = colors.get("accent", "#f59e0b")         # amber-500
+        accent = colors.get("accent", "#f59e0b")  # amber-500
 
         return f"""/* WebGen Global Styles */
 :root {{

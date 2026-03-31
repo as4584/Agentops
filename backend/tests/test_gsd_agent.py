@@ -1,39 +1,51 @@
 """Tests for GSDAgent — backend/agents/gsd_agent.py"""
+
 from __future__ import annotations
 
 import asyncio
 import json
 from pathlib import Path
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import patch
 
 from backend.models.gsd import (
     GSDPlan,
     GSDTask,
-    PhaseStatus,
-    TaskStatus,
 )
-
 
 # ---------------------------------------------------------------------------
 # _parse_plan_json
 # ---------------------------------------------------------------------------
 
+
 def test_parse_plan_json_valid():
     from backend.agents.gsd_agent import GSDAgent
+
     agent = GSDAgent()
-    raw = json.dumps({
-        "phase": 1,
-        "title": "Test phase",
-        "description": "A test",
-        "tasks": [
-            {"id": "T1", "description": "do A", "file_targets": ["backend/foo.py"],
-             "symbol_refs": [], "depends_on": [], "wave": 1},
-            {"id": "T2", "description": "test A", "file_targets": ["backend/tests/test_foo.py"],
-             "symbol_refs": [], "depends_on": ["T1"], "wave": 1},
-        ],
-    })
+    raw = json.dumps(
+        {
+            "phase": 1,
+            "title": "Test phase",
+            "description": "A test",
+            "tasks": [
+                {
+                    "id": "T1",
+                    "description": "do A",
+                    "file_targets": ["backend/foo.py"],
+                    "symbol_refs": [],
+                    "depends_on": [],
+                    "wave": 1,
+                },
+                {
+                    "id": "T2",
+                    "description": "test A",
+                    "file_targets": ["backend/tests/test_foo.py"],
+                    "symbol_refs": [],
+                    "depends_on": ["T1"],
+                    "wave": 1,
+                },
+            ],
+        }
+    )
     plan = agent._parse_plan_json(raw, 1, "A test")
     assert plan.phase == 1
     assert plan.title == "Test phase"
@@ -44,6 +56,7 @@ def test_parse_plan_json_valid():
 
 def test_parse_plan_json_with_markdown_fences():
     from backend.agents.gsd_agent import GSDAgent
+
     agent = GSDAgent()
     raw = '```json\n{"phase": 2, "title": "T2", "description": "d", "tasks": []}\n```'
     plan = agent._parse_plan_json(raw, 2, "d")
@@ -53,6 +66,7 @@ def test_parse_plan_json_with_markdown_fences():
 
 def test_parse_plan_json_malformed_returns_fallback():
     from backend.agents.gsd_agent import GSDAgent
+
     agent = GSDAgent()
     plan = agent._parse_plan_json("NOT JSON AT ALL {{{{", 3, "description")
     assert plan.phase == 3
@@ -64,11 +78,15 @@ def test_parse_plan_json_malformed_returns_fallback():
 # _plan_to_gatekeeper_payload
 # ---------------------------------------------------------------------------
 
+
 def test_plan_to_gatekeeper_payload_has_test_task():
     from backend.agents.gsd_agent import GSDAgent
+
     agent = GSDAgent()
     plan = GSDPlan(
-        phase=1, title="T", description="D",
+        phase=1,
+        title="T",
+        description="D",
         tasks=[
             GSDTask(id="T1", description="Add feature", file_targets=["backend/foo.py"], wave=1),
             GSDTask(id="T2", description="Add test for feature", file_targets=["backend/tests/test_foo.py"], wave=1),
@@ -81,9 +99,12 @@ def test_plan_to_gatekeeper_payload_has_test_task():
 
 def test_plan_to_gatekeeper_payload_no_test_task():
     from backend.agents.gsd_agent import GSDAgent
+
     agent = GSDAgent()
     plan = GSDPlan(
-        phase=1, title="T", description="D",
+        phase=1,
+        title="T",
+        description="D",
         tasks=[
             GSDTask(id="T1", description="Add feature", file_targets=["backend/foo.py"], wave=1),
         ],
@@ -95,9 +116,12 @@ def test_plan_to_gatekeeper_payload_no_test_task():
 
 def test_plan_to_gatekeeper_payload_no_runtime_files():
     from backend.agents.gsd_agent import GSDAgent
+
     agent = GSDAgent()
     plan = GSDPlan(
-        phase=1, title="T", description="D",
+        phase=1,
+        title="T",
+        description="D",
         tasks=[
             GSDTask(id="T1", description="Update readme", file_targets=["README.md"], wave=1),
         ],
@@ -111,10 +135,11 @@ def test_plan_to_gatekeeper_payload_no_runtime_files():
 # map_codebase (mocked LLM)
 # ---------------------------------------------------------------------------
 
+
 def test_map_codebase_produces_result(tmp_path: Path):
-    from backend.agents.gsd_agent import GSDAgent
     import backend.agents.gsd_agent as mod
     import backend.database.gsd_store as store_mod
+    from backend.agents.gsd_agent import GSDAgent
 
     def aw_side(path: Path, data: str) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -142,10 +167,11 @@ def test_map_codebase_produces_result(tmp_path: Path):
 # quick (mocked LLM)
 # ---------------------------------------------------------------------------
 
+
 def test_quick_returns_result(tmp_path: Path):
-    from backend.agents.gsd_agent import GSDAgent
     import backend.agents.gsd_agent as mod
     import backend.database.gsd_store as store_mod
+    from backend.agents.gsd_agent import GSDAgent
 
     def aw_side(path: Path, data: str) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -168,9 +194,9 @@ def test_quick_returns_result(tmp_path: Path):
 
 
 def test_quick_full_attempts_commit(tmp_path: Path):
-    from backend.agents.gsd_agent import GSDAgent
     import backend.agents.gsd_agent as mod
     import backend.database.gsd_store as store_mod
+    from backend.agents.gsd_agent import GSDAgent
 
     def aw_side(path: Path, data: str) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -195,9 +221,11 @@ def test_quick_full_attempts_commit(tmp_path: Path):
 # execute_phase wave grouping
 # ---------------------------------------------------------------------------
 
+
 def test_wave_grouping_is_correct():
     """Tasks in the same wave number should be executed together."""
     from backend.models.gsd import GSDPlan, GSDTask
+
     tasks = [
         GSDTask(id="T1", description="a", wave=1),
         GSDTask(id="T2", description="b", wave=1),
@@ -215,9 +243,10 @@ def test_wave_grouping_is_correct():
 # verify_work checklist parsing
 # ---------------------------------------------------------------------------
 
+
 def test_generate_checklist_parses_json_array():
-    from backend.agents.gsd_agent import GSDAgent
     import backend.agents.gsd_agent as mod
+    from backend.agents.gsd_agent import GSDAgent
 
     with patch.object(mod, "_llm_generate", return_value='["Check health", "DB has rows"]'):
         agent = GSDAgent()
@@ -227,8 +256,8 @@ def test_generate_checklist_parses_json_array():
 
 
 def test_generate_checklist_falls_back_to_lines():
-    from backend.agents.gsd_agent import GSDAgent
     import backend.agents.gsd_agent as mod
+    from backend.agents.gsd_agent import GSDAgent
 
     with patch.object(mod, "_llm_generate", return_value="- Check health\n- DB has rows"):
         agent = GSDAgent()

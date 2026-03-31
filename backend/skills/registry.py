@@ -10,7 +10,6 @@ from backend.utils import logger
 
 from .loader import LoadedSkill, load_legacy_json_skill, load_manifest_skill
 
-
 SKILLS_ROOT = Path(__file__).resolve().parent
 LEGACY_SKILLS_DIR = SKILLS_ROOT / "data"
 SKILLS_STATE_PATH = BACKEND_DIR / "memory" / "skills_state.json"
@@ -56,12 +55,7 @@ class SkillRegistry:
         return state
 
     def _write_state(self, state: dict[str, bool]) -> None:
-        payload = {
-            "skills": {
-                skill_id: {"enabled": enabled}
-                for skill_id, enabled in sorted(state.items())
-            }
-        }
+        payload = {"skills": {skill_id: {"enabled": enabled} for skill_id, enabled in sorted(state.items())}}
         self.state_path.parent.mkdir(parents=True, exist_ok=True)
         self.state_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
@@ -77,8 +71,7 @@ class SkillRegistry:
             return skills
 
         dirs = [
-            path for path in self.skills_root.iterdir()
-            if path.is_dir() and path.name not in {"__pycache__", "data"}
+            path for path in self.skills_root.iterdir() if path.is_dir() and path.name not in {"__pycache__", "data"}
         ]
         for skill_dir in sorted(dirs, key=lambda item: item.name.lower()):
             manifest_path = skill_dir / "skill.json"

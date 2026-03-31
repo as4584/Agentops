@@ -42,36 +42,37 @@ import platform
 import re
 import shutil
 import sqlite3
+import urllib.error
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import urllib.request
-import urllib.error
-
 from backend.config import (
+    AGENT_REGISTRY_PATH,
     CHANGE_LOG_PATH,
-    DOCS_DIR,
     PROJECT_ROOT,
     SAFE_SHELL_BLACKLIST,
     SAFE_SHELL_WHITELIST,
     SHELL_DANGEROUS_CHARS,
-    SSRF_BLOCKED_PREFIXES,
     SOURCE_OF_TRUTH_PATH,
-    AGENT_REGISTRY_PATH,
+    SSRF_BLOCKED_PREFIXES,
 )
+from backend.middleware import drift_guard
 from backend.models import (
     ChangeImpactLevel,
     ChangeLogEntry,
     ModificationType,
     ToolDefinition,
 )
-from backend.middleware import drift_guard
 from backend.utils import logger
+
+
 # MCP Bridge — imported lazily to avoid circular imports at module load time
 # Use get_mcp_bridge() to access the singleton safely.
 def get_mcp_bridge():
     from backend.mcp import mcp_bridge  # noqa: PLC0415
+
     return mcp_bridge
 
 
@@ -159,12 +160,10 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.READ_ONLY,
         requires_doc_update=False,
     ),
-
     # =========================================================
     # MCP Gateway Tools — routed through Docker MCP Gateway
     # Statically declared (INV-3). Executed via MCPBridge.
     # =========================================================
-
     # ── GitHub MCP Server ────────────────────────────────────
     "mcp_github_search_repositories": ToolDefinition(
         name="mcp_github_search_repositories",
@@ -208,7 +207,6 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.READ_ONLY,
         requires_doc_update=False,
     ),
-
     # ── Filesystem MCP Server ────────────────────────────────
     "mcp_filesystem_read_file": ToolDefinition(
         name="mcp_filesystem_read_file",
@@ -240,7 +238,6 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.READ_ONLY,
         requires_doc_update=False,
     ),
-
     # ── Docker MCP Server ────────────────────────────────────
     "mcp_docker_list_containers": ToolDefinition(
         name="mcp_docker_list_containers",
@@ -272,7 +269,6 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.READ_ONLY,
         requires_doc_update=False,
     ),
-
     # ── Time MCP Server ──────────────────────────────────────
     "mcp_time_get_current_time": ToolDefinition(
         name="mcp_time_get_current_time",
@@ -286,7 +282,6 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.READ_ONLY,
         requires_doc_update=False,
     ),
-
     # ── Fetch MCP Server ─────────────────────────────────────
     "mcp_fetch_get": ToolDefinition(
         name="mcp_fetch_get",
@@ -294,7 +289,6 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.READ_ONLY,
         requires_doc_update=False,
     ),
-
     # ── SQLite MCP Server ────────────────────────────────────
     "mcp_sqlite_read_query": ToolDefinition(
         name="mcp_sqlite_read_query",
@@ -314,7 +308,6 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.READ_ONLY,
         requires_doc_update=False,
     ),
-
     # ── Slack MCP Server ─────────────────────────────────────
     "mcp_slack_post_message": ToolDefinition(
         name="mcp_slack_post_message",
@@ -334,7 +327,6 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.READ_ONLY,
         requires_doc_update=False,
     ),
-
     # ── Browser Control (Sprint 4) ───────────────────────────
     "browser_open": ToolDefinition(
         name="browser_open",
@@ -393,7 +385,6 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.STATE_MODIFY,
         requires_doc_update=False,
     ),
-
     # ── Higgsfield Browser Tools (routed to higgsfield_playwright_server:8812) ──
     "hf_login": ToolDefinition(
         name="hf_login",
@@ -447,6 +438,7 @@ def get_tool_definition(name: str) -> ToolDefinition | None:
 # ---------------------------------------------------------------------------
 # safe_shell — Whitelisted command execution
 # ---------------------------------------------------------------------------
+
 
 async def safe_shell(command: str, agent_id: str) -> dict[str, Any]:
     """
@@ -531,7 +523,7 @@ async def safe_shell(command: str, agent_id: str) -> dict[str, Any]:
         logger.info(f"safe_shell executed by {agent_id}: {command[:100]}")
         return result
 
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return {
             "stdout": "",
             "stderr": "Command timed out after 30 seconds",
@@ -551,6 +543,7 @@ async def safe_shell(command: str, agent_id: str) -> dict[str, Any]:
 # file_reader — Safe file reading
 # ---------------------------------------------------------------------------
 
+
 async def file_reader(file_path: str, agent_id: str) -> dict[str, Any]:
     """
     Read file contents safely.
@@ -566,9 +559,9 @@ async def file_reader(file_path: str, agent_id: str) -> dict[str, Any]:
         Dict with content, size, exists.
     """
     try:
-        path = Path(os.path.normpath(
-            str(file_path) if Path(file_path).is_absolute() else str(PROJECT_ROOT / file_path)
-        ))
+        path = Path(
+            os.path.normpath(str(file_path) if Path(file_path).is_absolute() else str(PROJECT_ROOT / file_path))
+        )
 
         # Security: restrict to project directory
         if not str(path).startswith(str(PROJECT_ROOT)):
@@ -610,6 +603,7 @@ async def file_reader(file_path: str, agent_id: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # doc_updater — Governance documentation update tool
 # ---------------------------------------------------------------------------
+
 
 async def doc_updater(
     target: str,
@@ -686,6 +680,7 @@ async def doc_updater(
 # system_info — System information retrieval
 # ---------------------------------------------------------------------------
 
+
 async def system_info(agent_id: str) -> dict[str, Any]:
     """
     Retrieve system information.
@@ -722,6 +717,7 @@ async def system_info(agent_id: str) -> dict[str, Any]:
 # webhook_send — HTTP POST notification
 # ---------------------------------------------------------------------------
 
+
 async def webhook_send(url: str, payload: dict[str, Any], agent_id: str) -> dict[str, Any]:
     """
     Send an HTTP POST to a webhook URL with a JSON payload.
@@ -736,7 +732,7 @@ async def webhook_send(url: str, payload: dict[str, Any], agent_id: str) -> dict
     url_lower = url.lower()
     for prefix in SSRF_BLOCKED_PREFIXES:
         if url_lower.startswith(prefix):
-            return {"success": False, "error": f"BLOCKED: URL targets a restricted internal address"}
+            return {"success": False, "error": "BLOCKED: URL targets a restricted internal address"}
 
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
@@ -763,6 +759,7 @@ async def webhook_send(url: str, payload: dict[str, Any], agent_id: str) -> dict
 
 _GIT_ALLOWED_SUBCMDS = {"log", "status", "diff", "show", "branch", "tag", "remote"}
 
+
 async def git_ops(subcommand: str, agent_id: str) -> dict[str, Any]:
     """
     Execute a read-only git sub-command.
@@ -774,8 +771,7 @@ async def git_ops(subcommand: str, agent_id: str) -> dict[str, Any]:
     if not parts or parts[0] not in _GIT_ALLOWED_SUBCMDS:
         return {
             "stdout": "",
-            "stderr": f"Sub-command '{parts[0] if parts else ''}' not allowed. "
-                      f"Allowed: {sorted(_GIT_ALLOWED_SUBCMDS)}",
+            "stderr": f"Sub-command '{parts[0] if parts else ''}' not allowed. Allowed: {sorted(_GIT_ALLOWED_SUBCMDS)}",
             "return_code": -1,
         }
 
@@ -794,7 +790,7 @@ async def git_ops(subcommand: str, agent_id: str) -> dict[str, Any]:
             "stderr": stderr.decode("utf-8", errors="replace")[:1024],
             "return_code": process.returncode,
         }
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return {"stdout": "", "stderr": "git command timed out", "return_code": -1}
     except Exception as exc:
         return {"stdout": "", "stderr": str(exc), "return_code": -1}
@@ -803,6 +799,7 @@ async def git_ops(subcommand: str, agent_id: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # health_check — HTTP endpoint health probe
 # ---------------------------------------------------------------------------
+
 
 async def health_check(url: str, agent_id: str) -> dict[str, Any]:
     """
@@ -820,6 +817,7 @@ async def health_check(url: str, agent_id: str) -> dict[str, Any]:
             return {"reachable": False, "error": "BLOCKED: URL targets a restricted internal address"}
 
     import time
+
     start = time.monotonic()
     req = urllib.request.Request(url, headers={"User-Agent": "Agentop-HealthCheck/1.0"})
     try:
@@ -846,6 +844,7 @@ async def health_check(url: str, agent_id: str) -> dict[str, Any]:
 # log_tail — Tail log file contents
 # ---------------------------------------------------------------------------
 
+
 async def log_tail(file_path: str, lines: int, agent_id: str) -> dict[str, Any]:
     """
     Return the last N lines of a log file.
@@ -853,16 +852,16 @@ async def log_tail(file_path: str, lines: int, agent_id: str) -> dict[str, Any]:
     READ_ONLY — restricted to project directory.
     """
     try:
-        path = Path(os.path.normpath(
-            str(file_path) if Path(file_path).is_absolute() else str(PROJECT_ROOT / file_path)
-        ))
+        path = Path(
+            os.path.normpath(str(file_path) if Path(file_path).is_absolute() else str(PROJECT_ROOT / file_path))
+        )
         if not str(path).startswith(str(PROJECT_ROOT)):
             return {"content": "", "error": "Access denied: path outside project directory"}
         if not path.exists() or not path.is_file():
             return {"content": "", "error": "File not found or not a regular file"}
 
         all_lines = path.read_text(errors="replace").splitlines()
-        tail_lines = all_lines[-max(1, min(int(lines), 500)):]
+        tail_lines = all_lines[-max(1, min(int(lines), 500)) :]
         logger.info(f"log_tail by {agent_id}: {file_path} ({len(tail_lines)} lines)")
         return {"content": "\n".join(tail_lines), "total_lines": len(all_lines), "returned_lines": len(tail_lines)}
     except Exception as exc:
@@ -872,6 +871,7 @@ async def log_tail(file_path: str, lines: int, agent_id: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # alert_dispatch — Publish alert to shared event log
 # ---------------------------------------------------------------------------
+
 
 async def alert_dispatch(
     level: str,
@@ -885,6 +885,7 @@ async def alert_dispatch(
     STATE_MODIFY — appends to shared events (via memory_store, respecting INV-9).
     """
     from backend.memory import memory_store as _ms
+
     level_normalised = level.upper()
     if level_normalised not in {"INFO", "WARNING", "ERROR", "CRITICAL"}:
         level_normalised = "INFO"
@@ -907,15 +908,16 @@ async def alert_dispatch(
 # ---------------------------------------------------------------------------
 
 _SECRET_PATTERNS: list[tuple[str, re.Pattern]] = [
-    ("API Key (generic)",    re.compile(r"(?i)(api[_-]?key|apikey)\s*[:=]\s*['\"]?[a-zA-Z0-9_\-]{16,}")),
-    ("AWS Access Key",       re.compile(r"AKIA[0-9A-Z]{16}")),
-    ("Private Key Header",   re.compile(r"-----BEGIN\s+(RSA|EC|OPENSSH)\s+PRIVATE KEY-----")),
-    ("Password in code",     re.compile(r"(?i)(password|passwd|pwd)\s*[:=]\s*['\"][^'\"]{4,}")),
-    ("Bearer token",         re.compile(r"(?i)bearer\s+[a-zA-Z0-9\-_\.]{20,}")),
-    ("JWT",                  re.compile(r"eyJ[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+")),
-    ("GitHub Token",         re.compile(r"gh[pousr]_[A-Za-z0-9]{36,}")),
-    ("Database URL",         re.compile(r"(?i)(mysql|postgres|mongodb|redis)://[^@]+:[^@]+@")),
+    ("API Key (generic)", re.compile(r"(?i)(api[_-]?key|apikey)\s*[:=]\s*['\"]?[a-zA-Z0-9_\-]{16,}")),
+    ("AWS Access Key", re.compile(r"AKIA[0-9A-Z]{16}")),
+    ("Private Key Header", re.compile(r"-----BEGIN\s+(RSA|EC|OPENSSH)\s+PRIVATE KEY-----")),
+    ("Password in code", re.compile(r"(?i)(password|passwd|pwd)\s*[:=]\s*['\"][^'\"]{4,}")),
+    ("Bearer token", re.compile(r"(?i)bearer\s+[a-zA-Z0-9\-_\.]{20,}")),
+    ("JWT", re.compile(r"eyJ[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+")),
+    ("GitHub Token", re.compile(r"gh[pousr]_[A-Za-z0-9]{36,}")),
+    ("Database URL", re.compile(r"(?i)(mysql|postgres|mongodb|redis)://[^@]+:[^@]+@")),
 ]
+
 
 async def secret_scanner(target_path: str, agent_id: str) -> dict[str, Any]:
     """
@@ -923,9 +925,9 @@ async def secret_scanner(target_path: str, agent_id: str) -> dict[str, Any]:
 
     READ_ONLY — makes no changes, reports findings.
     """
-    target = Path(os.path.normpath(
-        str(target_path) if Path(target_path).is_absolute() else str(PROJECT_ROOT / target_path)
-    ))
+    target = Path(
+        os.path.normpath(str(target_path) if Path(target_path).is_absolute() else str(PROJECT_ROOT / target_path))
+    )
     if not str(target).startswith(str(PROJECT_ROOT)):
         return {"findings": [], "error": "Access denied: path outside project directory"}
     if not target.exists():
@@ -954,16 +956,18 @@ async def secret_scanner(target_path: str, agent_id: str) -> dict[str, Any]:
             files_scanned += 1
             for pattern_name, pattern in _SECRET_PATTERNS:
                 for match in pattern.finditer(text):
-                    line_no = text[:match.start()].count("\n") + 1
+                    line_no = text[: match.start()].count("\n") + 1
                     # Redact the actual secret — show only pattern type and location
                     raw = match.group(0)
                     redacted = raw[:8] + "****" if len(raw) > 8 else "****"
-                    findings.append({
-                        "file": str(file.relative_to(PROJECT_ROOT)),
-                        "line": line_no,
-                        "pattern": pattern_name,
-                        "snippet": redacted,
-                    })
+                    findings.append(
+                        {
+                            "file": str(file.relative_to(PROJECT_ROOT)),
+                            "line": line_no,
+                            "pattern": pattern_name,
+                            "snippet": redacted,
+                        }
+                    )
                     if len(findings) >= 50:
                         break
                 if len(findings) >= 50:
@@ -979,6 +983,7 @@ async def secret_scanner(target_path: str, agent_id: str) -> dict[str, Any]:
 # db_query — Read-only SQLite query
 # ---------------------------------------------------------------------------
 
+
 async def db_query(db_path: str, query: str, agent_id: str) -> dict[str, Any]:
     """
     Execute a read-only SELECT query against a SQLite database.
@@ -989,9 +994,7 @@ async def db_query(db_path: str, query: str, agent_id: str) -> dict[str, Any]:
     if not query_stripped.startswith("SELECT") and not query_stripped.startswith("PRAGMA"):
         return {"rows": [], "error": "Only SELECT and PRAGMA queries are permitted"}
 
-    path = Path(os.path.normpath(
-        str(db_path) if Path(db_path).is_absolute() else str(PROJECT_ROOT / db_path)
-    ))
+    path = Path(os.path.normpath(str(db_path) if Path(db_path).is_absolute() else str(PROJECT_ROOT / db_path)))
     if not str(path).startswith(str(PROJECT_ROOT)):
         return {"rows": [], "error": "Access denied: path outside project directory"}
     if not path.exists():
@@ -1016,10 +1019,11 @@ async def db_query(db_path: str, query: str, agent_id: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 _RESTARTABLE_PROCESSES: dict[str, list[str]] = {
-    "backend":  ["pkill", "-f", "uvicorn"],
+    "backend": ["pkill", "-f", "uvicorn"],
     "frontend": ["pkill", "-f", "next dev"],
-    "ollama":   ["pkill", "-f", "ollama serve"],
+    "ollama": ["pkill", "-f", "ollama serve"],
 }
+
 
 async def process_restart(process_name: str, agent_id: str) -> dict[str, Any]:
     """
@@ -1032,7 +1036,7 @@ async def process_restart(process_name: str, agent_id: str) -> dict[str, Any]:
         return {
             "success": False,
             "error": f"Process '{process_name}' not in restart whitelist. "
-                     f"Allowed: {list(_RESTARTABLE_PROCESSES.keys())}",
+            f"Allowed: {list(_RESTARTABLE_PROCESSES.keys())}",
         }
 
     cmd = _RESTARTABLE_PROCESSES[process_name]
@@ -1045,7 +1049,7 @@ async def process_restart(process_name: str, agent_id: str) -> dict[str, Any]:
         await asyncio.wait_for(process.communicate(), timeout=10)
         logger.info(f"process_restart by {agent_id}: {process_name}")
         return {"success": True, "process": process_name, "return_code": process.returncode}
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return {"success": False, "error": "Restart command timed out"}
     except Exception as exc:
         return {"success": False, "error": str(exc)}
@@ -1056,28 +1060,109 @@ async def process_restart(process_name: str, agent_id: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 _TEXT_EXTENSIONS = {
-    ".py", ".js", ".ts", ".tsx", ".jsx", ".json", ".yaml", ".yml",
-    ".toml", ".cfg", ".ini", ".md", ".txt", ".html", ".css", ".scss",
-    ".sh", ".bash", ".zsh", ".env", ".env.example", ".gitignore",
-    ".dockerfile", ".conf", ".xml", ".csv", ".sql", ".rs", ".go",
-    ".java", ".c", ".cpp", ".h", ".hpp", ".rb", ".php", ".swift",
-    ".kt", ".lua", ".r", ".jl", ".ex", ".exs", ".erl",
+    ".py",
+    ".js",
+    ".ts",
+    ".tsx",
+    ".jsx",
+    ".json",
+    ".yaml",
+    ".yml",
+    ".toml",
+    ".cfg",
+    ".ini",
+    ".md",
+    ".txt",
+    ".html",
+    ".css",
+    ".scss",
+    ".sh",
+    ".bash",
+    ".zsh",
+    ".env",
+    ".env.example",
+    ".gitignore",
+    ".dockerfile",
+    ".conf",
+    ".xml",
+    ".csv",
+    ".sql",
+    ".rs",
+    ".go",
+    ".java",
+    ".c",
+    ".cpp",
+    ".h",
+    ".hpp",
+    ".rb",
+    ".php",
+    ".swift",
+    ".kt",
+    ".lua",
+    ".r",
+    ".jl",
+    ".ex",
+    ".exs",
+    ".erl",
 }
 
 _SKIP_DIRS_ANALYZE = {
-    ".git", "__pycache__", "node_modules", ".next", "dist", "build",
-    "venv", ".venv", ".tox", ".mypy_cache", ".pytest_cache",
-    "target", "bin", "obj", ".idea", ".vscode",
+    ".git",
+    "__pycache__",
+    "node_modules",
+    ".next",
+    "dist",
+    "build",
+    "venv",
+    ".venv",
+    ".tox",
+    ".mypy_cache",
+    ".pytest_cache",
+    "target",
+    "bin",
+    "obj",
+    ".idea",
+    ".vscode",
 }
 
 _SKIP_EXTS_ANALYZE = {
-    ".png", ".jpg", ".jpeg", ".gif", ".ico", ".svg", ".bmp",
-    ".woff", ".woff2", ".ttf", ".eot", ".otf",
-    ".zip", ".tar", ".gz", ".bz2", ".xz", ".7z",
-    ".bin", ".exe", ".dll", ".so", ".dylib",
-    ".pdf", ".doc", ".docx", ".xls", ".xlsx",
-    ".mp3", ".mp4", ".avi", ".wav", ".flac",
-    ".pyc", ".o", ".a", ".class",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".ico",
+    ".svg",
+    ".bmp",
+    ".woff",
+    ".woff2",
+    ".ttf",
+    ".eot",
+    ".otf",
+    ".zip",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".xz",
+    ".7z",
+    ".bin",
+    ".exe",
+    ".dll",
+    ".so",
+    ".dylib",
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".mp3",
+    ".mp4",
+    ".avi",
+    ".wav",
+    ".flac",
+    ".pyc",
+    ".o",
+    ".a",
+    ".class",
 }
 
 
@@ -1230,6 +1315,7 @@ async def folder_analyzer(
 # Tool Executor — Routes tool calls through DriftGuard middleware
 # ---------------------------------------------------------------------------
 
+
 async def execute_tool(
     tool_name: str,
     agent_id: str,
@@ -1317,17 +1403,30 @@ async def execute_tool(
     # Browser tools — routed through BrowserSessionRegistry (Sprint 4)
     if tool_name.startswith("browser_"):
         from backend.browser.tooling import (
-            browser_open, browser_click, browser_type, browser_select,
-            browser_snapshot, browser_screenshot, browser_upload, browser_close,
+            browser_click,
+            browser_close,
+            browser_open,
+            browser_screenshot,
+            browser_select,
+            browser_snapshot,
+            browser_type,
+            browser_upload,
         )
+
         _browser_map: dict[str, Any] = {
             "browser_open": lambda: browser_open(url=kwargs.get("url", ""), agent_id=agent_id),
             "browser_click": lambda: browser_click(selector=kwargs.get("selector", ""), agent_id=agent_id),
-            "browser_type": lambda: browser_type(selector=kwargs.get("selector", ""), text=kwargs.get("text", ""), agent_id=agent_id),
-            "browser_select": lambda: browser_select(selector=kwargs.get("selector", ""), value=kwargs.get("value", ""), agent_id=agent_id),
+            "browser_type": lambda: browser_type(
+                selector=kwargs.get("selector", ""), text=kwargs.get("text", ""), agent_id=agent_id
+            ),
+            "browser_select": lambda: browser_select(
+                selector=kwargs.get("selector", ""), value=kwargs.get("value", ""), agent_id=agent_id
+            ),
             "browser_snapshot": lambda: browser_snapshot(agent_id=agent_id),
             "browser_screenshot": lambda: browser_screenshot(path=kwargs.get("path", ""), agent_id=agent_id),
-            "browser_upload": lambda: browser_upload(selector=kwargs.get("selector", ""), file_path=kwargs.get("file_path", ""), agent_id=agent_id),
+            "browser_upload": lambda: browser_upload(
+                selector=kwargs.get("selector", ""), file_path=kwargs.get("file_path", ""), agent_id=agent_id
+            ),
             "browser_close": lambda: browser_close(agent_id=agent_id),
         }
         tool_fn = _browser_map.get(tool_name)
@@ -1335,6 +1434,7 @@ async def execute_tool(
     # Higgsfield tools — forwarded to higgsfield_playwright_server on port 8812
     if tool_name.startswith("hf_"):
         import httpx
+
         from backend.config import HF_MCP_PORT  # type: ignore[attr-defined]
 
         _hf_endpoint = f"http://127.0.0.1:{HF_MCP_PORT}/tools/{tool_name}"
@@ -1355,22 +1455,29 @@ async def execute_tool(
         bridge = get_mcp_bridge()
         # Strip non-serialisable kwargs keys
         mcp_args = {k: v for k, v in kwargs.items() if k not in ("agent_id", "allowed_tools")}
-        tool_fn = lambda: bridge.call_tool(tool_name, agent_id, mcp_args)
+
+        def tool_fn():
+            return bridge.call_tool(tool_name, agent_id, mcp_args)
 
     # Sandbox exec — route through SandboxSession.exec_in_container (Sprint 8)
     if tool_name == "sandbox_exec":
-        from sandbox.session_manager import SandboxSession
         from backend.config import PROJECT_ROOT
+        from sandbox.session_manager import SandboxSession
+
         _session_id: str = str(kwargs.get("session_id") or "")
         _command: list[str] = list(kwargs.get("command") or [])
         _timeout: int = int(kwargs.get("timeout") or 30)
         if not _session_id:
+
             async def _err_sid() -> dict[str, Any]:
                 return {"error": "sandbox_exec requires 'session_id'"}
+
             tool_fn = _err_sid
         elif not _command:
+
             async def _err_cmd() -> dict[str, Any]:
                 return {"error": "sandbox_exec requires 'command' (non-empty list)"}
+
             tool_fn = _err_cmd
         else:
             _sandbox = SandboxSession(
@@ -1379,12 +1486,14 @@ async def execute_tool(
                 model="",
                 session_id=_session_id,
             )
+
             async def _sandbox_exec_inner(
                 _sb: Any = _sandbox,
                 _cmd: list[str] = _command,
                 _to: int = _timeout,
             ) -> dict[str, Any]:
                 return _sb.exec_in_container(command=_cmd, timeout=_to)
+
             tool_fn = _sandbox_exec_inner
 
     if tool_fn is None:

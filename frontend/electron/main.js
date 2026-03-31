@@ -25,6 +25,25 @@ const ICON_ICO = path.join(__dirname, 'icon.ico')
 const ICON_PNG = path.join(__dirname, 'icon.png')
 const ICON_PATH = process.platform === 'win32' ? ICON_ICO : ICON_PNG
 
+// ─── Resolve dashboard port (env > port file > default 3007) ─────────────────
+const fs = require('fs')
+function getDashboardPort() {
+  // 1. AGENTOP_DASHBOARD_PORT env var (set by app.py when it spawns Electron)
+  if (process.env.AGENTOP_DASHBOARD_PORT) {
+    return parseInt(process.env.AGENTOP_DASHBOARD_PORT, 10)
+  }
+  // 2. Port file written by app.py
+  const portFile = path.join(__dirname, '..', '..', '.dashboard_port')
+  try {
+    const port = parseInt(fs.readFileSync(portFile, 'utf-8').trim(), 10)
+    if (port > 0 && port < 65536) return port
+  } catch { /* file doesn't exist, fall through */ }
+  // 3. Default
+  return 3007
+}
+const DASHBOARD_PORT = getDashboardPort()
+const DASHBOARD_URL = `http://localhost:${DASHBOARD_PORT}`
+
 // ─── Wait for a URL to return HTTP 200 ───────────────────────────────────────
 function waitForPort(url, maxMs = 60000) {
   return new Promise((resolve, reject) => {
@@ -66,7 +85,7 @@ async function createWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#141417',
     show: false,
     autoHideMenuBar: true,
   })
@@ -75,11 +94,11 @@ async function createWindow() {
 
   // Wait for Next.js to be ready before loading
   try {
-    await waitForPort('http://localhost:3007', 60000)
+    await waitForPort(DASHBOARD_URL, 60000)
   } catch (err) {
     console.error('Frontend not ready:', err.message)
   }
-  mainWindow.loadURL('http://localhost:3007')
+  mainWindow.loadURL(DASHBOARD_URL)
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
@@ -92,7 +111,7 @@ async function createWindow() {
     console.error(`Page load failed (${code}): ${desc}. Retrying in 3s...`)
     setTimeout(() => {
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.loadURL('http://localhost:3007')
+        mainWindow.loadURL(DASHBOARD_URL)
       }
     }, 3000)
   })
@@ -106,7 +125,7 @@ async function createWindow() {
         console.log('Got 404 page, retrying in 3s...')
         setTimeout(() => {
           if (mainWindow && !mainWindow.isDestroyed()) {
-            mainWindow.loadURL('http://localhost:3007')
+            mainWindow.loadURL(DASHBOARD_URL)
           }
         }, 3000)
       }

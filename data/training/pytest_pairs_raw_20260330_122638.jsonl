@@ -1,0 +1,1 @@
+{"conversations": [{"from": "human", "value": "How do I know if the Agentop test suite is healthy?"}, {"from": "gpt", "value": "Run `pytest backend/tests/ -v` — all 0 tests pass. The test suite covers native tools, Ollama client, knowledge store, and agent orchestration. A healthy run shows green across all modules with no failures or warnings about missing fixtures."}]}

@@ -13,13 +13,14 @@ import asyncio
 from typing import Any
 
 from backend.browser.session import BrowserSession
-from backend.config import BROWSER_ALLOWED_AGENTS  # type: ignore[reportUnusedImport]  # used in _check_browser_permission
-from backend.utils import logger
-
+from backend.config import (
+    BROWSER_ALLOWED_AGENTS,  # type: ignore[reportUnusedImport]  # used in _check_browser_permission
+)
 
 # ---------------------------------------------------------------------------
 # Registry
 # ---------------------------------------------------------------------------
+
 
 class BrowserSessionRegistry:
     """Per-agent browser session store with TTL eviction."""
@@ -82,6 +83,7 @@ def get_browser_registry() -> BrowserSessionRegistry:
 # Agent permission check (Sprint 4.4)
 # ---------------------------------------------------------------------------
 
+
 def _check_browser_permission(agent_id: str) -> None:
     """Raise ``PermissionError`` if the agent is not allowed to use browser tools."""
     if BROWSER_ALLOWED_AGENTS and agent_id not in BROWSER_ALLOWED_AGENTS:
@@ -94,6 +96,7 @@ def _check_browser_permission(agent_id: str) -> None:
 # ---------------------------------------------------------------------------
 # Tool-surface functions
 # ---------------------------------------------------------------------------
+
 
 async def browser_open(url: str, agent_id: str) -> dict[str, Any]:
     """Open a URL in the agent's browser session."""

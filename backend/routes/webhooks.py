@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
-from datetime import datetime, timezone
 import hashlib
 import hmac
 import json
+import time
+import uuid
+from collections.abc import Awaitable, Callable
+from datetime import UTC, datetime
 from pathlib import Path
 from threading import Lock
-import time
 from typing import Any, cast
-import uuid
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
@@ -184,7 +184,7 @@ async def register_webhook(body: WebhookRegisterRequest) -> WebhookRecord:
         webhook_id=webhook_id,
         agent_id=body.agent_id,
         message_template=body.message_template,
-        created_at=datetime.now(timezone.utc).isoformat(),
+        created_at=datetime.now(UTC).isoformat(),
     )
     _registry.save(record)
     logger.info(

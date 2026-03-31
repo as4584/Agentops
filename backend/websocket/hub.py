@@ -25,13 +25,12 @@ from backend.websocket.models import (
     ErrorMessage,
     OutboundEvent,
     PingMessage,
-    PongMessage,
     SubscribeMessage,
     WelcomeMessage,
 )
 
 PING_INTERVAL: float = 20.0  # seconds between heartbeat pings
-PONG_TIMEOUT: float = 45.0   # seconds before stale connection is evicted
+PONG_TIMEOUT: float = 45.0  # seconds before stale connection is evicted
 
 
 class _ClientState:
@@ -200,6 +199,7 @@ class ConnectionManager:
 # Handle a single WebSocket connection (used by the /ws/control endpoint)
 # ---------------------------------------------------------------------------
 
+
 async def handle_ws_connection(
     ws: WebSocket,
     manager: ConnectionManager,
@@ -221,9 +221,7 @@ async def handle_ws_connection(
                 manager.record_pong(cid)
 
             else:
-                await ws.send_json(
-                    ErrorMessage(detail=f"Unknown message type: {msg_type!r}").model_dump()
-                )
+                await ws.send_json(ErrorMessage(detail=f"Unknown message type: {msg_type!r}").model_dump())
 
     except WebSocketDisconnect:
         pass

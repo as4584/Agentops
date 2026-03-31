@@ -5,21 +5,19 @@ ML Eval Routes — API endpoints for LLM evaluation, A/B experiments, benchmarks
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Any, Optional
 
-from backend.ml.eval_framework import LLMEvalFramework, EvalCase, EvalDimension
 from backend.ml.ab_experiment import ABExperimentHarness
+from backend.ml.benchmark import BenchmarkSuite
+from backend.ml.eval_framework import EvalCase, EvalDimension, LLMEvalFramework
+from backend.ml.mlflow_tracker import MLflowTracker
 from backend.ml.scoring import (
-    ExactMatchScorer,
-    RubricScorer,
     GoldenTaskRegistry,
 )
-from backend.ml.benchmark import BenchmarkSuite
-from backend.ml.mlflow_tracker import MLflowTracker
 from backend.ml.vector_store import VectorStore
-from backend.utils import logger
 
 router = APIRouter(prefix="/ml/eval", tags=["ml-eval"])
 
@@ -48,7 +46,7 @@ class EvalRequest(BaseModel):
     tokens_out: int = 0
     cost_usd: float = 0.0
     context: dict[str, Any] = {}
-    dimensions: Optional[list[str]] = None
+    dimensions: list[str] | None = None
 
 
 class ABCreateRequest(BaseModel):
@@ -99,7 +97,7 @@ class MemoryRecallRequest(BaseModel):
     agent_name: str
     query_embedding: list[float]
     limit: int = 10
-    memory_type: Optional[str] = None
+    memory_type: str | None = None
 
 
 class MLflowRunRequest(BaseModel):
@@ -118,8 +116,8 @@ class MLflowLLMCallRequest(BaseModel):
     tokens_in: int = 0
     tokens_out: int = 0
     cost_usd: float = 0.0
-    eval_score: Optional[float] = None
-    pass_fail: Optional[bool] = None
+    eval_score: float | None = None
+    pass_fail: bool | None = None
     task_type: str = ""
 
 
@@ -150,8 +148,8 @@ async def run_evaluation(req: EvalRequest) -> dict[str, Any]:
 
 @router.get("/results")
 async def get_eval_results(
-    task_type: Optional[str] = None,
-    model: Optional[str] = None,
+    task_type: str | None = None,
+    model: str | None = None,
     limit: int = 100,
 ) -> list[dict[str, Any]]:
     return _eval.get_results(task_type=task_type, model=model, limit=limit)
@@ -159,8 +157,8 @@ async def get_eval_results(
 
 @router.get("/summary")
 async def get_eval_summary(
-    task_type: Optional[str] = None,
-    model: Optional[str] = None,
+    task_type: str | None = None,
+    model: str | None = None,
 ) -> dict[str, Any]:
     return _eval.get_summary(task_type=task_type, model=model)
 
@@ -213,7 +211,7 @@ async def compare_ab_variants(experiment_id: str) -> dict[str, Any]:
 
 
 @router.get("/ab")
-async def list_ab_experiments(status: Optional[str] = None) -> list[dict[str, Any]]:
+async def list_ab_experiments(status: str | None = None) -> list[dict[str, Any]]:
     return _ab.list_experiments(status=status)
 
 
@@ -236,8 +234,8 @@ async def get_golden_task(task_id: str) -> dict[str, Any]:
 
 @router.get("/golden")
 async def list_golden_tasks(
-    task_type: Optional[str] = None,
-    difficulty: Optional[str] = None,
+    task_type: str | None = None,
+    difficulty: str | None = None,
 ) -> list[dict[str, Any]]:
     return _golden.list_tasks(task_type=task_type, difficulty=difficulty)
 
@@ -287,7 +285,7 @@ async def get_benchmark_suite(suite_id: str) -> dict[str, Any]:
 @router.get("/bench/history/{suite_id}")
 async def get_benchmark_history(
     suite_id: str,
-    model: Optional[str] = None,
+    model: str | None = None,
     limit: int = 20,
 ) -> list[dict[str, Any]]:
     return _bench.get_history(suite_id, model=model, limit=limit)

@@ -13,13 +13,14 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-
 # ---------------------------------------------------------------------------
 # Enumerations
 # ---------------------------------------------------------------------------
 
+
 class ModificationType(str, Enum):
     """Classification of tool modification impact."""
+
     READ_ONLY = "READ_ONLY"
     STATE_MODIFY = "STATE_MODIFY"
     ARCHITECTURAL_MODIFY = "ARCHITECTURAL_MODIFY"
@@ -27,6 +28,7 @@ class ModificationType(str, Enum):
 
 class ChangeImpactLevel(str, Enum):
     """Impact level of a change or agent."""
+
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
@@ -35,13 +37,15 @@ class ChangeImpactLevel(str, Enum):
 
 class DriftStatus(str, Enum):
     """System drift status indicator."""
-    GREEN = "GREEN"      # Aligned — all documentation matches code
-    YELLOW = "YELLOW"    # Pending — documentation update needed
-    RED = "RED"          # Violation — architectural invariant broken
+
+    GREEN = "GREEN"  # Aligned — all documentation matches code
+    YELLOW = "YELLOW"  # Pending — documentation update needed
+    RED = "RED"  # Violation — architectural invariant broken
 
 
 class AgentStatus(str, Enum):
     """Runtime status of an agent."""
+
     IDLE = "IDLE"
     ACTIVE = "ACTIVE"
     ERROR = "ERROR"
@@ -52,8 +56,10 @@ class AgentStatus(str, Enum):
 # Agent Models
 # ---------------------------------------------------------------------------
 
+
 class AgentDefinition(BaseModel):
     """Canonical agent definition mirroring AGENT_REGISTRY.md."""
+
     agent_id: str = Field(..., description="Unique agent identifier")
     role: str = Field(..., description="Immutable role definition")
     system_prompt: str = Field(..., description="Agent system prompt")
@@ -66,6 +72,7 @@ class AgentDefinition(BaseModel):
 
 class AgentState(BaseModel):
     """Runtime state of an agent."""
+
     agent_id: str
     status: AgentStatus = AgentStatus.IDLE
     last_active: datetime | None = None
@@ -78,8 +85,10 @@ class AgentState(BaseModel):
 # Tool Models
 # ---------------------------------------------------------------------------
 
+
 class ToolDefinition(BaseModel):
     """Definition of a registered tool."""
+
     name: str = Field(..., description="Unique tool name")
     description: str = Field(..., description="Tool purpose")
     modification_type: ModificationType = Field(..., description="Impact classification")
@@ -88,6 +97,7 @@ class ToolDefinition(BaseModel):
 
 class ToolExecutionRecord(BaseModel):
     """Log record for a tool execution."""
+
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     tool_name: str
     agent_id: str
@@ -103,8 +113,10 @@ class ToolExecutionRecord(BaseModel):
 # Change Log Models
 # ---------------------------------------------------------------------------
 
+
 class ChangeLogEntry(BaseModel):
     """Structured entry for CHANGE_LOG.md."""
+
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     agent_id: str = Field(..., description="Agent responsible for the change")
     files_modified: list[str] = Field(default_factory=list)
@@ -118,8 +130,10 @@ class ChangeLogEntry(BaseModel):
 # Drift Models
 # ---------------------------------------------------------------------------
 
+
 class DriftEvent(BaseModel):
     """A detected drift event."""
+
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     invariant_id: str = Field(..., description="Which invariant was violated")
     description: str = Field(..., description="What happened")
@@ -129,6 +143,7 @@ class DriftEvent(BaseModel):
 
 class DriftReport(BaseModel):
     """Current drift status of the system."""
+
     status: DriftStatus = DriftStatus.GREEN
     pending_updates: list[str] = Field(default_factory=list)
     violations: list[DriftEvent] = Field(default_factory=list)
@@ -139,8 +154,10 @@ class DriftReport(BaseModel):
 # API Request/Response Models
 # ---------------------------------------------------------------------------
 
+
 class ChatRequest(BaseModel):
     """Incoming chat request to an agent."""
+
     agent_id: str = Field(..., description="Target agent ID")
     message: str = Field(..., description="User message")
     context: dict[str, Any] = Field(default_factory=dict, description="Optional context")
@@ -148,6 +165,7 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     """Response from an agent."""
+
     agent_id: str
     message: str
     tool_calls: list[ToolExecutionRecord] = Field(default_factory=list)
@@ -157,11 +175,13 @@ class ChatResponse(BaseModel):
 
 class IntakeStartRequest(BaseModel):
     """Start a business intake session."""
+
     business_id: str = Field(..., description="Unique business identifier")
 
 
 class IntakeStartResponse(BaseModel):
     """Initial intake state and first question."""
+
     business_id: str
     current_question_index: int
     total_questions: int
@@ -172,12 +192,14 @@ class IntakeStartResponse(BaseModel):
 
 class IntakeAnswerRequest(BaseModel):
     """Submit a single intake answer."""
+
     business_id: str = Field(..., description="Business identifier")
     answer: str = Field(..., description="Answer text for current intake question")
 
 
 class IntakeStatusResponse(BaseModel):
     """Current intake status for a business profile."""
+
     business_id: str
     current_question_index: int
     total_questions: int
@@ -189,6 +211,7 @@ class IntakeStatusResponse(BaseModel):
 
 class CampaignGenerateRequest(BaseModel):
     """Generate a social campaign from completed intake context."""
+
     business_id: str = Field(..., description="Business identifier")
     platform: str = Field(..., description="Target platform")
     objective: str = Field(..., description="Campaign objective")
@@ -198,6 +221,7 @@ class CampaignGenerateRequest(BaseModel):
 
 class CampaignGenerateResponse(BaseModel):
     """Generated campaign package."""
+
     business_id: str
     platform: str
     objective: str
@@ -209,6 +233,7 @@ class CampaignGenerateResponse(BaseModel):
 
 class SystemStatus(BaseModel):
     """Full system status for dashboard."""
+
     agents: list[AgentState] = Field(default_factory=list)
     drift_report: DriftReport = Field(default_factory=DriftReport)
     recent_logs: list[ToolExecutionRecord] = Field(default_factory=list)

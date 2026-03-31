@@ -16,20 +16,18 @@ from __future__ import annotations
 import base64
 import json
 import os
-import struct
 from pathlib import Path
-from typing import Any
 
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.primitives import hashes
 
 from backend.config_gateway import GATEWAY_MASTER_KEY, GATEWAY_SECRETS_PATH
-
 
 # ---------------------------------------------------------------------------
 # SecretStr — Prevents accidental logging of sensitive values
 # ---------------------------------------------------------------------------
+
 
 class SecretStr:
     """Wrapper that masks value in repr / str to prevent leakage."""
@@ -56,6 +54,7 @@ class SecretStr:
 # Key Derivation
 # ---------------------------------------------------------------------------
 
+
 def _derive_key(master_key: str, salt: bytes) -> bytes:
     """Derive a 256-bit AES key from the master key + salt via PBKDF2-SHA256."""
     raw = master_key.encode() if isinstance(master_key, str) else master_key
@@ -71,6 +70,7 @@ def _derive_key(master_key: str, salt: bytes) -> bytes:
 # ---------------------------------------------------------------------------
 # Encryption / Decryption helpers
 # ---------------------------------------------------------------------------
+
 
 def _encrypt(plaintext: str, master_key: str) -> str:
     """Encrypt *plaintext* with AES-256-GCM.
@@ -98,6 +98,7 @@ def _decrypt(blob_b64: str, master_key: str) -> str:
 # ---------------------------------------------------------------------------
 # SecretsVault
 # ---------------------------------------------------------------------------
+
 
 class SecretsVault:
     """Persistent, encrypted key–value store for provider API keys.

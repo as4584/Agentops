@@ -21,12 +21,9 @@ Guardrails:
 
 from __future__ import annotations
 
-from typing import Optional
-
 from backend.content.base_agent import ContentAgent
-from backend.content.video_job import VideoJob, JobStatus
+from backend.content.video_job import JobStatus, VideoJob
 from backend.utils import logger
-
 
 # ─── System prompts ───────────────────────────────────────────────────────────
 
@@ -100,11 +97,12 @@ ARC_BEATS = [
 
 # ─── Agent ────────────────────────────────────────────────────────────────────
 
+
 class ScriptWriterAgent(ContentAgent):
     name = "ScriptWriterAgent"
     trigger_status = JobStatus.IDEA_APPROVED  # previously DRAFT
 
-    async def process(self, job: VideoJob) -> Optional[VideoJob]:
+    async def process(self, job: VideoJob) -> VideoJob | None:
         logger.info(f"[{self.name}] Writing conflict-arc script for: {job.topic!r}")
 
         context = self._build_context(job)
@@ -130,10 +128,7 @@ class ScriptWriterAgent(ContentAgent):
         # 5. Generate visual prompt frames
         frames = await self._generate_frames(job.topic, script)
 
-        logger.info(
-            f"[{self.name}] Script: {len(script.split())} words | "
-            f"Frames: {len(frames)} | Hook: {hook[:50]!r}"
-        )
+        logger.info(f"[{self.name}] Script: {len(script.split())} words | Frames: {len(frames)} | Hook: {hook[:50]!r}")
 
         updated = self.store.transition_job(
             job.job_id,
@@ -167,9 +162,7 @@ class ScriptWriterAgent(ContentAgent):
     async def _generate_frames(self, topic: str, script: str) -> list[str]:
         """Generate 8 image-gen prompts (one per arc beat)."""
         user_prompt = (
-            f"Video topic: {topic}\n\n"
-            f"Script:\n{script}\n\n"
-            f"Generate 8 visual prompt frames — one per arc beat."
+            f"Video topic: {topic}\n\nScript:\n{script}\n\nGenerate 8 visual prompt frames — one per arc beat."
         )
         try:
             raw = await self.llm.chat(
@@ -234,9 +227,7 @@ class ScriptWriterAgent(ContentAgent):
             max_tokens=600,
         )
 
-    async def _fix_missing_beats(
-        self, script: str, missing: list[str], topic: str
-    ) -> str:
+    async def _fix_missing_beats(self, script: str, missing: list[str], topic: str) -> str:
         """Ask LLM to add missing arc beats."""
         return await self.llm.chat(
             messages=[

@@ -16,19 +16,19 @@ The enforcer also validates that changes have been logged (audit mode).
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from threading import Lock
-from typing import Any, Optional
+from typing import Any
 
-from backend.config import ML_DOC_PATH, ML_DIR
+from backend.config import ML_DIR, ML_DOC_PATH
 from backend.utils import logger
 
 
 class MLDocEnforcer:
     """Enforces and manages ML documentation requirements."""
 
-    def __init__(self, doc_path: Optional[Path] = None) -> None:
+    def __init__(self, doc_path: Path | None = None) -> None:
         self._doc_path = doc_path or ML_DOC_PATH
         self._audit_path = ML_DIR / "audit_log.jsonl"
         self._lock = Lock()
@@ -39,7 +39,7 @@ class MLDocEnforcer:
         agent_name: str,
         change_type: str,
         description: str,
-        details: Optional[dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
         run_id: str = "",
     ) -> None:
         """Log an ML change. This MUST be called by any agent modifying ML state.
@@ -47,14 +47,11 @@ class MLDocEnforcer:
         change_type: one of training_run, model_deploy, pipeline_change,
                      goal_added, threshold_change, data_update, config_change
         """
-        timestamp = datetime.now(timezone.utc)
+        timestamp = datetime.now(UTC)
         ts_str = timestamp.strftime("%Y-%m-%d %H:%M UTC")
 
         # Append to Markdown changelog
-        entry = (
-            f"\n### [{ts_str}] {change_type.upper()} — {agent_name}\n\n"
-            f"{description}\n"
-        )
+        entry = f"\n### [{ts_str}] {change_type.upper()} — {agent_name}\n\n{description}\n"
         if run_id:
             entry += f"\n- **Run ID:** `{run_id}`\n"
         if details:
@@ -79,9 +76,7 @@ class MLDocEnforcer:
             with open(self._audit_path, "a") as f:
                 f.write(json.dumps(audit_record) + "\n")
 
-        logger.info(
-            f"[MLDocEnforcer] Logged {change_type} by {agent_name}: {description[:80]}"
-        )
+        logger.info(f"[MLDocEnforcer] Logged {change_type} by {agent_name}: {description[:80]}")
 
     def log_goal(self, agent_name: str, goal: str, success_criteria: str = "") -> None:
         """Log a new ML goal/objective."""

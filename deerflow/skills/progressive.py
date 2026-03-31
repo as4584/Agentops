@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import logging
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from deerflow.middleware.chain import LLMContext, Middleware
@@ -70,6 +70,7 @@ _INTENT_INDEX: list[tuple[re.Pattern[str], str]] = [
 # Data
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class SkillMatch:
     """A skill selected by intent classification."""
@@ -83,6 +84,7 @@ class SkillMatch:
 # ProgressiveSkillLoader
 # ---------------------------------------------------------------------------
 
+
 class ProgressiveSkillLoader:
     """
     Lazy-loads only the skills relevant to the current message.
@@ -93,9 +95,7 @@ class ProgressiveSkillLoader:
     def __init__(self, skill_registry: Any) -> None:
         self._registry = skill_registry
 
-    def classify_intent(
-        self, message: str, max_skills: int = 3
-    ) -> list[SkillMatch]:
+    def classify_intent(self, message: str, max_skills: int = 3) -> list[SkillMatch]:
         """Match *message* against the keyword index, return top N skills."""
         matches: list[SkillMatch] = []
         seen: set[str] = set()
@@ -138,7 +138,7 @@ class ProgressiveSkillLoader:
 
         return prompt
 
-    def as_middleware(self, max_skills: int = 3) -> "_ProgressiveSkillMiddleware":
+    def as_middleware(self, max_skills: int = 3) -> _ProgressiveSkillMiddleware:
         """Return a Middleware instance that plugs into MiddlewareChain."""
         return _ProgressiveSkillMiddleware(self, max_skills)
 
@@ -147,15 +147,14 @@ class ProgressiveSkillLoader:
 # Middleware adapter
 # ---------------------------------------------------------------------------
 
+
 class _ProgressiveSkillMiddleware(Middleware):
     """Injects relevant skill context into the system prompt before LLM calls."""
 
     name = "progressive_skills"
     priority = 45  # after summarization, before LLM call
 
-    def __init__(
-        self, loader: ProgressiveSkillLoader, max_skills: int
-    ) -> None:
+    def __init__(self, loader: ProgressiveSkillLoader, max_skills: int) -> None:
         self._loader = loader
         self._max_skills = max_skills
 
@@ -190,8 +189,6 @@ class _ProgressiveSkillMiddleware(Middleware):
                 break
         else:
             # No system message — prepend one
-            messages.insert(
-                0, {"role": "system", "content": skill_section}
-            )
+            messages.insert(0, {"role": "system", "content": skill_section})
 
         return messages

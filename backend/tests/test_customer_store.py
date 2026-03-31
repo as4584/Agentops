@@ -1,4 +1,5 @@
 """Tests for CustomerStore — SQLite persistence layer for CS agent."""
+
 from __future__ import annotations
 
 import sqlite3
@@ -10,10 +11,10 @@ import pytest
 from backend.database.customer_store import CustomerStore
 from backend.models.customer import Customer, CustomerService, ServiceStatus, ServiceType
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_customer(email: str = "test@example.com") -> Customer:
     return Customer(
@@ -40,6 +41,7 @@ def _make_service(
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def store(tmp_path: Path) -> CustomerStore:
     """Isolated CustomerStore backed by a temp SQLite file."""
@@ -50,6 +52,7 @@ def store(tmp_path: Path) -> CustomerStore:
 # Schema / init
 # ---------------------------------------------------------------------------
 
+
 class TestInit:
     def test_db_file_created(self, tmp_path: Path) -> None:
         db = tmp_path / "cs.db"
@@ -59,12 +62,7 @@ class TestInit:
     def test_all_tables_present(self, tmp_path: Path) -> None:
         store = CustomerStore(db_path=tmp_path / "schema.db")
         with store.connection() as conn:
-            tables = {
-                row[0]
-                for row in conn.execute(
-                    "SELECT name FROM sqlite_master WHERE type='table'"
-                ).fetchall()
-            }
+            tables = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
         assert {"customers", "customer_services", "service_events", "customer_deployments"} <= tables
 
     def test_double_init_idempotent(self, tmp_path: Path) -> None:
@@ -77,6 +75,7 @@ class TestInit:
 # ---------------------------------------------------------------------------
 # create_customer / get_customer
 # ---------------------------------------------------------------------------
+
 
 class TestCreateAndGet:
     def test_create_and_retrieve(self, store: CustomerStore) -> None:
@@ -119,6 +118,7 @@ class TestCreateAndGet:
 # list_customers
 # ---------------------------------------------------------------------------
 
+
 class TestListCustomers:
     def test_empty_store(self, store: CustomerStore) -> None:
         assert store.list_customers() == []
@@ -145,6 +145,7 @@ class TestListCustomers:
 # add_service / update_service_status
 # ---------------------------------------------------------------------------
 
+
 class TestServices:
     def test_add_and_retrieve_service(self, store: CustomerStore) -> None:
         c = _make_customer()
@@ -154,9 +155,7 @@ class TestServices:
 
         # Confirm via direct SQL since there's no get_service helper
         with store.connection() as conn:
-            row = conn.execute(
-                "SELECT * FROM customer_services WHERE id = ?", (svc.id,)
-            ).fetchone()
+            row = conn.execute("SELECT * FROM customer_services WHERE id = ?", (svc.id,)).fetchone()
         assert row is not None
         assert row["customer_id"] == c.id
         assert row["type"] == ServiceType.WEBSITE.value
@@ -184,9 +183,7 @@ class TestServices:
 
         store.update_service_status(svc.id, ServiceStatus.IN_PROGRESS, progress_percent=55)
         with store.connection() as conn:
-            row = conn.execute(
-                "SELECT progress_percent FROM customer_services WHERE id = ?", (svc.id,)
-            ).fetchone()
+            row = conn.execute("SELECT progress_percent FROM customer_services WHERE id = ?", (svc.id,)).fetchone()
         assert row["progress_percent"] == 55
 
     def test_complete_service_sets_completed_at(self, store: CustomerStore) -> None:
@@ -197,15 +194,14 @@ class TestServices:
 
         store.update_service_status(svc.id, ServiceStatus.COMPLETED)
         with store.connection() as conn:
-            row = conn.execute(
-                "SELECT completed_at FROM customer_services WHERE id = ?", (svc.id,)
-            ).fetchone()
+            row = conn.execute("SELECT completed_at FROM customer_services WHERE id = ?", (svc.id,)).fetchone()
         assert row["completed_at"] is not None
 
 
 # ---------------------------------------------------------------------------
 # add_service_event / get_service_events
 # ---------------------------------------------------------------------------
+
 
 class TestServiceEvents:
     def test_log_and_retrieve_event(self, store: CustomerStore) -> None:
@@ -254,6 +250,7 @@ class TestServiceEvents:
 # add_customer_deployment / list_customer_deployments
 # ---------------------------------------------------------------------------
 
+
 class TestDeployments:
     def test_record_and_list_deployment(self, store: CustomerStore) -> None:
         c = _make_customer()
@@ -291,6 +288,7 @@ class TestDeployments:
 # ---------------------------------------------------------------------------
 # update_customer_tokens
 # ---------------------------------------------------------------------------
+
 
 class TestTokenTracking:
     def test_increment_tokens(self, store: CustomerStore) -> None:

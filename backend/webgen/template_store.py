@@ -9,43 +9,46 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
-
 
 # ---------------------------------------------------------------------------
 # Template data models
 # ---------------------------------------------------------------------------
 
+
 class StylePattern(BaseModel):
     """Extracted CSS/Tailwind style pattern."""
+
     name: str = ""
     description: str = ""
     css_classes: list[str] = Field(default_factory=list)
     color_scheme: dict[str, str] = Field(default_factory=dict)
     font_stack: str = ""
-    spacing: str = ""            # compact, normal, spacious
+    spacing: str = ""  # compact, normal, spacious
 
 
 class ComponentRecord(BaseModel):
     """A reusable page component extracted from a past site."""
+
     id: str = Field(default_factory=lambda: uuid.uuid4().hex[:8])
-    name: str = ""               # e.g. "hero-centered", "pricing-3col"
-    category: str = ""           # hero, nav, footer, cta, features, testimonials, etc.
+    name: str = ""  # e.g. "hero-centered", "pricing-3col"
+    category: str = ""  # hero, nav, footer, cta, features, testimonials, etc.
     description: str = ""
-    html_template: str = ""      # HTML with {{placeholders}}
+    html_template: str = ""  # HTML with {{placeholders}}
     variables: list[str] = Field(default_factory=list)  # placeholder names
     business_types: list[str] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
     source_url: str = ""
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 
 class TemplateRecord(BaseModel):
     """A full site template learned from a past website."""
+
     id: str = Field(default_factory=lambda: uuid.uuid4().hex[:8])
     name: str = ""
     source_url: str = ""
@@ -55,16 +58,17 @@ class TemplateRecord(BaseModel):
     page_structure: list[dict[str, Any]] = Field(default_factory=list)
     component_ids: list[str] = Field(default_factory=list)
     style: StylePattern = Field(default_factory=StylePattern)
-    nav_pattern: str = ""        # top-bar, sidebar, hamburger
+    nav_pattern: str = ""  # top-bar, sidebar, hamburger
     footer_pattern: str = ""
     section_order: list[str] = Field(default_factory=list)  # common section order
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
 # Store
 # ---------------------------------------------------------------------------
+
 
 class TemplateStore:
     """
@@ -97,7 +101,7 @@ class TemplateStore:
         self._save()
         return template.id
 
-    def get_template(self, template_id: str) -> Optional[TemplateRecord]:
+    def get_template(self, template_id: str) -> TemplateRecord | None:
         return next((t for t in self._templates if t.id == template_id), None)
 
     def list_templates(self, business_type: str = "") -> list[TemplateRecord]:
@@ -121,7 +125,7 @@ class TemplateStore:
         self._save()
         return component.id
 
-    def get_component(self, component_id: str) -> Optional[ComponentRecord]:
+    def get_component(self, component_id: str) -> ComponentRecord | None:
         return next((c for c in self._components if c.id == component_id), None)
 
     def list_components(self, category: str = "", business_type: str = "") -> list[ComponentRecord]:
@@ -169,12 +173,8 @@ class TemplateStore:
                 self._components = []
 
     def _save(self) -> None:
-        self._templates_path.write_text(
-            json.dumps([t.model_dump() for t in self._templates], indent=2)
-        )
-        self._components_path.write_text(
-            json.dumps([c.model_dump() for c in self._components], indent=2)
-        )
+        self._templates_path.write_text(json.dumps([t.model_dump() for t in self._templates], indent=2))
+        self._components_path.write_text(json.dumps([c.model_dump() for c in self._components], indent=2))
 
     @property
     def template_count(self) -> int:

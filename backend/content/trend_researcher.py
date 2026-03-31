@@ -15,11 +15,10 @@ No cloud dependency — uses local Ollama.
 from __future__ import annotations
 
 import os
-from typing import Optional
 
-from backend.content.base_agent import ContentAgent
-from backend.content.video_job import VideoJob, JobStatus
 from backend.config import MEMORY_DIR
+from backend.content.base_agent import ContentAgent
+from backend.content.video_job import JobStatus, VideoJob
 from backend.utils import logger
 
 NOTES_DIR = MEMORY_DIR / "content_notes"
@@ -55,7 +54,7 @@ class TrendResearcher(ContentAgent):
     name = "TrendResearcher"
     trigger_status = None  # Runs on schedule, creates new jobs
 
-    async def process(self, job: VideoJob) -> Optional[VideoJob]:
+    async def process(self, job: VideoJob) -> VideoJob | None:
         return None  # Not a per-job agent
 
     async def run(self) -> list[VideoJob]:
@@ -70,10 +69,7 @@ class TrendResearcher(ContentAgent):
 
         # Dedup against recent topics
         existing = self.store.get_recent_topics(days=30)
-        unique_pitches = [
-            p for p in pitches
-            if p.get("title", "").lower().strip() not in existing
-        ]
+        unique_pitches = [p for p in pitches if p.get("title", "").lower().strip() not in existing]
 
         # Create IDEA_PENDING jobs
         created: list[VideoJob] = []
@@ -94,19 +90,13 @@ class TrendResearcher(ContentAgent):
             )
             self.store.save(job)
             created.append(job)
-            logger.info(
-                f"[{self.name}] IDEA_PENDING {job.job_id}: {job.topic!r}"
-            )
+            logger.info(f"[{self.name}] IDEA_PENDING {job.job_id}: {job.topic!r}")
 
-        logger.info(
-            f"[{self.name}] Created {len(created)} ideas awaiting human greenlight"
-        )
+        logger.info(f"[{self.name}] Created {len(created)} ideas awaiting human greenlight")
         self._log_idea_table(created)
         return created
 
-    async def _generate_ideas(
-        self, niche: str, notes: list[str]
-    ) -> list[dict]:
+    async def _generate_ideas(self, niche: str, notes: list[str]) -> list[dict]:
         """Use local LLM to generate idea pitches using Jack Craig's method."""
         notes_str = "\n".join(f"- {n}" for n in notes) if notes else "No recent notes."
 
@@ -149,8 +139,13 @@ class TrendResearcher(ContentAgent):
                     key = key.strip().lower()
                     val = val.strip()
                     if key in {
-                        "title", "niche", "pillar", "conflict",
-                        "hook", "pitch", "why_now",
+                        "title",
+                        "niche",
+                        "pillar",
+                        "conflict",
+                        "hook",
+                        "pitch",
+                        "why_now",
                     }:
                         idea[key] = val
             if idea.get("title"):

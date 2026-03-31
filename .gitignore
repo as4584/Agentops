@@ -4,6 +4,9 @@
 .env.*
 *.key
 
+# Runtime
+.dashboard_port
+
 # Python
 __pycache__/
 *.pyc

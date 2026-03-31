@@ -19,18 +19,17 @@ Covers:
 
 from __future__ import annotations
 
-import asyncio
 import json
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import patch
 
 import pytest
 
-from backend.mcp import MCPBridge, MCP_TOOL_MAP, is_mcp_tool
-
+from backend.mcp import MCP_TOOL_MAP, MCPBridge, is_mcp_tool
 
 # ---------------------------------------------------------------------------
 # is_mcp_tool predicate
 # ---------------------------------------------------------------------------
+
 
 def test_is_mcp_tool_true_for_prefixed_names():
     assert is_mcp_tool("mcp_github_search_repositories") is True
@@ -47,6 +46,7 @@ def test_is_mcp_tool_false_for_native_tools():
 # Not initialised
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_call_tool_before_initialise_returns_error():
     bridge = MCPBridge()
@@ -59,6 +59,7 @@ async def test_call_tool_before_initialise_returns_error():
 # ---------------------------------------------------------------------------
 # Disabled gateway
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_call_tool_when_disabled_returns_error(monkeypatch):
@@ -73,6 +74,7 @@ async def test_call_tool_when_disabled_returns_error(monkeypatch):
 # ---------------------------------------------------------------------------
 # Docker CLI absent
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_initialise_when_docker_missing(monkeypatch):
@@ -100,6 +102,7 @@ async def test_call_tool_when_cli_missing_returns_error(monkeypatch):
 # Unknown tool name
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_call_tool_unknown_name_returns_error(monkeypatch):
     monkeypatch.setattr("backend.mcp.MCP_GATEWAY_ENABLED", True)
@@ -116,11 +119,17 @@ async def test_call_tool_unknown_name_returns_error(monkeypatch):
 # Tool map completeness
 # ---------------------------------------------------------------------------
 
+
 def test_mcp_tool_map_has_all_expected_groups():
     """All 26 documented MCP tools must be in MCP_TOOL_MAP."""
     expected_prefixes = {
-        "mcp_github_", "mcp_filesystem_", "mcp_docker_",
-        "mcp_time_", "mcp_fetch_", "mcp_sqlite_", "mcp_slack_",
+        "mcp_github_",
+        "mcp_filesystem_",
+        "mcp_docker_",
+        "mcp_time_",
+        "mcp_fetch_",
+        "mcp_sqlite_",
+        "mcp_slack_",
     }
     present = set()
     for key in MCP_TOOL_MAP:
@@ -128,9 +137,7 @@ def test_mcp_tool_map_has_all_expected_groups():
             if key.startswith(prefix):
                 present.add(prefix)
                 break
-    assert present == expected_prefixes, (
-        f"Missing tool groups: {expected_prefixes - present}"
-    )
+    assert present == expected_prefixes, f"Missing tool groups: {expected_prefixes - present}"
 
 
 def test_mcp_tool_map_total_count():
@@ -147,20 +154,22 @@ def test_mcp_tool_map_all_values_are_two_tuples():
 # _discover_tools: JSON list format
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_discover_tools_parses_list_format(monkeypatch):
     monkeypatch.setattr("backend.mcp.MCP_GATEWAY_ENABLED", True)
 
-    fake_output = json.dumps([
-        {"name": "search_repositories", "server": "github", "description": "Search repos"},
-        {"name": "read_file", "server": "filesystem", "description": "Read a file"},
-    ])
+    fake_output = json.dumps(
+        [
+            {"name": "search_repositories", "server": "github", "description": "Search repos"},
+            {"name": "read_file", "server": "filesystem", "description": "Read a file"},
+        ]
+    )
 
     async def _fake_run(cmd, env, timeout):
         return {"success": True, "output": fake_output}
 
-    with patch("backend.mcp._run_docker_mcp", new=_fake_run), \
-         patch("shutil.which", return_value="/usr/bin/docker"):
+    with patch("backend.mcp._run_docker_mcp", new=_fake_run), patch("shutil.which", return_value="/usr/bin/docker"):
         bridge = MCPBridge()
         bridge._enabled = True  # noqa: SLF001
         bridge._cli_available = True  # noqa: SLF001
@@ -173,11 +182,15 @@ async def test_discover_tools_parses_list_format(monkeypatch):
 async def test_discover_tools_parses_dict_format(monkeypatch):
     monkeypatch.setattr("backend.mcp.MCP_GATEWAY_ENABLED", True)
 
-    fake_output = json.dumps({
-        "github": {"tools": [
-            {"name": "create_issue", "description": "Create a GitHub issue"},
-        ]},
-    })
+    fake_output = json.dumps(
+        {
+            "github": {
+                "tools": [
+                    {"name": "create_issue", "description": "Create a GitHub issue"},
+                ]
+            },
+        }
+    )
 
     async def _fake_run(cmd, env, timeout):
         return {"success": True, "output": fake_output}
@@ -228,6 +241,7 @@ async def test_discover_tools_handles_invalid_json(monkeypatch):
 # call_tool returns expected result shape
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_call_tool_success_returns_expected_keys(monkeypatch):
     monkeypatch.setattr("backend.mcp.MCP_GATEWAY_ENABLED", True)
@@ -241,9 +255,7 @@ async def test_call_tool_success_returns_expected_keys(monkeypatch):
         bridge._enabled = True  # noqa: SLF001
         bridge._cli_available = True  # noqa: SLF001
 
-        result = await bridge.call_tool(
-            "mcp_github_list_issues", "devops_agent", {"repo": "agentop"}
-        )
+        result = await bridge.call_tool("mcp_github_list_issues", "devops_agent", {"repo": "agentop"})
 
     assert "success" in result
     assert "tool" in result
@@ -263,8 +275,6 @@ async def test_call_tool_cli_failure_returns_error(monkeypatch):
         bridge._enabled = True  # noqa: SLF001
         bridge._cli_available = True  # noqa: SLF001
 
-        result = await bridge.call_tool(
-            "mcp_github_list_issues", "devops_agent", {}
-        )
+        result = await bridge.call_tool("mcp_github_list_issues", "devops_agent", {})
 
     assert result["success"] is False

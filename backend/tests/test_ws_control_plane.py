@@ -10,24 +10,23 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from fastapi.websockets import WebSocket as FastAPIWebSocket
-from starlette.testclient import WebSocketTestSession
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture()
 def fresh_manager():
     """Return a brand-new ConnectionManager (not the module singleton)."""
     from backend.websocket.hub import ConnectionManager
+
     return ConnectionManager()
 
 
@@ -48,6 +47,7 @@ def ws_app(fresh_manager):
 # ---------------------------------------------------------------------------
 # Sprint 1.1 — Connection Management
 # ---------------------------------------------------------------------------
+
 
 def test_ws_connection_sends_welcome(ws_app) -> None:
     app, manager = ws_app
@@ -132,6 +132,7 @@ def test_ws_multiple_clients_independent(ws_app) -> None:
 # Sprint 1.1 — get_subscriptions
 # ---------------------------------------------------------------------------
 
+
 def test_get_subscriptions_returns_active_channels(fresh_manager) -> None:
     from starlette.websockets import WebSocketState
 
@@ -150,6 +151,7 @@ def test_get_subscriptions_returns_active_channels(fresh_manager) -> None:
 # ---------------------------------------------------------------------------
 # Sprint 1.2 — Broadcast
 # ---------------------------------------------------------------------------
+
 
 def test_broadcast_delivers_to_subscribed_client(fresh_manager) -> None:
     from starlette.websockets import WebSocketState
@@ -219,6 +221,7 @@ def test_broadcast_wildcard_subscription_receives_all_channels(fresh_manager) ->
 # Heartbeat — ping_all / record_pong / stale eviction
 # ---------------------------------------------------------------------------
 
+
 def test_ping_all_sends_ping_to_connected_clients(fresh_manager) -> None:
     from starlette.websockets import WebSocketState
 
@@ -268,6 +271,7 @@ def test_record_pong_updates_last_pong(fresh_manager) -> None:
 # Sprint 1.2 — Task event emitter integration
 # ---------------------------------------------------------------------------
 
+
 def test_task_tracker_subscribe_unsubscribe_compiles() -> None:
     """Smoke test that the task tracker SSE API is compatible with the emitter loop."""
     from backend.tasks import task_tracker
@@ -280,6 +284,7 @@ def test_task_tracker_subscribe_unsubscribe_compiles() -> None:
 # ---------------------------------------------------------------------------
 # Server endpoint smoke test
 # ---------------------------------------------------------------------------
+
 
 def test_ws_control_endpoint_exists_in_app() -> None:
     """Confirm /ws/control is registered in the real server app."""

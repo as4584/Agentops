@@ -50,24 +50,28 @@ class KnowledgeVectorStore:
 
         for doc in docs:
             for i, chunk in enumerate(self._chunk_text(doc["content"])):
-                chunks.append({
-                    "path": doc["path"],
-                    "chunk_index": i,
-                    "text": chunk,
-                })
+                chunks.append(
+                    {
+                        "path": doc["path"],
+                        "chunk_index": i,
+                        "text": chunk,
+                    }
+                )
 
         items: list[dict[str, Any]] = []
-        for chunk in chunks:
-            embedding = await self.llm.embed(chunk["text"])
+        for chunk in chunks:  # type: ignore[assignment]
+            embedding = await self.llm.embed(chunk["text"])  # type: ignore[index]
             if not embedding:
                 continue
-            items.append({
-                "id": f"{chunk['path']}::{chunk['chunk_index']}",
-                "path": chunk["path"],
-                "chunk_index": chunk["chunk_index"],
-                "text": chunk["text"],
-                "embedding": embedding,
-            })
+            items.append(
+                {
+                    "id": f"{chunk['path']}::{chunk['chunk_index']}",  # type: ignore[index]
+                    "path": chunk["path"],  # type: ignore[index]
+                    "chunk_index": chunk["chunk_index"],  # type: ignore[index]
+                    "text": chunk["text"],  # type: ignore[index]
+                    "embedding": embedding,
+                }
+            )
 
         self._items = items
         self._signature = current_signature
@@ -93,12 +97,14 @@ class KnowledgeVectorStore:
         scored: list[dict[str, Any]] = []
         for item in self._items:
             score = _cosine_similarity(query_embedding, item["embedding"])
-            scored.append({
-                "path": item["path"],
-                "chunk_index": item["chunk_index"],
-                "text": item["text"],
-                "score": score,
-            })
+            scored.append(
+                {
+                    "path": item["path"],
+                    "chunk_index": item["chunk_index"],
+                    "text": item["text"],
+                    "score": score,
+                }
+            )
 
         scored.sort(key=lambda x: x["score"], reverse=True)
         return scored[:top_k]
@@ -120,9 +126,7 @@ class KnowledgeVectorStore:
             return
 
         item = {
-            "id": hashlib.sha256(
-                f"{business_id}:{field}:{content}".encode("utf-8")
-            ).hexdigest(),
+            "id": hashlib.sha256(f"{business_id}:{field}:{content}".encode()).hexdigest(),
             "business_id": business_id,
             "field": field,
             "text": text,
@@ -132,10 +136,7 @@ class KnowledgeVectorStore:
         self._business_profiles = [
             existing
             for existing in self._business_profiles
-            if not (
-                existing.get("business_id") == business_id
-                and existing.get("field") == field
-            )
+            if not (existing.get("business_id") == business_id and existing.get("field") == field)
         ]
         self._business_profiles.append(item)
         self._save_business_profiles()
@@ -151,20 +152,19 @@ class KnowledgeVectorStore:
         if not query_embedding:
             return []
 
-        scoped = [
-            item for item in self._business_profiles
-            if item.get("business_id") == business_id
-        ]
+        scoped = [item for item in self._business_profiles if item.get("business_id") == business_id]
 
         scored: list[dict[str, Any]] = []
         for item in scoped:
             score = _cosine_similarity(query_embedding, item.get("embedding", []))
-            scored.append({
-                "business_id": item.get("business_id"),
-                "field": item.get("field"),
-                "text": item.get("text"),
-                "score": score,
-            })
+            scored.append(
+                {
+                    "business_id": item.get("business_id"),
+                    "field": item.get("field"),
+                    "text": item.get("text"),
+                    "score": score,
+                }
+            )
 
         scored.sort(key=lambda x: x["score"], reverse=True)
         return scored[:top_k]

@@ -260,3 +260,75 @@ CMD-001 (subprocess `cwd` validation before `vercel` CLI call in `webgen_builder
 - This track is intentionally split into small Codex-executable sprints with explicit file targets, tests, and acceptance criteria.
 - Any tool-permission change must update `docs/AGENT_REGISTRY.md`.
 - Any architectural invariant change must update `docs/SOURCE_OF_TRUTH.md`.
+
+---
+
+# Level-Up Sprints — 2026-03-30
+
+> Audit-driven improvement plan. Fills integration gaps, hardens governance, gets CI green.
+
+---
+
+## Sprint 6 — CI & Governance Foundation
+
+**Goal:** Green CI on `dev` branch, enforceable branch rules, clean lint.
+
+| Task | Status | Details |
+|------|--------|---------|
+| Create `dev` branch | ✅ | All development happens here; `main` is production-only |
+| Update CLAUDE.md with branch rules | ✅ | Agents and contributors blocked from pushing to `main` until CI green |
+| Fix ruff lint errors (auto-fix + manual) | 🔄 | Exclude non-core dirs, auto-fix fixable, resolve remaining |
+| Fix `test_launch.py` CI compatibility | 🔄 | Mark as integration-only (skip in CI) |
+| Verify `mypy`, `ruff format`, `pytest ≥58%` | 🔄 | All CI gates must pass |
+| Run `act` for local CI verification | 🔄 | Confirm GitHub Actions pass locally before push |
+
+---
+
+## Sprint 7 — Gatekeeper Enforcement (Highest Impact)
+
+**Goal:** Make GatekeeperAgent actually run tests instead of trusting `tests_ok=True`.
+
+| Task | Details |
+|------|---------|
+| Add `_run_pytest()` to GatekeeperAgent | Subprocess call to `pytest` on changed files; parse exit code |
+| Replace trust-based `tests_ok` check | Gatekeeper runs tests itself and returns real result |
+| Add `_run_ruff_check()` for lint validation | Run `ruff check` on changed files pre-merge |
+| Timeout + fallback | 60s timeout; if pytest hangs, mark as FAIL not PASS |
+| Tests for the Gatekeeper runner | Unit tests mocking subprocess |
+
+---
+
+## Sprint 8 — Dependency Health Endpoint
+
+**Goal:** `GET /health/deps` reports all external dependency status.
+
+| Task | Details |
+|------|---------|
+| Create `/health/deps` route | Returns JSON with status of each dependency |
+| Ollama check | Model availability, version, response latency |
+| FFmpeg check | `which ffmpeg` + version string |
+| Docker MCP check | Docker available, MCP servers enabled |
+| TTS backend check | Which TTS engine is active |
+
+---
+
+## Sprint 9 — Integration Tests
+
+**Goal:** Three end-to-end tests that validate component interactions.
+
+| Task | Details |
+|------|---------|
+| GSD flow integration test | plan → execute → verify with mocked LLM |
+| Content pipeline integration test | script → voice → video stub chain |
+| Chat gateway integration test | POST /chat → orchestrator → agent → response |
+
+---
+
+## Sprint 10 — WebGen Persistence & Setup Script
+
+**Goal:** Persist generated websites to disk; first-run dependency setup.
+
+| Task | Details |
+|------|---------|
+| WebGen disk persistence | Write HTML/CSS to `data/webgen/<project_id>/` |
+| `scripts/setup_deps.sh` | Detect/install FFmpeg, eSpeak, check Ollama models, verify Docker MCP |

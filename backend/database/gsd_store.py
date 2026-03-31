@@ -4,10 +4,11 @@ GSD Store — JSON-backed persistent store for GSD workflow state.
 All writes use an atomic tmp → rename pattern (same as job_store.py and
 site_store.py) to guard against partial writes during interruptions.
 """
+
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -48,6 +49,7 @@ def _read_json(path: Path) -> dict[str, Any]:
 # State
 # ---------------------------------------------------------------------------
 
+
 class GSDStore:
     """Manages all on-disk state for the GSD workflow."""
 
@@ -60,7 +62,7 @@ class GSDStore:
         return GSDStateFile.model_validate(raw)
 
     def save_state(self, state: GSDStateFile) -> None:
-        state.last_updated = datetime.now(timezone.utc)
+        state.last_updated = datetime.now(UTC)
         _atomic_write(_STATE_PATH, state.model_dump_json(indent=2))
 
     # ---- Phase plans -------------------------------------------------------
@@ -83,10 +85,7 @@ class GSDStore:
     def list_phases(self) -> list[int]:
         if not _PHASES_ROOT.exists():
             return []
-        return sorted(
-            int(p.name) for p in _PHASES_ROOT.iterdir()
-            if p.is_dir() and p.name.isdigit()
-        )
+        return sorted(int(p.name) for p in _PHASES_ROOT.iterdir() if p.is_dir() and p.name.isdigit())
 
     # ---- Execution logs ----------------------------------------------------
 
@@ -127,10 +126,10 @@ class GSDStore:
         docs_dir = Path("docs/gsd")
         docs_dir.mkdir(parents=True, exist_ok=True)
         for field_name, heading in (
-            ("stack",        "STACK"),
+            ("stack", "STACK"),
             ("architecture", "ARCHITECTURE"),
-            ("conventions",  "CONVENTIONS"),
-            ("concerns",     "CONCERNS"),
+            ("conventions", "CONVENTIONS"),
+            ("concerns", "CONCERNS"),
         ):
             content = getattr(result, field_name, "") or ""
             _atomic_write(
@@ -149,6 +148,7 @@ class GSDStore:
 # ---------------------------------------------------------------------------
 # Markdown helpers
 # ---------------------------------------------------------------------------
+
 
 def _plan_to_markdown(plan: GSDPlan) -> str:
     lines = [
@@ -187,8 +187,8 @@ def _verify_report_to_markdown(report: GSDVerifyReport) -> str:
         "",
     ]
     for section_label, items in (
-        ("✅ Passed",       report.passed),
-        ("❌ Failed",       report.failed),
+        ("✅ Passed", report.passed),
+        ("❌ Failed", report.failed),
         ("❓ Unverifiable", report.unverifiable),
     ):
         lines.append(f"## {section_label} ({len(items)})")

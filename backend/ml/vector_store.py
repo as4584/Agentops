@@ -13,20 +13,19 @@ from __future__ import annotations
 
 import hashlib
 import time
-from typing import Any, Optional
+from typing import Any
 
-from backend.config import ML_DIR
 from backend.utils import logger
 
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.models import (
         Distance,
+        FieldCondition,
+        Filter,
+        MatchValue,
         PointStruct,
         VectorParams,
-        Filter,
-        FieldCondition,
-        MatchValue,
     )
 
     QDRANT_AVAILABLE = True
@@ -65,7 +64,7 @@ class VectorStore:
     def ensure_collection(
         self,
         collection: str = "",
-        dim: Optional[int] = None,
+        dim: int | None = None,
     ) -> None:
         """Create collection if it doesn't exist."""
         if not self._client:
@@ -88,7 +87,7 @@ class VectorStore:
         self,
         vectors: list[list[float]],
         payloads: list[dict[str, Any]],
-        ids: Optional[list[str]] = None,
+        ids: list[str] | None = None,
         collection: str = "",
         agent_namespace: str = "",
     ) -> int:
@@ -115,7 +114,7 @@ class VectorStore:
         limit: int = 10,
         collection: str = "",
         agent_namespace: str = "",
-        filters: Optional[dict[str, Any]] = None,
+        filters: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         """Semantic search with optional agent namespace filtering."""
         if not self._client:
@@ -126,14 +125,12 @@ class VectorStore:
         # Build filter
         conditions = []
         if agent_namespace:
-            conditions.append(
-                FieldCondition(key="agent_namespace", match=MatchValue(value=agent_namespace))
-            )
+            conditions.append(FieldCondition(key="agent_namespace", match=MatchValue(value=agent_namespace)))
         if filters:
             for key, value in filters.items():
                 conditions.append(FieldCondition(key=key, match=MatchValue(value=value)))
 
-        query_filter = Filter(must=conditions) if conditions else None
+        query_filter = Filter(must=conditions) if conditions else None  # type: ignore[arg-type]
 
         response = self._client.query_points(
             collection_name=coll,
@@ -151,7 +148,7 @@ class VectorStore:
             for hit in response.points
         ]
 
-    def get_by_id(self, point_id: str, collection: str = "") -> Optional[dict[str, Any]]:
+    def get_by_id(self, point_id: str, collection: str = "") -> dict[str, Any] | None:
         """Retrieve a point by ID."""
         if not self._client:
             return None
@@ -170,7 +167,7 @@ class VectorStore:
         if not self._client:
             return 0
         coll = collection or self.DEFAULT_COLLECTION
-        self._client.delete(collection_name=coll, points_selector=ids)
+        self._client.delete(collection_name=coll, points_selector=ids)  # type: ignore[arg-type]
         return len(ids)
 
     def count(self, collection: str = "") -> int:
@@ -194,7 +191,7 @@ class VectorStore:
         content: str,
         embedding: list[float],
         memory_type: str = "conversation",
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """High-level: store a memory item for an agent."""
         payload = {
@@ -217,7 +214,7 @@ class VectorStore:
         agent_name: str,
         query_embedding: list[float],
         limit: int = 10,
-        memory_type: Optional[str] = None,
+        memory_type: str | None = None,
     ) -> list[dict[str, Any]]:
         """High-level: recall relevant memories for an agent."""
         filters = {}

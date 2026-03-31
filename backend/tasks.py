@@ -15,7 +15,7 @@ import asyncio
 import json
 import threading
 from collections import deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 
@@ -34,7 +34,7 @@ class ActivityEvent:
     def __init__(self, event_type: str, data: dict[str, Any]) -> None:
         self.event_type = event_type
         self.data = data
-        self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.timestamp = datetime.now(UTC).isoformat()
 
     def to_sse(self) -> str:
         """Format as an SSE message string."""
@@ -106,7 +106,7 @@ class TaskTracker:
                 "action": action,
                 "detail": detail,
                 "status": status,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "started_at": None,
                 "completed_at": None,
                 "duration_ms": None,
@@ -117,10 +117,18 @@ class TaskTracker:
             self._tasks.append(task)
 
         # Broadcast to SSE subscribers
-        self._broadcast(ActivityEvent("task_created", {
-            "task_id": task_id, "agent_id": agent_id,
-            "action": action, "detail": detail[:200], "status": status,
-        }))
+        self._broadcast(
+            ActivityEvent(
+                "task_created",
+                {
+                    "task_id": task_id,
+                    "agent_id": agent_id,
+                    "action": action,
+                    "detail": detail[:200],
+                    "status": status,
+                },
+            )
+        )
         return task_id
 
     def start_task(self, task_id: str) -> None:
@@ -129,7 +137,7 @@ class TaskTracker:
             task = self._find(task_id)
             if task:
                 task["status"] = TaskStatus.RUNNING
-                task["started_at"] = datetime.now(timezone.utc).isoformat()
+                task["started_at"] = datetime.now(UTC).isoformat()
         self._broadcast(ActivityEvent("task_started", {"task_id": task_id}))
 
     def complete_task(self, task_id: str, detail: str | None = None) -> None:
@@ -139,7 +147,7 @@ class TaskTracker:
         with self._lock:
             task = self._find(task_id)
             if task:
-                now = datetime.now(timezone.utc)
+                now = datetime.now(UTC)
                 task["status"] = TaskStatus.COMPLETED
                 task["completed_at"] = now.isoformat()
                 agent_id = task.get("agent_id", "")
@@ -150,10 +158,17 @@ class TaskTracker:
                     task["duration_ms"] = int((now - started).total_seconds() * 1000)
                     duration_ms = task["duration_ms"]
 
-        self._broadcast(ActivityEvent("task_completed", {
-            "task_id": task_id, "agent_id": agent_id,
-            "detail": (detail or "")[:200], "duration_ms": duration_ms,
-        }))
+        self._broadcast(
+            ActivityEvent(
+                "task_completed",
+                {
+                    "task_id": task_id,
+                    "agent_id": agent_id,
+                    "detail": (detail or "")[:200],
+                    "duration_ms": duration_ms,
+                },
+            )
+        )
 
     def fail_task(self, task_id: str, error: str) -> None:
         """Mark a task as FAILED."""
@@ -161,7 +176,7 @@ class TaskTracker:
         with self._lock:
             task = self._find(task_id)
             if task:
-                now = datetime.now(timezone.utc)
+                now = datetime.now(UTC)
                 task["status"] = TaskStatus.FAILED
                 task["completed_at"] = now.isoformat()
                 task["error"] = error
@@ -170,9 +185,16 @@ class TaskTracker:
                     started = datetime.fromisoformat(task["started_at"])
                     task["duration_ms"] = int((now - started).total_seconds() * 1000)
 
-        self._broadcast(ActivityEvent("task_failed", {
-            "task_id": task_id, "agent_id": agent_id, "error": error[:200],
-        }))
+        self._broadcast(
+            ActivityEvent(
+                "task_failed",
+                {
+                    "task_id": task_id,
+                    "agent_id": agent_id,
+                    "error": error[:200],
+                },
+            )
+        )
 
     # ----- Custom activity events (non-task) -----
 

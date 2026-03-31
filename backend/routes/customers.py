@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -95,7 +95,7 @@ async def add_service(customer_id: str, payload: AddServiceRequest) -> dict[str,
         progress_percent=5,
         assigned_agents=assigned_agents,
         notes=payload.notes,
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
     customer_store.add_service(customer_id, service)
     customer_store.add_service_event(
@@ -130,10 +130,7 @@ async def add_service(customer_id: str, payload: AddServiceRequest) -> dict[str,
     task_tracker.create_task(
         agent_id="soul_core",
         action="service_assigned",
-        detail=(
-            f"Customer={customer_id} Service={payload.service_type.value} "
-            f"Agents={','.join(assigned_agents)}"
-        ),
+        detail=(f"Customer={customer_id} Service={payload.service_type.value} Agents={','.join(assigned_agents)}"),
     )
 
     return {

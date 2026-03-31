@@ -4,6 +4,7 @@ Sprint 5.2 — Transport
 Sprint 5.4 — Interaction Loop
 Sprint 5.5 — Guardrails (clear, quota, state)
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -23,6 +24,7 @@ _get_bus = get_a2ui_bus
 # ---------------------------------------------------------------------------
 # Request / Response models
 # ---------------------------------------------------------------------------
+
 
 class CanvasEmitResponse(BaseModel):
     ok: bool
@@ -53,6 +55,7 @@ class ActionDispatchResponse(BaseModel):
 # Emit endpoint
 # ---------------------------------------------------------------------------
 
+
 @router.post("/{session_id}/event", response_model=CanvasEmitResponse, status_code=200)
 async def emit_canvas_event(session_id: str, body: A2UIMessage) -> CanvasEmitResponse:
     """Agent emits a canvas event for the given session."""
@@ -81,6 +84,7 @@ async def emit_canvas_event(session_id: str, body: A2UIMessage) -> CanvasEmitRes
 # State endpoint
 # ---------------------------------------------------------------------------
 
+
 @router.get("/{session_id}/state", response_model=CanvasStateResponse)
 async def get_canvas_state(session_id: str) -> CanvasStateResponse:
     """Return current canvas widget state for the session."""
@@ -93,6 +97,7 @@ async def get_canvas_state(session_id: str) -> CanvasStateResponse:
 # ---------------------------------------------------------------------------
 # Clear endpoint (Sprint 5.5)
 # ---------------------------------------------------------------------------
+
 
 @router.delete("/{session_id}", response_model=CanvasClearResponse)
 async def clear_canvas(session_id: str) -> CanvasClearResponse:
@@ -109,6 +114,7 @@ async def clear_canvas(session_id: str) -> CanvasClearResponse:
 # ---------------------------------------------------------------------------
 # Widget action endpoint (Sprint 5.4)
 # ---------------------------------------------------------------------------
+
 
 @router.post("/action", response_model=ActionDispatchResponse)
 async def handle_canvas_action(body: A2UIAction) -> ActionDispatchResponse:

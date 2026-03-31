@@ -8,9 +8,7 @@ Adds FAQ schema, speakable content, entity markup, topic clusters.
 from __future__ import annotations
 
 import json
-from typing import Any, Optional
 
-from backend.llm import OllamaClient
 from backend.utils import logger
 from backend.webgen.agents.base_agent import WebAgentBase
 from backend.webgen.models import (
@@ -58,7 +56,7 @@ Page: {page.slug} — {page.title}
 Purpose: {page.purpose}
 Business: {brief.business_name}
 Type: {brief.business_type.value}
-Services: {', '.join(brief.services) if brief.services else 'Various services'}
+Services: {", ".join(brief.services) if brief.services else "Various services"}
 Description: {brief.description}
 
 Generate:
@@ -124,11 +122,7 @@ Return JSON:
                     for faq in aeo.faq_pairs
                 ],
             }
-            aeo_tags.append(
-                f'  <script type="application/ld+json">\n'
-                f'{json.dumps(faq_schema, indent=2)}\n'
-                f'  </script>'
-            )
+            aeo_tags.append(f'  <script type="application/ld+json">\n{json.dumps(faq_schema, indent=2)}\n  </script>')
 
         # Speakable Schema
         if aeo.speakable_selectors:
@@ -141,9 +135,7 @@ Return JSON:
                 },
             }
             aeo_tags.append(
-                f'  <script type="application/ld+json">\n'
-                f'{json.dumps(speakable_schema, indent=2)}\n'
-                f'  </script>'
+                f'  <script type="application/ld+json">\n{json.dumps(speakable_schema, indent=2)}\n  </script>'
             )
 
         # Inject before </head>
@@ -166,14 +158,15 @@ Return JSON:
             items.append(
                 f'    <details class="border-b border-gray-200 py-4">\n'
                 f'      <summary class="cursor-pointer font-semibold text-lg text-gray-800">'
-                f'{faq.get("q", "")}</summary>\n'
+                f"{faq.get('q', '')}</summary>\n"
                 f'      <p class="faq-answer mt-2 text-gray-600">{faq.get("a", "")}</p>\n'
-                f'    </details>'
+                f"    </details>"
             )
 
         return (
             '  <section id="faq" class="max-w-3xl mx-auto px-4 py-16">\n'
             '    <h2 class="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>\n'
-            + "\n".join(items) + "\n"
+            + "\n".join(items)
+            + "\n"
             "  </section>"
         )

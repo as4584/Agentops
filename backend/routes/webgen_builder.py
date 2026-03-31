@@ -4,8 +4,8 @@ import os
 import re
 import shutil
 import subprocess
+from datetime import UTC, datetime
 from importlib import import_module
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -15,13 +15,14 @@ from pydantic import BaseModel, Field
 
 from backend.config import PROJECT_ROOT
 from backend.database.customer_store import customer_store
+from backend.llm import OllamaClient
 from backend.webgen.models import BusinessType, ClientBrief, SiteStatus
 from backend.webgen.pipeline import WebGenPipeline
 from backend.webgen.site_store import SiteStore
 
 router = APIRouter(prefix="/api/webgen", tags=["webgen-builder"])
 
-_pipeline = WebGenPipeline()
+_pipeline = WebGenPipeline(llm=OllamaClient(model="webgen"))
 _store = SiteStore()
 
 
@@ -137,7 +138,7 @@ async def generate_site(payload: GenerateSiteRequest) -> dict[str, Any]:
 
     if payload.customer_id:
         project.metadata["customer_id"] = payload.customer_id
-        _store.save(project)
+    _store.save(project)
 
     project_dir, html_file = _project_first_html(_slugify(payload.business_name))
     html = html_file.read_text(encoding="utf-8", errors="ignore")
@@ -204,7 +205,7 @@ async def save_project_page(project_id: str, payload: SavePageRequest) -> dict[s
     _, html_file = _project_first_html(slug)
     html_file.write_text(payload.html, encoding="utf-8")
 
-    project.updated_at = datetime.now(timezone.utc).isoformat()
+    project.updated_at = datetime.now(UTC).isoformat()
     _store.save(project)
 
     return {
@@ -255,7 +256,7 @@ async def deploy_project(payload: DeployRequest) -> dict[str, Any]:
 
     project.status = SiteStatus.DEPLOYED
     project.metadata["deployed_url"] = deployed_url
-    project.metadata["deployed_at"] = datetime.now(timezone.utc).isoformat()
+    project.metadata["deployed_at"] = datetime.now(UTC).isoformat()
 
     customer_id = payload.customer_id or project.metadata.get("customer_id")
     qr_path: str | None = None

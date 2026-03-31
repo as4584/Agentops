@@ -12,11 +12,8 @@ Alert thresholds:
 
 from __future__ import annotations
 
-import json
-import sqlite3
-import time
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -60,12 +57,13 @@ CREATE INDEX IF NOT EXISTS idx_usage_daily_key  ON gateway_usage_daily(key_id, d
 # Data class
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class UsageSummary:
     key_id: str
     model: str
     provider: str
-    period: str        # hour or day ISO string
+    period: str  # hour or day ISO string
     requests: int
     tokens_in: int
     tokens_out: int
@@ -76,6 +74,7 @@ class UsageSummary:
 # ---------------------------------------------------------------------------
 # UsageTracker
 # ---------------------------------------------------------------------------
+
 
 class UsageTracker:
     """Record and query per-key usage metrics."""
@@ -98,14 +97,14 @@ class UsageTracker:
         error: bool = False,
     ) -> None:
         """Upsert usage into hourly and daily rollup tables."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         hour_ts = now.strftime("%Y-%m-%dT%H")
         day_ts = now.strftime("%Y-%m-%d")
         err_count = 1 if error else 0
 
         for table, ts_col, ts_val in (
             ("gateway_usage_hourly", "hour_ts", hour_ts),
-            ("gateway_usage_daily",  "day_ts",  day_ts),
+            ("gateway_usage_daily", "day_ts", day_ts),
         ):
             self._conn.execute(
                 f"""INSERT INTO {table}
@@ -117,15 +116,14 @@ class UsageTracker:
                         tokens_out= tokens_out+ excluded.tokens_out,
                         cost_usd  = cost_usd  + excluded.cost_usd,
                         errors    = errors    + excluded.errors""",
-                (key_id, model, provider, ts_val,
-                 tokens_in, tokens_out, cost_usd, err_count),
+                (key_id, model, provider, ts_val, tokens_in, tokens_out, cost_usd, err_count),
             )
         self._conn.commit()
 
     # ---------------------------------------------------------------- Query
 
     def get_daily_usage(self, key_id: str, days: int = 30) -> list[UsageSummary]:
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+        cutoff = (datetime.now(UTC) - timedelta(days=days)).strftime("%Y-%m-%d")
         rows = self._conn.execute(
             """SELECT key_id, model, provider, day_ts, requests,
                       tokens_in, tokens_out, cost_usd, errors
@@ -137,7 +135,7 @@ class UsageTracker:
         return [UsageSummary(*r) for r in rows]
 
     def get_today_cost(self, key_id: str) -> float:
-        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        today = datetime.now(UTC).strftime("%Y-%m-%d")
         row = self._conn.execute(
             "SELECT COALESCE(SUM(cost_usd), 0) FROM gateway_usage_daily WHERE key_id = ? AND day_ts = ?",
             (key_id, today),
@@ -145,7 +143,7 @@ class UsageTracker:
         return row[0] if row else 0.0
 
     def get_monthly_cost(self, key_id: str) -> float:
-        month = datetime.now(timezone.utc).strftime("%Y-%m")
+        month = datetime.now(UTC).strftime("%Y-%m")
         row = self._conn.execute(
             "SELECT COALESCE(SUM(cost_usd), 0) FROM gateway_usage_daily WHERE key_id = ? AND day_ts LIKE ?",
             (key_id, f"{month}-%"),
@@ -154,7 +152,7 @@ class UsageTracker:
 
     def get_today_tokens(self, key_id: str) -> tuple[int, int]:
         """Returns (tokens_in, tokens_out) for today."""
-        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        today = datetime.now(UTC).strftime("%Y-%m-%d")
         row = self._conn.execute(
             """SELECT COALESCE(SUM(tokens_in), 0), COALESCE(SUM(tokens_out), 0)
                FROM gateway_usage_daily WHERE key_id = ? AND day_ts = ?""",
@@ -194,7 +192,7 @@ class UsageTracker:
 
     def top_models(self, key_id: str, days: int = 7) -> list[dict[str, Any]]:
         """Return top models by cost for *key_id* in the last *days* days."""
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+        cutoff = (datetime.now(UTC) - timedelta(days=days)).strftime("%Y-%m-%d")
         rows = self._conn.execute(
             """SELECT model, provider,
                       SUM(requests) as req,
@@ -207,8 +205,7 @@ class UsageTracker:
             (key_id, cutoff),
         ).fetchall()
         return [
-            {"model": r[0], "provider": r[1], "requests": r[2],
-             "tokens": r[3], "cost_usd": round(r[4], 6)}
+            {"model": r[0], "provider": r[1], "requests": r[2], "tokens": r[3], "cost_usd": round(r[4], 6)}
             for r in rows
         ]
 

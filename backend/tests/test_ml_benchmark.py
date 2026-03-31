@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 
+import pytest
+
 from backend.ml.benchmark import (
-    BenchmarkSuite,
     BenchmarkCase,
     BenchmarkResult,
-    SuiteReport,
+    BenchmarkSuite,
 )
 
 
@@ -45,8 +45,14 @@ def mock_runner_degraded(case: BenchmarkCase) -> BenchmarkResult:
 
 
 CASES = [
-    {"case_id": "c1", "suite_id": "s", "task_type": "code",
-     "input_prompt": "Write hello world", "expected_output": "print('hello')", "tags": ["python"]},
+    {
+        "case_id": "c1",
+        "suite_id": "s",
+        "task_type": "code",
+        "input_prompt": "Write hello world",
+        "expected_output": "print('hello')",
+        "tags": ["python"],
+    },
 ]
 
 
@@ -133,3 +139,28 @@ class TestBenchmarkSuite:
         suite.create_suite("no_baseline", "NB", cases)
         report = suite.run_suite("no_baseline", model="m", runner_fn=mock_runner)
         assert report.regressions == []
+
+    def test_run_suite_with_errors(self, suite: BenchmarkSuite) -> None:
+        """Runner that raises should be captured as error, suite should continue."""
+
+        def failing_runner(case: BenchmarkCase) -> BenchmarkResult:
+            raise RuntimeError("boom")
+
+        cases = [
+            {"case_id": "c1", "suite_id": "err", "task_type": "t", "input_prompt": "p"},
+            {"case_id": "c2", "suite_id": "err", "task_type": "t", "input_prompt": "p2"},
+        ]
+        suite.create_suite("err_suite", "Errors", cases)
+        report = suite.run_suite("err_suite", model="m", runner_fn=failing_runner)
+        assert report.errors == 2
+        assert report.total_cases == 2
+        assert any(r.get("error") for r in report.results)
+
+    def test_avg_score_regression(self, suite: BenchmarkSuite) -> None:
+        """Avg score drop >5% should flag regression."""
+        cases = [{"case_id": "c1", "suite_id": "sr", "task_type": "t", "input_prompt": "p"}]
+        suite.create_suite("score_reg", "SR", cases)
+        good = suite.run_suite("score_reg", model="m", runner_fn=mock_runner)
+        suite.set_baseline("score_reg", "m", good)
+        bad = suite.run_suite("score_reg", model="m", runner_fn=mock_runner_degraded)
+        assert any("score" in r.lower() for r in bad.regressions)

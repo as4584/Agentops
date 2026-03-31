@@ -11,11 +11,11 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Awaitable
+from typing import Any
 
 from deerflow.tools.health import ToolHealthMonitor
-
 
 _REPAIR_SYSTEM = (
     "You are a tool repair specialist for an AI agent system. "
@@ -62,12 +62,12 @@ class RepairSuggestion:
     confidence: float = 0.0
 
     @classmethod
-    def skip(cls, rationale: str) -> "RepairSuggestion":
+    def skip(cls, rationale: str) -> RepairSuggestion:
         """Convenience constructor for a no-op skip suggestion."""
         return cls(strategy="skip", rationale=rationale, confidence=1.0)
 
     @classmethod
-    def escalate(cls, rationale: str) -> "RepairSuggestion":
+    def escalate(cls, rationale: str) -> RepairSuggestion:
         """Convenience constructor for an escalation suggestion."""
         return cls(strategy="escalate", rationale=rationale, confidence=1.0)
 
@@ -123,8 +123,7 @@ class ToolRepairEngine:
         # Short-circuit: chronic tool should go straight to escalation
         if stats.is_chronic:
             return RepairSuggestion.escalate(
-                f"Tool '{tool_name}' has failed {stats.total_failures} times. "
-                "Route to self_healer_agent."
+                f"Tool '{tool_name}' has failed {stats.total_failures} times. Route to self_healer_agent."
             )
 
         # Anti-loop guard: if this exact (tool, error) combo was already addressed,
@@ -137,8 +136,7 @@ class ToolRepairEngine:
             )
 
         history_lines = [
-            f"  [{i+1}] error={f.error!r} kwargs={f.kwargs}"
-            for i, f in enumerate(stats.recent_failures[-5:])
+            f"  [{i + 1}] error={f.error!r} kwargs={f.kwargs}" for i, f in enumerate(stats.recent_failures[-5:])
         ]
         history = "\n".join(history_lines) or "  (no prior failures)"
 
@@ -184,9 +182,7 @@ class ToolRepairEngine:
         Returns:
             (repaired_result_or_None, suggestion)
         """
-        suggestion = await self.suggest_repair(
-            tool_name, agent_id, error, original_kwargs
-        )
+        suggestion = await self.suggest_repair(tool_name, agent_id, error, original_kwargs)
 
         if suggestion.strategy in ("skip", "escalate"):
             return None, suggestion

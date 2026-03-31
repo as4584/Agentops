@@ -6,13 +6,18 @@ from __future__ import annotations
 
 import json
 import uuid
-from typing import Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Any
 
 import httpx
 
 from backend.gateway.adapters.base import (
-    BaseProviderAdapter, ChatCompletionRequest, ChatCompletionResponse,
-    StreamChunk, UsageInfo, ProviderError,
+    BaseProviderAdapter,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+    ProviderError,
+    StreamChunk,
+    UsageInfo,
 )
 from backend.gateway.secrets import get_provider_key
 from backend.utils.tool_ids import sanitize_tool_id
@@ -64,14 +69,18 @@ def _convert_messages(
         if m.role == "tool":
             # Always sanitize — even empty/None IDs get a deterministic fallback
             tool_use_id = sanitize_tool_id(m.tool_call_id or "")
-            converted.append({
-                "role": "user",
-                "content": [{
-                    "type": "tool_result",
-                    "tool_use_id": tool_use_id,
-                    "content": m.content if isinstance(m.content, str) else json.dumps(m.content),
-                }],
-            })
+            converted.append(
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": tool_use_id,
+                            "content": m.content if isinstance(m.content, str) else json.dumps(m.content),
+                        }
+                    ],
+                }
+            )
             continue
         content = m.content
         if isinstance(content, list):
@@ -86,8 +95,12 @@ def _convert_messages(
         if m.tool_calls:
             # Sanitize tool_use IDs to match Anthropic's ^[a-zA-Z0-9_-]+$ pattern
             tc_blocks = [
-                {"type": "tool_use", "id": sanitize_tool_id(tc["id"]), "name": tc["function"]["name"],
-                 "input": json.loads(tc["function"].get("arguments", "{}"))}
+                {
+                    "type": "tool_use",
+                    "id": sanitize_tool_id(tc["id"]),
+                    "name": tc["function"]["name"],
+                    "input": json.loads(tc["function"].get("arguments", "{}")),
+                }
                 for tc in m.tool_calls
             ]
             msg["content"] = (msg_content or []) + tc_blocks
@@ -104,11 +117,13 @@ def _convert_tools(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for t in tools:
         if t.get("type") == "function":
             fn = t["function"]
-            result.append({
-                "name": fn["name"],
-                "description": fn.get("description", ""),
-                "input_schema": fn.get("parameters", {}),
-            })
+            result.append(
+                {
+                    "name": fn["name"],
+                    "description": fn.get("description", ""),
+                    "input_schema": fn.get("parameters", {}),
+                }
+            )
     return result
 
 
@@ -162,14 +177,16 @@ class AnthropicAdapter(BaseProviderAdapter):
             if block.get("type") == "text":
                 text_content += block.get("text", "")
             elif block.get("type") == "tool_use":
-                tool_calls.append({
-                    "id": block["id"],
-                    "type": "function",
-                    "function": {
-                        "name": block["name"],
-                        "arguments": json.dumps(block.get("input", {})),
+                tool_calls.append(
+                    {
+                        "id": block["id"],
+                        "type": "function",
+                        "function": {
+                            "name": block["name"],
+                            "arguments": json.dumps(block.get("input", {})),
+                        },
                     }
-                })
+                )
         usage_data = data.get("usage", {})
         return ChatCompletionResponse(
             id=data.get("id", f"anthro-{uuid.uuid4().hex[:12]}"),
@@ -186,16 +203,14 @@ class AnthropicAdapter(BaseProviderAdapter):
             raw=data,
         )
 
-    async def chat_stream(self, request: ChatCompletionRequest) -> AsyncIterator[StreamChunk]:
+    async def chat_stream(self, request: ChatCompletionRequest) -> AsyncIterator[StreamChunk]:  # type: ignore[override]
         if not self._api_key:
             raise ProviderError("Anthropic API key not configured", 503, self.provider_name)
         body = self._build_body(request, stream=True)
         comp_id = f"anthro-{uuid.uuid4().hex[:12]}"
         async with httpx.AsyncClient(timeout=120) as client:
             try:
-                async with client.stream(
-                    "POST", f"{_BASE_URL}/messages", headers=self._headers(), json=body
-                ) as resp:
+                async with client.stream("POST", f"{_BASE_URL}/messages", headers=self._headers(), json=body) as resp:
                     resp.raise_for_status()
                     tokens_in = 0
                     tokens_out = 0
@@ -212,7 +227,9 @@ class AnthropicAdapter(BaseProviderAdapter):
                             delta = ev.get("delta", {})
                             if delta.get("type") == "text_delta":
                                 yield StreamChunk(
-                                    id=comp_id, model=request.model, provider=self.provider_name,
+                                    id=comp_id,
+                                    model=request.model,
+                                    provider=self.provider_name,
                                     delta_content=delta.get("text", ""),
                                 )
                         elif ev_type == "message_delta":
@@ -223,8 +240,11 @@ class AnthropicAdapter(BaseProviderAdapter):
                             tokens_in = usage.get("input_tokens", 0)
                         elif ev_type == "message_stop":
                             yield StreamChunk(
-                                id=comp_id, model=request.model, provider=self.provider_name,
-                                delta_content=None, finish_reason="end_turn",
+                                id=comp_id,
+                                model=request.model,
+                                provider=self.provider_name,
+                                delta_content=None,
+                                finish_reason="end_turn",
                                 usage=UsageInfo(
                                     prompt_tokens=tokens_in,
                                     completion_tokens=tokens_out,

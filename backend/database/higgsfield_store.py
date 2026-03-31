@@ -12,11 +12,10 @@ from __future__ import annotations
 import json
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
-
 
 # ---------------------------------------------------------------------------
 # Default DB path — relative to project root
@@ -138,14 +137,12 @@ class HighgsfieldStore:
         soul_id_status: str = "pending",
     ) -> str:
         """Insert or update a character record. Returns the character ID."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         char_id = f"char_{name.lower().replace(' ', '_')}"
         profile_str = json.dumps(profile_json) if profile_json else None
 
         with self.connection() as conn:
-            existing = conn.execute(
-                "SELECT id FROM characters WHERE name = ?", (name,)
-            ).fetchone()
+            existing = conn.execute("SELECT id FROM characters WHERE name = ?", (name,)).fetchone()
 
             if existing:
                 conn.execute(
@@ -157,9 +154,15 @@ class HighgsfieldStore:
                     WHERE name=?
                     """,
                     (
-                        character_type, soul_id_url, soul_id_status,
-                        anchor_image_path, positive_prefix, negative_prefix,
-                        profile_str, now, name,
+                        character_type,
+                        soul_id_url,
+                        soul_id_status,
+                        anchor_image_path,
+                        positive_prefix,
+                        negative_prefix,
+                        profile_str,
+                        now,
+                        name,
                     ),
                 )
                 conn.commit()
@@ -174,9 +177,17 @@ class HighgsfieldStore:
                 VALUES (?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 (
-                    char_id, name, character_type, soul_id_url, soul_id_status,
-                    anchor_image_path, positive_prefix, negative_prefix,
-                    profile_str, now, now,
+                    char_id,
+                    name,
+                    character_type,
+                    soul_id_url,
+                    soul_id_status,
+                    anchor_image_path,
+                    positive_prefix,
+                    negative_prefix,
+                    profile_str,
+                    now,
+                    now,
                 ),
             )
             conn.commit()
@@ -184,27 +195,21 @@ class HighgsfieldStore:
 
     def get_character(self, character_id: str) -> dict[str, Any] | None:
         with self.connection() as conn:
-            row = conn.execute(
-                "SELECT * FROM characters WHERE id=?", (character_id,)
-            ).fetchone()
+            row = conn.execute("SELECT * FROM characters WHERE id=?", (character_id,)).fetchone()
         return dict(row) if row else None
 
     def get_character_by_name(self, name: str) -> dict[str, Any] | None:
         with self.connection() as conn:
-            row = conn.execute(
-                "SELECT * FROM characters WHERE name=?", (name,)
-            ).fetchone()
+            row = conn.execute("SELECT * FROM characters WHERE name=?", (name,)).fetchone()
         return dict(row) if row else None
 
     def list_characters(self) -> list[dict[str, Any]]:
         with self.connection() as conn:
-            rows = conn.execute(
-                "SELECT * FROM characters ORDER BY created_at DESC"
-            ).fetchall()
+            rows = conn.execute("SELECT * FROM characters ORDER BY created_at DESC").fetchall()
         return [dict(r) for r in rows]
 
     def set_soul_id(self, character_id: str, soul_id_url: str, status: str = "locked") -> None:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         with self.connection() as conn:
             conn.execute(
                 "UPDATE characters SET soul_id_url=?, soul_id_status=?, updated_at=? WHERE id=?",
@@ -227,7 +232,7 @@ class HighgsfieldStore:
         tags: list[str] | None = None,
     ) -> str:
         run_id = f"run_{uuid4().hex[:12]}"
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         tags_str = json.dumps(tags or [])
         with self.connection() as conn:
             conn.execute(
@@ -237,8 +242,7 @@ class HighgsfieldStore:
                      outcome, campaign, tags_json, created_at)
                 VALUES (?,?,?,?,?,?,?,?,?)
                 """,
-                (run_id, character_id, model, prompt, anchor_image,
-                 "pending", campaign, tags_str, now),
+                (run_id, character_id, model, prompt, anchor_image, "pending", campaign, tags_str, now),
             )
             conn.commit()
         return run_id
@@ -255,12 +259,10 @@ class HighgsfieldStore:
         cost_usd: float | None = None,
         tags: list[str] | None = None,
     ) -> None:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         with self.connection() as conn:
             # Get current tags to merge
-            row = conn.execute(
-                "SELECT tags_json FROM generation_runs WHERE id=?", (run_id,)
-            ).fetchone()
+            row = conn.execute("SELECT tags_json FROM generation_runs WHERE id=?", (run_id,)).fetchone()
             prev_tags: list[str] = json.loads(row["tags_json"] or "[]") if row else []
             merged_tags = list(set(prev_tags + (tags or [])))
 
@@ -273,18 +275,22 @@ class HighgsfieldStore:
                 WHERE id=?
                 """,
                 (
-                    outcome, result_url, evidence_path,
-                    failure_reason, duration_s, cost_usd,
-                    json.dumps(merged_tags), now, run_id,
+                    outcome,
+                    result_url,
+                    evidence_path,
+                    failure_reason,
+                    duration_s,
+                    cost_usd,
+                    json.dumps(merged_tags),
+                    now,
+                    run_id,
                 ),
             )
             conn.commit()
 
     def get_run(self, run_id: str) -> dict[str, Any] | None:
         with self.connection() as conn:
-            row = conn.execute(
-                "SELECT * FROM generation_runs WHERE id=?", (run_id,)
-            ).fetchone()
+            row = conn.execute("SELECT * FROM generation_runs WHERE id=?", (run_id,)).fetchone()
         return dict(row) if row else None
 
     def list_runs(
@@ -354,7 +360,7 @@ class HighgsfieldStore:
         lesson: str | None = None,
     ) -> str:
         entry_id = f"rag_{uuid4().hex[:12]}"
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         with self.connection() as conn:
             conn.execute(
                 """
@@ -365,9 +371,18 @@ class HighgsfieldStore:
                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 (
-                    entry_id, run_id, character_id, model, prompt, outcome,
-                    failure_reason, evidence_screenshot, result_url,
-                    json.dumps(tags or []), lesson, now,
+                    entry_id,
+                    run_id,
+                    character_id,
+                    model,
+                    prompt,
+                    outcome,
+                    failure_reason,
+                    evidence_screenshot,
+                    result_url,
+                    json.dumps(tags or []),
+                    lesson,
+                    now,
                 ),
             )
             conn.commit()
@@ -430,18 +445,10 @@ class HighgsfieldStore:
     def stats(self) -> dict[str, Any]:
         with self.connection() as conn:
             total_runs = conn.execute("SELECT COUNT(*) FROM generation_runs").fetchone()[0]
-            successes = conn.execute(
-                "SELECT COUNT(*) FROM generation_runs WHERE outcome='success'"
-            ).fetchone()[0]
-            failures = conn.execute(
-                "SELECT COUNT(*) FROM generation_runs WHERE outcome='failure'"
-            ).fetchone()[0]
-            total_cost = conn.execute(
-                "SELECT COALESCE(SUM(cost_usd), 0) FROM generation_runs"
-            ).fetchone()[0]
-            soul_id_locked = conn.execute(
-                "SELECT COUNT(*) FROM characters WHERE soul_id_status='locked'"
-            ).fetchone()[0]
+            successes = conn.execute("SELECT COUNT(*) FROM generation_runs WHERE outcome='success'").fetchone()[0]
+            failures = conn.execute("SELECT COUNT(*) FROM generation_runs WHERE outcome='failure'").fetchone()[0]
+            total_cost = conn.execute("SELECT COALESCE(SUM(cost_usd), 0) FROM generation_runs").fetchone()[0]
+            soul_id_locked = conn.execute("SELECT COUNT(*) FROM characters WHERE soul_id_status='locked'").fetchone()[0]
         return {
             "total_runs": total_runs,
             "successes": successes,

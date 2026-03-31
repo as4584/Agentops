@@ -68,7 +68,7 @@ class Fact:
         }
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "Fact":
+    def from_dict(cls, d: dict[str, Any]) -> Fact:
         return cls(
             content=d["content"],
             category=FactCategory(d["category"]),
@@ -102,6 +102,7 @@ Rules:
 # ---------------------------------------------------------------------------
 # FactMemory
 # ---------------------------------------------------------------------------
+
 
 class FactMemory:
     """
@@ -148,9 +149,7 @@ class FactMemory:
 
         if filtered:
             self._merge_and_store(agent_id, filtered)
-            logger.info(
-                "facts.extracted agent=%s count=%d", agent_id, len(filtered)
-            )
+            logger.info("facts.extracted agent=%s count=%d", agent_id, len(filtered))
 
         return filtered
 
@@ -172,6 +171,7 @@ class FactMemory:
             facts = [f for f in facts if f.category == category]
 
         now = time.time()
+
         def score(f: Fact) -> float:
             age_days = max((now - f.created_at) / 86400, 0.1)
             recency = 1.0 / age_days
@@ -185,15 +185,11 @@ class FactMemory:
             f.last_accessed = now
 
         # persist updated counters
-        self._mem.write(
-            agent_id, FACTS_KEY, [f.to_dict() for f in self.get_all_facts(agent_id)]
-        )
+        self._mem.write(agent_id, FACTS_KEY, [f.to_dict() for f in self.get_all_facts(agent_id)])
 
         return facts[:limit]
 
-    def build_prompt_section(
-        self, agent_id: str, limit: int = 8
-    ) -> str:
+    def build_prompt_section(self, agent_id: str, limit: int = 8) -> str:
         """Build a markdown section for injection into the agent's system prompt."""
         top = self.get_top_facts(agent_id, limit=limit)
         if not top:
@@ -201,17 +197,12 @@ class FactMemory:
 
         lines = ["## Known Facts (from prior interactions)\n"]
         for f in top:
-            lines.append(
-                f"- [{f.category.value}] {f.content} "
-                f"(confidence: {f.confidence:.0%})"
-            )
+            lines.append(f"- [{f.category.value}] {f.content} (confidence: {f.confidence:.0%})")
         return "\n".join(lines)
 
     # -- internals ----------------------------------------------------------
 
-    def _parse_facts(
-        self, raw: str, agent_id: str
-    ) -> list[Fact]:
+    def _parse_facts(self, raw: str, agent_id: str) -> list[Fact]:
         # Strip markdown fences if the LLM wraps them
         text = raw.strip()
         if text.startswith("```"):
@@ -246,9 +237,7 @@ class FactMemory:
                 continue
         return facts
 
-    def _merge_and_store(
-        self, agent_id: str, new_facts: list[Fact]
-    ) -> None:
+    def _merge_and_store(self, agent_id: str, new_facts: list[Fact]) -> None:
         """Deduplicate by content similarity then persist."""
         existing = self.get_all_facts(agent_id)
         existing_contents = {f.content.lower().strip() for f in existing}

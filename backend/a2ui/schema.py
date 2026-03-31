@@ -25,11 +25,10 @@ from __future__ import annotations
 
 import re
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated, Any, Literal  # noqa: F401 — Annotated used in field definitions
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-
 
 # ---------------------------------------------------------------------------
 # Component catalogue (v1)
@@ -47,6 +46,7 @@ _TARGET_RE = re.compile(r"^canvas/[a-zA-Z0-9_\-]+$")
 # ---------------------------------------------------------------------------
 # Per-component prop schemas (Sprint 5.1 strict validation)
 # ---------------------------------------------------------------------------
+
 
 class StatusCardProps(BaseModel):
     """Props for the ``status_card`` widget."""
@@ -103,6 +103,7 @@ def validate_component_props(component: str, props: dict[str, Any] | None) -> di
 # A2UIMessage
 # ---------------------------------------------------------------------------
 
+
 class A2UIMessage(BaseModel):
     """Full A2UI event message emitted by an agent."""
 
@@ -115,7 +116,7 @@ class A2UIMessage(BaseModel):
     component: A2UIComponentType | None = None
     props: dict[str, Any] | None = None
     seq: int = Field(default=0, ge=0)
-    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
 
     model_config = {"extra": "forbid"}
 
@@ -123,13 +124,11 @@ class A2UIMessage(BaseModel):
     @classmethod
     def _validate_target(cls, v: str) -> str:
         if not _TARGET_RE.match(v):
-            raise ValueError(
-                f"target must match 'canvas/<identifier>' (alphanumeric, - or _), got: {v!r}"
-            )
+            raise ValueError(f"target must match 'canvas/<identifier>' (alphanumeric, - or _), got: {v!r}")
         return v
 
     @model_validator(mode="after")
-    def _validate_op_requirements(self) -> "A2UIMessage":
+    def _validate_op_requirements(self) -> A2UIMessage:
         if self.op in _OPS_REQUIRING_COMPONENT:
             if not self.component:
                 raise ValueError(f"op={self.op!r} requires 'component'")
@@ -144,6 +143,7 @@ class A2UIMessage(BaseModel):
 # A2UIAction — widget interaction callback (Sprint 5.4)
 # ---------------------------------------------------------------------------
 
+
 class A2UIAction(BaseModel):
     """Widget interaction sent from the frontend to the backend."""
 
@@ -154,7 +154,7 @@ class A2UIAction(BaseModel):
     payload: dict[str, Any] = Field(default_factory=dict)
     agent_id: str = Field(..., min_length=1)
     session_id: str = Field(..., min_length=1)
-    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
 
     model_config = {"extra": "forbid"}
 
@@ -162,7 +162,5 @@ class A2UIAction(BaseModel):
     @classmethod
     def _validate_target(cls, v: str) -> str:
         if not _TARGET_RE.match(v):
-            raise ValueError(
-                f"target must match 'canvas/<identifier>', got: {v!r}"
-            )
+            raise ValueError(f"target must match 'canvas/<identifier>', got: {v!r}")
         return v

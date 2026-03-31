@@ -47,7 +47,6 @@ from backend.config import (
 )
 from backend.utils import logger
 
-
 # ---------------------------------------------------------------------------
 # MCP tool name → (docker-mcp server name, mcp tool name)
 # ---------------------------------------------------------------------------
@@ -59,43 +58,37 @@ from backend.utils import logger
 MCP_TOOL_MAP: dict[str, tuple[str, str]] = {
     # GitHub MCP Server
     "mcp_github_search_repositories": ("github", "search_repositories"),
-    "mcp_github_get_file_contents":   ("github", "get_file_contents"),
-    "mcp_github_list_issues":         ("github", "list_issues"),
-    "mcp_github_create_issue":        ("github", "create_issue"),
-    "mcp_github_search_code":         ("github", "search_code"),
-    "mcp_github_list_pull_requests":  ("github", "list_pull_requests"),
-    "mcp_github_get_pull_request":     ("github", "get_pull_request"),
-
+    "mcp_github_get_file_contents": ("github", "get_file_contents"),
+    "mcp_github_list_issues": ("github", "list_issues"),
+    "mcp_github_create_issue": ("github", "create_issue"),
+    "mcp_github_search_code": ("github", "search_code"),
+    "mcp_github_list_pull_requests": ("github", "list_pull_requests"),
+    "mcp_github_get_pull_request": ("github", "get_pull_request"),
     # Filesystem MCP Server
-    "mcp_filesystem_read_file":       ("filesystem", "read_file"),
-    "mcp_filesystem_write_file":      ("filesystem", "write_file"),
-    "mcp_filesystem_list_directory":  ("filesystem", "list_directory"),
-    "mcp_filesystem_search_files":    ("filesystem", "search_files"),
-    "mcp_filesystem_get_file_info":   ("filesystem", "get_file_info"),
-
+    "mcp_filesystem_read_file": ("filesystem", "read_file"),
+    "mcp_filesystem_write_file": ("filesystem", "write_file"),
+    "mcp_filesystem_list_directory": ("filesystem", "list_directory"),
+    "mcp_filesystem_search_files": ("filesystem", "search_files"),
+    "mcp_filesystem_get_file_info": ("filesystem", "get_file_info"),
     # Docker MCP Server
-    "mcp_docker_list_containers":     ("docker", "list_containers"),
-    "mcp_docker_get_container_logs":  ("docker", "get_container_logs"),
-    "mcp_docker_inspect_container":   ("docker", "inspect_container"),
-    "mcp_docker_restart_container":   ("docker", "restart_container"),
-    "mcp_docker_list_images":         ("docker", "list_images"),
-
+    "mcp_docker_list_containers": ("docker", "list_containers"),
+    "mcp_docker_get_container_logs": ("docker", "get_container_logs"),
+    "mcp_docker_inspect_container": ("docker", "inspect_container"),
+    "mcp_docker_restart_container": ("docker", "restart_container"),
+    "mcp_docker_list_images": ("docker", "list_images"),
     # Time MCP Server
-    "mcp_time_get_current_time":      ("time", "get_current_time"),
-    "mcp_time_convert_time":          ("time", "convert_time"),
-
+    "mcp_time_get_current_time": ("time", "get_current_time"),
+    "mcp_time_convert_time": ("time", "convert_time"),
     # Fetch MCP Server
-    "mcp_fetch_get":                  ("fetch", "fetch"),
-
+    "mcp_fetch_get": ("fetch", "fetch"),
     # SQLite MCP Server
-    "mcp_sqlite_read_query":          ("sqlite", "read_query"),
-    "mcp_sqlite_list_tables":         ("sqlite", "list_tables"),
-    "mcp_sqlite_describe_table":      ("sqlite", "describe_table"),
-
+    "mcp_sqlite_read_query": ("sqlite", "read_query"),
+    "mcp_sqlite_list_tables": ("sqlite", "list_tables"),
+    "mcp_sqlite_describe_table": ("sqlite", "describe_table"),
     # Slack MCP Server
-    "mcp_slack_post_message":         ("slack", "post_message"),
-    "mcp_slack_list_channels":        ("slack", "list_channels"),
-    "mcp_slack_get_channel_history":  ("slack", "get_channel_history"),
+    "mcp_slack_post_message": ("slack", "post_message"),
+    "mcp_slack_list_channels": ("slack", "list_channels"),
+    "mcp_slack_get_channel_history": ("slack", "get_channel_history"),
 }
 
 
@@ -191,12 +184,14 @@ class MCPBridge:
         elif isinstance(data, dict):
             # {server: {tools: [{name, description}]}}
             for server_name, server_data in data.items():
-                for tool in (server_data.get("tools") or []):
-                    tools_list.append({
-                        "name": tool.get("name", ""),
-                        "server": server_name,
-                        "description": tool.get("description", ""),
-                    })
+                for tool in server_data.get("tools") or []:
+                    tools_list.append(
+                        {
+                            "name": tool.get("name", ""),
+                            "server": server_name,
+                            "description": tool.get("description", ""),
+                        }
+                    )
 
         for tool in tools_list:
             key = f"{tool.get('server', 'unknown')}_{tool.get('name', 'unknown')}"
@@ -260,9 +255,7 @@ class MCPBridge:
         timestamp = datetime.utcnow().isoformat()
 
         if result["success"]:
-            logger.info(
-                f"MCPBridge: {agent_id} called {gateway_tool_id} → success"
-            )
+            logger.info(f"MCPBridge: {agent_id} called {gateway_tool_id} → success")
             return {
                 "success": True,
                 "result": _parse_tool_output(result["output"]),
@@ -272,9 +265,7 @@ class MCPBridge:
                 "timestamp": timestamp,
             }
         else:
-            logger.warning(
-                f"MCPBridge: {agent_id} called {gateway_tool_id} → error: {result.get('error', '')}"
-            )
+            logger.warning(f"MCPBridge: {agent_id} called {gateway_tool_id} → error: {result.get('error', '')}")
             return {
                 "success": False,
                 "error": result.get("error", "Unknown MCP error"),
@@ -318,6 +309,7 @@ mcp_bridge = MCPBridge()
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+
 def _mcp_env() -> dict[str, str]:
     """
     Build the environment dict for docker mcp subprocess calls.
@@ -325,6 +317,7 @@ def _mcp_env() -> dict[str, str]:
     when running on Docker CE / Linux without Docker Desktop.
     """
     import os
+
     env = os.environ.copy()
     env["DOCKER_MCP_IN_CONTAINER"] = "1"
     # Point docker mcp at our project config directory
@@ -360,7 +353,7 @@ async def _run_docker_mcp(
         else:
             return {"success": False, "output": out, "error": err or f"exit code {process.returncode}"}
 
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return {"success": False, "output": "", "error": f"Command timed out after {timeout}s"}
     except FileNotFoundError:
         return {"success": False, "output": "", "error": "docker binary not found"}

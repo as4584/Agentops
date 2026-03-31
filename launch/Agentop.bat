@@ -5,7 +5,7 @@ echo  ========================================
 echo    Agentop - Starting...
 echo  ========================================
 echo.
-echo  Starting backend, frontend, and native window.
+echo  Starting backend, frontend, and Electron window.
 echo  This may take 15-30 seconds on first launch.
 echo  DO NOT close this window — it keeps services running.
 echo.

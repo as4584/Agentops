@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import uuid
 from collections.abc import Awaitable, Callable
 from pathlib import Path
-import uuid
 from typing import Any
 
 from apscheduler.job import Job
@@ -17,7 +17,7 @@ from backend.utils import logger
 DispatchCallable = Callable[[str, str, dict[str, Any]], Awaitable[dict[str, Any] | Any]]
 
 
-_SCHEDULER_INSTANCES: dict[str, "AgentopScheduler"] = {}
+_SCHEDULER_INSTANCES: dict[str, AgentopScheduler] = {}
 
 
 async def _run_scheduled_dispatch(
@@ -39,9 +39,7 @@ class AgentopScheduler:
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._scheduler = AsyncIOScheduler(
-            jobstores={
-                "default": SQLAlchemyJobStore(url=f"sqlite:///{self.db_path}")
-            },
+            jobstores={"default": SQLAlchemyJobStore(url=f"sqlite:///{self.db_path}")},
             timezone="UTC",
         )
         self._dispatcher: DispatchCallable | None = None

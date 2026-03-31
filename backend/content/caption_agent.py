@@ -9,11 +9,10 @@ from __future__ import annotations
 import json
 import subprocess
 from pathlib import Path
-from typing import Optional
 
-from backend.content.base_agent import ContentAgent
-from backend.content.video_job import VideoJob, JobStatus
 from backend.config import MEMORY_DIR
+from backend.content.base_agent import ContentAgent
+from backend.content.video_job import JobStatus, VideoJob
 from backend.utils import logger
 
 VIDEO_DIR = MEMORY_DIR / "content_video"
@@ -27,7 +26,7 @@ class CaptionAgent(ContentAgent):
     OUTLINE_WIDTH = 2
     MARGIN_BOTTOM = 60
 
-    async def process(self, job: VideoJob) -> Optional[VideoJob]:
+    async def process(self, job: VideoJob) -> VideoJob | None:
         logger.info(f"[{self.name}] Adding captions to {job.job_id}")
 
         input_video = Path(job.avatar_video_path)
@@ -61,7 +60,7 @@ class CaptionAgent(ContentAgent):
         idx = 1
         t = 0.0
         for i in range(0, len(words), words_per_sub):
-            chunk = " ".join(words[i:i + words_per_sub])
+            chunk = " ".join(words[i : i + words_per_sub])
             start = self._srt_time(t)
             end = self._srt_time(t + sub_duration)
             srt_lines.extend([str(idx), f"{start} --> {end}", chunk, ""])
@@ -91,16 +90,28 @@ class CaptionAgent(ContentAgent):
             f"MarginV={self.MARGIN_BOTTOM}'"
         )
         cmd = [
-            "ffmpeg", "-y",
-            "-i", str(input_v),
-            "-vf", (
+            "ffmpeg",
+            "-y",
+            "-i",
+            str(input_v),
+            "-vf",
+            (
                 "scale=1080:1920:force_original_aspect_ratio=decrease,"
                 "pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black,"
                 f"{sub_filter}"
             ),
-            "-c:v", "libx264", "-preset", "fast", "-crf", "23",
-            "-c:a", "aac", "-b:a", "128k",
-            "-movflags", "+faststart",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "fast",
+            "-crf",
+            "23",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "128k",
+            "-movflags",
+            "+faststart",
             str(output),
         ]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)

@@ -25,8 +25,8 @@ from __future__ import annotations
 import hashlib
 import json
 import time
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, timezone
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -35,15 +35,15 @@ from backend.config_gateway import (
     GATEWAY_DEBUG_LOG_CONTENT,
 )
 
-
 # ---------------------------------------------------------------------------
 # AuditEntry
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class AuditEntry:
-    ts: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    key_id_hash: str = ""   # SHA-256 of key_id — never raw key
+    ts: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    key_id_hash: str = ""  # SHA-256 of key_id — never raw key
     model: str = ""
     provider: str = ""
     tokens_in: int = 0
@@ -54,7 +54,7 @@ class AuditEntry:
     stream: bool = False
     error: str = ""
     # Debug-only fields — empty unless GATEWAY_DEBUG_LOG_CONTENT=1
-    _prompt_hash: str = ""   # SHA-256 of first user message (PII-safe ref)
+    _prompt_hash: str = ""  # SHA-256 of first user message (PII-safe ref)
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
@@ -67,6 +67,7 @@ class AuditEntry:
 # ---------------------------------------------------------------------------
 # AuditLogger
 # ---------------------------------------------------------------------------
+
 
 class AuditLogger:
     """Append-only JSONL audit log for gateway requests."""
@@ -109,9 +110,7 @@ class AuditLogger:
             error=error,
         )
         if GATEWAY_DEBUG_LOG_CONTENT and first_user_message:
-            entry._prompt_hash = hashlib.sha256(
-                first_user_message.encode()
-            ).hexdigest()[:16]
+            entry._prompt_hash = hashlib.sha256(first_user_message.encode()).hexdigest()[:16]
         self.log(entry)
 
     def tail(self, n: int = 100) -> list[dict[str, Any]]:
@@ -133,6 +132,7 @@ class AuditLogger:
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _hash_id(key_id: str) -> str:
     """Stable anonymised key for correlation in logs."""
     return hashlib.sha256(key_id.encode()).hexdigest()[:16]
@@ -142,6 +142,7 @@ def _hash_id(key_id: str) -> str:
 # Timer context manager for latency measurement
 # ---------------------------------------------------------------------------
 
+
 class RequestTimer:
     """Context manager that records wall-clock latency in ms."""
 
@@ -149,7 +150,7 @@ class RequestTimer:
         self._start = 0.0
         self.elapsed_ms = 0
 
-    def __enter__(self) -> "RequestTimer":
+    def __enter__(self) -> RequestTimer:
         self._start = time.perf_counter()
         return self
 

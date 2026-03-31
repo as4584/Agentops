@@ -28,12 +28,10 @@ import subprocess
 import sys
 import tempfile
 import time
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-
-from backend.config import PROJECT_ROOT
 
 # Port registry file location
 PORT_REGISTRY_PATH = Path("/tmp/agentop-port-registry.json")
@@ -81,12 +79,12 @@ class PortRegistry:
             return {"version": 1, "reservations": {}, "updated_at": None}
         try:
             return json.loads(self.path.read_text())
-        except (json.JSONDecodeError, IOError):
+        except (OSError, json.JSONDecodeError):
             return {"version": 1, "reservations": {}, "updated_at": None}
 
     def _save(self, data: dict[str, Any]) -> None:
         """Atomic write with 0o600 permissions to prevent other-user reads."""
-        data["updated_at"] = datetime.now(timezone.utc).isoformat()
+        data["updated_at"] = datetime.now(UTC).isoformat()
         payload = json.dumps(data, indent=2).encode()
         # Create temp file in same directory as the target for atomic rename
         dir_ = str(self.path.parent)
@@ -106,8 +104,8 @@ class PortRegistry:
             port=port,
             pid=pid,
             command=command,
-            started_at=datetime.now(timezone.utc).isoformat(),
-            last_heartbeat=datetime.now(timezone.utc).isoformat(),
+            started_at=datetime.now(UTC).isoformat(),
+            last_heartbeat=datetime.now(UTC).isoformat(),
             purpose=purpose,
             cwd=cwd,
         )
@@ -214,6 +212,7 @@ def _get_process_using_port(port: int) -> dict[str, Any] | None:
                 if f":{port}" in line and "users:" in line:
                     # Extract pid from users:(("name",pid=1234,fd=...))
                     import re
+
                     match = re.search(r"pid=(\d+)", line)
                     if match:
                         pid = int(match.group(1))
@@ -397,7 +396,7 @@ def cmd_serve() -> int:
         print("To resolve:")
         print(f"  1. Kill existing: python -m backend.port_guard kill {port}")
         print(f"  2. Use different port: --port {port + 1}")
-        print(f"  3. Check status: python -m backend.port_guard status")
+        print("  3. Check status: python -m backend.port_guard status")
         return 1
 
     # Claim the port
@@ -422,6 +421,7 @@ def cmd_serve() -> int:
     try:
         # Start uvicorn
         import uvicorn
+
         # Parse args for uvicorn
         sys.argv = ["uvicorn"] + args
         uvicorn.main()

@@ -7,9 +7,7 @@ Validates HTML structure, meta tags, accessibility, links.
 from __future__ import annotations
 
 import re
-from typing import Any, Optional
 
-from backend.llm import OllamaClient
 from backend.utils import logger
 from backend.webgen.agents.base_agent import WebAgentBase
 from backend.webgen.models import PageSpec, SiteProject, SiteStatus
@@ -55,10 +53,7 @@ class WebQAAgent(WebAgentBase):
 
         project.errors = all_issues
         total = len(project.pages)
-        logger.info(
-            f"[{self.name}] QA complete: {pass_count}/{total} pages clean, "
-            f"{len(all_issues)} total issues"
-        )
+        logger.info(f"[{self.name}] QA complete: {pass_count}/{total} pages clean, {len(all_issues)} total issues")
 
         # Advance if issues are minor (< 3 per page average)
         if len(all_issues) < total * 3:
@@ -103,7 +98,7 @@ class WebQAAgent(WebAgentBase):
 
         # Lang attribute
         if 'lang="' not in html:
-            issues.append('Missing lang attribute on <html>')
+            issues.append("Missing lang attribute on <html>")
 
         # Images without alt
         img_tags = re.findall(r"<img\s[^>]*>", html, re.IGNORECASE)
@@ -116,7 +111,7 @@ class WebQAAgent(WebAgentBase):
             issues.append("Missing og:title meta tag")
 
         # JSON-LD
-        if 'application/ld+json' not in html:
+        if "application/ld+json" not in html:
             issues.append("Missing JSON-LD structured data")
 
         # Empty body check

@@ -16,12 +16,12 @@ Usage:
 
 from __future__ import annotations
 
-import json
 import hashlib
-from datetime import datetime, timezone
+import json
+from datetime import UTC, datetime
 from pathlib import Path
 from threading import Lock
-from typing import Any, Optional
+from typing import Any
 
 from backend.config import ML_EXPERIMENTS_DIR
 from backend.utils import logger
@@ -37,7 +37,7 @@ class ExperimentRun:
         model_type: str,
         hyperparameters: dict[str, Any],
         dataset_version: str,
-        tags: Optional[dict[str, str]] = None,
+        tags: dict[str, str] | None = None,
     ) -> None:
         self.run_id = run_id
         self.experiment_name = experiment_name
@@ -48,8 +48,8 @@ class ExperimentRun:
         self.metrics: dict[str, list[dict[str, Any]]] = {}
         self.artifacts: list[str] = []
         self.status: str = "running"
-        self.started_at: str = datetime.now(timezone.utc).isoformat()
-        self.ended_at: Optional[str] = None
+        self.started_at: str = datetime.now(UTC).isoformat()
+        self.ended_at: str | None = None
         self.notes: str = ""
 
     def to_dict(self) -> dict[str, Any]:
@@ -90,7 +90,7 @@ class ExperimentRun:
 class ExperimentTracker:
     """Persists all ML experiment runs to disk as structured JSON."""
 
-    def __init__(self, experiments_dir: Optional[Path] = None) -> None:
+    def __init__(self, experiments_dir: Path | None = None) -> None:
         self._dir = experiments_dir or ML_EXPERIMENTS_DIR
         self._dir.mkdir(parents=True, exist_ok=True)
         self._index_path = self._dir / "index.json"
@@ -106,7 +106,7 @@ class ExperimentTracker:
         hyperparameters: dict[str, Any],
         model_type: str = "",
         dataset_version: str = "",
-        tags: Optional[dict[str, str]] = None,
+        tags: dict[str, str] | None = None,
     ) -> str:
         """Start a new experiment run. Returns its run_id."""
         run_id = self._generate_run_id(experiment_name)
@@ -125,9 +125,7 @@ class ExperimentTracker:
         logger.info(f"[ExperimentTracker] Started run {run_id} for {experiment_name}")
         return run_id
 
-    def log_metric(
-        self, run_id: str, name: str, value: float, step: Optional[int] = None
-    ) -> None:
+    def log_metric(self, run_id: str, name: str, value: float, step: int | None = None) -> None:
         """Log a metric value for a run (supports time-series via step)."""
         with self._lock:
             run = self._get_run(run_id)
@@ -135,7 +133,7 @@ class ExperimentTracker:
                 run.metrics[name] = []
             entry: dict[str, Any] = {
                 "value": value,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             }
             if step is not None:
                 entry["step"] = step
@@ -154,7 +152,7 @@ class ExperimentTracker:
         with self._lock:
             run = self._get_run(run_id)
             run.status = status
-            run.ended_at = datetime.now(timezone.utc).isoformat()
+            run.ended_at = datetime.now(UTC).isoformat()
             run.notes = notes
             self._save_run(run)
             self._save_index()
@@ -166,8 +164,8 @@ class ExperimentTracker:
 
     def list_runs(
         self,
-        experiment_name: Optional[str] = None,
-        status: Optional[str] = None,
+        experiment_name: str | None = None,
+        status: str | None = None,
     ) -> list[dict[str, Any]]:
         """List all runs, optionally filtered."""
         runs = list(self._runs.values())
@@ -186,34 +184,35 @@ class ExperimentTracker:
             for name, entries in run.metrics.items():
                 if entries:
                     latest_metrics[name] = entries[-1]["value"]
-            results.append({
-                "run_id": rid,
-                "experiment_name": run.experiment_name,
-                "model_type": run.model_type,
-                "hyperparameters": run.hyperparameters,
-                "dataset_version": run.dataset_version,
-                "status": run.status,
-                "metrics": latest_metrics,
-                "started_at": run.started_at,
-                "ended_at": run.ended_at,
-            })
+            results.append(
+                {
+                    "run_id": rid,
+                    "experiment_name": run.experiment_name,
+                    "model_type": run.model_type,
+                    "hyperparameters": run.hyperparameters,
+                    "dataset_version": run.dataset_version,
+                    "status": run.status,
+                    "metrics": latest_metrics,
+                    "started_at": run.started_at,
+                    "ended_at": run.ended_at,
+                }
+            )
         return results
 
     def best_run(
         self, experiment_name: str, metric: str = "accuracy", higher_is_better: bool = True
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Find the best run for an experiment by a given metric."""
         runs = [r for r in self._runs.values() if r.experiment_name == experiment_name]
-        best: Optional[ExperimentRun] = None
-        best_value: Optional[float] = None
+        best: ExperimentRun | None = None
+        best_value: float | None = None
         for run in runs:
             entries = run.metrics.get(metric, [])
             if not entries:
                 continue
             val = entries[-1]["value"]
             if best_value is None or (
-                (higher_is_better and val > best_value)
-                or (not higher_is_better and val < best_value)
+                (higher_is_better and val > best_value) or (not higher_is_better and val < best_value)
             ):
                 best_value = val
                 best = run
@@ -233,7 +232,7 @@ class ExperimentTracker:
         return self._runs[run_id]
 
     def _generate_run_id(self, experiment_name: str) -> str:
-        ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        ts = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
         h = hashlib.sha256(f"{experiment_name}:{ts}".encode()).hexdigest()[:8]
         return f"{experiment_name}_{ts}_{h}"
 

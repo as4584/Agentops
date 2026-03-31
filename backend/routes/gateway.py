@@ -11,23 +11,22 @@ from __future__ import annotations
 
 import json
 import time
-import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 
 from backend.config_gateway import (
-    GATEWAY_MAX_PROMPT_LENGTH,
     GATEWAY_MAX_MESSAGES,
+    GATEWAY_MAX_PROMPT_LENGTH,
     GATEWAY_MAX_RESPONSE_TOKENS,
 )
 from backend.gateway import get_gateway_router
-from backend.gateway.acl import get_acl, ModelTier
+from backend.gateway.acl import get_acl
 from backend.gateway.adapters import ChatCompletionRequest, ChatMessage, ProviderError
 from backend.gateway.health import check_prompt_safety, get_health_monitor
-from backend.gateway.middleware import require_gateway_auth, GatewayContext
+from backend.gateway.middleware import GatewayContext, require_gateway_auth
 from backend.gateway.ratelimit import get_rate_limiter
 from backend.gateway.streaming import ToolIdSanitizer, stream_to_openai_sse
 from backend.gateway.usage import get_usage_tracker
@@ -40,6 +39,7 @@ router = APIRouter(prefix="/v1", tags=["Gateway"])
 # ---------------------------------------------------------------------------
 # Request / Response Pydantic Models
 # ---------------------------------------------------------------------------
+
 
 class MessageInput(BaseModel):
     role: str
@@ -86,11 +86,9 @@ class LegacyCompletionInput(BaseModel):
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _validate_content_length(messages: list[MessageInput]) -> None:
-    total = sum(
-        len(m.content) if isinstance(m.content, str) else len(json.dumps(m.content))
-        for m in messages
-    )
+    total = sum(len(m.content) if isinstance(m.content, str) else len(json.dumps(m.content)) for m in messages)
     if total > GATEWAY_MAX_PROMPT_LENGTH:
         raise HTTPException(
             status_code=400,
@@ -109,9 +107,7 @@ def _check_model_access(ctx: GatewayContext, model_id: str) -> None:
 
 def _check_quota(ctx: GatewayContext) -> None:
     tracker = get_usage_tracker()
-    ok, reason = tracker.check_quota(
-        ctx.key_id, ctx.quota_daily_usd, ctx.quota_monthly_usd
-    )
+    ok, reason = tracker.check_quota(ctx.key_id, ctx.quota_daily_usd, ctx.quota_monthly_usd)
     if not ok:
         raise HTTPException(status_code=429, detail=f"Quota exceeded: {reason}")
 
@@ -182,6 +178,7 @@ def _response_to_openai(resp: Any, model: str) -> dict[str, Any]:
 # Routes
 # ---------------------------------------------------------------------------
 
+
 @router.post("/chat/completions")
 async def chat_completions(
     body: ChatCompletionInput,
@@ -203,10 +200,7 @@ async def chat_completions(
                 raise HTTPException(status_code=400, detail=f"Content safety: {reason}")
 
     # TPM pre-check (rough estimate: 1 word ≈ 1.33 tokens)
-    est_tokens = sum(
-        len(str(m.content).split()) * 4 // 3
-        for m in body.messages
-    )
+    est_tokens = sum(len(str(m.content).split()) * 4 // 3 for m in body.messages)
     limiter = get_rate_limiter()
     tpm_ok, _ = limiter.check_tpm(ctx.key_id, est_tokens, ctx.quota_tpm)
     if not tpm_ok:
@@ -220,14 +214,12 @@ async def chat_completions(
 
         async def _sse_gen():
             try:
-                async for sse_line in stream_to_openai_sse(
-                    gateway.stream(chat_req, key_id=ctx.key_id), sanitizer
-                ):
+                async for sse_line in stream_to_openai_sse(gateway.stream(chat_req, key_id=ctx.key_id), sanitizer):
                     yield sse_line
             except ProviderError as e:
-                error_payload = json.dumps({
-                    "error": {"message": str(e), "type": "provider_error", "code": e.status_code}
-                })
+                error_payload = json.dumps(
+                    {"error": {"message": str(e), "type": "provider_error", "code": e.status_code}}
+                )
                 yield f"data: {error_payload}\n\n"
 
         return StreamingResponse(
@@ -273,25 +265,27 @@ async def legacy_completions(
     except ProviderError as e:
         raise HTTPException(status_code=e.status_code, detail=str(e))
 
-    return JSONResponse({
-        "id": response.id,
-        "object": "text_completion",
-        "created": int(time.time()),
-        "model": body.model,
-        "choices": [
-            {
-                "text": response.content,
-                "index": 0,
-                "logprobs": None,
-                "finish_reason": response.finish_reason,
-            }
-        ],
-        "usage": {
-            "prompt_tokens": response.usage.prompt_tokens,
-            "completion_tokens": response.usage.completion_tokens,
-            "total_tokens": response.usage.total_tokens,
-        },
-    })
+    return JSONResponse(
+        {
+            "id": response.id,
+            "object": "text_completion",
+            "created": int(time.time()),
+            "model": body.model,
+            "choices": [
+                {
+                    "text": response.content,
+                    "index": 0,
+                    "logprobs": None,
+                    "finish_reason": response.finish_reason,
+                }
+            ],
+            "usage": {
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens,
+            },
+        }
+    )
 
 
 @router.get("/models")
@@ -305,14 +299,16 @@ async def list_models(
     data = []
     for mid in allowed:
         spec = UNIFIED_MODEL_REGISTRY.get(mid)
-        data.append({
-            "id": mid,
-            "object": "model",
-            "created": 0,
-            "owned_by": spec.provider.value if spec else "unknown",
-            "context_window": spec.context_window if spec else None,
-            "supports_tools": spec.supports_tools if spec else False,
-        })
+        data.append(
+            {
+                "id": mid,
+                "object": "model",
+                "created": 0,
+                "owned_by": spec.provider.value if spec else "unknown",
+                "context_window": spec.context_window if spec else None,
+                "supports_tools": spec.supports_tools if spec else False,
+            }
+        )
     return JSONResponse({"object": "list", "data": data})
 
 

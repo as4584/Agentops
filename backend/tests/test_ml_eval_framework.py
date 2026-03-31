@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 
+import pytest
+
 from backend.ml.eval_framework import (
-    LLMEvalFramework,
     EvalCase,
     EvalDimension,
     EvalResult,
+    LLMEvalFramework,
 )
 
 
@@ -31,7 +32,7 @@ def _make_case(**overrides) -> EvalCase:
         "tokens_out": 5,
     }
     defaults.update(overrides)
-    return EvalCase(**defaults)
+    return EvalCase(**defaults)  # type: ignore[arg-type]
 
 
 class TestEvalFramework:
@@ -59,10 +60,12 @@ class TestEvalFramework:
         assert result.score == 1.0  # skipped
 
     def test_retrieval_accuracy(self, framework: LLMEvalFramework) -> None:
-        case = _make_case(context={
-            "expected_docs": ["a.md", "b.md", "c.md"],
-            "actual_docs": ["a.md", "b.md"],
-        })
+        case = _make_case(
+            context={
+                "expected_docs": ["a.md", "b.md", "c.md"],
+                "actual_docs": ["a.md", "b.md"],
+            }
+        )
         result = framework.evaluate_retrieval(case)
         assert 0.0 < result.score <= 1.0
         assert result.metadata["recall"] == pytest.approx(2 / 3)
@@ -164,3 +167,79 @@ class TestEvalFramework:
         result = framework.evaluate(case, dimensions=[EvalDimension.LATENCY])
         assert len(result.results) == 1
         assert result.results[0].dimension == EvalDimension.LATENCY
+
+    def test_retrieval_no_expected_docs(self, framework: LLMEvalFramework) -> None:
+        """When expected_docs is empty, score should be 1.0 (skipped)."""
+        case = _make_case(context={"expected_docs": [], "actual_docs": ["a.md"]})
+        result = framework.evaluate_retrieval(case)
+        assert result.score == 1.0
+        assert result.pass_fail is True
+
+    def test_correctness_no_expected_output(self, framework: LLMEvalFramework) -> None:
+        """When expected_output is empty, score should be 1.0 (skipped)."""
+        case = _make_case(expected_output="", actual_output="anything goes")
+        result = framework.evaluate_correctness(case)
+        assert result.score == 1.0
+        assert result.pass_fail is True
+
+    def test_constraints_forbidden_keywords(self, framework: LLMEvalFramework) -> None:
+        case = _make_case(
+            actual_output="This is clean output",
+            context={"constraints": {"forbidden_keywords": ["secret", "password"]}},
+        )
+        result = framework.evaluate_constraints(case)
+        assert result.pass_fail is True
+        assert result.score == 1.0
+
+    def test_constraints_forbidden_keyword_violated(self, framework: LLMEvalFramework) -> None:
+        case = _make_case(
+            actual_output="The password is abc123",
+            context={"constraints": {"forbidden_keywords": ["password"]}},
+        )
+        result = framework.evaluate_constraints(case)
+        assert result.pass_fail is False
+
+    def test_constraints_mixed(self, framework: LLMEvalFramework) -> None:
+        """Test constraints with max_length + required + forbidden keywords."""
+        case = _make_case(
+            actual_output="hello world test",
+            context={
+                "constraints": {
+                    "max_length": 50,
+                    "required_keywords": ["hello"],
+                    "forbidden_keywords": ["bad"],
+                }
+            },
+        )
+        result = framework.evaluate_constraints(case)
+        assert result.pass_fail is True
+        assert result.score == 1.0
+
+    def test_get_results_filter_by_task_type(self, framework: LLMEvalFramework) -> None:
+        framework.evaluate(_make_case(case_id="code_1", task_type="code"))
+        framework.evaluate(_make_case(case_id="chat_1", task_type="chat"))
+        results = framework.get_results(task_type="code")
+        assert len(results) == 1
+        assert results[0]["task_type"] == "code"
+
+    def test_get_results_filter_by_model(self, framework: LLMEvalFramework) -> None:
+        framework.evaluate(_make_case(case_id="m1", model="llama3.2"))
+        framework.evaluate(_make_case(case_id="m2", model="qwen2.5"))
+        results = framework.get_results(model="qwen2.5")
+        assert len(results) == 1
+        assert results[0]["model"] == "qwen2.5"
+
+    def test_get_summary_with_data(self, framework: LLMEvalFramework) -> None:
+        framework.evaluate(_make_case(case_id="s1"))
+        framework.evaluate(_make_case(case_id="s2"))
+        summary = framework.get_summary()
+        assert summary["total"] == 2
+        assert summary["passed"] >= 0
+        assert summary["avg_score"] > 0
+        assert "dimensions" in summary
+        # Check per-dimension summary structure
+        for dim_data in summary["dimensions"].values():
+            assert "avg" in dim_data
+            assert "min" in dim_data
+            assert "max" in dim_data
+            assert "count" in dim_data

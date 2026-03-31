@@ -12,14 +12,13 @@ Default: CosyVoice 2 — runs entirely on your machine.
 
 from __future__ import annotations
 
-import subprocess
 import shutil
+import subprocess
 from pathlib import Path
-from typing import Optional
 
-from backend.content.base_agent import ContentAgent
-from backend.content.video_job import VideoJob, JobStatus
 from backend.config import MEMORY_DIR, QWEN_TTS_MODEL, QWEN_TTS_VOICE
+from backend.content.base_agent import ContentAgent
+from backend.content.video_job import JobStatus, VideoJob
 from backend.utils import logger
 
 AUDIO_DIR = MEMORY_DIR / "content_audio"
@@ -30,7 +29,7 @@ class VoiceAgent(ContentAgent):
     name = "VoiceAgent"
     trigger_status = JobStatus.GENERATED
 
-    async def process(self, job: VideoJob) -> Optional[VideoJob]:
+    async def process(self, job: VideoJob) -> VideoJob | None:
         logger.info(f"[{self.name}] Generating audio for {job.job_id}")
 
         spoken_text = self._clean_for_tts(job.script)
@@ -80,7 +79,7 @@ class VoiceAgent(ContentAgent):
                 continue
             for label in labels:
                 if stripped.upper().startswith(label):
-                    stripped = stripped[len(label):].strip()
+                    stripped = stripped[len(label) :].strip()
                     break
             if stripped and stripped[0].isdigit() and len(stripped) > 2 and stripped[1] == ".":
                 stripped = stripped[2:].strip()
@@ -94,6 +93,7 @@ class VoiceAgent(ContentAgent):
         """Check if Qwen CosyVoice 2 is installed."""
         try:
             from cosyvoice.cli.cosyvoice import CosyVoice2  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -104,6 +104,7 @@ class VoiceAgent(ContentAgent):
     def _has_coqui(self) -> bool:
         try:
             import TTS  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -114,8 +115,8 @@ class VoiceAgent(ContentAgent):
     def _generate_cosyvoice(self, text: str, output: Path) -> bool:
         """Generate audio using Qwen CosyVoice 2 (local, open-source)."""
         try:
-            from cosyvoice.cli.cosyvoice import CosyVoice2
             import torchaudio
+            from cosyvoice.cli.cosyvoice import CosyVoice2
 
             model = CosyVoice2(
                 QWEN_TTS_MODEL,
@@ -133,6 +134,7 @@ class VoiceAgent(ContentAgent):
                 return False
 
             import torch
+
             audio = torch.cat(chunks, dim=1)
             torchaudio.save(str(output), audio, model.sample_rate)
 
@@ -147,8 +149,10 @@ class VoiceAgent(ContentAgent):
         try:
             cmd = [
                 "piper",
-                "--model", "en_US-lessac-medium",
-                "--output_file", str(output),
+                "--model",
+                "en_US-lessac-medium",
+                "--output_file",
+                str(output),
             ]
             result = subprocess.run(
                 cmd,
@@ -170,6 +174,7 @@ class VoiceAgent(ContentAgent):
         """Generate audio using Coqui TTS (local, supports cloning)."""
         try:
             from TTS.api import TTS as CoquiTTS
+
             tts = CoquiTTS(model_name="tts_models/en/ljspeech/tacotron2-DDC")
             tts.tts_to_file(text=text, file_path=str(output))
             logger.info(f"[{self.name}] Coqui TTS success")
@@ -183,7 +188,7 @@ class VoiceAgent(ContentAgent):
         try:
             espeak = shutil.which("espeak-ng") or shutil.which("espeak")
             cmd = [espeak, "-w", str(output), text]
-            result = subprocess.run(cmd, capture_output=True, timeout=30)
+            result = subprocess.run(cmd, capture_output=True, timeout=30)  # type: ignore[arg-type]
             if result.returncode == 0 and output.exists():
                 logger.info(f"[{self.name}] eSpeak TTS success")
                 return True

@@ -91,26 +91,24 @@ class OllamaClient:
             # Emit activity event for live preview
             try:
                 from backend.tasks import task_tracker as _tt
-                _tt.emit_activity("llm_response", {
-                    "model": self.model,
-                    "endpoint": "generate",
-                    "prompt_len": len(prompt),
-                    "response_len": len(result),
-                })
+
+                _tt.emit_activity(
+                    "llm_response",
+                    {
+                        "model": self.model,
+                        "endpoint": "generate",
+                        "prompt_len": len(prompt),
+                        "response_len": len(result),
+                    },
+                )
             except Exception:
                 pass
 
-            logger.info(
-                f"LLM generate: model={self.model}, "
-                f"prompt_len={len(prompt)}, response_len={len(result)}"
-            )
+            logger.info(f"LLM generate: model={self.model}, prompt_len={len(prompt)}, response_len={len(result)}")
             return result
 
         except httpx.ConnectError:
-            error_msg = (
-                f"Cannot connect to Ollama at {self.base_url}. "
-                "Ensure Ollama is running: `ollama serve`"
-            )
+            error_msg = f"Cannot connect to Ollama at {self.base_url}. Ensure Ollama is running: `ollama serve`"
             logger.error(error_msg)
             raise ConnectionError(error_msg)
 
@@ -158,26 +156,24 @@ class OllamaClient:
             # Emit activity event for live preview
             try:
                 from backend.tasks import task_tracker as _tt
-                _tt.emit_activity("llm_response", {
-                    "model": self.model,
-                    "endpoint": "chat",
-                    "messages": len(messages),
-                    "response_len": len(result),
-                })
+
+                _tt.emit_activity(
+                    "llm_response",
+                    {
+                        "model": self.model,
+                        "endpoint": "chat",
+                        "messages": len(messages),
+                        "response_len": len(result),
+                    },
+                )
             except Exception:
                 pass
 
-            logger.info(
-                f"LLM chat: model={self.model}, "
-                f"messages={len(messages)}, response_len={len(result)}"
-            )
+            logger.info(f"LLM chat: model={self.model}, messages={len(messages)}, response_len={len(result)}")
             return result
 
         except httpx.ConnectError:
-            error_msg = (
-                f"Cannot connect to Ollama at {self.base_url}. "
-                "Ensure Ollama is running: `ollama serve`"
-            )
+            error_msg = f"Cannot connect to Ollama at {self.base_url}. Ensure Ollama is running: `ollama serve`"
             logger.error(error_msg)
             raise ConnectionError(error_msg)
 
@@ -253,6 +249,7 @@ class OllamaClient:
 # OllamaClient so existing agents don't need code changes.
 # ---------------------------------------------------------------------------
 
+
 class HybridClient:
     """
     Hybrid LLM client — presents the OllamaClient interface but
@@ -300,7 +297,7 @@ class HybridClient:
 
                 local_llm = LocalLLM()
                 cloud_llm = CloudLLMClient() if self.mode != "local_only" else None
-                self._router = LLMRouter(
+                self._router = LLMRouter(  # type: ignore[assignment]
                     mode=self.mode,
                     local_client=local_llm,
                     cloud_client=cloud_llm,
@@ -377,6 +374,7 @@ class HybridClient:
         if self.mode != "local_only":
             try:
                 from lib.localllm.cloud_client import CLOUD_MODELS
+
                 cloud_names = [f"cloud:{k}" for k in CLOUD_MODELS]
                 return local_models + cloud_names
             except ImportError:

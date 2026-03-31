@@ -16,12 +16,11 @@ Integrates with MLflowTracker for persistent logging.
 from __future__ import annotations
 
 import json
-import time
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, timezone
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from backend.config import ML_EXPERIMENTS_DIR
 from backend.utils import logger
@@ -29,6 +28,7 @@ from backend.utils import logger
 
 class EvalDimension(str, Enum):
     """Dimensions we evaluate LLM outputs on."""
+
     TOOL_SELECTION = "tool_selection"
     RETRIEVAL_ACCURACY = "retrieval_accuracy"
     ANSWER_CORRECTNESS = "answer_correctness"
@@ -43,6 +43,7 @@ class EvalDimension(str, Enum):
 @dataclass
 class EvalResult:
     """Result of a single evaluation."""
+
     dimension: str
     score: float  # 0.0 – 1.0
     pass_fail: bool
@@ -53,6 +54,7 @@ class EvalResult:
 @dataclass
 class EvalCase:
     """A single evaluation case (input → expected → actual)."""
+
     case_id: str
     task_type: str
     input_prompt: str
@@ -70,7 +72,7 @@ class EvalCase:
 
     def __post_init__(self) -> None:
         if not self.timestamp:
-            self.timestamp = datetime.now(timezone.utc).isoformat()
+            self.timestamp = datetime.now(UTC).isoformat()
 
     @property
     def overall_score(self) -> float:
@@ -92,7 +94,7 @@ class EvalCase:
 class LLMEvalFramework:
     """Orchestrates evaluation of LLM outputs across multiple dimensions."""
 
-    def __init__(self, storage_dir: Optional[Path] = None) -> None:
+    def __init__(self, storage_dir: Path | None = None) -> None:
         self._storage_dir = storage_dir or (ML_EXPERIMENTS_DIR / "eval_results")
         self._storage_dir.mkdir(parents=True, exist_ok=True)
         self._evaluators: dict[str, Any] = {}
@@ -100,7 +102,7 @@ class LLMEvalFramework:
     def evaluate(
         self,
         case: EvalCase,
-        dimensions: Optional[list[EvalDimension]] = None,
+        dimensions: list[EvalDimension] | None = None,
     ) -> EvalCase:
         """Run all applicable evaluations on a case."""
         dims = dimensions or list(EvalDimension)
@@ -110,8 +112,7 @@ class LLMEvalFramework:
             case.results.append(result)
         self._persist_case(case)
         logger.info(
-            f"[LLMEval] {case.case_id}: score={case.overall_score:.2f} "
-            f"passed={case.passed} dims={len(case.results)}"
+            f"[LLMEval] {case.case_id}: score={case.overall_score:.2f} passed={case.passed} dims={len(case.results)}"
         )
         return case
 
@@ -220,7 +221,7 @@ class LLMEvalFramework:
                 details="No constraints specified",
             )
         violations = []
-        total = len(constraints)
+        len(constraints)
         passed_count = 0
         max_length = constraints.get("max_length")
         if max_length and len(case.actual_output) > int(max_length):
@@ -301,12 +302,12 @@ class LLMEvalFramework:
 
     def get_results(
         self,
-        task_type: Optional[str] = None,
-        model: Optional[str] = None,
+        task_type: str | None = None,
+        model: str | None = None,
         limit: int = 100,
     ) -> list[dict[str, Any]]:
         """Retrieve stored eval results."""
-        results = []
+        results: list[dict[str, Any]] = []
         for f in sorted(self._storage_dir.glob("*.json"), reverse=True):
             if len(results) >= limit:
                 break
@@ -320,8 +321,8 @@ class LLMEvalFramework:
 
     def get_summary(
         self,
-        task_type: Optional[str] = None,
-        model: Optional[str] = None,
+        task_type: str | None = None,
+        model: str | None = None,
     ) -> dict[str, Any]:
         """Aggregate summary across eval results."""
         results = self.get_results(task_type=task_type, model=model, limit=10000)

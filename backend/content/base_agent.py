@@ -13,11 +13,10 @@ from __future__ import annotations
 
 import traceback
 from abc import ABC, abstractmethod
-from typing import Optional
 
-from backend.llm import OllamaClient
-from backend.content.video_job import VideoJob, JobStatus
 from backend.content.job_store import job_store
+from backend.content.video_job import JobStatus, VideoJob
+from backend.llm import OllamaClient
 from backend.utils import logger
 
 
@@ -25,7 +24,7 @@ class ContentAgent(ABC):
     """Base class for all content pipeline agents."""
 
     name: str = "ContentAgent"
-    trigger_status: Optional[JobStatus] = None
+    trigger_status: JobStatus | None = None
 
     def __init__(self, llm: OllamaClient):
         self.llm = llm
@@ -51,7 +50,7 @@ class ContentAgent(ABC):
 
         return results
 
-    async def run_single(self, job_id: str) -> Optional[VideoJob]:
+    async def run_single(self, job_id: str) -> VideoJob | None:
         job = self.store.load(job_id)
         if job is None:
             logger.error(f"[{self.name}] Job {job_id} not found")
@@ -63,8 +62,7 @@ class ContentAgent(ABC):
             return None
 
     @abstractmethod
-    async def process(self, job: VideoJob) -> Optional[VideoJob]:
-        ...
+    async def process(self, job: VideoJob) -> VideoJob | None: ...
 
     def _handle_failure(self, job: VideoJob, error: Exception) -> None:
         tb = traceback.format_exc()

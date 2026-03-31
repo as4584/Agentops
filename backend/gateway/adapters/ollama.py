@@ -6,14 +6,18 @@ from __future__ import annotations
 
 import json
 import uuid
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 import httpx
 
 from backend.config import OLLAMA_BASE_URL, OLLAMA_TIMEOUT
 from backend.gateway.adapters.base import (
-    BaseProviderAdapter, ChatCompletionRequest, ChatCompletionResponse,
-    StreamChunk, UsageInfo, ProviderError,
+    BaseProviderAdapter,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+    ProviderError,
+    StreamChunk,
+    UsageInfo,
 )
 
 
@@ -69,7 +73,7 @@ class OllamaAdapter(BaseProviderAdapter):
             raw=data,
         )
 
-    async def chat_stream(self, request: ChatCompletionRequest) -> AsyncIterator[StreamChunk]:
+    async def chat_stream(self, request: ChatCompletionRequest) -> AsyncIterator[StreamChunk]:  # type: ignore[override]
         payload: dict = {
             "model": request.model,
             "messages": _messages_to_ollama(request.messages),
@@ -78,9 +82,7 @@ class OllamaAdapter(BaseProviderAdapter):
         comp_id = f"ollama-{uuid.uuid4().hex[:12]}"
         async with httpx.AsyncClient(timeout=self._timeout) as client:
             try:
-                async with client.stream(
-                    "POST", f"{self._base_url}/api/chat", json=payload
-                ) as resp:
+                async with client.stream("POST", f"{self._base_url}/api/chat", json=payload) as resp:
                     resp.raise_for_status()
                     async for line in resp.aiter_lines():
                         if not line.strip():

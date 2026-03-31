@@ -558,4 +558,18 @@ export const api = {
       body: JSON.stringify({ project_id: projectId, target_url: targetUrl }),
     }),
   webgenQrFileUrl: (qrPath: string) => `${API_BASE}/api/webgen/qr/file?path=${encodeURIComponent(qrPath)}`,
+
+  // ML Eval
+  mlEvalSummary: (taskType?: string, model?: string) =>
+    fetchAPI<{ total_cases: number; avg_score: number; pass_rate: number; by_dimension: Record<string, number>; by_model: Record<string, unknown> }>(
+      `/ml/eval/summary${taskType || model ? '?' : ''}${taskType ? `task_type=${taskType}` : ''}${model ? `${taskType ? '&' : ''}model=${model}` : ''}`
+    ),
+  mlEvalResults: (limit = 20) =>
+    fetchAPI<Array<{ case_id: string; task_type: string; model: string; score: number; pass_fail: boolean; timestamp: string }>>(`/ml/eval/results?limit=${limit}`),
+  mlAbExperiments: () =>
+    fetchAPI<Array<{ experiment_id: string; name: string; status: string; variants: unknown[] }>>('/ml/eval/ab'),
+  mlGoldenTasks: () =>
+    fetchAPI<Array<{ task_id: string; task_type: string; description: string; difficulty: string }>>('/ml/eval/golden'),
+  mlTrainingFiles: () =>
+    fetchAPI<{ files: Array<{ name: string; size_bytes: number; line_count: number }>; total_files: number; total_lines: number }>('/api/ml/training/files'),
 };

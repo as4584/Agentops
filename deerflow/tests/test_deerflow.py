@@ -6,21 +6,15 @@ and execution recorder.
 Run: pytest deerflow/tests/test_deerflow.py -v
 """
 
-from deerflow.tests import MockLLM, MockMemoryStore
-
-import asyncio
 import json
-import time
-from pathlib import Path
 
 import pytest
-
 
 # ===========================================================================
 # ExecutionRecorder
 # ===========================================================================
-
-from deerflow.execution.recorder import ExecutionRecorder, ToolCallEntry
+from deerflow.execution.recorder import ExecutionRecorder
+from deerflow.tests import MockLLM
 
 
 @pytest.fixture()
@@ -71,6 +65,7 @@ def test_end_run_writes_sentinel(recorder, tmp_path):
 
 def test_recorder_prunes_old_runs(tmp_path, monkeypatch):
     import deerflow.execution.recorder as rec_module
+
     monkeypatch.setattr(rec_module, "_MAX_RUNS_PER_AGENT", 3)
     recorder = ExecutionRecorder(base_dir=tmp_path / "agents")
     agent = "prune_agent"
@@ -107,7 +102,7 @@ def test_failed_tool_call_recorded(recorder, tmp_path):
 # MiddlewareChain
 # ===========================================================================
 
-from deerflow.middleware.chain import MiddlewareChain, Middleware, ToolContext, LLMContext
+from deerflow.middleware.chain import LLMContext, Middleware, MiddlewareChain, ToolContext
 
 
 class LoggingMiddleware(Middleware):
@@ -182,6 +177,7 @@ async def test_chain_priority_ordering():
     class FirstMiddleware(Middleware):
         name = "first"
         priority = 10
+
         async def before_tool(self, ctx):
             order.append("first")
             return ctx
@@ -189,6 +185,7 @@ async def test_chain_priority_ordering():
     class SecondMiddleware(Middleware):
         name = "second"
         priority = 90
+
         async def before_tool(self, ctx):
             order.append("second")
             return ctx
@@ -212,6 +209,7 @@ async def test_chain_priority_ordering():
 async def test_chain_llm_hooks():
     class UppercaseMiddleware(Middleware):
         name = "upper"
+
         async def after_llm(self, response: str, meta: LLMContext) -> str:
             return response.upper()
 
@@ -230,7 +228,7 @@ async def test_chain_llm_hooks():
 # FactMemory
 # ===========================================================================
 
-from deerflow.memory.facts import FactMemory, Fact, FactCategory
+from deerflow.memory.facts import Fact, FactCategory, FactMemory
 
 
 @pytest.fixture()
@@ -243,9 +241,13 @@ def fact_memory(tmp_path, monkeypatch):
     monkeypatch.setattr(cfg, "MEMORY_DIR", mem_dir)
     monkeypatch.setattr(mem_module, "MEMORY_DIR", mem_dir)
     store = MemoryStore()
-    llm = MockLLM(response=json.dumps([
-        {"content": "Deploy on Fridays", "category": "preference", "confidence": 0.9},
-    ]))
+    llm = MockLLM(
+        response=json.dumps(
+            [
+                {"content": "Deploy on Fridays", "category": "preference", "confidence": 0.9},
+            ]
+        )
+    )
     return FactMemory(llm_client=llm, memory_store=store)
 
 
@@ -269,9 +271,13 @@ async def test_extracted_facts_are_persisted(tmp_path, monkeypatch):
     monkeypatch.setattr(cfg, "MEMORY_DIR", mem_dir)
     monkeypatch.setattr(mem_module, "MEMORY_DIR", mem_dir)
     store = MemoryStore()
-    llm = MockLLM(response=json.dumps([
-        {"content": "Use pytest for all tests", "category": "preference", "confidence": 0.95},
-    ]))
+    llm = MockLLM(
+        response=json.dumps(
+            [
+                {"content": "Use pytest for all tests", "category": "preference", "confidence": 0.95},
+            ]
+        )
+    )
     fm = FactMemory(llm_client=llm, memory_store=store)
     await fm.extract("code_review_agent", [{"role": "user", "content": "use pytest"}])
 

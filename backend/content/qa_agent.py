@@ -9,13 +9,12 @@ from __future__ import annotations
 
 import json
 import subprocess
-from pathlib import Path
-from typing import Optional
 from difflib import SequenceMatcher
+from pathlib import Path
 
-from backend.content.base_agent import ContentAgent
-from backend.content.video_job import VideoJob, JobStatus, QAReport
 from backend.config import MEMORY_DIR
+from backend.content.base_agent import ContentAgent
+from backend.content.video_job import JobStatus, QAReport, VideoJob
 from backend.utils import logger
 
 VIDEO_DIR = MEMORY_DIR / "content_video"
@@ -31,7 +30,7 @@ class QAAgent(ContentAgent):
     MAX_DURATION = 65.0
     MIN_CAPTION_ACCURACY = 0.95
 
-    async def process(self, job: VideoJob) -> Optional[VideoJob]:
+    async def process(self, job: VideoJob) -> VideoJob | None:
         logger.info(f"[{self.name}] QA check on {job.job_id}")
 
         report = QAReport()
@@ -43,9 +42,7 @@ class QAAgent(ContentAgent):
             report.audio_lufs = lufs
             if lufs is not None:
                 ok = self.LUFS_MIN <= lufs <= self.LUFS_MAX
-                notes.append(
-                    f"{'✅' if ok else '⚠️'} Audio LUFS: {lufs:.1f}"
-                )
+                notes.append(f"{'✅' if ok else '⚠️'} Audio LUFS: {lufs:.1f}")
             clipped = self._check_clipping(job.voice_audio_path)
             report.audio_clipped = clipped
             notes.append("❌ Audio clipping" if clipped else "✅ No clipping")
@@ -58,13 +55,9 @@ class QAAgent(ContentAgent):
             dur = self._get_duration(vid)
             report.video_duration_sec = dur
             ok = self.MIN_DURATION <= dur <= self.MAX_DURATION
-            notes.append(
-                f"{'✅' if ok else '❌'} Duration: {dur:.1f}s"
-            )
+            notes.append(f"{'✅' if ok else '❌'} Duration: {dur:.1f}s")
             report.visual_artifacts = self._check_artifacts(vid)
-            notes.append(
-                "❌ Visual artifacts" if report.visual_artifacts else "✅ No artifacts"
-            )
+            notes.append("❌ Visual artifacts" if report.visual_artifacts else "✅ No artifacts")
         else:
             notes.append("⚠️ Video file missing")
 
@@ -80,9 +73,7 @@ class QAAgent(ContentAgent):
         # Content policy (local LLM)
         policy_ok = await self._check_policy_llm(job.script)
         report.policy_violation = not policy_ok
-        notes.append(
-            "✅ Content policy OK" if policy_ok else "❌ Policy concern flagged"
-        )
+        notes.append("✅ Content policy OK" if policy_ok else "❌ Policy concern flagged")
 
         # Verdict
         report.notes = notes
@@ -90,18 +81,21 @@ class QAAgent(ContentAgent):
             report.audio_clipped is True,
             report.visual_artifacts is True,
             report.policy_violation is True,
-            (report.video_duration_sec is not None
-             and not (self.MIN_DURATION <= report.video_duration_sec <= self.MAX_DURATION)),
+            (
+                report.video_duration_sec is not None
+                and not (self.MIN_DURATION <= report.video_duration_sec <= self.MAX_DURATION)
+            ),
         ]
         report.passed = not any(critical)
 
         new_status = JobStatus.QA if report.passed else JobStatus.FAILED
-        failure = "" if report.passed else "QA failed: " + "; ".join(
-            n for n in notes if n.startswith("❌")
-        )
+        failure = "" if report.passed else "QA failed: " + "; ".join(n for n in notes if n.startswith("❌"))
 
         updated = self.store.transition_job(
-            job.job_id, new_status, qa_report=report, failure_reason=failure,
+            job.job_id,
+            new_status,
+            qa_report=report,
+            failure_reason=failure,
         )
 
         verdict = "PASSED ✅" if report.passed else "FAILED ❌"
@@ -144,19 +138,25 @@ class QAAgent(ContentAgent):
 
     def _keyword_policy_check(self, script: str) -> bool:
         banned = [
-            "guaranteed results", "get rich quick", "lose weight fast",
-            "cure for", "medical advice", "financial advice",
+            "guaranteed results",
+            "get rich quick",
+            "lose weight fast",
+            "cure for",
+            "medical advice",
+            "financial advice",
         ]
         lower = script.lower()
         return not any(p in lower for p in banned)
 
     # ── FFmpeg checks ────────────────────────────────────
 
-    def _measure_lufs(self, path: str) -> Optional[float]:
+    def _measure_lufs(self, path: str) -> float | None:
         try:
             r = subprocess.run(
                 ["ffmpeg", "-i", path, "-af", "loudnorm=print_format=json", "-f", "null", "-"],
-                capture_output=True, text=True, timeout=60,
+                capture_output=True,
+                text=True,
+                timeout=60,
             )
             for line in r.stderr.splitlines():
                 if '"input_i"' in line:
@@ -169,7 +169,9 @@ class QAAgent(ContentAgent):
         try:
             r = subprocess.run(
                 ["ffmpeg", "-i", path, "-af", "astats=metadata=1:reset=1", "-f", "null", "-"],
-                capture_output=True, text=True, timeout=60,
+                capture_output=True,
+                text=True,
+                timeout=60,
             )
             return "Number of Clips" in r.stderr
         except Exception:
@@ -179,7 +181,9 @@ class QAAgent(ContentAgent):
         try:
             r = subprocess.run(
                 ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", path],
-                capture_output=True, text=True, timeout=30,
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
             return float(json.loads(r.stdout).get("format", {}).get("duration", 0))
         except Exception:
@@ -189,7 +193,9 @@ class QAAgent(ContentAgent):
         try:
             r = subprocess.run(
                 ["ffmpeg", "-i", path, "-vf", "blackdetect=d=0.5:pix_th=0.10", "-an", "-f", "null", "-"],
-                capture_output=True, text=True, timeout=60,
+                capture_output=True,
+                text=True,
+                timeout=60,
             )
             return "blackdetect" in r.stderr.lower()
         except Exception:
@@ -197,8 +203,9 @@ class QAAgent(ContentAgent):
 
     def _caption_accuracy(self, transcript: str, srt_path: Path) -> float:
         srt_text = " ".join(
-            l.strip() for l in srt_path.read_text().splitlines()
-            if l.strip() and not l.strip().isdigit() and "-->" not in l
+            line.strip()
+            for line in srt_path.read_text().splitlines()
+            if line.strip() and not line.strip().isdigit() and "-->" not in line
         )
         a = " ".join(transcript.lower().split())
         b = " ".join(srt_text.lower().split())

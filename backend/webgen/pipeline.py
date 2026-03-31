@@ -7,12 +7,11 @@ Coordinates all agents from brief → deployed site.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from backend.agents.gatekeeper_agent import GatekeeperAgent
 from backend.config import LOCAL_LLM_REQUIRED_CHECKS, PROJECT_ROOT, SANDBOX_ENFORCEMENT_ENABLED
 from backend.llm import OllamaClient
-from sandbox.session_manager import SandboxSession
 from backend.utils import logger
 from backend.webgen.agents.aeo_agent import AEOAgent
 from backend.webgen.agents.page_generator import PageGeneratorAgent
@@ -23,6 +22,7 @@ from backend.webgen.agents.template_learner import TemplateLearnerAgent
 from backend.webgen.models import ClientBrief, SiteProject, SiteStatus
 from backend.webgen.site_store import SiteStore
 from backend.webgen.template_store import TemplateStore
+from sandbox.session_manager import SandboxSession
 
 
 class WebGenPipeline:
@@ -44,9 +44,9 @@ class WebGenPipeline:
 
     def __init__(
         self,
-        llm: Optional[OllamaClient] = None,
-        template_store: Optional[TemplateStore] = None,
-        site_store: Optional[SiteStore] = None,
+        llm: OllamaClient | None = None,
+        template_store: TemplateStore | None = None,
+        site_store: SiteStore | None = None,
         output_base: str | Path | None = None,
     ) -> None:
         self.llm = llm or OllamaClient()
@@ -153,8 +153,7 @@ class WebGenPipeline:
         """Learn a template from an existing site (directory path)."""
         return await self.template_learner.run(source, business_type, name)
 
-    async def learn_html(self, html: str, source_name: str = "pasted",
-                          business_type: str = "custom", name: str = ""):
+    async def learn_html(self, html: str, source_name: str = "pasted", business_type: str = "custom", name: str = ""):
         """Learn a template from raw HTML content."""
         return await self.template_learner.learn_from_html(html, source_name, business_type, name)
 
@@ -267,7 +266,7 @@ class WebGenPipeline:
     def list_projects(self) -> list[SiteProject]:
         return self.site_store.list_projects()
 
-    def get_project(self, project_id: str) -> Optional[SiteProject]:
+    def get_project(self, project_id: str) -> SiteProject | None:
         return self.site_store.load(project_id)
 
     def list_templates(self, business_type: str = ""):

@@ -12,15 +12,13 @@ Optional: HeyGen API if HEYGEN_API_KEY is set.
 
 from __future__ import annotations
 
-import os
-import subprocess
 import shutil
+import subprocess
 from pathlib import Path
-from typing import Optional
 
-from backend.content.base_agent import ContentAgent
-from backend.content.video_job import VideoJob, JobStatus
 from backend.config import MEMORY_DIR
+from backend.content.base_agent import ContentAgent
+from backend.content.video_job import JobStatus, VideoJob
 from backend.utils import logger
 
 VIDEO_DIR = MEMORY_DIR / "content_video"
@@ -33,7 +31,7 @@ class AvatarVideoAgent(ContentAgent):
     name = "AvatarVideoAgent"
     trigger_status = JobStatus.AUDIO_READY
 
-    async def process(self, job: VideoJob) -> Optional[VideoJob]:
+    async def process(self, job: VideoJob) -> VideoJob | None:
         logger.info(f"[{self.name}] Generating video for {job.job_id}")
 
         audio_path = Path(job.voice_audio_path)
@@ -87,11 +85,15 @@ class AvatarVideoAgent(ContentAgent):
         try:
             cmd = [
                 "sadtalker",
-                "--driven_audio", str(audio),
-                "--source_image", str(AVATAR_IMAGE_PATH),
-                "--result_dir", str(output.parent),
+                "--driven_audio",
+                str(audio),
+                "--source_image",
+                str(AVATAR_IMAGE_PATH),
+                "--result_dir",
+                str(output.parent),
                 "--still",
-                "--preprocess", "crop",
+                "--preprocess",
+                "crop",
             ]
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
             if result.returncode == 0:
@@ -110,9 +112,12 @@ class AvatarVideoAgent(ContentAgent):
         try:
             cmd = [
                 "wav2lip",
-                "--audio", str(audio),
-                "--face", str(AVATAR_IMAGE_PATH),
-                "--outfile", str(output),
+                "--audio",
+                str(audio),
+                "--face",
+                str(AVATAR_IMAGE_PATH),
+                "--outfile",
+                str(output),
             ]
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
             return result.returncode == 0
@@ -135,30 +140,48 @@ class AvatarVideoAgent(ContentAgent):
             if AVATAR_IMAGE_PATH.exists():
                 # Use creator avatar image
                 cmd = [
-                    "ffmpeg", "-y",
-                    "-loop", "1",
-                    "-i", str(AVATAR_IMAGE_PATH),
-                    "-i", str(audio),
-                    "-c:v", "libx264",
-                    "-tune", "stillimage",
-                    "-c:a", "aac",
-                    "-b:a", "128k",
-                    "-vf", "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black",
-                    "-pix_fmt", "yuv420p",
+                    "ffmpeg",
+                    "-y",
+                    "-loop",
+                    "1",
+                    "-i",
+                    str(AVATAR_IMAGE_PATH),
+                    "-i",
+                    str(audio),
+                    "-c:v",
+                    "libx264",
+                    "-tune",
+                    "stillimage",
+                    "-c:a",
+                    "aac",
+                    "-b:a",
+                    "128k",
+                    "-vf",
+                    "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black",
+                    "-pix_fmt",
+                    "yuv420p",
                     "-shortest",
                     str(output),
                 ]
             else:
                 # Generate plain background with audio
                 cmd = [
-                    "ffmpeg", "-y",
-                    "-f", "lavfi",
-                    "-i", f"color=c=#1a1a2e:s=1080x1920:d={duration}",
-                    "-i", str(audio),
-                    "-c:v", "libx264",
-                    "-c:a", "aac",
-                    "-b:a", "128k",
-                    "-pix_fmt", "yuv420p",
+                    "ffmpeg",
+                    "-y",
+                    "-f",
+                    "lavfi",
+                    "-i",
+                    f"color=c=#1a1a2e:s=1080x1920:d={duration}",
+                    "-i",
+                    str(audio),
+                    "-c:v",
+                    "libx264",
+                    "-c:a",
+                    "aac",
+                    "-b:a",
+                    "128k",
+                    "-pix_fmt",
+                    "yuv420p",
                     "-shortest",
                     str(output),
                 ]
@@ -177,11 +200,16 @@ class AvatarVideoAgent(ContentAgent):
         """Get audio duration in seconds via ffprobe."""
         try:
             cmd = [
-                "ffprobe", "-v", "quiet",
-                "-print_format", "json",
-                "-show_format", str(audio_path),
+                "ffprobe",
+                "-v",
+                "quiet",
+                "-print_format",
+                "json",
+                "-show_format",
+                str(audio_path),
             ]
             import json
+
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
             data = json.loads(result.stdout)
             return float(data.get("format", {}).get("duration", 30))

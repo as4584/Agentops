@@ -18,10 +18,10 @@ import pytest
 from backend.middleware import DriftGuard
 from backend.models import DriftStatus, ModificationType
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 async def _noop(**kwargs):
     return "ok"
@@ -34,6 +34,7 @@ async def _failing(**kwargs):
 # ---------------------------------------------------------------------------
 # Normal execution — READ_ONLY
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_read_only_executes_and_returns_result():
@@ -62,6 +63,7 @@ async def test_state_modify_executes_and_returns_result():
 # ---------------------------------------------------------------------------
 # ARCHITECTURAL_MODIFY — flagged but NOT blocked
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_architectural_modify_still_executes():
@@ -93,6 +95,7 @@ async def test_architectural_modify_adds_pending_update():
 # ---------------------------------------------------------------------------
 # Halted system
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_halted_system_blocks_all_tool_calls():
@@ -127,6 +130,7 @@ async def test_cleared_halt_allows_execution():
 # Failing tool propagates exception
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_failing_tool_propagates_exception():
     guard = DriftGuard()
@@ -143,6 +147,7 @@ async def test_failing_tool_propagates_exception():
 # ---------------------------------------------------------------------------
 # check_invariants()
 # ---------------------------------------------------------------------------
+
 
 def test_check_invariants_green_on_fresh_guard():
     guard = DriftGuard()
@@ -168,6 +173,7 @@ def test_check_invariants_yellow_after_arch_modify_without_docs(monkeypatch):
 # ---------------------------------------------------------------------------
 # check_namespace_overlap()
 # ---------------------------------------------------------------------------
+
 
 def test_namespace_overlap_no_duplicates():
     guard = DriftGuard()

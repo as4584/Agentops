@@ -12,19 +12,19 @@ Human approvals pause the pipeline between TrendResearcher and ScriptWriter.
 
 from __future__ import annotations
 
-from backend.llm import OllamaClient
-from backend.content.video_job import VideoJob, JobStatus
-from backend.content.job_store import job_store
-from backend.content.base_agent import ContentAgent
-from backend.content.trend_researcher import TrendResearcher
-from backend.content.idea_intake_agent import IdeaIntakeAgent
-from backend.content.script_writer_agent import ScriptWriterAgent
-from backend.content.voice_agent import VoiceAgent
-from backend.content.avatar_video_agent import AvatarVideoAgent
-from backend.content.caption_agent import CaptionAgent
-from backend.content.qa_agent import QAAgent
-from backend.content.publisher_agent import PublisherAgent
 from backend.content.analytics_agent import AnalyticsAgent
+from backend.content.avatar_video_agent import AvatarVideoAgent
+from backend.content.base_agent import ContentAgent
+from backend.content.caption_agent import CaptionAgent
+from backend.content.idea_intake_agent import IdeaIntakeAgent
+from backend.content.job_store import job_store
+from backend.content.publisher_agent import PublisherAgent
+from backend.content.qa_agent import QAAgent
+from backend.content.script_writer_agent import ScriptWriterAgent
+from backend.content.trend_researcher import TrendResearcher
+from backend.content.video_job import JobStatus, VideoJob
+from backend.content.voice_agent import VoiceAgent
+from backend.llm import OllamaClient
 from backend.utils import logger
 
 
@@ -40,8 +40,8 @@ class ContentPipeline:
             TrendResearcher(llm),
         ]
         self.agents: list[ContentAgent] = [
-            IdeaIntakeAgent(llm),      # legacy manual-note intake
-            ScriptWriterAgent(llm),    # trigger: IDEA_APPROVED
+            IdeaIntakeAgent(llm),  # legacy manual-note intake
+            ScriptWriterAgent(llm),  # trigger: IDEA_APPROVED
             VoiceAgent(llm),
             AvatarVideoAgent(llm),
             CaptionAgent(llm),
@@ -105,9 +105,7 @@ class ContentPipeline:
     def reject_idea(self, job_id: str, reason: str = "") -> VideoJob:
         """Reject an idea — moves to FAILED with reason."""
         logger.info(f"[Pipeline] Rejecting idea {job_id}: {reason}")
-        return job_store.transition_job(
-            job_id, JobStatus.FAILED, failure_reason=f"Idea rejected: {reason}"
-        )
+        return job_store.transition_job(job_id, JobStatus.FAILED, failure_reason=f"Idea rejected: {reason}")
 
     def get_pending_ideas(self) -> list[VideoJob]:
         """Return all jobs awaiting human greenlight."""
@@ -118,9 +116,7 @@ class ContentPipeline:
         return job_store.transition_job(job_id, JobStatus.APPROVED)
 
     def reject_job(self, job_id: str, reason: str = "") -> VideoJob:
-        return job_store.transition_job(
-            job_id, JobStatus.FAILED, failure_reason=f"Rejected: {reason}"
-        )
+        return job_store.transition_job(job_id, JobStatus.FAILED, failure_reason=f"Rejected: {reason}")
 
     def retry_job(self, job_id: str, restart_from: JobStatus) -> VideoJob:
         return job_store.transition_job(job_id, restart_from)

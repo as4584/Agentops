@@ -169,10 +169,7 @@ class MemoryStore:
         """List all existing memory namespaces."""
         if not MEMORY_DIR.exists():
             return []
-        return [
-            d.name for d in MEMORY_DIR.iterdir()
-            if d.is_dir() and d.name != "shared"
-        ]
+        return [d.name for d in MEMORY_DIR.iterdir() if d.is_dir() and d.name != "shared"]
 
     # ----- Internal -----
 

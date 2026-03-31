@@ -18,19 +18,20 @@ Architecture Notes:
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
-from typing import Any, TypedDict
 import uuid
+from datetime import UTC, datetime
+from typing import Any, TypedDict
 
+from langgraph.graph import END, StateGraph
 from pydantic import BaseModel, Field
 
-from langgraph.graph import StateGraph, END
-
+from backend.agents import ALL_AGENT_DEFINITIONS, SoulAgent, create_agent
+from backend.agents.gatekeeper_agent import GatekeeperAgent, GatekeeperResult
+from backend.config import A2A_MAX_DEPTH
 from backend.knowledge import KnowledgeVectorStore
 from backend.llm import OllamaClient
 from backend.memory import memory_store
 from backend.middleware import drift_guard
-from backend.config import A2A_MAX_DEPTH
 from backend.models import (
     AgentDefinition,
     AgentState,
@@ -39,16 +40,14 @@ from backend.models import (
     DriftReport,
     DriftStatus,
 )
-from backend.agents import create_agent, ALL_AGENT_DEFINITIONS, SoulAgent
-from backend.agents.gatekeeper_agent import GatekeeperAgent, GatekeeperResult
-from backend.tasks import task_tracker, TaskStatus
+from backend.tasks import TaskStatus, task_tracker
 from backend.utils import logger
 from backend.utils.tool_ids import ToolIdRegistry
-
 
 # ---------------------------------------------------------------------------
 # Orchestrator State Schema
 # ---------------------------------------------------------------------------
+
 
 class OrchestratorState(TypedDict):
     """
@@ -57,13 +56,14 @@ class OrchestratorState(TypedDict):
     This is the single source of truth for a conversation's state.
     All fields are immutable within a single node execution.
     """
+
     # Routing
-    target_agent: str               # Which agent should handle this
-    message: str                    # Current message to process
-    context: dict[str, Any]         # Additional context
+    target_agent: str  # Which agent should handle this
+    message: str  # Current message to process
+    context: dict[str, Any]  # Additional context
 
     # Response
-    response: str                   # The agent's response
+    response: str  # The agent's response
     tool_calls: list[dict[str, Any]]  # Tool calls made during processing
 
     # Tool ID normalisation — per-conversation ToolIdRegistry instance.
@@ -72,12 +72,12 @@ class OrchestratorState(TypedDict):
     tool_id_registry: Any
 
     # Governance
-    drift_status: str               # Current drift status (GREEN/YELLOW/RED)
-    governance_notes: list[str]     # Governance observations
+    drift_status: str  # Current drift status (GREEN/YELLOW/RED)
+    governance_notes: list[str]  # Governance observations
 
     # Metadata
-    timestamp: str                  # Processing timestamp
-    error: str | None               # Error message if any
+    timestamp: str  # Processing timestamp
+    error: str | None  # Error message if any
 
 
 INTAKE_QUESTIONS: list[tuple[str, str]] = [
@@ -107,6 +107,7 @@ class AgentMessage(BaseModel):
 # ---------------------------------------------------------------------------
 # Orchestrator Class
 # ---------------------------------------------------------------------------
+
 
 class AgentOrchestrator:
     """
@@ -250,18 +251,13 @@ class AgentOrchestrator:
             return {
                 "error": "SYSTEM HALTED: Critical drift event. Resolve before proceeding.",
                 "drift_status": DriftStatus.RED.value,
-                "governance_notes": governance_notes + [
-                    "ROUTING BLOCKED: System halted due to drift violation"
-                ],
+                "governance_notes": governance_notes + ["ROUTING BLOCKED: System halted due to drift violation"],
             }
 
         if target not in self._all_agent_ids:
             available = sorted(self._all_agent_ids - {"direct_llm"})
             return {
-                "error": (
-                    f"Agent '{target}' not found. "
-                    f"Available: {available}"
-                ),
+                "error": (f"Agent '{target}' not found. Available: {available}"),
                 "governance_notes": governance_notes + [f"Unknown agent requested: {target}"],
             }
 
@@ -289,17 +285,20 @@ class AgentOrchestrator:
 
         # ── Non-knowledge agents: delegate to BaseAgent ──────────────────
         if target != self._knowledge_agent_id and target in self._agents:
-            from backend.agents import BaseAgent as _BA
+            from backend.agents import BaseAgent as _BaseAgent
+
             agent = self._agents[target]
-            if isinstance(agent, _BA):
+            if isinstance(agent, _BaseAgent):
                 try:
                     response = await agent.process_message(message, context)
-                    memory_store.append_shared_event({
-                        "type": "AGENT_RESPONSE",
-                        "agent_id": target,
-                        "message_preview": message[:100],
-                        "response_preview": response[:100],
-                    })
+                    memory_store.append_shared_event(
+                        {
+                            "type": "AGENT_RESPONSE",
+                            "agent_id": target,
+                            "message_preview": message[:100],
+                            "response_preview": response[:100],
+                        }
+                    )
                     return {"response": response, "error": None}
                 except Exception as exc:
                     error_msg = f"{target} execution error: {exc}"
@@ -336,9 +335,7 @@ class AgentOrchestrator:
                 )
 
             for i, item in enumerate(retrieved, start=1):
-                context_blocks.append(
-                    f"[Source {i}] {item['path']} (score={item['score']:.3f})\n{item['text']}"
-                )
+                context_blocks.append(f"[Source {i}] {item['path']} (score={item['score']:.3f})\n{item['text']}")
 
             system_prompt = (
                 "You are a local knowledge agent. Use the provided sources to answer. "
@@ -371,14 +368,16 @@ class AgentOrchestrator:
             task_tracker.complete_task(_tid, detail=f"OK — {len(retrieved)} chunks")
 
             # Record shared event (INV-9: append-only via orchestrator)
-            memory_store.append_shared_event({
-                "type": "LLM_RESPONSE",
-                "agent_id": self._knowledge_agent_id,
-                "message_preview": message[:100],
-                "response_preview": response[:100],
-                "retrieved_chunks": len(retrieved),
-                "retrieved_business_chunks": len(profile_hits),
-            })
+            memory_store.append_shared_event(
+                {
+                    "type": "LLM_RESPONSE",
+                    "agent_id": self._knowledge_agent_id,
+                    "message_preview": message[:100],
+                    "response_preview": response[:100],
+                    "retrieved_chunks": len(retrieved),
+                    "retrieved_business_chunks": len(profile_hits),
+                }
+            )
 
             return {
                 "response": response,
@@ -410,15 +409,11 @@ class AgentOrchestrator:
         governance_notes.append(f"Drift status: {drift_report.status.value}")
 
         if drift_report.pending_updates:
-            governance_notes.append(
-                f"Pending docs: {', '.join(drift_report.pending_updates)}"
-            )
+            governance_notes.append(f"Pending docs: {', '.join(drift_report.pending_updates)}")
 
         if drift_report.violations:
             for v in drift_report.violations:
-                governance_notes.append(
-                    f"VIOLATION: {v.invariant_id} — {v.description}"
-                )
+                governance_notes.append(f"VIOLATION: {v.invariant_id} — {v.description}")
 
         return {
             "drift_status": drift_report.status.value,
@@ -464,7 +459,7 @@ class AgentOrchestrator:
 
         try:
             # Run the state machine
-            final_state = await self._compiled_graph.ainvoke(initial_state)
+            final_state = await self._compiled_graph.ainvoke(initial_state)  # type: ignore[arg-type]
 
             return {
                 "agent_id": agent_id,
@@ -539,7 +534,11 @@ class AgentOrchestrator:
             raise ValueError(f"A2A depth exceeded max={A2A_MAX_DEPTH}")
 
         resolved_message_id = message_id or f"a2a_{uuid.uuid4().hex}"
-        history = self.get_message_history(thread_id=thread_id or "") if thread_id else self.list_agent_messages(agent_id=from_agent, limit=500)
+        history = (
+            self.get_message_history(thread_id=thread_id or "")
+            if thread_id
+            else self.list_agent_messages(agent_id=from_agent, limit=500)
+        )
         if any(item.get("message_id") == resolved_message_id for item in history):
             raise ValueError(f"Duplicate message_id: {resolved_message_id}")
 
@@ -553,14 +552,16 @@ class AgentOrchestrator:
             depth=depth,
             purpose=purpose,
             payload=payload,
-            created_at=datetime.now(timezone.utc).isoformat(),
+            created_at=datetime.now(UTC).isoformat(),
         )
 
-        memory_store.append_shared_event({
-            "type": "A2A_MESSAGE",
-            "thread_id": resolved_thread_id,
-            "message": envelope.model_dump(mode="json"),
-        })
+        memory_store.append_shared_event(
+            {
+                "type": "A2A_MESSAGE",
+                "thread_id": resolved_thread_id,
+                "message": envelope.model_dump(mode="json"),
+            }
+        )
         logger.info(
             "A2A message persisted",
             event_type="a2a_message_sent",
@@ -619,23 +620,27 @@ class AgentOrchestrator:
         results = []
         # knowledge agent
         size_bytes = memory_store.get_namespace_size(self._knowledge_agent_id)
-        results.append({
-            "agent_id": self._knowledge_agent_id,
-            "namespace": self._knowledge_agent_id,
-            "size_bytes": size_bytes,
-            "size_mb": round(size_bytes / (1024 * 1024), 4),
-        })
+        results.append(
+            {
+                "agent_id": self._knowledge_agent_id,
+                "namespace": self._knowledge_agent_id,
+                "size_bytes": size_bytes,
+                "size_mb": round(size_bytes / (1024 * 1024), 4),
+            }
+        )
         # all other agents
         for agent in self._agents.values():
             if hasattr(agent, "definition"):
                 ns = agent.definition.memory_namespace
                 ns_bytes = memory_store.get_namespace_size(ns)
-                results.append({
-                    "agent_id": agent.definition.agent_id,
-                    "namespace": ns,
-                    "size_bytes": ns_bytes,
-                    "size_mb": round(ns_bytes / (1024 * 1024), 4),
-                })
+                results.append(
+                    {
+                        "agent_id": agent.definition.agent_id,
+                        "namespace": ns,
+                        "size_bytes": ns_bytes,
+                        "size_mb": round(ns_bytes / (1024 * 1024), 4),
+                    }
+                )
         return results
 
     def _get_intake_state(self, business_id: str) -> dict[str, Any]:
@@ -740,10 +745,7 @@ class AgentOrchestrator:
         """Generate a campaign package using completed intake + vector profile context."""
         intake_status = self.get_intake_status(business_id)
         if not intake_status.get("completed", False):
-            raise ValueError(
-                "Intake must be completed before campaign generation. "
-                "Finish all intake questions first."
-            )
+            raise ValueError("Intake must be completed before campaign generation. Finish all intake questions first.")
 
         answers = dict(intake_status.get("answers", {}))
         semantic_query = (
@@ -761,8 +763,7 @@ class AgentOrchestrator:
         profile_lines: list[str] = []
         for idx, hit in enumerate(profile_hits, start=1):
             profile_lines.append(
-                f"[Profile Hit {idx}] field={hit.get('field')} score={hit.get('score', 0):.3f}\n"
-                f"{hit.get('text', '')}"
+                f"[Profile Hit {idx}] field={hit.get('field')} score={hit.get('score', 0):.3f}\n{hit.get('text', '')}"
             )
 
         system_prompt = (

@@ -19,28 +19,28 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, cast
 
 from backend.llm import OllamaClient
 from backend.memory import memory_store
-from backend.tasks import task_tracker, TaskStatus
-from backend.skills import build_skills_prompt
 from backend.models import (
     AgentDefinition,
     AgentState,
     AgentStatus,
     ChangeImpactLevel,
 )
+from backend.skills import build_skills_prompt
+from backend.tasks import TaskStatus, task_tracker
 from backend.tools import execute_tool
 from backend.utils import logger
 from backend.utils.tool_ids import ToolIdRegistry, make_tool_call_id
 from backend.utils.tool_validator import ToolValidator, validator_for_agent
 
-
 # ---------------------------------------------------------------------------
 # Base Agent Class
 # ---------------------------------------------------------------------------
+
 
 class BaseAgent:
     """
@@ -68,10 +68,7 @@ class BaseAgent:
         self._tool_call_sequence: int = 0
         # Optional tool health monitor — set via set_health_monitor()
         self._health_monitor: Any = None
-        logger.info(
-            f"Agent initialized: {definition.agent_id} "
-            f"(impact={definition.change_impact_level})"
-        )
+        logger.info(f"Agent initialized: {definition.agent_id} (impact={definition.change_impact_level})")
 
     @property
     def agent_id(self) -> str:
@@ -104,12 +101,12 @@ class BaseAgent:
             The agent's response text.
         """
         self.state.status = AgentStatus.ACTIVE
-        self.state.last_active = datetime.now(timezone.utc)
+        self.state.last_active = datetime.now(UTC)
 
         # Track task
         _tid = task_tracker.create_task(
             agent_id=self.agent_id,
-            action=f"process_message",
+            action="process_message",
             detail=message[:120],
             status=TaskStatus.RUNNING,
         )
@@ -157,7 +154,7 @@ class BaseAgent:
                 {
                     "message": message,
                     "response": response[:500],
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 },
             )
 
@@ -196,15 +193,13 @@ class BaseAgent:
         """
 
         # ── Structured tool_calls JSON block (OpenAI format bridged to text) ──
-        structured_pattern = r'\[TOOL_CALLS:(.*?)\]'
+        structured_pattern = r"\[TOOL_CALLS:(.*?)\]"
         structured_match = re.search(structured_pattern, response, re.DOTALL)
         if structured_match:
-            response = await self._handle_structured_tool_calls(
-                response, structured_match
-            )
+            response = await self._handle_structured_tool_calls(response, structured_match)
 
         # ── Legacy text pattern ──────────────────────────────────────────────
-        tool_pattern = r'\[TOOL:(\w+)\(([^)]*)\)\]'
+        tool_pattern = r"\[TOOL:(\w+)\(([^)]*)\)\]"
         matches = re.findall(tool_pattern, response)
 
         if not matches:
@@ -214,9 +209,7 @@ class BaseAgent:
             # Validate tool name before execution.
             validation = self._tool_validator.validate(tool_name)
             if not validation.valid:
-                logger.warning(
-                    f"Agent {self.agent_id}: {validation.error_message}"
-                )
+                logger.warning(f"Agent {self.agent_id}: {validation.error_message}")
                 tool_call_str = f"[TOOL:{tool_name}({params_str})]"
                 blocked_str = f"\n[Tool Blocked: {tool_name}]\n{validation.error_message}\n"
                 response = response.replace(tool_call_str, blocked_str)
@@ -245,17 +238,16 @@ class BaseAgent:
 
             # Replace tool call with result in response.
             tool_call_str = f"[TOOL:{tool_name}({params_str})]"
-            result_str = (
-                f"\n[Tool Result: {tool_name} | id={call_id}]\n"
-                f"{_format_result(result)}\n"
-            )
+            result_str = f"\n[Tool Result: {tool_name} | id={call_id}]\n{_format_result(result)}\n"
             response = response.replace(tool_call_str, result_str)
 
             # Add tool result to conversation for context.
-            self._conversation_history.append({
-                "role": "system",
-                "content": f"Tool {tool_name} (call_id={call_id}) returned: {_format_result(result)}",
-            })
+            self._conversation_history.append(
+                {
+                    "role": "system",
+                    "content": f"Tool {tool_name} (call_id={call_id}) returned: {_format_result(result)}",
+                }
+            )
 
         return response
 
@@ -288,9 +280,7 @@ class BaseAgent:
             validation = self._tool_validator.validate(tool_name)
             if not validation.valid:
                 logger.warning(f"Agent {self.agent_id}: {validation.error_message}")
-                replacement_parts.append(
-                    f"\n[Tool Blocked: {tool_name}]\n{validation.error_message}\n"
-                )
+                replacement_parts.append(f"\n[Tool Blocked: {tool_name}]\n{validation.error_message}\n")
                 continue
 
             # Deterministic ID.
@@ -307,29 +297,26 @@ class BaseAgent:
                 {k: str(v) for k, v in arguments.items()},
             )
 
-            replacement_parts.append(
-                f"\n[Tool Result: {tool_name} | id={call_id}]\n"
-                f"{_format_result(result)}\n"
+            replacement_parts.append(f"\n[Tool Result: {tool_name} | id={call_id}]\n{_format_result(result)}\n")
+            self._conversation_history.append(
+                {
+                    "role": "system",
+                    "content": f"Tool {tool_name} (call_id={call_id}) returned: {_format_result(result)}",
+                }
             )
-            self._conversation_history.append({
-                "role": "system",
-                "content": f"Tool {tool_name} (call_id={call_id}) returned: {_format_result(result)}",
-            })
 
         block = "\n".join(replacement_parts)
-        return response[:match.start()] + block + response[match.end():]
+        return response[: match.start()] + block + response[match.end() :]
 
     def _build_tools_context(self) -> str:
         """Build a description of available tools for the prompt."""
         lines: list[str] = []
         for tool_name in self.definition.tool_permissions:
             from backend.tools import get_tool_definition
+
             tool_def = get_tool_definition(tool_name)
             if tool_def:
-                lines.append(
-                    f"- {tool_def.name}: {tool_def.description} "
-                    f"[{tool_def.modification_type.value}]"
-                )
+                lines.append(f"- {tool_def.name}: {tool_def.description} [{tool_def.modification_type.value}]")
         return "\n".join(lines) if lines else "No tools available."
 
     # ----- Memory Access -----
@@ -394,6 +381,7 @@ class BaseAgent:
 
         if self._health_monitor is not None:
             from deerflow.tools.middleware import detect_tool_failure
+
             is_failure, error_msg = detect_tool_failure(result)
             if is_failure:
                 self._health_monitor.record_failure(
@@ -452,6 +440,7 @@ def _format_result(result: Any) -> str:
 # SoulAgent — Persistent governing intelligence with autobiographical memory
 # ---------------------------------------------------------------------------
 
+
 class SoulAgent(BaseAgent):
     """
     The Soul Agent is the persistent governing intelligence of the cluster.
@@ -509,7 +498,7 @@ class SoulAgent(BaseAgent):
         stored_identity = self.read_memory(self.IDENTITY_KEY)
         if not isinstance(stored_identity, dict):
             identity = dict(self._DEFAULT_IDENTITY)
-            identity["created_at"] = datetime.now(timezone.utc).isoformat()
+            identity["created_at"] = datetime.now(UTC).isoformat()
             self.write_memory(self.IDENTITY_KEY, identity)
         else:
             identity = cast(dict[str, Any], stored_identity)
@@ -532,19 +521,24 @@ class SoulAgent(BaseAgent):
 
         # 5. Session event
         _raw_sessions = self.read_memory(self.SESSION_KEY)
-        sessions: list[dict[str, Any]] = cast(list[dict[str, Any]], _raw_sessions) if isinstance(_raw_sessions, list) else []
+        sessions: list[dict[str, Any]] = (
+            cast(list[dict[str, Any]], _raw_sessions) if isinstance(_raw_sessions, list) else []
+        )
         self._session_count = len(sessions) + 1
-        sessions.append({"started_at": datetime.now(timezone.utc).isoformat(), "session": self._session_count})
+        sessions.append({"started_at": datetime.now(UTC).isoformat(), "session": self._session_count})
         self.write_memory(self.SESSION_KEY, sessions[-100:])  # keep last 100
 
         from backend.memory import memory_store as _ms
-        _ms.append_shared_event({
-            "type": "SOUL_BOOT",
-            "session": self._session_count,
-            "active_goals": len(self._active_goals),
-            "recent_reflections": len(recent_reflections),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+
+        _ms.append_shared_event(
+            {
+                "type": "SOUL_BOOT",
+                "session": self._session_count,
+                "active_goals": len(self._active_goals),
+                "recent_reflections": len(recent_reflections),
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+        )
 
         logger.info(f"SoulAgent boot complete — session {self._session_count}, {len(self._active_goals)} active goals")
         return {
@@ -560,6 +554,7 @@ class SoulAgent(BaseAgent):
         Generate a self-assessment based on recent shared events and produce a reflection entry.
         """
         from backend.memory import memory_store as _ms
+
         recent_events = _ms.get_shared_events(limit=20)
         event_summary = "\n".join(
             f"- [{e.get('type', '?')}] {e.get('agent_id', e.get('source_agent', '?'))}: "
@@ -579,7 +574,7 @@ class SoulAgent(BaseAgent):
         reflection_text = await self.llm.generate(prompt=reflect_prompt)  # type: ignore[attr-defined]
 
         log_entry: dict[str, Any] = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "trigger": trigger,
             "reflection": reflection_text,
             "events_reviewed": len(recent_events),
@@ -596,11 +591,11 @@ class SoulAgent(BaseAgent):
     def set_goal(self, title: str, description: str, priority: str = "MEDIUM") -> dict[str, Any]:
         """Add a new active goal."""
         goal: dict[str, Any] = {
-            "id": f"goal_{int(datetime.now(timezone.utc).timestamp())}",
+            "id": f"goal_{int(datetime.now(UTC).timestamp())}",
             "title": title,
             "description": description,
             "priority": priority.upper(),
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
             "completed": False,
         }
         _raw_goals = self.read_memory(self.GOALS_KEY)
@@ -619,7 +614,7 @@ class SoulAgent(BaseAgent):
         for g in goals:
             if g.get("id") == goal_id:
                 g["completed"] = True
-                g["completed_at"] = datetime.now(timezone.utc).isoformat()
+                g["completed_at"] = datetime.now(UTC).isoformat()
         self.write_memory(self.GOALS_KEY, goals)
         self._active_goals = [g for g in goals if not g.get("completed", False)]
         return True
@@ -662,10 +657,16 @@ IT_AGENT_DEFINITION = AgentDefinition(
         "memory namespace, and always report changes through proper channels."
     ),
     tool_permissions=[
-        "safe_shell", "file_reader", "system_info", "doc_updater", "folder_analyzer",
+        "safe_shell",
+        "file_reader",
+        "system_info",
+        "doc_updater",
+        "folder_analyzer",
         # MCP tools
-        "mcp_filesystem_read_file", "mcp_filesystem_list_directory",
-        "mcp_docker_list_containers", "mcp_docker_get_container_logs",
+        "mcp_filesystem_read_file",
+        "mcp_filesystem_list_directory",
+        "mcp_docker_list_containers",
+        "mcp_docker_get_container_logs",
         "mcp_time_get_current_time",
     ],
     memory_namespace="it_agent",
@@ -697,9 +698,12 @@ CS_AGENT_DEFINITION = AgentDefinition(
         "IT Agent via the orchestrator."
     ),
     tool_permissions=[
-        "file_reader", "system_info", "doc_updater",
+        "file_reader",
+        "system_info",
+        "doc_updater",
         # MCP tools
-        "mcp_filesystem_read_file", "mcp_filesystem_list_directory",
+        "mcp_filesystem_read_file",
+        "mcp_filesystem_list_directory",
         "mcp_time_get_current_time",
     ],
     memory_namespace="cs_agent",
@@ -733,10 +737,15 @@ SOUL_AGENT_DEFINITION = AgentDefinition(
         "You may read all shared events but write only to your own soul_core namespace."
     ),
     tool_permissions=[
-        "file_reader", "system_info", "doc_updater", "alert_dispatch",
+        "file_reader",
+        "system_info",
+        "doc_updater",
+        "alert_dispatch",
         # MCP tools
-        "mcp_github_search_repositories", "mcp_github_list_issues",
-        "mcp_filesystem_read_file", "mcp_filesystem_list_directory",
+        "mcp_github_search_repositories",
+        "mcp_github_list_issues",
+        "mcp_filesystem_read_file",
+        "mcp_filesystem_list_directory",
         "mcp_time_get_current_time",
     ],
     memory_namespace="soul_core",
@@ -770,13 +779,23 @@ DEVOPS_AGENT_DEFINITION = AgentDefinition(
         "Log every deployment action and escalate anomalies to the Monitor Agent via the orchestrator."
     ),
     tool_permissions=[
-        "git_ops", "safe_shell", "file_reader", "health_check", "doc_updater", "folder_analyzer",
+        "git_ops",
+        "safe_shell",
+        "file_reader",
+        "health_check",
+        "doc_updater",
+        "folder_analyzer",
         # MCP tools
-        "mcp_github_search_repositories", "mcp_github_get_file_contents",
-        "mcp_github_list_issues", "mcp_github_create_issue",
-        "mcp_github_list_pull_requests", "mcp_github_get_pull_request",
-        "mcp_docker_list_containers", "mcp_docker_get_container_logs",
-        "mcp_docker_inspect_container", "mcp_time_get_current_time",
+        "mcp_github_search_repositories",
+        "mcp_github_get_file_contents",
+        "mcp_github_list_issues",
+        "mcp_github_create_issue",
+        "mcp_github_list_pull_requests",
+        "mcp_github_get_pull_request",
+        "mcp_docker_list_containers",
+        "mcp_docker_get_container_logs",
+        "mcp_docker_inspect_container",
+        "mcp_time_get_current_time",
     ],
     memory_namespace="devops_agent",
     allowed_actions=[
@@ -808,11 +827,17 @@ MONITOR_AGENT_DEFINITION = AgentDefinition(
         "and suggest a remediation plan for the Self Healer or IT Agent."
     ),
     tool_permissions=[
-        "health_check", "log_tail", "system_info", "alert_dispatch", "file_reader",
+        "health_check",
+        "log_tail",
+        "system_info",
+        "alert_dispatch",
+        "file_reader",
         # MCP tools
         "mcp_fetch_get",
-        "mcp_docker_list_containers", "mcp_docker_get_container_logs",
-        "mcp_docker_inspect_container", "mcp_time_get_current_time",
+        "mcp_docker_list_containers",
+        "mcp_docker_get_container_logs",
+        "mcp_docker_inspect_container",
+        "mcp_time_get_current_time",
     ],
     memory_namespace="monitor_agent",
     allowed_actions=[
@@ -845,10 +870,16 @@ SELF_HEALER_AGENT_DEFINITION = AgentDefinition(
         "Never guess at root cause — only apply verified remediation patterns."
     ),
     tool_permissions=[
-        "process_restart", "health_check", "log_tail", "alert_dispatch", "system_info",
+        "process_restart",
+        "health_check",
+        "log_tail",
+        "alert_dispatch",
+        "system_info",
         # MCP tools
-        "mcp_docker_list_containers", "mcp_docker_get_container_logs",
-        "mcp_docker_restart_container", "mcp_docker_inspect_container",
+        "mcp_docker_list_containers",
+        "mcp_docker_get_container_logs",
+        "mcp_docker_restart_container",
+        "mcp_docker_inspect_container",
     ],
     memory_namespace="self_healer_agent",
     allowed_actions=[
@@ -881,11 +912,17 @@ CODE_REVIEW_AGENT_DEFINITION = AgentDefinition(
         "Always cite the specific invariant or file that is at risk."
     ),
     tool_permissions=[
-        "git_ops", "file_reader", "doc_updater", "alert_dispatch", "folder_analyzer",
+        "git_ops",
+        "file_reader",
+        "doc_updater",
+        "alert_dispatch",
+        "folder_analyzer",
         # MCP tools
-        "mcp_github_search_repositories", "mcp_github_get_file_contents",
+        "mcp_github_search_repositories",
+        "mcp_github_get_file_contents",
         "mcp_github_search_code",
-        "mcp_filesystem_read_file", "mcp_filesystem_list_directory",
+        "mcp_filesystem_read_file",
+        "mcp_filesystem_list_directory",
     ],
     memory_namespace="code_review_agent",
     allowed_actions=[
@@ -917,10 +954,17 @@ SECURITY_AGENT_DEFINITION = AgentDefinition(
         "Always recommend the least-privilege remediation first."
     ),
     tool_permissions=[
-        "secret_scanner", "file_reader", "health_check", "alert_dispatch", "system_info", "folder_analyzer",
+        "secret_scanner",
+        "file_reader",
+        "health_check",
+        "alert_dispatch",
+        "system_info",
+        "folder_analyzer",
         # MCP tools
-        "mcp_github_search_code", "mcp_github_get_file_contents",
-        "mcp_filesystem_read_file", "mcp_filesystem_search_files",
+        "mcp_github_search_code",
+        "mcp_github_get_file_contents",
+        "mcp_filesystem_read_file",
+        "mcp_filesystem_search_files",
     ],
     memory_namespace="security_agent",
     allowed_actions=[
@@ -951,9 +995,16 @@ DATA_AGENT_DEFINITION = AgentDefinition(
         "Never execute INSERT, UPDATE, or DELETE statements. Only SELECT and PRAGMA."
     ),
     tool_permissions=[
-        "db_query", "file_reader", "system_info", "doc_updater", "alert_dispatch", "folder_analyzer",
+        "db_query",
+        "file_reader",
+        "system_info",
+        "doc_updater",
+        "alert_dispatch",
+        "folder_analyzer",
         # MCP tools
-        "mcp_sqlite_read_query", "mcp_sqlite_list_tables", "mcp_sqlite_describe_table",
+        "mcp_sqlite_read_query",
+        "mcp_sqlite_list_tables",
+        "mcp_sqlite_describe_table",
         "mcp_filesystem_read_file",
     ],
     memory_namespace="data_agent",
@@ -987,11 +1038,16 @@ COMMS_AGENT_DEFINITION = AgentDefinition(
         "HIGH or CRITICAL severity messages require soul approval first."
     ),
     tool_permissions=[
-        "webhook_send", "file_reader", "alert_dispatch", "doc_updater",
+        "webhook_send",
+        "file_reader",
+        "alert_dispatch",
+        "doc_updater",
         # MCP tools
-        "mcp_slack_post_message", "mcp_slack_list_channels",
+        "mcp_slack_post_message",
+        "mcp_slack_list_channels",
         "mcp_slack_get_channel_history",
-        "mcp_fetch_get", "mcp_time_get_current_time",
+        "mcp_fetch_get",
+        "mcp_time_get_current_time",
     ],
     memory_namespace="comms_agent",
     allowed_actions=[
@@ -1055,9 +1111,11 @@ PROMPT_ENGINEER_DEFINITION = AgentDefinition(
         "- Never fabricate model capabilities — only cite what is in the LLM Knowledge DB."
     ),
     tool_permissions=[
-        "file_reader", "system_info",
+        "file_reader",
+        "system_info",
         # MCP tools
-        "mcp_filesystem_read_file", "mcp_time_get_current_time",
+        "mcp_filesystem_read_file",
+        "mcp_time_get_current_time",
     ],
     memory_namespace="prompt_engineer",
     allowed_actions=[
@@ -1108,8 +1166,10 @@ TOKEN_OPTIMIZER_DEFINITION = AgentDefinition(
         "- TRANSLATE: output at requested compression level."
     ),
     tool_permissions=[
-        "file_reader", "system_info",
-        "mcp_filesystem_read_file", "mcp_time_get_current_time",
+        "file_reader",
+        "system_info",
+        "mcp_filesystem_read_file",
+        "mcp_time_get_current_time",
     ],
     memory_namespace="token_optimizer",
     allowed_actions=[
@@ -1157,8 +1217,10 @@ CURRICULUM_ADVISOR_DEFINITION = AgentDefinition(
         "Reference specific people, frameworks, and vocabulary from each studio's Spell Book."
     ),
     tool_permissions=[
-        "file_reader", "system_info",
-        "mcp_filesystem_read_file", "mcp_time_get_current_time",
+        "file_reader",
+        "system_info",
+        "mcp_filesystem_read_file",
+        "mcp_time_get_current_time",
     ],
     memory_namespace="curriculum_advisor",
     allowed_actions=[
@@ -1170,9 +1232,14 @@ CURRICULUM_ADVISOR_DEFINITION = AgentDefinition(
     ],
     change_impact_level=ChangeImpactLevel.LOW,
     skills=[
-        "web_development_inquiry", "fullstack_engineering", "infrastructure_resilience",
-        "business_analysis", "data_knowledge_systems", "systems_analysis_design",
-        "applied_enterprise_ai", "community_ai_training",
+        "web_development_inquiry",
+        "fullstack_engineering",
+        "infrastructure_resilience",
+        "business_analysis",
+        "data_knowledge_systems",
+        "systems_analysis_design",
+        "applied_enterprise_ai",
+        "community_ai_training",
     ],
 )
 
@@ -1207,8 +1274,10 @@ VOCABULARY_COACH_DEFINITION = AgentDefinition(
         "Celebrate when users use precise terms. Gently suggest upgrades for vague ones."
     ),
     tool_permissions=[
-        "file_reader", "system_info",
-        "mcp_filesystem_read_file", "mcp_time_get_current_time",
+        "file_reader",
+        "system_info",
+        "mcp_filesystem_read_file",
+        "mcp_time_get_current_time",
     ],
     memory_namespace="vocabulary_coach",
     allowed_actions=[
@@ -1221,9 +1290,15 @@ VOCABULARY_COACH_DEFINITION = AgentDefinition(
     ],
     change_impact_level=ChangeImpactLevel.LOW,
     skills=[
-        "web_development_inquiry", "fullstack_engineering", "infrastructure_resilience",
-        "business_analysis", "data_knowledge_systems", "systems_analysis_design",
-        "applied_enterprise_ai", "community_ai_training", "token_optimization",
+        "web_development_inquiry",
+        "fullstack_engineering",
+        "infrastructure_resilience",
+        "business_analysis",
+        "data_knowledge_systems",
+        "systems_analysis_design",
+        "applied_enterprise_ai",
+        "community_ai_training",
+        "token_optimization",
     ],
 )
 
@@ -1256,8 +1331,11 @@ CAREER_INTEL_DEFINITION = AgentDefinition(
         "Every BSEAI graduate has these capabilities verified through 8 Demo Days."
     ),
     tool_permissions=[
-        "file_reader", "system_info",
-        "mcp_filesystem_read_file", "mcp_fetch_get", "mcp_time_get_current_time",
+        "file_reader",
+        "system_info",
+        "mcp_filesystem_read_file",
+        "mcp_fetch_get",
+        "mcp_time_get_current_time",
     ],
     memory_namespace="career_intel",
     allowed_actions=[
@@ -1302,8 +1380,11 @@ ACCREDITATION_ADVISOR_DEFINITION = AgentDefinition(
         "4. REPORT — Generate accreditation-ready documentation from curriculum data"
     ),
     tool_permissions=[
-        "file_reader", "system_info", "doc_updater",
-        "mcp_filesystem_read_file", "mcp_time_get_current_time",
+        "file_reader",
+        "system_info",
+        "doc_updater",
+        "mcp_filesystem_read_file",
+        "mcp_time_get_current_time",
     ],
     memory_namespace="accreditation_advisor",
     allowed_actions=[
@@ -1349,8 +1430,11 @@ PEDAGOGY_AGENT_DEFINITION = AgentDefinition(
         "4. REVIEW — Evaluate existing materials for cognitive load, alignment, and engagement"
     ),
     tool_permissions=[
-        "file_reader", "system_info", "doc_updater",
-        "mcp_filesystem_read_file", "mcp_time_get_current_time",
+        "file_reader",
+        "system_info",
+        "doc_updater",
+        "mcp_filesystem_read_file",
+        "mcp_time_get_current_time",
     ],
     memory_namespace="pedagogy_agent",
     allowed_actions=[
@@ -1362,9 +1446,14 @@ PEDAGOGY_AGENT_DEFINITION = AgentDefinition(
     ],
     change_impact_level=ChangeImpactLevel.LOW,
     skills=[
-        "community_ai_training", "web_development_inquiry", "fullstack_engineering",
-        "infrastructure_resilience", "business_analysis", "data_knowledge_systems",
-        "systems_analysis_design", "applied_enterprise_ai",
+        "community_ai_training",
+        "web_development_inquiry",
+        "fullstack_engineering",
+        "infrastructure_resilience",
+        "business_analysis",
+        "data_knowledge_systems",
+        "systems_analysis_design",
+        "applied_enterprise_ai",
     ],
 )
 
@@ -1476,24 +1565,24 @@ HIGGSFIELD_RESEARCH_AGENT_DEFINITION = AgentDefinition(
 
 # Complete registry of all agent definitions
 ALL_AGENT_DEFINITIONS: dict[str, AgentDefinition] = {
-    "it_agent":              IT_AGENT_DEFINITION,
-    "cs_agent":              CS_AGENT_DEFINITION,
-    "soul_core":             SOUL_AGENT_DEFINITION,
-    "devops_agent":          DEVOPS_AGENT_DEFINITION,
-    "monitor_agent":         MONITOR_AGENT_DEFINITION,
-    "self_healer_agent":     SELF_HEALER_AGENT_DEFINITION,
-    "code_review_agent":     CODE_REVIEW_AGENT_DEFINITION,
-    "security_agent":        SECURITY_AGENT_DEFINITION,
-    "data_agent":            DATA_AGENT_DEFINITION,
-    "comms_agent":           COMMS_AGENT_DEFINITION,
-    "prompt_engineer":       PROMPT_ENGINEER_DEFINITION,
-    "token_optimizer":       TOKEN_OPTIMIZER_DEFINITION,
-    "curriculum_advisor":    CURRICULUM_ADVISOR_DEFINITION,
-    "vocabulary_coach":      VOCABULARY_COACH_DEFINITION,
-    "career_intel":          CAREER_INTEL_DEFINITION,
+    "it_agent": IT_AGENT_DEFINITION,
+    "cs_agent": CS_AGENT_DEFINITION,
+    "soul_core": SOUL_AGENT_DEFINITION,
+    "devops_agent": DEVOPS_AGENT_DEFINITION,
+    "monitor_agent": MONITOR_AGENT_DEFINITION,
+    "self_healer_agent": SELF_HEALER_AGENT_DEFINITION,
+    "code_review_agent": CODE_REVIEW_AGENT_DEFINITION,
+    "security_agent": SECURITY_AGENT_DEFINITION,
+    "data_agent": DATA_AGENT_DEFINITION,
+    "comms_agent": COMMS_AGENT_DEFINITION,
+    "prompt_engineer": PROMPT_ENGINEER_DEFINITION,
+    "token_optimizer": TOKEN_OPTIMIZER_DEFINITION,
+    "curriculum_advisor": CURRICULUM_ADVISOR_DEFINITION,
+    "vocabulary_coach": VOCABULARY_COACH_DEFINITION,
+    "career_intel": CAREER_INTEL_DEFINITION,
     "accreditation_advisor": ACCREDITATION_ADVISOR_DEFINITION,
-    "pedagogy_agent":        PEDAGOGY_AGENT_DEFINITION,
-    "higgsfield_agent":      HIGGSFIELD_AGENT_DEFINITION,
+    "pedagogy_agent": PEDAGOGY_AGENT_DEFINITION,
+    "higgsfield_agent": HIGGSFIELD_AGENT_DEFINITION,
     "higgsfield_research_agent": HIGGSFIELD_RESEARCH_AGENT_DEFINITION,
 }
 

@@ -11,11 +11,11 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-from backend.config import TRAINING_DATA_DIR, ML_DIR
+from backend.config import ML_DIR, TRAINING_DATA_DIR
 from backend.utils import logger
 
 
@@ -24,8 +24,8 @@ class DataVersioner:
 
     def __init__(
         self,
-        training_dir: Optional[Path] = None,
-        versions_dir: Optional[Path] = None,
+        training_dir: Path | None = None,
+        versions_dir: Path | None = None,
     ) -> None:
         self._data_dir = training_dir or TRAINING_DATA_DIR
         self._versions_dir = versions_dir or (ML_DIR / "data_versions")
@@ -58,8 +58,8 @@ class DataVersioner:
             "version": version_hash,
             "directory": str(target.relative_to(self._data_dir)) if subdir else ".",
             "file_count": len(files_info),
-            "total_size": sum(f["size"] for f in files_info),
-            "computed_at": datetime.now(timezone.utc).isoformat(),
+            "total_size": sum(f["size"] for f in files_info),  # type: ignore[misc]
+            "computed_at": datetime.now(UTC).isoformat(),
             "files": files_info,
         }
 
@@ -77,12 +77,11 @@ class DataVersioner:
         version_path.write_text(json.dumps(version, indent=2))
 
         logger.info(
-            f"[DataVersioner] Version {version_hash}: "
-            f"{version['file_count']} files, {version['total_size']} bytes"
+            f"[DataVersioner] Version {version_hash}: {version['file_count']} files, {version['total_size']} bytes"
         )
         return version
 
-    def get_version(self, version_hash: str) -> Optional[dict[str, Any]]:
+    def get_version(self, version_hash: str) -> dict[str, Any] | None:
         """Retrieve a previously computed version."""
         path = self._versions_dir / f"{version_hash}.json"
         if path.exists():

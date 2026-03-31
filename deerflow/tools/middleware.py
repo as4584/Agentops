@@ -15,10 +15,10 @@ from deerflow.middleware.chain import Middleware, ToolContext
 from deerflow.tools.health import ToolHealthMonitor
 from deerflow.tools.repair import ToolRepairEngine
 
-
 # ---------------------------------------------------------------------------
 # Unified failure detection
 # ---------------------------------------------------------------------------
+
 
 def detect_tool_failure(result: Any) -> tuple[bool, str | None]:
     """
@@ -72,6 +72,7 @@ def detect_tool_failure(result: Any) -> tuple[bool, str | None]:
 # ---------------------------------------------------------------------------
 # Middleware
 # ---------------------------------------------------------------------------
+
 
 class ToolHealthMiddleware(Middleware):
     """

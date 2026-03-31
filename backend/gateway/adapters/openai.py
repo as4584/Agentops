@@ -6,13 +6,18 @@ from __future__ import annotations
 
 import json
 import uuid
-from typing import Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Any
 
 import httpx
 
 from backend.gateway.adapters.base import (
-    BaseProviderAdapter, ChatCompletionRequest, ChatCompletionResponse,
-    StreamChunk, UsageInfo, ProviderError,
+    BaseProviderAdapter,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+    ProviderError,
+    StreamChunk,
+    UsageInfo,
 )
 from backend.gateway.secrets import get_provider_key
 from backend.utils.tool_ids import sanitize_tool_id
@@ -114,7 +119,7 @@ class OpenAIAdapter(BaseProviderAdapter):
             raw=data,
         )
 
-    async def chat_stream(self, request: ChatCompletionRequest) -> AsyncIterator[StreamChunk]:
+    async def chat_stream(self, request: ChatCompletionRequest) -> AsyncIterator[StreamChunk]:  # type: ignore[override]
         if not self._api_key:
             raise ProviderError("OpenAI API key not configured", 503, self.provider_name)
         body = self._build_body(request)

@@ -9,5 +9,5 @@
 #   act push -W .github/workflows/ci.yml --pull
 #
 -P ubuntu-latest=catthehacker/ubuntu:act-22.04
---no-pull
+--pull=false
 --bind

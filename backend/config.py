@@ -22,11 +22,7 @@ BACKEND_DIR: Path = PROJECT_ROOT / "backend"
 DOCS_DIR: Path = PROJECT_ROOT / "docs"
 MEMORY_DIR: Path = PROJECT_ROOT / "data" / "agents"
 OUTPUT_DIR: Path = PROJECT_ROOT / "output"
-BROWSER_ALLOWED_AGENTS: list[str] = [
-    a.strip()
-    for a in os.getenv("BROWSER_ALLOWED_AGENTS", "").split(",")
-    if a.strip()
-]
+BROWSER_ALLOWED_AGENTS: list[str] = [a.strip() for a in os.getenv("BROWSER_ALLOWED_AGENTS", "").split(",") if a.strip()]
 
 # Governance documents
 SOURCE_OF_TRUTH_PATH: Path = DOCS_DIR / "SOURCE_OF_TRUTH.md"
@@ -113,14 +109,14 @@ RATE_LIMIT_RPM: int = int(os.getenv("RATE_LIMIT_RPM", "600"))
 LLM_RATE_LIMIT_RPM: int = int(os.getenv("LLM_RATE_LIMIT_RPM", "30"))
 # Internal-only URL prefixes that webhook_send / health_check must NOT contact
 SSRF_BLOCKED_PREFIXES: list[str] = [
-    "http://169.254.",       # cloud metadata
-    "http://127.",           # loopback
-    "http://localhost",      # loopback
-    "http://0.0.0.0",       # wildcard loopback
-    "http://[::1]",         # ipv6 loopback
-    "http://10.",            # private RFC-1918
-    "http://172.16.",        # private RFC-1918
-    "http://192.168.",       # private RFC-1918
+    "http://169.254.",  # cloud metadata
+    "http://127.",  # loopback
+    "http://localhost",  # loopback
+    "http://0.0.0.0",  # wildcard loopback
+    "http://[::1]",  # ipv6 loopback
+    "http://10.",  # private RFC-1918
+    "http://172.16.",  # private RFC-1918
+    "http://192.168.",  # private RFC-1918
     "https://169.254.",
     "https://127.",
     "https://localhost",
@@ -143,22 +139,56 @@ MAX_LOG_ENTRIES: int = int(os.getenv("MAX_LOG_ENTRIES", "10000"))
 # ---------------------------------------------------------------------------
 # Whitelisted commands for safe_shell tool
 SAFE_SHELL_WHITELIST: list[str] = [
-    "ls", "cat", "head", "tail", "grep", "find", "wc",
-    "df", "du", "free", "uptime", "whoami", "hostname",
-    "date", "echo", "pwd", "env", "ps", "top",
-    "uname", "id", "which", "file", "stat",
+    "ls",
+    "cat",
+    "head",
+    "tail",
+    "grep",
+    "find",
+    "wc",
+    "df",
+    "du",
+    "free",
+    "uptime",
+    "whoami",
+    "hostname",
+    "date",
+    "echo",
+    "pwd",
+    "env",
+    "ps",
+    "top",
+    "uname",
+    "id",
+    "which",
+    "file",
+    "stat",
 ]
 
 # Shell metacharacters that MUST NOT appear in commands (prevents chaining)
 SHELL_DANGEROUS_CHARS: list[str] = [
-    ";", "&&", "||", "|", "`", "$(", "${", "<(", ">(", "\n",
-    ">>", ">", "<", "\\", "!",
+    ";",
+    "&&",
+    "||",
+    "|",
+    "`",
+    "$(",
+    "${",
+    "<(",
+    ">(",
+    "\n",
+    ">>",
+    ">",
+    "<",
+    "\\",
+    "!",
 ]
 
 
 # ---------------------------------------------------------------------------
 # CORS Configuration
 # ---------------------------------------------------------------------------
+
 
 def _parse_cors_origins() -> list[str]:
     """Parse allowed CORS origins from the environment.
@@ -187,15 +217,45 @@ CORS_ORIGINS: list[str] = _parse_cors_origins()
 
 # Prohibited patterns for safe_shell
 SAFE_SHELL_BLACKLIST: list[str] = [
-    "rm -rf", "rm -r", "rm -f", "rm ", "rmdir", "mkfs", "dd ",
-    "pip install", "npm install", "apt install", "brew install",
-    "curl", "wget", "ssh", "scp", "sudo", "su ",
-    "> /dev/", "chmod", "chown", "chgrp",
-    "mv ", "cp ", "mkdir ", "touch ",
-    "kill ", "pkill", "killall",
-    "eval ", "exec ", "source ",
-    "python", "node ", "ruby ", "perl ",
-    "/etc/", "/proc/", "/sys/", "/dev/",
+    "rm -rf",
+    "rm -r",
+    "rm -f",
+    "rm ",
+    "rmdir",
+    "mkfs",
+    "dd ",
+    "pip install",
+    "npm install",
+    "apt install",
+    "brew install",
+    "curl",
+    "wget",
+    "ssh",
+    "scp",
+    "sudo",
+    "su ",
+    "> /dev/",
+    "chmod",
+    "chown",
+    "chgrp",
+    "mv ",
+    "cp ",
+    "mkdir ",
+    "touch ",
+    "kill ",
+    "pkill",
+    "killall",
+    "eval ",
+    "exec ",
+    "source ",
+    "python",
+    "node ",
+    "ruby ",
+    "perl ",
+    "/etc/",
+    "/proc/",
+    "/sys/",
+    "/dev/",
     "../",  # directory traversal
 ]
 
@@ -257,11 +317,7 @@ A2UI_MAX_EVENTS_PER_SESSION: int = int(os.getenv("A2UI_MAX_EVENTS_PER_SESSION", 
 # Maximum widgets per canvas target per session (prevents DOM flooding)
 A2UI_MAX_WIDGETS_PER_TARGET: int = int(os.getenv("A2UI_MAX_WIDGETS_PER_TARGET", "50"))
 # Agents allowed to emit A2UI events (empty = all agents)
-A2UI_ALLOWED_AGENTS: list[str] = [
-    a.strip()
-    for a in os.getenv("A2UI_ALLOWED_AGENTS", "").split(",")
-    if a.strip()
-]
+A2UI_ALLOWED_AGENTS: list[str] = [a.strip() for a in os.getenv("A2UI_ALLOWED_AGENTS", "").split(",") if a.strip()]
 
 # Ensure required directories exist
 MEMORY_DIR.mkdir(parents=True, exist_ok=True)

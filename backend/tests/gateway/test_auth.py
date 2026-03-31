@@ -4,19 +4,16 @@ Gateway Tests — Unit tests for auth, encryption, rate limits, ACL, and audit.
 
 from __future__ import annotations
 
-import hashlib
-import tempfile
 import time
-from pathlib import Path
 
 import pytest
 
-from backend.gateway.auth import APIKeyManager, generate_api_key, _hash_key
-
+from backend.gateway.auth import APIKeyManager, _hash_key, generate_api_key
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def tmp_mgr(tmp_path):
@@ -27,6 +24,7 @@ def tmp_mgr(tmp_path):
 # ---------------------------------------------------------------------------
 # Key Generation
 # ---------------------------------------------------------------------------
+
 
 class TestKeyGeneration:
     def test_format(self):
@@ -50,6 +48,7 @@ class TestKeyGeneration:
 # ---------------------------------------------------------------------------
 # APIKeyManager
 # ---------------------------------------------------------------------------
+
 
 class TestAPIKeyManager:
     def test_create_and_validate(self, tmp_mgr):

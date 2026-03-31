@@ -4,46 +4,48 @@ GSD (Get Shit Done) — Pydantic models.
 Covers the data shapes for all five GSD commands:
   map-codebase / plan-phase / execute-phase / quick / verify-work
 """
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
-
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
 
+
 class PhaseStatus(str, Enum):
-    PENDING    = "pending"
-    PLANNING   = "planning"
-    PLANNED    = "planned"
-    EXECUTING  = "executing"
-    COMPLETED  = "completed"
-    FAILED     = "failed"
+    PENDING = "pending"
+    PLANNING = "planning"
+    PLANNED = "planned"
+    EXECUTING = "executing"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 
 class TaskStatus(str, Enum):
-    PENDING   = "pending"
-    RUNNING   = "running"
-    DONE      = "done"
-    SKIPPED   = "skipped"
-    FAILED    = "failed"
+    PENDING = "pending"
+    RUNNING = "running"
+    DONE = "done"
+    SKIPPED = "skipped"
+    FAILED = "failed"
 
 
 # ---------------------------------------------------------------------------
 # Plan models
 # ---------------------------------------------------------------------------
 
+
 class GSDTask(BaseModel):
     id: str
     description: str
     file_targets: list[str] = Field(default_factory=list)
     symbol_refs: list[str] = Field(default_factory=list)
-    depends_on: list[str] = Field(default_factory=list)   # task ids
+    depends_on: list[str] = Field(default_factory=list)  # task ids
     wave: int = 1
     status: TaskStatus = TaskStatus.PENDING
     result_summary: str = ""
@@ -55,7 +57,7 @@ class GSDPlan(BaseModel):
     description: str
     tasks: list[GSDTask] = Field(default_factory=list)
     status: PhaseStatus = PhaseStatus.PLANNED
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     gatekeeper_violations: list[str] = Field(default_factory=list)
     gatekeeper_revision: int = 0
 
@@ -64,17 +66,19 @@ class GSDPlan(BaseModel):
 # Map-codebase result
 # ---------------------------------------------------------------------------
 
+
 class GSDMapResult(BaseModel):
     stack: str = ""
     architecture: str = ""
     conventions: str = ""
     concerns: str = ""
-    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 # ---------------------------------------------------------------------------
 # Execution result
 # ---------------------------------------------------------------------------
+
 
 class WaveResult(BaseModel):
     wave: int
@@ -89,7 +93,7 @@ class GSDExecutionResult(BaseModel):
     gatekeeper_approved: bool = False
     gatekeeper_violations: list[str] = Field(default_factory=list)
     status: PhaseStatus = PhaseStatus.EXECUTING
-    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     completed_at: datetime | None = None
 
 
@@ -97,25 +101,27 @@ class GSDExecutionResult(BaseModel):
 # Quick task
 # ---------------------------------------------------------------------------
 
+
 class GSDQuickRequest(BaseModel):
     prompt: str = Field(..., min_length=1, max_length=2000)
-    full: bool = False   # True = commit via git_ops after task
+    full: bool = False  # True = commit via git_ops after task
 
 
 class GSDQuickResult(BaseModel):
     prompt: str
     response: str
     committed: bool = False
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 # ---------------------------------------------------------------------------
 # Verify-work report
 # ---------------------------------------------------------------------------
 
+
 class VerifyCheckItem(BaseModel):
     description: str
-    status: str    # "passed" | "failed" | "unverifiable"
+    status: str  # "passed" | "failed" | "unverifiable"
     detail: str = ""
 
 
@@ -124,12 +130,13 @@ class GSDVerifyReport(BaseModel):
     passed: list[VerifyCheckItem] = Field(default_factory=list)
     failed: list[VerifyCheckItem] = Field(default_factory=list)
     unverifiable: list[VerifyCheckItem] = Field(default_factory=list)
-    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 # ---------------------------------------------------------------------------
 # Persistent state file model
 # ---------------------------------------------------------------------------
+
 
 class GSDRoadmapEntry(BaseModel):
     title: str
@@ -143,6 +150,6 @@ class GSDStateFile(BaseModel):
     completed_phases: list[int] = Field(default_factory=list)
     failed_phases: list[int] = Field(default_factory=list)
     roadmap: list[GSDRoadmapEntry] = Field(default_factory=list)
-    quick_log: list[str] = Field(default_factory=list)   # "<timestamp>: <prompt>"
+    quick_log: list[str] = Field(default_factory=list)  # "<timestamp>: <prompt>"
     map_generated_at: datetime | None = None
-    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))

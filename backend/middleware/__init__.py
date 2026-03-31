@@ -23,15 +23,16 @@ Referenced Invariants:
 from __future__ import annotations
 
 import re
+from collections.abc import Awaitable, Callable
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Awaitable
+from typing import Any
 
 from backend.config import (
+    AGENT_REGISTRY_PATH,
     CHANGE_LOG_PATH,
     DOCS_DIR,
     SOURCE_OF_TRUTH_PATH,
-    AGENT_REGISTRY_PATH,
 )
 from backend.models import (
     ChangeImpactLevel,
@@ -104,8 +105,7 @@ class DriftGuard:
         # Step 1: Check if system is halted
         if self._halted:
             raise RuntimeError(
-                "SYSTEM HALTED: Critical drift event detected. "
-                "Resolve invariant violations before proceeding."
+                "SYSTEM HALTED: Critical drift event detected. Resolve invariant violations before proceeding."
             )
 
         # Step 2: Create execution record (INV-7)
@@ -120,12 +120,9 @@ class DriftGuard:
         if modification_type == ModificationType.ARCHITECTURAL_MODIFY:
             doc_check = self._check_documentation_updated(agent_id, tool_name)
             if not doc_check:
-                self._pending_updates.append(
-                    f"{tool_name} by {agent_id} requires documentation update"
-                )
+                self._pending_updates.append(f"{tool_name} by {agent_id} requires documentation update")
                 logger.warning(
-                    f"DRIFT YELLOW: {tool_name} by {agent_id} — "
-                    "documentation update required before execution"
+                    f"DRIFT YELLOW: {tool_name} by {agent_id} — documentation update required before execution"
                 )
                 # For architectural modifications, we still allow but flag
                 record.doc_updated = False
@@ -134,34 +131,45 @@ class DriftGuard:
         try:
             # Emit live activity event for SSE subscribers
             from backend.tasks import task_tracker as _tt
-            _tt.emit_activity("tool_start", {
-                "tool_name": tool_name,
-                "agent_id": agent_id,
-                "modification_type": modification_type.value,
-            })
+
+            _tt.emit_activity(
+                "tool_start",
+                {
+                    "tool_name": tool_name,
+                    "agent_id": agent_id,
+                    "modification_type": modification_type.value,
+                },
+            )
 
             result = await tool_fn(*args, **kwargs)
             record.success = True
             record.output_summary = str(result)[:200] if result else ""
 
-            _tt.emit_activity("tool_end", {
-                "tool_name": tool_name,
-                "agent_id": agent_id,
-                "success": True,
-                "output_preview": str(result)[:120] if result else "",
-            })
+            _tt.emit_activity(
+                "tool_end",
+                {
+                    "tool_name": tool_name,
+                    "agent_id": agent_id,
+                    "success": True,
+                    "output_preview": str(result)[:120] if result else "",
+                },
+            )
         except Exception as e:
             record.success = False
             record.error = str(e)
             logger.log_tool_execution(record)
 
             from backend.tasks import task_tracker as _tt2
-            _tt2.emit_activity("tool_end", {
-                "tool_name": tool_name,
-                "agent_id": agent_id,
-                "success": False,
-                "error": str(e)[:120],
-            })
+
+            _tt2.emit_activity(
+                "tool_end",
+                {
+                    "tool_name": tool_name,
+                    "agent_id": agent_id,
+                    "success": False,
+                    "error": str(e)[:120],
+                },
+            )
             raise
 
         # Step 5: Record the execution
@@ -211,18 +219,13 @@ class DriftGuard:
             return False
         return True
 
-    def validate_agent_tool_access(
-        self, agent_id: str, tool_name: str, allowed_tools: list[str]
-    ) -> bool:
+    def validate_agent_tool_access(self, agent_id: str, tool_name: str, allowed_tools: list[str]) -> bool:
         """
         Validate that an agent has permission to use a tool.
         Returns True if access is permitted.
         """
         if tool_name not in allowed_tools:
-            logger.warning(
-                f"Tool access denied: agent={agent_id}, tool={tool_name}, "
-                f"allowed={allowed_tools}"
-            )
+            logger.warning(f"Tool access denied: agent={agent_id}, tool={tool_name}, allowed={allowed_tools}")
             return False
         return True
 
@@ -268,10 +271,7 @@ class DriftGuard:
             logger.info(f"CHANGE_LOG updated by {entry.agent_id}: {entry.reason}")
 
             # Clear the pending update for this agent if any
-            self._pending_updates = [
-                p for p in self._pending_updates
-                if entry.agent_id not in p
-            ]
+            self._pending_updates = [p for p in self._pending_updates if entry.agent_id not in p]
         except Exception as e:
             logger.error(f"Failed to update CHANGE_LOG: {e}")
             raise
@@ -300,9 +300,7 @@ class DriftGuard:
 
         if severity == ChangeImpactLevel.CRITICAL:
             self._halted = True
-            logger.error(
-                f"SYSTEM HALTED: Critical invariant violation {invariant_id}"
-            )
+            logger.error(f"SYSTEM HALTED: Critical invariant violation {invariant_id}")
 
     def resolve_violation(self, invariant_id: str) -> bool:
         """
@@ -315,10 +313,7 @@ class DriftGuard:
                 resolved_any = True
 
         # Check if system can be unhalted
-        active_critical = [
-            v for v in self._violations
-            if not v.resolved and v.severity == ChangeImpactLevel.CRITICAL
-        ]
+        active_critical = [v for v in self._violations if not v.resolved and v.severity == ChangeImpactLevel.CRITICAL]
         if not active_critical:
             self._halted = False
             logger.info("System unhalted — no active critical violations")
@@ -336,10 +331,7 @@ class DriftGuard:
     @property
     def drift_status(self) -> DriftStatus:
         """Quick accessor for current drift status."""
-        if self._halted or any(
-            not v.resolved and v.severity == ChangeImpactLevel.CRITICAL
-            for v in self._violations
-        ):
+        if self._halted or any(not v.resolved and v.severity == ChangeImpactLevel.CRITICAL for v in self._violations):
             return DriftStatus.RED
         if self._pending_updates:
             return DriftStatus.YELLOW

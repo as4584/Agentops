@@ -15,18 +15,17 @@ from __future__ import annotations
 
 import json
 import math
-import time
 from collections import deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from threading import RLock
-from typing import Any, Optional
+from typing import Any
 
 from backend.config import (
-    ML_MONITORING_DIR,
     ML_ACCURACY_THRESHOLD,
-    ML_LATENCY_THRESHOLD_MS,
     ML_DRIFT_THRESHOLD,
+    ML_LATENCY_THRESHOLD_MS,
+    ML_MONITORING_DIR,
 )
 from backend.utils import logger
 
@@ -39,13 +38,13 @@ class MLAlert:
         alert_type: str,
         severity: str,
         message: str,
-        details: Optional[dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         self.alert_type = alert_type
         self.severity = severity
         self.message = message
         self.details = details or {}
-        self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.timestamp = datetime.now(UTC).isoformat()
         self.acknowledged = False
 
     def to_dict(self) -> dict[str, Any]:
@@ -62,7 +61,7 @@ class MLAlert:
 class MLMonitor:
     """Monitors ML model health across multiple dimensions."""
 
-    def __init__(self, monitoring_dir: Optional[Path] = None) -> None:
+    def __init__(self, monitoring_dir: Path | None = None) -> None:
         self._dir = monitoring_dir or ML_MONITORING_DIR
         self._dir.mkdir(parents=True, exist_ok=True)
         self._alerts_path = self._dir / "alerts.jsonl"
@@ -87,7 +86,7 @@ class MLMonitor:
             "endpoint": endpoint,
             "model_name": model_name,
             "latency_ms": latency_ms,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
         with self._lock:
             self._latencies.append(entry)
@@ -105,8 +104,8 @@ class MLMonitor:
         self,
         model_name: str,
         predicted: Any,
-        actual: Optional[Any] = None,
-        confidence: Optional[float] = None,
+        actual: Any | None = None,
+        confidence: float | None = None,
     ) -> None:
         """Record a prediction for accuracy tracking."""
         entry: dict[str, Any] = {
@@ -115,7 +114,7 @@ class MLMonitor:
             "actual": actual,
             "confidence": confidence,
             "correct": predicted == actual if actual is not None else None,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
         with self._lock:
             self._predictions.append(entry)
@@ -130,16 +129,14 @@ class MLMonitor:
                     self._feature_distributions[key] = []
                 self._feature_distributions[key].append(value)
 
-    def record_endpoint_result(
-        self, endpoint: str, status_code: int, error: Optional[str] = None
-    ) -> None:
+    def record_endpoint_result(self, endpoint: str, status_code: int, error: str | None = None) -> None:
         """Record an endpoint call result."""
         entry = {
             "endpoint": endpoint,
             "status_code": status_code,
             "error": error,
             "success": 200 <= status_code < 400,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
         with self._lock:
             self._endpoint_results.append(entry)
@@ -169,10 +166,9 @@ class MLMonitor:
     def check_accuracy(self, model_name: str, window: int = 100) -> dict[str, Any]:
         """Check recent accuracy for a model within a sliding window."""
         with self._lock:
-            recent = [
-                p for p in self._predictions
-                if p["model_name"] == model_name and p["correct"] is not None
-            ][-window:]
+            recent = [p for p in self._predictions if p["model_name"] == model_name and p["correct"] is not None][
+                -window:
+            ]
 
         if not recent:
             return {"model_name": model_name, "accuracy": None, "sample_size": 0, "alert": False}
@@ -245,17 +241,17 @@ class MLMonitor:
 
         return drift_results
 
-    def check_latency(self, endpoint: Optional[str] = None, window: int = 100) -> dict[str, Any]:
+    def check_latency(self, endpoint: str | None = None, window: int = 100) -> dict[str, Any]:
         """Check recent latency stats."""
         with self._lock:
             recent = list(self._latencies)[-window:]
         if endpoint:
-            recent = [l for l in recent if l["endpoint"] == endpoint]
+            recent = [rec for rec in recent if rec["endpoint"] == endpoint]
 
         if not recent:
             return {"p50": 0, "p95": 0, "p99": 0, "count": 0, "alert": False}
 
-        latencies = sorted(l["latency_ms"] for l in recent)
+        latencies = sorted(rec["latency_ms"] for rec in recent)
         count = len(latencies)
 
         return {
@@ -290,7 +286,7 @@ class MLMonitor:
     def get_health_report(self, model_name: str = "") -> dict[str, Any]:
         """Full health report across all monitoring dimensions."""
         report: dict[str, Any] = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "latency": self.check_latency(),
             "endpoints": self.check_endpoints(),
             "alerts": self.get_alerts(limit=20),
@@ -302,8 +298,8 @@ class MLMonitor:
 
     def get_alerts(
         self,
-        alert_type: Optional[str] = None,
-        severity: Optional[str] = None,
+        alert_type: str | None = None,
+        severity: str | None = None,
         limit: int = 50,
     ) -> list[dict[str, Any]]:
         """Get recent alerts, optionally filtered."""
@@ -315,7 +311,7 @@ class MLMonitor:
             alerts = [a for a in alerts if a.severity == severity]
         return [a.to_dict() for a in alerts[-limit:]]
 
-    def acknowledge_alerts(self, alert_type: Optional[str] = None) -> int:
+    def acknowledge_alerts(self, alert_type: str | None = None) -> int:
         """Mark alerts as acknowledged. Returns count acknowledged."""
         count = 0
         with self._lock:
@@ -329,9 +325,7 @@ class MLMonitor:
 
     # ── Internals ────────────────────────────────────────
 
-    def _raise_alert(
-        self, alert_type: str, severity: str, message: str, details: dict[str, Any]
-    ) -> None:
+    def _raise_alert(self, alert_type: str, severity: str, message: str, details: dict[str, Any]) -> None:
         alert = MLAlert(alert_type, severity, message, details)
         with self._lock:
             self._alerts.append(alert)

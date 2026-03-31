@@ -47,8 +47,9 @@ def _is_port_open(port: int, host: str = "127.0.0.1") -> bool:
 
 def _is_healthy(port: int, path: str = "/", expect_status: int = 200) -> bool:
     """HTTP health check — verifies the service returns the expected status."""
-    import urllib.request
     import urllib.error
+    import urllib.request
+
     try:
         req = urllib.request.Request(f"http://127.0.0.1:{port}{path}")
         resp = urllib.request.urlopen(req, timeout=3)
@@ -60,9 +61,7 @@ def _is_healthy(port: int, path: str = "/", expect_status: int = 200) -> bool:
 def _kill_port(port: int) -> None:
     """Kill any process listening on a port (cleanup zombies/stale procs)."""
     try:
-        out = subprocess.check_output(
-            ["lsof", "-ti", f":{port}"], stderr=subprocess.DEVNULL
-        ).decode().strip()
+        out = subprocess.check_output(["lsof", "-ti", f":{port}"], stderr=subprocess.DEVNULL).decode().strip()
         if out:
             for pid in out.split("\n"):
                 pid = pid.strip()
@@ -83,18 +82,13 @@ def _find_available_port(preferred: int, fallback_start: int, fallback_end: int,
     for port in range(fallback_start, fallback_end + 1):
         if not _is_port_open(port, host=host):
             return port
-    raise RuntimeError(
-        f"No available port in range {fallback_start}-{fallback_end} (preferred {preferred} occupied)"
-    )
+    raise RuntimeError(f"No available port in range {fallback_start}-{fallback_end} (preferred {preferred} occupied)")
 
 
 def _is_agentop_owned_process(command: str) -> bool:
     cmd = command.lower()
     return (
-        "backend.server:app" in cmd
-        or "next dev" in cmd
-        or "agentop" in cmd
-        or "frontend/node_modules/electron" in cmd
+        "backend.server:app" in cmd or "next dev" in cmd or "agentop" in cmd or "frontend/node_modules/electron" in cmd
     )
 
 
@@ -166,6 +160,9 @@ def cleanup() -> None:
             os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
         except (OSError, ProcessLookupError):
             pass
+    # Remove port file
+    port_file = ROOT / ".dashboard_port"
+    port_file.unlink(missing_ok=True)
     print("  ✓ All services stopped. Goodbye.")
 
 
@@ -197,6 +194,7 @@ BANNER = """
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     print(BANNER)
@@ -237,8 +235,7 @@ def main() -> None:
                 backend_port = _find_available_port(backend_port, 8765, 8799)
                 print(f"  → Backend fallback port: :{backend_port}")
         _start_process(
-            [sys.executable, "-m", "uvicorn", "backend.server:app",
-             "--host", "127.0.0.1", "--port", str(backend_port)],
+            [sys.executable, "-m", "uvicorn", "backend.server:app", "--host", "127.0.0.1", "--port", str(backend_port)],
             cwd=ROOT,
             label="backend",
         )
@@ -281,6 +278,10 @@ def main() -> None:
     # ---- Open Native Window ----
     print("\n🖥️  Opening Agentop window...\n")
 
+    # Write port file so Electron picks it up even without env var
+    port_file = ROOT / ".dashboard_port"
+    port_file.write_text(str(dashboard_port))
+
     # Detect WSL — Electron works natively on Windows display, pywebview doesn't
     is_wsl = "microsoft" in (Path("/proc/version").read_text().lower() if Path("/proc/version").exists() else "")
 
@@ -291,12 +292,14 @@ def main() -> None:
                 ["npx", "electron", ".", "--no-sandbox", "--disable-gpu"],
                 cwd=FRONTEND_DIR,
                 label="electron",
+                env={"AGENTOP_DASHBOARD_PORT": str(dashboard_port)},
             )
             # Block until Electron exits
             electron_proc.wait()
         except (FileNotFoundError, OSError) as e:
             print(f"  ✗ Electron failed ({e}), opening in browser...")
             import webbrowser
+
             webbrowser.open(f"http://localhost:{dashboard_port}")
             print("\n  Dashboard open in your browser.")
             print("  Press Ctrl+C to stop all services.\n")
@@ -309,7 +312,7 @@ def main() -> None:
         try:
             import webview
 
-            window = webview.create_window(
+            webview.create_window(
                 title="Agentop — Local AI Control Center",
                 url=f"http://localhost:{dashboard_port}",
                 width=1400,
@@ -330,6 +333,7 @@ def main() -> None:
         except ImportError:
             print("  pywebview not available, opening in browser instead...")
             import webbrowser
+
             webbrowser.open("http://localhost:3007")
             print("\n  Dashboard open in your browser.")
             print("  Press Ctrl+C to stop all services.\n")
@@ -343,6 +347,7 @@ def main() -> None:
             if "display" in str(e).lower() or "gtk" in str(e).lower() or "qt" in str(e).lower():
                 print(f"  No display detected ({e}), opening in browser...")
                 import webbrowser
+
                 webbrowser.open(f"http://localhost:{dashboard_port}")
                 print("\n  Dashboard open in your browser.")
                 print("  Press Ctrl+C to stop all services.\n")

@@ -10,40 +10,33 @@ Strategy:
 
 from __future__ import annotations
 
-import asyncio
-import json
-import os
 import sqlite3
-import tempfile
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, Mock, patch, call
+from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
-
+from backend.config import PROJECT_ROOT
 from backend.tools import (
-    safe_shell,
-    file_reader,
+    alert_dispatch,
+    db_query,
     doc_updater,
-    system_info,
-    webhook_send,
+    execute_tool,
+    file_reader,
+    folder_analyzer,
+    get_tool_definition,
+    get_tool_definitions,
     git_ops,
     health_check,
     log_tail,
-    alert_dispatch,
-    secret_scanner,
-    db_query,
     process_restart,
-    folder_analyzer,
-    get_tool_definitions,
-    get_tool_definition,
-    execute_tool,
+    safe_shell,
+    secret_scanner,
+    system_info,
+    webhook_send,
 )
-from backend.config import PROJECT_ROOT
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_proc(returncode: int = 0, stdout: bytes = b"ok", stderr: bytes = b"") -> AsyncMock:
     """Build a mock asyncio subprocess."""
@@ -56,6 +49,7 @@ def _make_proc(returncode: int = 0, stdout: bytes = b"ok", stderr: bytes = b"") 
 # ---------------------------------------------------------------------------
 # Tool Registry
 # ---------------------------------------------------------------------------
+
 
 class TestToolRegistry:
     def test_get_tool_definitions_returns_list(self):
@@ -80,6 +74,7 @@ class TestToolRegistry:
 # ---------------------------------------------------------------------------
 # safe_shell
 # ---------------------------------------------------------------------------
+
 
 class TestSafeShell:
     async def test_blocked_dangerous_char_semicolon(self):
@@ -136,7 +131,7 @@ class TestSafeShell:
 
     async def test_subprocess_success(self):
         mock_proc = _make_proc(stdout=b"hello\n")
-        with patch("asyncio.create_subprocess_exec", return_value=mock_proc) as mock_exec:
+        with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
             result = await safe_shell("ls .", "agent")
         assert result["blocked"] is False
         assert result["stdout"] == "hello\n"
@@ -144,13 +139,13 @@ class TestSafeShell:
 
     async def test_subprocess_timeout(self):
         async def _slow_communicate():
-            raise asyncio.TimeoutError()
+            raise TimeoutError()
 
         mock_proc = AsyncMock()
-        mock_proc.communicate.side_effect = asyncio.TimeoutError()
+        mock_proc.communicate.side_effect = TimeoutError()
 
         with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
-            with patch("asyncio.wait_for", side_effect=asyncio.TimeoutError()):
+            with patch("asyncio.wait_for", side_effect=TimeoutError()):
                 result = await safe_shell("ls .", "agent")
         assert result["blocked"] is False
         assert "timed out" in result["stderr"].lower()
@@ -169,6 +164,7 @@ class TestSafeShell:
 # ---------------------------------------------------------------------------
 # file_reader
 # ---------------------------------------------------------------------------
+
 
 class TestFileReader:
     async def test_path_outside_project_denied(self):
@@ -208,6 +204,7 @@ class TestFileReader:
 # ---------------------------------------------------------------------------
 # doc_updater
 # ---------------------------------------------------------------------------
+
 
 class TestDocUpdater:
     async def test_invalid_target_returns_error(self):
@@ -251,6 +248,7 @@ class TestDocUpdater:
 # system_info
 # ---------------------------------------------------------------------------
 
+
 class TestSystemInfo:
     async def test_returns_platform_info(self):
         result = await system_info("monitor_agent")
@@ -270,6 +268,7 @@ class TestSystemInfo:
 # ---------------------------------------------------------------------------
 # webhook_send
 # ---------------------------------------------------------------------------
+
 
 class TestWebhookSend:
     async def test_blocked_non_http_scheme(self):
@@ -311,6 +310,7 @@ class TestWebhookSend:
 # git_ops
 # ---------------------------------------------------------------------------
 
+
 class TestGitOps:
     async def test_blocked_non_whitelisted_subcommand(self):
         result = await git_ops("push", "agent")
@@ -348,6 +348,7 @@ class TestGitOps:
 # health_check
 # ---------------------------------------------------------------------------
 
+
 class TestHealthCheck:
     async def test_blocked_non_http_scheme(self):
         result = await health_check("ftp://example.com", "agent")
@@ -377,10 +378,8 @@ class TestHealthCheck:
 
     async def test_http_error_code_still_reachable(self):
         import urllib.error
-        exc = urllib.error.HTTPError(
-            url="https://example.com/health", code=404,
-            msg="Not Found", hdrs=None, fp=None
-        )
+
+        exc = urllib.error.HTTPError(url="https://example.com/health", code=404, msg="Not Found", hdrs=None, fp=None)
         with patch("urllib.request.urlopen", side_effect=exc):
             result = await health_check("https://example.com/health", "agent")
         # 4xx response means reachable
@@ -389,6 +388,7 @@ class TestHealthCheck:
 
     async def test_connection_error_not_reachable(self):
         import urllib.error
+
         exc = urllib.error.URLError("connection refused")
         with patch("urllib.request.urlopen", side_effect=exc):
             result = await health_check("https://example.com/health", "agent")
@@ -398,6 +398,7 @@ class TestHealthCheck:
 # ---------------------------------------------------------------------------
 # log_tail
 # ---------------------------------------------------------------------------
+
 
 class TestLogTail:
     async def test_path_outside_project_denied(self):
@@ -440,9 +441,10 @@ class TestLogTail:
 # alert_dispatch
 # ---------------------------------------------------------------------------
 
+
 class TestAlertDispatch:
     async def test_dispatches_info_level(self):
-        with patch("backend.memory.memory_store.append_shared_event") as mock_append:
+        with patch("backend.memory.memory_store.append_shared_event"):
             result = await alert_dispatch("INFO", "Test Alert", "test message", "agent")
         assert result["dispatched"] is True
         assert result["level"] == "INFO"
@@ -483,6 +485,7 @@ class TestAlertDispatch:
 # secret_scanner
 # ---------------------------------------------------------------------------
 
+
 class TestSecretScanner:
     async def test_path_outside_project_denied(self):
         result = await secret_scanner("/etc", "agent")
@@ -510,7 +513,7 @@ class TestSecretScanner:
             result = await secret_scanner("backend/tests/_dirty_secret_test.py", "agent")
             assert result["files_scanned"] == 1
             # Should detect AWS Access Key pattern
-            patterns = [f["pattern"] for f in result["findings"]]
+            [f["pattern"] for f in result["findings"]]
             assert len(result["findings"]) >= 1
         finally:
             dirty_path.unlink(missing_ok=True)
@@ -536,6 +539,7 @@ class TestSecretScanner:
 # ---------------------------------------------------------------------------
 # db_query
 # ---------------------------------------------------------------------------
+
 
 class TestDbQuery:
     async def test_non_select_rejected(self):
@@ -592,6 +596,7 @@ class TestDbQuery:
 # process_restart
 # ---------------------------------------------------------------------------
 
+
 class TestProcessRestart:
     async def test_unknown_process_refused(self):
         result = await process_restart("malicious_process", "agent")
@@ -619,13 +624,13 @@ class TestProcessRestart:
 
     async def test_timeout_returns_failure(self):
         async def _slow():
-            raise asyncio.TimeoutError()
+            raise TimeoutError()
 
         mock_proc = AsyncMock()
-        mock_proc.communicate.side_effect = asyncio.TimeoutError()
+        mock_proc.communicate.side_effect = TimeoutError()
 
         with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
-            with patch("asyncio.wait_for", side_effect=asyncio.TimeoutError()):
+            with patch("asyncio.wait_for", side_effect=TimeoutError()):
                 result = await process_restart("backend", "agent")
         assert result["success"] is False
         assert "timed out" in result["error"].lower()
@@ -639,6 +644,7 @@ class TestProcessRestart:
 # ---------------------------------------------------------------------------
 # folder_analyzer
 # ---------------------------------------------------------------------------
+
 
 class TestFolderAnalyzer:
     async def test_path_outside_project_denied(self):
@@ -679,9 +685,11 @@ class TestFolderAnalyzer:
 # execute_tool dispatcher
 # ---------------------------------------------------------------------------
 
+
 class TestExecuteTool:
     async def _run_with_passthrough_guard(self, coro_factory, *args, **kwargs):
         """Run execute_tool with drift_guard.guard_tool_execution mocked to call through."""
+
         async def _passthrough(tool_name, agent_id, modification_type, tool_fn, *a, **kw):
             return await tool_fn()
 
@@ -707,13 +715,16 @@ class TestExecuteTool:
 
     async def test_routes_safe_shell_blocked(self):
         """safe_shell blocking logic should still function through execute_tool."""
+
         async def _passthrough(tool_name, agent_id, modification_type, tool_fn, *a, **kw):
             return await tool_fn()
 
         with patch("backend.tools.drift_guard.guard_tool_execution", side_effect=_passthrough):
             result = await execute_tool(
-                "safe_shell", "agent", ["safe_shell"],
-                command="rm -rf /", 
+                "safe_shell",
+                "agent",
+                ["safe_shell"],
+                command="rm -rf /",
             )
         assert result["blocked"] is True
 
@@ -723,7 +734,9 @@ class TestExecuteTool:
 
         with patch("backend.tools.drift_guard.guard_tool_execution", side_effect=_passthrough):
             result = await execute_tool(
-                "git_ops", "agent", ["git_ops"],
+                "git_ops",
+                "agent",
+                ["git_ops"],
                 subcommand="push",
             )
         assert result["return_code"] == -1
@@ -736,17 +749,18 @@ class TestExecuteTool:
             return await tool_fn()
 
         # This shouldn't happen in production but covers the None tool_fn path
-        # We need a registered tool that's not in tool_functions. 
+        # We need a registered tool that's not in tool_functions.
         # The mcp_ tools and browser_ tools are handled separately.
         # The simplest way: use a registered mcp_ tool but mock MCPBridge.
-        from backend.mcp import MCPBridge
         mock_bridge = AsyncMock()
         mock_bridge.call_tool = AsyncMock(return_value={"ok": True})
 
         with patch("backend.tools.get_mcp_bridge", return_value=mock_bridge):
             with patch("backend.tools.drift_guard.guard_tool_execution", side_effect=_passthrough):
                 result = await execute_tool(
-                    "mcp_slack_post_message", "agent", ["mcp_slack_post_message"],
+                    "mcp_slack_post_message",
+                    "agent",
+                    ["mcp_slack_post_message"],
                 )
         # Should have routed to MCPBridge and returned the mock result
         assert result == {"ok": True}

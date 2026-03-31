@@ -18,7 +18,7 @@ import {
   TextInput,
   Title,
 } from '@mantine/core';
-import { IconPlus, IconCheck } from '@tabler/icons-react';
+import { IconArrowLeft, IconPlus, IconCheck } from '@tabler/icons-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -152,10 +152,15 @@ export default function CustomersPage() {
   return (
     <Stack p="xl" gap="lg">
       <Group justify="space-between">
-        <Box>
-          <Title order={2}>Customer Operations</Title>
-          <Text c="dimmed">Manage customers, services, and token usage</Text>
-        </Box>
+        <Group gap="md">
+          <ActionIcon variant="subtle" size="lg" component={Link} href="/">
+            <IconArrowLeft size={20} />
+          </ActionIcon>
+          <Box>
+            <Title order={2}>Customer Operations</Title>
+            <Text c="dimmed">Manage customers, services, and token usage</Text>
+          </Box>
+        </Group>
       </Group>
 
       <Group grow>

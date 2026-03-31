@@ -9,7 +9,7 @@ agents so failure patterns are visible system-wide.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from typing import Any
 
 _HEALTH_NS = "tool_health"
@@ -36,7 +36,7 @@ class ToolFailureRecord:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict) -> "ToolFailureRecord":
+    def from_dict(cls, d: dict) -> ToolFailureRecord:
         return cls(
             tool_name=d["tool_name"],
             agent_id=d["agent_id"],
@@ -62,8 +62,8 @@ class ToolHealthStats:
     is_chronic: bool = False
     recent_failures: list[ToolFailureRecord] = field(default_factory=list)
     # OpenSpace-inspired: skill selection vs. application tracking
-    selected_count: int = 0   # times this skill was chosen by the router
-    applied_count: int = 0    # times it was actually executed/completed
+    selected_count: int = 0  # times this skill was chosen by the router
+    applied_count: int = 0  # times it was actually executed/completed
     fallback_rate: float = 0.0  # (selected - applied) / selected — canary for stale skills
 
 
@@ -143,11 +143,7 @@ class ToolHealthMonitor:
         calls = self._read_calls()
         all_failures = self._read_failures()
 
-        tool_failures = [
-            ToolFailureRecord.from_dict(f)
-            for f in all_failures
-            if f.get("tool_name") == tool_name
-        ]
+        tool_failures = [ToolFailureRecord.from_dict(f) for f in all_failures if f.get("tool_name") == tool_name]
 
         total_calls = calls.get(tool_name, 0)
         total_failures = len(tool_failures)
@@ -202,9 +198,7 @@ class ToolHealthMonitor:
         """Return health stats for every tool that has been called or failed."""
         calls = self._read_calls()
         failures = self._read_failures()
-        all_tools: set[str] = set(calls.keys()) | {
-            f.get("tool_name", "") for f in failures
-        }
+        all_tools: set[str] = set(calls.keys()) | {f.get("tool_name", "") for f in failures}
         return {t: self.get_stats(t) for t in all_tools if t}
 
     def build_health_report(self) -> str:
@@ -220,36 +214,28 @@ class ToolHealthMonitor:
         lines = ["## Tool Health Report"]
 
         chronic = [s for s in stats.values() if s.is_chronic]
-        degraded = [
-            s for s in stats.values()
-            if not s.is_chronic and s.total_failures > 0 and s.failure_rate >= 0.2
-        ]
+        degraded = [s for s in stats.values() if not s.is_chronic and s.total_failures > 0 and s.failure_rate >= 0.2]
 
         if chronic:
             lines.append("\n### Chronic Failures (action required)")
             for s in sorted(chronic, key=lambda x: x.total_failures, reverse=True):
                 lines.append(
-                    f"- **{s.tool_name}**: {s.total_failures} failures in last hour — "
-                    f"last error: `{s.last_error}`"
+                    f"- **{s.tool_name}**: {s.total_failures} failures in last hour — last error: `{s.last_error}`"
                 )
 
         if degraded:
             lines.append("\n### Degraded Tools (elevated failure rate)")
             for s in sorted(degraded, key=lambda x: x.failure_rate, reverse=True):
                 lines.append(
-                    f"- `{s.tool_name}`: {s.failure_rate:.0%} failure rate "
-                    f"({s.total_failures}/{s.total_calls} calls)"
+                    f"- `{s.tool_name}`: {s.failure_rate:.0%} failure rate ({s.total_failures}/{s.total_calls} calls)"
                 )
 
-        high_fallback = [
-            (sid, s) for sid, s in skill_stats.items() if s["fallback_rate"] >= 0.3
-        ]
+        high_fallback = [(sid, s) for sid, s in skill_stats.items() if s["fallback_rate"] >= 0.3]
         if high_fallback:
             lines.append("\n### High Fallback Rate Skills (instructions may be stale)")
-            for sid, s in sorted(high_fallback, key=lambda x: -x[1]["fallback_rate"]):
+            for sid, s in sorted(high_fallback, key=lambda x: -x[1]["fallback_rate"]):  # type: ignore[assignment]
                 lines.append(
-                    f"- `{sid}`: {s['fallback_rate']:.0%} fallback "
-                    f"({s['applied_count']}/{s['selected_count']} applied)"
+                    f"- `{sid}`: {s['fallback_rate']:.0%} fallback ({s['applied_count']}/{s['selected_count']} applied)"  # type: ignore[index]
                 )
 
         if not chronic and not degraded and not high_fallback:

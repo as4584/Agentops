@@ -1,7 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Box, Button, Card, Group, NumberInput, Select, Slider, Stack, Switch, Text, Title } from '@mantine/core';
+import Link from 'next/link';
+import { ActionIcon, Box, Button, Card, Group, NumberInput, Select, Slider, Stack, Switch, Text, Title } from '@mantine/core';
+import { IconArrowLeft } from '@tabler/icons-react';
 
 const glassStyle = {
   background: 'rgba(255,255,255,0.05)',
@@ -43,7 +45,12 @@ export default function PricingPage() {
 
   return (
     <Stack p="xl" gap="lg">
-      <Title order={2}>Pricing Calculator</Title>
+      <Group gap="sm">
+        <ActionIcon component={Link} href="/" variant="subtle" size="lg" aria-label="Back to dashboard">
+          <IconArrowLeft size={20} />
+        </ActionIcon>
+        <Title order={2}>Pricing Calculator</Title>
+      </Group>
       <Text c="dimmed">Build business-owner-ready proposals with startup + monthly totals.</Text>
 
       <Group align="flex-start" grow>

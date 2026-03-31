@@ -3,9 +3,11 @@ Tests for backend/gateway/ratelimit.py — MemoryRateLimiter token-bucket logic.
 
 No external dependencies required.
 """
+
 from __future__ import annotations
 
 import time
+
 import pytest
 
 from backend.gateway.ratelimit import BucketState, MemoryRateLimiter, get_rate_limiter
@@ -20,6 +22,7 @@ def limiter() -> MemoryRateLimiter:
 # BucketState
 # ---------------------------------------------------------------------------
 
+
 class TestBucketState:
     def test_default_construction(self):
         b = BucketState()
@@ -33,6 +36,7 @@ class TestBucketState:
 # ---------------------------------------------------------------------------
 # RPM
 # ---------------------------------------------------------------------------
+
 
 class TestCheckRPM:
     def test_first_request_allowed(self, limiter):
@@ -81,6 +85,7 @@ class TestCheckRPM:
 # TPM
 # ---------------------------------------------------------------------------
 
+
 class TestCheckTPM:
     def test_within_limit(self, limiter):
         allowed, remaining = limiter.check_tpm("k1", tokens=100, limit=1000)
@@ -120,6 +125,7 @@ class TestCheckTPM:
 # TPD
 # ---------------------------------------------------------------------------
 
+
 class TestCheckTPD:
     def test_within_daily_limit(self, limiter):
         allowed, remaining = limiter.check_tpd("k1", tokens=500, limit=10000)
@@ -144,7 +150,7 @@ class TestCheckTPD:
 
         # Manually simulate a day rollover by setting bucket's day to yesterday
         bucket = limiter._buckets["k3"]
-        bucket.tpd_day = "1970-01-01"   # past date; next check will reset
+        bucket.tpd_day = "1970-01-01"  # past date; next check will reset
         allowed_new_day, _ = limiter.check_tpd("k3", tokens=9000, limit=10000)
         assert allowed_new_day is True
 
@@ -159,6 +165,7 @@ class TestCheckTPD:
 # ---------------------------------------------------------------------------
 # Cost tracking
 # ---------------------------------------------------------------------------
+
 
 class TestRecordCost:
     def test_within_budget(self, limiter):
@@ -187,9 +194,11 @@ class TestRecordCost:
 # Factory function
 # ---------------------------------------------------------------------------
 
+
 class TestGetRateLimiter:
     def test_returns_memory_limiter_by_default(self, monkeypatch):
         import backend.gateway.ratelimit as rl_mod
+
         # Reset singleton to force re-creation
         monkeypatch.setattr(rl_mod, "_limiter", None)
         monkeypatch.setattr(rl_mod, "GATEWAY_RATE_LIMIT_BACKEND", "memory")
@@ -198,6 +207,7 @@ class TestGetRateLimiter:
 
     def test_returns_same_singleton(self, monkeypatch):
         import backend.gateway.ratelimit as rl_mod
+
         monkeypatch.setattr(rl_mod, "_limiter", None)
         lim1 = get_rate_limiter()
         lim2 = get_rate_limiter()

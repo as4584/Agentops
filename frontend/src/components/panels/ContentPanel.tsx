@@ -41,7 +41,7 @@ const STATUS_COLORS: Record<string, string> = {
   draft: 'gray',
   generated: 'blue',
   audio_ready: 'indigo',
-  video_ready: 'violet',
+  video_ready: 'blue',
   captioned: 'grape',
   qa: 'yellow',
   approved: 'teal',
