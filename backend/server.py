@@ -388,7 +388,7 @@ async def security_middleware(request: Request, call_next):
     ip = request.client.host if request.client else "unknown"
     is_local = ip in ("127.0.0.1", "::1", "localhost")
     # Skip auth for health check and OpenAPI docs
-    skip_auth_paths = {"/health", "/docs", "/openapi.json", "/redoc"}
+    skip_auth_paths = {"/health", "/health/deps", "/docs", "/openapi.json", "/redoc"}
     # Gateway-managed paths have their own dedicated auth middleware.
     # Let them pass through here so security headers are still applied.
     if path.startswith("/v1/") or path.startswith("/admin/"):
@@ -439,6 +439,52 @@ async def health_check() -> dict[str, Any]:
         "llm_available": llm_available,
         "drift_status": drift_guard.drift_status.value,
         "uptime_seconds": round(time.time() - _start_time, 2),
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+
+
+@app.get("/health/deps")
+async def health_deps() -> dict[str, Any]:
+    """Dependency health check — surfaces status of all external deps."""
+    import shutil
+
+    # 1. Ollama / LLM
+    llm_ok = False
+    llm_detail = "client not initialised"
+    if _llm_client:
+        try:
+            llm_ok = await _llm_client.is_available()
+            llm_detail = "reachable" if llm_ok else "unreachable"
+        except Exception as exc:
+            llm_detail = str(exc)[:200]
+
+    # 2. Docker MCP bridge
+    mcp_status = mcp_bridge.get_status()
+
+    # 3. FFmpeg (needed for content pipeline)
+    ffmpeg_path = shutil.which("ffmpeg")
+    ffmpeg_ok = ffmpeg_path is not None
+
+    # 4. Docker CLI
+    docker_path = shutil.which("docker")
+    docker_ok = docker_path is not None
+
+    # 5. Ruff (needed for gatekeeper)
+    ruff_path = shutil.which("ruff")
+    ruff_ok = ruff_path is not None
+
+    deps = {
+        "ollama": {"ok": llm_ok, "detail": llm_detail},
+        "mcp_bridge": {"ok": mcp_status["cli_available"], "detail": mcp_status},
+        "ffmpeg": {"ok": ffmpeg_ok, "path": ffmpeg_path},
+        "docker": {"ok": docker_ok, "path": docker_path},
+        "ruff": {"ok": ruff_ok, "path": ruff_path},
+    }
+
+    all_ok = all(d["ok"] for d in deps.values())
+    return {
+        "status": "healthy" if all_ok else "degraded",
+        "dependencies": deps,
         "timestamp": datetime.utcnow().isoformat(),
     }
 
