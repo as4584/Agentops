@@ -73,7 +73,7 @@ class _FakeScheduler:
 
 
 def _client_with_fake_scheduler() -> TestClient:
-    from backend.routes import scheduler as scheduler_routes  # type: ignore[attr-defined]
+    from backend.routes import schedule_routes as scheduler_routes
 
     fake = _FakeScheduler()
     scheduler_routes.job_scheduler = fake  # type: ignore[assignment]
