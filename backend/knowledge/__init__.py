@@ -20,6 +20,7 @@ from typing import Any
 
 from backend.config import MEMORY_DIR, PROJECT_ROOT
 from backend.llm import OllamaClient
+from backend.ocr import OCR_EXTENSIONS, extract_text as ocr_extract_text
 from backend.utils import logger
 
 
@@ -46,9 +47,23 @@ class KnowledgeVectorStore:
             return
 
         docs = self._collect_documents()
+
+        # Augment with OCR-extracted content for PDFs and images.
+        # _collect_documents returns a sentinel {"ocr": True} for these files;
+        # we resolve them here where async is available.
+        resolved_docs: list[dict[str, str]] = []
+        for doc in docs:
+            if doc.get("ocr"):
+                markdown = await ocr_extract_text(doc["path"])
+                if markdown:
+                    resolved_docs.append({"path": doc["path"], "content": markdown})
+                # silently skip if OCR unavailable — don't break the index build
+            else:
+                resolved_docs.append(doc)
+
         chunks: list[dict[str, Any]] = []
 
-        for doc in docs:
+        for doc in resolved_docs:
             for i, chunk in enumerate(self._chunk_text(doc["content"])):
                 chunks.append(
                     {
@@ -176,7 +191,10 @@ class KnowledgeVectorStore:
             PROJECT_ROOT / "backend",
             PROJECT_ROOT / "frontend" / "src",
         ]
-        allowed_suffixes = {".md", ".py", ".ts", ".tsx", ".txt"}
+        text_suffixes = {".md", ".py", ".ts", ".tsx", ".txt"}
+        # PDFs are resolved later in ensure_index via OCR (async).
+        ocr_suffixes = {s for s in OCR_EXTENSIONS if s == ".pdf"}
+        allowed_suffixes = text_suffixes | ocr_suffixes
         skip_parts = {
             "node_modules",
             ".next",
@@ -195,6 +213,10 @@ class KnowledgeVectorStore:
                     continue
                 rel = path.relative_to(PROJECT_ROOT).as_posix()
                 if any(part in rel for part in skip_parts):
+                    continue
+                if path.suffix.lower() in ocr_suffixes:
+                    # Defer to async OCR — return sentinel with absolute path
+                    docs.append({"path": str(path), "ocr": True})  # type: ignore[dict-item]
                     continue
                 try:
                     content = path.read_text(encoding="utf-8", errors="replace")

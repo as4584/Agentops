@@ -17,4 +17,5 @@ playwright>=1.40.0
 rank-bm25>=0.2.2
 anthropic>=0.40.0
 pypdf>=4.0.0
+glmocr[server]>=0.1.0
 discord.py>=2.3.0

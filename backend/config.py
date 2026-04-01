@@ -39,6 +39,14 @@ OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.2")
 OLLAMA_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", "120"))
 
 # ---------------------------------------------------------------------------
+# GLM-OCR Configuration (local document/image → Markdown extraction)
+# Run: python -m glmocr.server   (starts on GLMOCR_URL, default port 5002)
+# ---------------------------------------------------------------------------
+GLMOCR_URL: str = os.getenv("GLMOCR_URL", "http://localhost:5002")
+GLMOCR_ENABLED: bool = os.getenv("GLMOCR_ENABLED", "true").lower() == "true"
+GLMOCR_TIMEOUT: int = int(os.getenv("GLMOCR_TIMEOUT", "60"))
+
+# ---------------------------------------------------------------------------
 # Cloud LLM Configuration (OpenRouter — hybrid/cloud modes)
 # ---------------------------------------------------------------------------
 OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")

@@ -65,6 +65,7 @@ from backend.models import (
     ModificationType,
     ToolDefinition,
 )
+from backend.ocr import OCR_EXTENSIONS, extract_text as ocr_extract_text, is_supported as ocr_supported
 from backend.utils import logger
 
 
@@ -157,6 +158,16 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
     "folder_analyzer": ToolDefinition(
         name="folder_analyzer",
         description="Recursively index a folder — returns file tree, metadata, and content snippets for agent analysis",
+        modification_type=ModificationType.READ_ONLY,
+        requires_doc_update=False,
+    ),
+    "document_ocr": ToolDefinition(
+        name="document_ocr",
+        description=(
+            "Extract clean Markdown from a PDF, image, or Office document via GLM-OCR "
+            "(0.9B local model). Saves LLM tokens by pre-converting unstructured documents "
+            "to structured text before agent processing."
+        ),
         modification_type=ModificationType.READ_ONLY,
         requires_doc_update=False,
     ),
@@ -588,6 +599,22 @@ async def file_reader(file_path: str, agent_id: str) -> dict[str, Any]:
         if not path.is_file():
             return {"content": "", "error": "Path is not a file", "exists": True}
 
+        # Route PDFs, images, and Office docs through GLM-OCR before the
+        # binary-extension block.  Falls back to the normal text read if the
+        # microservice is unavailable.
+        if ocr_supported(str(path)):
+            markdown = await ocr_extract_text(str(path))
+            if markdown:
+                logger.info(f"file_reader (ocr) by {agent_id}: {file_path}")
+                return {
+                    "content": markdown[:10000],
+                    "size": path.stat().st_size,
+                    "exists": True,
+                    "source": "glmocr",
+                }
+            # Microservice down — fall through to normal read (text PDFs may
+            # still work; binary images will hit the block below)
+
         content = path.read_text(errors="replace")[:10000]  # Limit size
         logger.info(f"file_reader by {agent_id}: {file_path}")
         return {
@@ -598,6 +625,77 @@ async def file_reader(file_path: str, agent_id: str) -> dict[str, Any]:
 
     except Exception as e:
         return {"content": "", "error": str(e), "exists": False}
+
+
+# ---------------------------------------------------------------------------
+# document_ocr — GLM-OCR document extraction
+# ---------------------------------------------------------------------------
+
+
+async def document_ocr(file_path: str, agent_id: str) -> dict[str, Any]:
+    """
+    Extract clean Markdown from a PDF, image, or Office document via GLM-OCR.
+
+    Agents should call this instead of file_reader when they need structured
+    content from a document — it produces far fewer tokens than raw text dumps.
+
+    READ_ONLY — no modification, no doc update required.
+
+    Supported: .pdf .png .jpg .jpeg .tiff .tif .webp .bmp .doc .docx
+
+    Args:
+        file_path: Absolute or project-relative path to the document.
+        agent_id: The calling agent's ID.
+
+    Returns:
+        Dict with markdown content, page estimates, and glmocr metadata.
+    """
+    try:
+        path = Path(
+            os.path.normpath(
+                str(file_path) if Path(file_path).is_absolute() else str(PROJECT_ROOT / file_path)
+            )
+        )
+
+        if not str(path).startswith(str(PROJECT_ROOT)):
+            return {"content": "", "error": "Access denied: path outside project directory"}
+
+        if not path.exists():
+            return {"content": "", "error": "File not found"}
+
+        if not path.is_file():
+            return {"content": "", "error": "Path is not a file"}
+
+        suffix = path.suffix.lower()
+        if suffix not in OCR_EXTENSIONS:
+            return {
+                "content": "",
+                "error": (
+                    f"Unsupported file type '{suffix}'. "
+                    f"Supported: {', '.join(sorted(OCR_EXTENSIONS))}"
+                ),
+            }
+
+        markdown = await ocr_extract_text(str(path))
+        if markdown is None:
+            return {
+                "content": "",
+                "error": (
+                    "GLM-OCR microservice unavailable. "
+                    "Start it with: python -m glmocr.server"
+                ),
+            }
+
+        logger.info(f"document_ocr by {agent_id}: {file_path} ({len(markdown):,} chars)")
+        return {
+            "content": markdown,
+            "char_count": len(markdown),
+            "size": path.stat().st_size,
+            "source": "glmocr",
+        }
+
+    except Exception as e:
+        return {"content": "", "error": str(e)}
 
 
 # ---------------------------------------------------------------------------
@@ -1395,6 +1493,10 @@ async def execute_tool(
             max_files=int(kwargs.get("max_files", 200)),
             snippet_lines=int(kwargs.get("snippet_lines", 30)),
             include_content=str(kwargs.get("include_content", "true")).lower() != "false",
+        ),
+        "document_ocr": lambda: document_ocr(
+            file_path=kwargs.get("file_path", ""),
+            agent_id=agent_id,
         ),
     }
 
