@@ -44,7 +44,10 @@ try:
 
     PDF_AVAILABLE = True
 except ImportError:
+    _PdfReader = None  # type: ignore[assignment,misc]
     PDF_AVAILABLE = False
+
+from typing import Any
 
 try:
     import anthropic as _anthropic  # type: ignore
@@ -951,7 +954,7 @@ def _read_pdf(path: Path) -> str:
     if not PDF_AVAILABLE:
         return ""
     try:
-        reader = _PdfReader(str(path))
+        reader = _PdfReader(str(path))  # type: ignore[misc]
         return "\n".join(page.extract_text() or "" for page in reader.pages)
     except Exception:
         return ""
@@ -1003,7 +1006,7 @@ def chunk_text(text: str) -> list[str]:
 # ── Claude API ─────────────────────────────────────────────────────────────────
 
 def generate_pairs(
-    client: "_anthropic.Anthropic",
+    client: Any,
     chunk: str,
     domain: str,
     model: str,
@@ -1055,6 +1058,7 @@ def generate_pairs_ollama(chunk: str, domain: str) -> list[dict]:
         "stream": False,
         "options": {"temperature": 0.7, "num_predict": 2048},
     }
+    raw = ""
     try:
         resp = requests.post(f"{OLLAMA_URL}/api/chat", json=payload, timeout=180)
         resp.raise_for_status()

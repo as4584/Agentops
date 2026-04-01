@@ -12,6 +12,7 @@ Produces JSONL training data biased toward:
 import json
 import os
 from datetime import UTC, datetime
+from typing import Any
 
 AGENTS = [
     "soul_core",
@@ -42,7 +43,7 @@ TOOLS = {
 }
 
 
-def generate_hard_negatives() -> list[dict]:
+def generate_hard_negatives() -> list[dict[str, Any]]:
     """Generate hand-crafted hard negatives targeting known failure modes."""
     examples: list[dict] = []
 
@@ -381,7 +382,7 @@ def generate_hard_negatives() -> list[dict]:
         for ex in group:
             agent = ex["expected_agent"]
             ex["expected_tools"] = TOOLS.get(agent, [])
-            ex["confidence"] = 0.95 if ex["difficulty"] == "easy" else 0.85 if ex["difficulty"] == "medium" else 0.75
+            ex["confidence"] = 0.95 if ex["difficulty"] == "easy" else 0.85 if ex["difficulty"] == "medium" else 0.75  # type: ignore[assignment]
             examples.append(ex)
 
     return examples

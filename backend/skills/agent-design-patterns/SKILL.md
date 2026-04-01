@@ -1,3 +1,7 @@
+---
+name: agent-design-patterns
+description: AI agent architecture patterns, behavior contracts, and orchestration design
+---
 # AI Agent Design Patterns
 
 **Domain:** Agent Engineering & Architecture  

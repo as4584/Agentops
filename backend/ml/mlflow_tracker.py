@@ -30,6 +30,8 @@ try:
 
     MLFLOW_AVAILABLE = True
 except ImportError:
+    mlflow = None  # type: ignore[assignment]
+    MlflowClient = None  # type: ignore[assignment,misc]
     MLFLOW_AVAILABLE = False
 
 
@@ -52,9 +54,9 @@ class MLflowTracker:
             return
 
         uri = tracking_uri or str(ML_EXPERIMENTS_DIR / "mlruns")
-        mlflow.set_tracking_uri(f"file://{uri}")
-        mlflow.set_experiment(experiment_name)
-        self._client = MlflowClient(tracking_uri=f"file://{uri}")
+        mlflow.set_tracking_uri(f"file://{uri}")  # type: ignore[union-attr]
+        mlflow.set_experiment(experiment_name)  # type: ignore[union-attr]
+        self._client = MlflowClient(tracking_uri=f"file://{uri}")  # type: ignore[misc]
         self._experiment_name = experiment_name
         logger.info(f"[MLflowTracker] Initialized — tracking to {uri}")
 
@@ -83,27 +85,27 @@ class MLflowTracker:
             return
 
         with self._lock:
-            run = mlflow.start_run(run_name=run_name)
+            run = mlflow.start_run(run_name=run_name)  # type: ignore[union-attr]
             run_id = run.info.run_id
             self._active_runs[run_id] = run
 
         if params:
             # MLflow params must be strings
             str_params = {k: str(v) for k, v in params.items()}
-            mlflow.log_params(str_params)
+            mlflow.log_params(str_params)  # type: ignore[union-attr]
         if tags:
-            mlflow.set_tags(tags)
+            mlflow.set_tags(tags)  # type: ignore[union-attr]
 
         try:
             yield run_id
         except Exception as e:
-            mlflow.set_tag("error", str(e)[:250])
-            mlflow.end_run(status="FAILED")
+            mlflow.set_tag("error", str(e)[:250])  # type: ignore[union-attr]
+            mlflow.end_run(status="FAILED")  # type: ignore[union-attr]
             with self._lock:
                 self._active_runs.pop(run_id, None)
             raise
         else:
-            mlflow.end_run(status="FINISHED")
+            mlflow.end_run(status="FINISHED")  # type: ignore[union-attr]
             with self._lock:
                 self._active_runs.pop(run_id, None)
 
@@ -117,8 +119,8 @@ class MLflowTracker:
 
         with self._lock:
             if run_id in self._active_runs:
-                with mlflow.start_run(run_id=run_id, nested=True):
-                    mlflow.log_metrics(metrics, step=step)
+                with mlflow.start_run(run_id=run_id, nested=True):  # type: ignore[union-attr]
+                    mlflow.log_metrics(metrics, step=step)  # type: ignore[union-attr]
 
     def log_llm_call(
         self,
@@ -163,8 +165,8 @@ class MLflowTracker:
 
         with self._lock:
             if run_id in self._active_runs:
-                with mlflow.start_run(run_id=run_id, nested=True):
-                    mlflow.log_metrics(metrics)
+                with mlflow.start_run(run_id=run_id, nested=True):  # type: ignore[union-attr]
+                    mlflow.log_metrics(metrics)  # type: ignore[union-attr]
                     # Log prompt/response as artifacts to avoid param length limits
                     artifact_dir = ML_EXPERIMENTS_DIR / "artifacts" / run_id
                     artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -178,7 +180,7 @@ class MLflowTracker:
                     }
                     log_path = artifact_dir / f"llm_call_{int(time.time() * 1000)}.json"
                     log_path.write_text(json.dumps(call_log, indent=2))
-                    mlflow.log_artifact(str(log_path))
+                    mlflow.log_artifact(str(log_path))  # type: ignore[union-attr]
 
     def log_artifact(self, run_id: str, path: str) -> None:
         """Log a file artifact to the run."""
@@ -189,8 +191,8 @@ class MLflowTracker:
 
         with self._lock:
             if run_id in self._active_runs:
-                with mlflow.start_run(run_id=run_id, nested=True):
-                    mlflow.log_artifact(path)
+                with mlflow.start_run(run_id=run_id, nested=True):  # type: ignore[union-attr]
+                    mlflow.log_artifact(path)  # type: ignore[union-attr]
 
     def search_runs(
         self,

@@ -1,7 +1,7 @@
 ---
-mode: agent
+agent: agent
 description: Generate DPO preference pairs for lex-v2 alignment training
-tools: ['read_file', 'create_file', 'run_in_terminal']
+tools: ['read_file', 'create_file', 'runInTerminal']
 ---
 
 # Generate Preference Pairs for DPO Alignment

@@ -1,0 +1,31 @@
+{
+  "id": "social_media_manager",
+  "name": "Social Media Manager",
+  "version": "1.0.0",
+  "description": "24/7 autonomous social media manager. Posts content to TikTok, Facebook, and Instagram. Monitors analytics continuously via scheduled polling. Fires alerts on viral velocity, engagement drops, and follower changes. Routes through ContentAgent for content creation and GSDAgent for task coordination. All platform rules enforced from docs/SOCIAL_MEDIA_PLATFORM_RULES.md.",
+  "allowed_agents": ["GSDAgent", "ContentAgent", "comms_agent", "monitor_agent"],
+  "required_tools": ["webhook_send", "alert_dispatch", "safe_shell"],
+  "risk_level": "medium",
+  "enabled": true,
+  "platforms": ["tiktok", "facebook", "instagram"],
+  "env_vars_required": [
+    "TIKTOK_CLIENT_KEY",
+    "TIKTOK_CLIENT_SECRET",
+    "TIKTOK_ACCESS_TOKEN",
+    "TIKTOK_OPEN_ID",
+    "META_APP_ID",
+    "META_APP_SECRET",
+    "META_PAGE_ACCESS_TOKEN",
+    "FACEBOOK_PAGE_ID",
+    "INSTAGRAM_BUSINESS_ID"
+  ],
+  "schedule": {
+    "tiktok_analytics_poll": "*/15 * * * *",
+    "instagram_insights_poll": "*/30 * * * *",
+    "facebook_page_insights_poll": "0 * * * *",
+    "tiktok_trending_check": "0 */6 * * *",
+    "content_performance_report": "0 18 * * *",
+    "token_refresh_check": "0 2 * * *"
+  },
+  "rules_reference": "docs/SOCIAL_MEDIA_PLATFORM_RULES.md"
+}

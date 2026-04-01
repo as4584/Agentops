@@ -1,7 +1,7 @@
 ---
-mode: agent
+agent: agent
 description: Generate routing training examples for lex-v2 router model
-tools: ['read_file', 'create_file', 'run_in_terminal']
+tools: ['read_file', 'create_file', 'runInTerminal']
 ---
 
 # Generate Routing Training Data for lex-v2

@@ -173,3 +173,45 @@ app.py (main)
 
 `atexit` handler kills all child processes when app.py exits. Electron exit triggers
 app.py exit (via `electron_proc.wait()`).
+
+---
+
+## 8. Recurring Electron Crash on WSL — IPC Buffer Overflow
+
+> Added: 2026-03-31 | Severity: **HIGH** (recurring)
+
+**Symptom:** Electron crashes immediately or within seconds of launch with:
+```
+ERROR:connection.cc(711) Cannot send request of length 17301536
+```
+Or: Electron window appears blank/black, then the process exits silently.
+
+**Root Cause (composite — 3 contributing factors):**
+
+| # | Factor | Detail |
+|---|--------|--------|
+| 1 | **Chromium shared-memory IPC overflow** | On WSL2, the `/dev/shm` partition is small by default. Chromium's GPU process tries to allocate a ~17 MB IPC buffer via shared memory, which fails when the compositor can't handle it through WSLg's virtual display. |
+| 2 | **Missing GPU isolation flags** | `--disable-hardware-acceleration` alone is not enough in WSL. Chromium still spawns a GPU process that attempts software rasterization through the display compositor, which triggers the same IPC failure. Required flags: `--disable-software-rasterizer`, `--disable-gpu-compositing`, `--in-process-gpu`. |
+| 3 | **Backend startup race** | Electron waited only for the frontend (Next.js on `:3007`) but not the backend (`:8000`). If the backend is slow (MCP bridge init, Ollama cold start), the dashboard loads but shows errors, causing the user to kill/restart Electron — leading to zombie processes and port conflicts on the next attempt. |
+
+**Fix (applied 2026-03-31):**
+
+| File | Change |
+|------|--------|
+| `frontend/electron/main.js` | Added Chromium flags: `disable-software-rasterizer`, `disable-gpu-compositing`, `in-process-gpu` |
+| `frontend/electron/main.js` | Added backend health pre-check: `waitForPort('http://localhost:8000/health', 90000)` before loading frontend |
+| `frontend/electron/main.js` | `waitForPort()` now uses exponential backoff (800ms → 3s cap) instead of fixed 800ms polling |
+| `app.py` | Backend health timeout raised from 30s → 90s to allow for slow MCP bridge initialization |
+
+**How to verify:**
+```bash
+# Clean start
+pkill -f "electron" 2>/dev/null; pkill -f "next dev" 2>/dev/null
+cd /root/studio/testing/Agentop && source .venv/bin/activate && python3 app.py
+# Electron should open without the connection.cc error
+```
+
+**Permanent fix plan (if issue recurs):**
+1. **Increase `/dev/shm` size** — Add `[wsl2] memory=8GB` to `.wslconfig` or mount tmpfs: `sudo mount -t tmpfs -o size=512m tmpfs /dev/shm`
+2. **Switch to browser-only mode** — Set `AGENTOP_USE_BROWSER=1` to skip Electron entirely and open in the default browser
+3. **Migrate to Tauri** — Tauri uses the system WebView (WebKitGTK on Linux) which doesn't have Chromium's GPU process IPC issues. This would eliminate the entire class of WSL+Electron display bugs.

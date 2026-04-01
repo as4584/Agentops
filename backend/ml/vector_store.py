@@ -30,6 +30,13 @@ try:
 
     QDRANT_AVAILABLE = True
 except ImportError:
+    QdrantClient = None  # type: ignore[assignment,misc]
+    Distance = None  # type: ignore[assignment]
+    FieldCondition = None  # type: ignore[assignment]
+    Filter = None  # type: ignore[assignment]
+    MatchValue = None  # type: ignore[assignment]
+    PointStruct = None  # type: ignore[assignment]
+    VectorParams = None  # type: ignore[assignment]
     QDRANT_AVAILABLE = False
 
 
@@ -55,10 +62,10 @@ class VectorStore:
             return
 
         if in_memory:
-            self._client = QdrantClient(location=":memory:")
+            self._client = QdrantClient(location=":memory:")  # type: ignore[misc]
             logger.info("[VectorStore] Running in-memory mode (test/dev)")
         else:
-            self._client = QdrantClient(host=host, port=port)
+            self._client = QdrantClient(host=host, port=port)  # type: ignore[misc]
             logger.info(f"[VectorStore] Connected to Qdrant at {host}:{port}")
 
     def ensure_collection(
@@ -78,7 +85,7 @@ class VectorStore:
         if coll not in existing:
             self._client.create_collection(
                 collection_name=coll,
-                vectors_config=VectorParams(size=d, distance=Distance.COSINE),
+                vectors_config=VectorParams(size=d, distance=Distance.COSINE),  # type: ignore[misc]
             )
             logger.info(f"[VectorStore] Created collection: {coll} (dim={d})")
         self._collections_initialized.add(coll)
@@ -103,7 +110,7 @@ class VectorStore:
             if agent_namespace:
                 payload["agent_namespace"] = agent_namespace
             payload.setdefault("indexed_at", time.time())
-            points.append(PointStruct(id=point_id, vector=vec, payload=payload))
+            points.append(PointStruct(id=point_id, vector=vec, payload=payload))  # type: ignore[misc]
 
         self._client.upsert(collection_name=coll, points=points)
         return len(points)
@@ -125,10 +132,10 @@ class VectorStore:
         # Build filter
         conditions = []
         if agent_namespace:
-            conditions.append(FieldCondition(key="agent_namespace", match=MatchValue(value=agent_namespace)))
+            conditions.append(FieldCondition(key="agent_namespace", match=MatchValue(value=agent_namespace)))  # type: ignore[misc]
         if filters:
             for key, value in filters.items():
-                conditions.append(FieldCondition(key=key, match=MatchValue(value=value)))
+                conditions.append(FieldCondition(key=key, match=MatchValue(value=value)))  # type: ignore[misc]
 
         query_filter = Filter(must=conditions) if conditions else None  # type: ignore[arg-type]
 

@@ -43,7 +43,7 @@ class UnifiedQuantizer:
         if self._backend == "rust":
             import turbo_quant_rs
 
-            self._rs = turbo_quant_rs.TurboQuantizer(dim=dim, bits=bits, seed=seed)
+            self._rs = turbo_quant_rs.TurboQuantizer(dim=dim, bits=bits, seed=seed)  # type: ignore[attr-defined]
             self._py = None
         else:
             from backend.ml.turbo_quant import TurboQuantizer

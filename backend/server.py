@@ -303,7 +303,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
         async def _seed_knowledge_index() -> None:
             try:
-                stats = await _orchestrator.ensure_knowledge_index(force_rebuild=KNOWLEDGE_SEED_FORCE_REBUILD)
+                if hasattr(_orchestrator, "ensure_knowledge_index"):
+                    stats = await _orchestrator.ensure_knowledge_index(force_rebuild=KNOWLEDGE_SEED_FORCE_REBUILD)  # type: ignore[union-attr]
+                else:
+                    stats = {"chunks": 0, "index_size_bytes": 0, "skipped": "method not implemented"}
                 logger.info(
                     "Knowledge index seeded on startup",
                     event_type="knowledge_seeded_startup",

@@ -299,15 +299,15 @@ def run_sft(train_path: Path, eval_path: Path, resume_from: str | None = None) -
 
     # Import heavy dependencies only when training
     try:
-        from unsloth import FastLanguageModel
+        from unsloth import FastLanguageModel  # type: ignore[import-untyped]
     except ImportError:
         print("  [ERROR] unsloth not installed. Install with:")
         print("    pip install 'unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git'")
         sys.exit(1)
 
-    from datasets import load_dataset
+    from datasets import load_dataset  # type: ignore[import-untyped]
     from transformers import TrainingArguments
-    from trl import SFTTrainer
+    from trl import SFTTrainer  # type: ignore[import-untyped]
 
     # Load base model with 4-bit quantization
     print(f"  Loading base model: {HP.base_model}")
@@ -428,13 +428,13 @@ def run_dpo(sft_model_path: Path) -> Path:
         return sft_model_path
 
     try:
-        from unsloth import FastLanguageModel
+        from unsloth import FastLanguageModel  # type: ignore[import-untyped]
     except ImportError:
         print("  [SKIP] Unsloth not installed. Skipping DPO.")
         return sft_model_path
 
-    from datasets import load_dataset
-    from trl import DPOConfig, DPOTrainer
+    from datasets import load_dataset  # type: ignore[import-untyped]
+    from trl import DPOConfig, DPOTrainer  # type: ignore[import-untyped]
 
     # Load SFT model
     print(f"  Loading SFT model: {sft_model_path}")
@@ -496,7 +496,7 @@ def export_gguf(model_path: Path) -> Path:
     print("\n═══ Stage 3: GGUF Export ═══")
 
     try:
-        from unsloth import FastLanguageModel
+        from unsloth import FastLanguageModel  # type: ignore[import-untyped]
     except ImportError:
         print("  [ERROR] Unsloth required for GGUF export.")
         sys.exit(1)

@@ -1,3 +1,7 @@
+---
+name: token-optimization
+description: Prompt engineering and LLM token cost optimization strategies
+---
 # Token Optimization & Vocabulary Power
 
 **Domain:** Prompt Engineering & LLM Economics  

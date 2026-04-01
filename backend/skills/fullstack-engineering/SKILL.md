@@ -1,3 +1,7 @@
+---
+name: fullstack-engineering
+description: Web application development covering API design, frontend, backend, databases, and DevOps
+---
 # Full-Stack Engineering & Architecture
 
 **Domain:** Web Application Development  

@@ -43,6 +43,7 @@ try:
 
     HAS_HTTPX = True
 except ImportError:
+    httpx = None  # type: ignore[assignment]
     HAS_HTTPX = False
 
 logger = logging.getLogger("agentop.discord")
@@ -81,23 +82,23 @@ AGENT_ALIASES: dict[str, str] = {
 # ---------------------------------------------------------------------------
 # Discord Client
 # ---------------------------------------------------------------------------
-_ClientBase = discord.Client if HAS_DISCORD else object
+_ClientBase = discord.Client if HAS_DISCORD else object  # type: ignore[union-attr]
 
 
 class AgentopBot(_ClientBase):  # type: ignore[misc]
     """Discord bot that routes messages to Agentop agents."""
 
     def __init__(self) -> None:
-        intents = Intents.default()
+        intents = Intents.default()  # type: ignore[union-attr]
         intents.message_content = True
         super().__init__(intents=intents)
-        self._http_client: httpx.AsyncClient | None = None
+        self._http_client: Any = None
         self._conversation_agents: dict[int, str] = {}  # channel_id → last agent
         self._rate_limits: dict[int, float] = {}  # user_id → last msg time
         self._rate_limit_seconds: float = 2.0
 
     async def setup_hook(self) -> None:
-        self._http_client = httpx.AsyncClient(timeout=120.0)
+        self._http_client = httpx.AsyncClient(timeout=120.0)  # type: ignore[union-attr]
         logger.info("Agentop Discord bot initialized")
 
     async def close(self) -> None:
@@ -114,13 +115,13 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
         else:
             logger.info("Listening in ALL channels (no filter)")
         await self.change_presence(
-            activity=discord.Activity(
-                type=discord.ActivityType.listening,
+            activity=discord.Activity(  # type: ignore[union-attr]
+                type=discord.ActivityType.listening,  # type: ignore[union-attr]
                 name="your commands | !help",
             )
         )
 
-    async def on_message(self, message: Message) -> None:
+    async def on_message(self, message: Any) -> None:
         # Ignore own messages
         if message.author == self.user:
             return
@@ -134,7 +135,7 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
             return
 
         # Role-based access control (if configured)
-        if ALLOWED_ROLE_IDS and isinstance(message.author, discord.Member):
+        if ALLOWED_ROLE_IDS and isinstance(message.author, discord.Member):  # type: ignore[union-attr]
             user_roles = {r.id for r in message.author.roles}
             if not user_roles & set(ALLOWED_ROLE_IDS):
                 return
@@ -159,7 +160,7 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
             if clean:
                 await self._handle_chat(message, clean, agent_id="auto")
 
-    async def _handle_command(self, message: Message, raw: str) -> None:
+    async def _handle_command(self, message: Any, raw: str) -> None:
         parts = raw.strip().split(None, 1)
         cmd = parts[0].lower() if parts else ""
         args = parts[1] if len(parts) > 1 else ""
@@ -196,7 +197,7 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
             if full_text:
                 await self._handle_chat(message, full_text, agent_id="auto")
 
-    async def _handle_chat(self, message: Message, text: str, agent_id: str = "auto") -> None:
+    async def _handle_chat(self, message: Any, text: str, agent_id: str = "auto") -> None:
         """Send message to Agentop backend and relay response."""
         if not self._http_client:
             await message.reply("Bot not fully initialized yet.")
@@ -250,15 +251,15 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
                 else:
                     await message.reply(f"❌ Backend error ({resp.status_code}): {resp.text[:200]}")
 
-            except httpx.ConnectError:
+            except httpx.ConnectError:  # type: ignore[union-attr]
                 await message.reply(f"🔌 Can't reach Agentop backend. Is it running?\nExpected at: `{AGENTOP_API_URL}`")
-            except httpx.TimeoutException:
+            except httpx.TimeoutException:  # type: ignore[union-attr]
                 await message.reply("⏱️ Agent took too long to respond (>120s). Try a simpler question.")
             except Exception as e:
                 logger.exception("Discord chat handler error")
                 await message.reply(f"❌ Unexpected error: {type(e).__name__}")
 
-    async def _send_long(self, message: Message, text: str) -> None:
+    async def _send_long(self, message: Any, text: str) -> None:
         """Send a message, splitting if over Discord's 2000 char limit."""
         chunks = _split_message(text, MAX_DISCORD_LENGTH)
         for i, chunk in enumerate(chunks):
@@ -267,8 +268,8 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
             else:
                 await message.channel.send(chunk)
 
-    async def _send_help(self, message: Message) -> None:
-        embed = discord.Embed(
+    async def _send_help(self, message: Any) -> None:
+        embed = discord.Embed(  # type: ignore[union-attr]
             title="Agentop — Discord Agent Interface",
             description="Talk to your local AI agents via Discord.",
             color=0x3B82F6,
@@ -301,7 +302,7 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
         embed.set_footer(text="Agentop — Local-first multi-agent system")
         await message.reply(embed=embed)
 
-    async def _send_agent_list(self, message: Message) -> None:
+    async def _send_agent_list(self, message: Any) -> None:
         if not self._http_client:
             await message.reply("Bot not initialized.")
             return
@@ -322,7 +323,7 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
         except Exception as e:
             await message.reply(f"Error fetching agents: {e}")
 
-    async def _send_status(self, message: Message) -> None:
+    async def _send_status(self, message: Any) -> None:
         if not self._http_client:
             await message.reply("Bot not initialized.")
             return
@@ -330,7 +331,7 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
             resp = await self._http_client.get(f"{AGENTOP_API_URL}/health")
             if resp.status_code == 200:
                 data = resp.json()
-                embed = discord.Embed(
+                embed = discord.Embed(  # type: ignore[union-attr]
                     title="Agentop Status",
                     color=0x22C55E,  # green
                 )
@@ -339,7 +340,7 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
                 await message.reply(embed=embed)
             else:
                 await message.reply(f"⚠️ Backend unhealthy ({resp.status_code})")
-        except httpx.ConnectError:
+        except httpx.ConnectError:  # type: ignore[union-attr]
             await message.reply("🔌 Backend unreachable")
         except Exception as e:
             await message.reply(f"Error: {e}")
@@ -395,7 +396,7 @@ async def start_bot() -> None:
     _bot_instance = AgentopBot()
     try:
         await _bot_instance.start(DISCORD_BOT_TOKEN)
-    except discord.LoginFailure:
+    except discord.LoginFailure:  # type: ignore[union-attr]
         logger.error("Invalid DISCORD_BOT_TOKEN — bot cannot log in")
     except Exception:
         logger.exception("Discord bot crashed")
