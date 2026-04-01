@@ -89,7 +89,8 @@ jobs:
 
       - name: Detect secrets (detect-secrets)
         run: |
-          pip install detect-secrets --quiet --root-user-action=ignore
+          python3 -m pip install --upgrade pip --quiet 2>/dev/null || true
+          pip install detect-secrets --quiet --root-user-action=ignore 2>/dev/null || pip install detect-secrets --quiet
           detect-secrets scan \
             --exclude-files '\.env\.example$' \
             --exclude-files '\.actrc$' \
