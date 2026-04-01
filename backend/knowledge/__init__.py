@@ -20,7 +20,8 @@ from typing import Any
 
 from backend.config import MEMORY_DIR, PROJECT_ROOT
 from backend.llm import OllamaClient
-from backend.ocr import OCR_EXTENSIONS, extract_text as ocr_extract_text
+from backend.ocr import OCR_EXTENSIONS
+from backend.ocr import extract_text as ocr_extract_text
 from backend.utils import logger
 
 

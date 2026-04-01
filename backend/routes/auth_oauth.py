@@ -190,6 +190,80 @@ TIKTOK_REFRESH_TOKEN={refresh_token}</pre>
     )
 
 
+@router.post("/tiktok/refresh")
+async def tiktok_refresh_token() -> dict:
+    """Exchange TIKTOK_REFRESH_TOKEN for a new access token and save it."""
+    client_key = os.getenv("TIKTOK_CLIENT_KEY", "")
+    client_secret = os.getenv("TIKTOK_CLIENT_SECRET", "")
+    refresh_token = os.getenv("TIKTOK_REFRESH_TOKEN", "")
+
+    if not client_key or not client_secret:
+        raise HTTPException(status_code=500, detail="TIKTOK_CLIENT_KEY or TIKTOK_CLIENT_SECRET not set")
+    if not refresh_token:
+        # Fall back to saved file
+        if TIKTOK_TOKENS_PATH.exists():
+            saved = json.loads(TIKTOK_TOKENS_PATH.read_text())
+            refresh_token = saved.get("refresh_token", "")
+    if not refresh_token:
+        raise HTTPException(
+            status_code=400,
+            detail="No refresh token available. Set TIKTOK_REFRESH_TOKEN in .env or run OAuth first.",
+        )
+
+    async with httpx.AsyncClient(timeout=30) as client:
+        resp = await client.post(
+            "https://open.tiktokapis.com/v2/oauth/token/",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            data={
+                "client_key": client_key,
+                "client_secret": client_secret,
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token,
+            },
+        )
+
+    if resp.status_code != 200:
+        raise HTTPException(
+            status_code=502,
+            detail=f"TikTok returned HTTP {resp.status_code}: {resp.text}",
+        )
+
+    data = resp.json()
+    if data.get("error"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"{data.get('error')}: {data.get('error_description', '')}",
+        )
+
+    access_token = data.get("access_token", "")
+    new_refresh_token = data.get("refresh_token", refresh_token)
+    open_id = data.get("open_id", os.getenv("TIKTOK_OPEN_ID", ""))
+    expires_in = data.get("expires_in", 0)
+    scope = data.get("scope", "")
+
+    # Persist updated tokens
+    _ensure_dir()
+    token_data = {
+        "access_token": access_token,
+        "refresh_token": new_refresh_token,
+        "open_id": open_id,
+        "scope": scope,
+        "expires_in": expires_in,
+        "obtained_at": int(time.time()),
+        "expires_at": int(time.time()) + expires_in,
+    }
+    TIKTOK_TOKENS_PATH.write_text(json.dumps(token_data, indent=2))
+
+    return {
+        "status": "refreshed",
+        "open_id": open_id,
+        "scope": scope,
+        "expires_in_seconds": expires_in,
+        "expires_in_hours": round(expires_in / 3600, 1),
+        "note": f"Update TIKTOK_ACCESS_TOKEN and TIKTOK_REFRESH_TOKEN in .env with new values from {TIKTOK_TOKENS_PATH}",
+    }
+
+
 @router.get("/tiktok/status")
 async def tiktok_token_status() -> dict:
     """Check saved TikTok token status without exposing the token value."""

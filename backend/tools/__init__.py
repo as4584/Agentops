@@ -65,7 +65,9 @@ from backend.models import (
     ModificationType,
     ToolDefinition,
 )
-from backend.ocr import OCR_EXTENSIONS, extract_text as ocr_extract_text, is_supported as ocr_supported
+from backend.ocr import OCR_EXTENSIONS
+from backend.ocr import extract_text as ocr_extract_text
+from backend.ocr import is_supported as ocr_supported
 from backend.utils import logger
 
 
@@ -652,9 +654,7 @@ async def document_ocr(file_path: str, agent_id: str) -> dict[str, Any]:
     """
     try:
         path = Path(
-            os.path.normpath(
-                str(file_path) if Path(file_path).is_absolute() else str(PROJECT_ROOT / file_path)
-            )
+            os.path.normpath(str(file_path) if Path(file_path).is_absolute() else str(PROJECT_ROOT / file_path))
         )
 
         if not str(path).startswith(str(PROJECT_ROOT)):
@@ -670,20 +670,14 @@ async def document_ocr(file_path: str, agent_id: str) -> dict[str, Any]:
         if suffix not in OCR_EXTENSIONS:
             return {
                 "content": "",
-                "error": (
-                    f"Unsupported file type '{suffix}'. "
-                    f"Supported: {', '.join(sorted(OCR_EXTENSIONS))}"
-                ),
+                "error": (f"Unsupported file type '{suffix}'. Supported: {', '.join(sorted(OCR_EXTENSIONS))}"),
             }
 
         markdown = await ocr_extract_text(str(path))
         if markdown is None:
             return {
                 "content": "",
-                "error": (
-                    "GLM-OCR microservice unavailable. "
-                    "Start it with: python -m glmocr.server"
-                ),
+                "error": ("GLM-OCR microservice unavailable. Start it with: python -m glmocr.server"),
             }
 
         logger.info(f"document_ocr by {agent_id}: {file_path} ({len(markdown):,} chars)")

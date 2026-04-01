@@ -71,7 +71,10 @@ _KEYWORD_MAP: list[tuple[list[str], str]] = [
     (["customer", "support", "ticket", "help desk", "complaint"], "cs_agent"),
     (["cpu", "memory", "disk", "network", "uptime", "process", "system info", "infrastructure"], "it_agent"),
     (["search", "docs", "knowledge", "documentation", "source of truth"], "knowledge_agent"),
-    (["ocr", "pdf", "scan", "extract text", "document extract", "image to text", "read pdf", "parse document"], "ocr_agent"),
+    (
+        ["ocr", "pdf", "scan", "extract text", "document extract", "image to text", "read pdf", "parse document"],
+        "ocr_agent",
+    ),
     (["reflect", "goal", "trust", "purpose", "mission", "remember", "soul"], "soul_core"),
 ]
 

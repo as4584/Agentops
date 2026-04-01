@@ -83,19 +83,14 @@ async def extract_text(file_path: str) -> str | None:
         markdown: str = result.get("markdown") or result.get("content", "")
 
         if markdown:
-            logger.info(
-                f"glm-ocr: extracted {len(markdown):,} chars from {path.name}"
-            )
+            logger.info(f"glm-ocr: extracted {len(markdown):,} chars from {path.name}")
             return markdown.strip()
 
         logger.warning(f"glm-ocr: empty response for {path.name}")
         return None
 
     except httpx.ConnectError:
-        logger.warning(
-            f"glm-ocr: microservice unreachable at {GLMOCR_URL} — "
-            "run: python -m glmocr.server"
-        )
+        logger.warning(f"glm-ocr: microservice unreachable at {GLMOCR_URL} — run: python -m glmocr.server")
         return None
     except Exception as exc:
         logger.warning(f"glm-ocr: extraction failed for {path.name}: {exc}")

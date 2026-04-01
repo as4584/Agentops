@@ -20,6 +20,9 @@ from __future__ import annotations
 
 import pytest
 
+# Re-export mock_ollama fixture so all tests can use it
+from backend.tests.mock_ollama import mock_ollama  # noqa: F401
+
 # ── Filename-pattern → marker mapping ────────────────────────────────────────
 # Order matters: first match wins.  More specific patterns go first.
 _MARKER_RULES: list[tuple[str, str]] = [

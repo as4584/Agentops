@@ -25,7 +25,15 @@ import logging
 import os
 import re
 import time
+from pathlib import Path
 from typing import Any
+
+# Load .env if present (needed for standalone mode)
+_env_path = Path(__file__).resolve().parent.parent / ".env"
+if _env_path.exists():
+    from dotenv import load_dotenv
+
+    load_dotenv(_env_path)
 
 try:
     import discord
@@ -47,6 +55,37 @@ except ImportError:
     HAS_HTTPX = False
 
 logger = logging.getLogger("agentop.discord")
+
+# ---------------------------------------------------------------------------
+# Singleton lock — prevent multiple bot instances
+# ---------------------------------------------------------------------------
+_PID_FILE = Path(__file__).resolve().parent.parent / ".discord_bot.pid"
+
+
+def _acquire_lock() -> bool:
+    """Prevent multiple bot instances by writing a PID file."""
+    if _PID_FILE.exists():
+        try:
+            old_pid = int(_PID_FILE.read_text().strip())
+            # Check if that process is still alive
+            os.kill(old_pid, 0)
+            logger.error(f"Another bot instance is running (PID {old_pid}). Kill it first or delete {_PID_FILE}")
+            return False
+        except (ProcessLookupError, ValueError):
+            # Old process is dead — stale PID file
+            pass
+    _PID_FILE.write_text(str(os.getpid()))
+    return True
+
+
+def _release_lock() -> None:
+    """Remove PID file on shutdown."""
+    try:
+        if _PID_FILE.exists() and _PID_FILE.read_text().strip() == str(os.getpid()):
+            _PID_FILE.unlink()
+    except Exception:
+        pass
+
 
 # ---------------------------------------------------------------------------
 # Config
@@ -96,6 +135,7 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
         self._conversation_agents: dict[int, str] = {}  # channel_id → last agent
         self._rate_limits: dict[int, float] = {}  # user_id → last msg time
         self._rate_limit_seconds: float = 2.0
+        self._handled_messages: set[int] = set()  # dedup guard: message IDs already processed
 
     async def setup_hook(self) -> None:
         self._http_client = httpx.AsyncClient(timeout=120.0)  # type: ignore[union-attr]
@@ -150,6 +190,14 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
         content = message.content.strip()
         if not content:
             return
+
+        # Dedup guard — prevent double-processing same message
+        if message.id in self._handled_messages:
+            return
+        self._handled_messages.add(message.id)
+        # Keep set bounded (last 1000 messages)
+        if len(self._handled_messages) > 1000:
+            self._handled_messages = set(list(self._handled_messages)[-500:])
 
         # --- Command routing ---
         if content.startswith(BOT_PREFIX):
@@ -206,9 +254,20 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
         # Show typing indicator while processing
         async with message.channel.typing():
             try:
+                # Inject Discord context so agents give concise, accurate answers
+                discord_prefix = (
+                    "[DISCORD CONTEXT] You are responding via Discord. Rules: "
+                    "1) Keep responses under 500 characters. "
+                    "2) Do NOT hallucinate tool calls or agent names. "
+                    "3) Only reference agents: soul_core, devops_agent, monitor_agent, "
+                    "self_healer_agent, code_review_agent, security_agent, data_agent, "
+                    "comms_agent, cs_agent, it_agent, knowledge_agent. "
+                    "4) Be direct and helpful. No verbose preamble. "
+                    "[/DISCORD CONTEXT]\n\n"
+                )
                 payload: dict[str, Any] = {
                     "agent_id": agent_id,
-                    "message": text,
+                    "message": discord_prefix + text,
                     "context": {
                         "source": "discord",
                         "user": str(message.author),
@@ -229,6 +288,18 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
                     agent_name = data.get("agent_id", agent_id)
                     response_text = data.get("message", "No response.")
                     drift = data.get("drift_status", "GREEN")
+
+                    # Strip any echoed Discord context prefix from response
+                    response_text = re.sub(
+                        r"\[DISCORD CONTEXT\].*?\[/DISCORD CONTEXT\]\s*",
+                        "",
+                        response_text,
+                        flags=re.DOTALL,
+                    ).strip()
+
+                    # Truncate overly verbose responses for Discord
+                    if len(response_text) > 1800:
+                        response_text = response_text[:1800] + "\n\n*...truncated for Discord*"
 
                     # Format response with agent attribution
                     header = f"**[{agent_name}]**"
@@ -313,8 +384,9 @@ class AgentopBot(_ClientBase):  # type: ignore[misc]
                 if isinstance(agents, list):
                     lines = [f"**Available Agents ({len(agents)}):**"]
                     for a in agents:
-                        name = a if isinstance(a, str) else a.get("id", "?")
-                        lines.append(f"• `{name}`")
+                        name = a if isinstance(a, str) else a.get("agent_id", a.get("id", "?"))
+                        role = "" if isinstance(a, str) else f" — {a.get('role', '')[:60]}"
+                        lines.append(f"• `{name}`{role}")
                     await message.reply("\n".join(lines))
                 else:
                     await message.reply(f"Agents: {json.dumps(agents)[:1500]}")
@@ -392,6 +464,9 @@ async def start_bot() -> None:
     if not DISCORD_BOT_TOKEN:
         logger.warning("DISCORD_BOT_TOKEN not set — Discord bot disabled. Set it in .env to enable.")
         return
+    if not _acquire_lock():
+        logger.error("Another bot instance is already running. Aborting.")
+        return
 
     _bot_instance = AgentopBot()
     try:
@@ -400,6 +475,8 @@ async def start_bot() -> None:
         logger.error("Invalid DISCORD_BOT_TOKEN — bot cannot log in")
     except Exception:
         logger.exception("Discord bot crashed")
+    finally:
+        _release_lock()
 
 
 def run_bot() -> None:
@@ -422,10 +499,18 @@ def run_bot() -> None:
         print("ERROR: httpx not installed. Run: pip install httpx")
         return
 
+    if not _acquire_lock():
+        print("ERROR: Another bot instance is already running.")
+        print(f"If this is wrong, delete {_PID_FILE}")
+        return
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
     )
+    import atexit
+
+    atexit.register(_release_lock)
     bot = AgentopBot()
     bot.run(DISCORD_BOT_TOKEN)
 
