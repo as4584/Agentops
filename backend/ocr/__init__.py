@@ -93,9 +93,8 @@ async def extract_text(file_path: str) -> str | None:
 
     except httpx.ConnectError:
         logger.warning(
-            "glm-ocr: microservice unreachable at %s — "
-            "run: python -m glmocr.server",
-            GLMOCR_URL,
+            f"glm-ocr: microservice unreachable at {GLMOCR_URL} — "
+            "run: python -m glmocr.server"
         )
         return None
     except Exception as exc:

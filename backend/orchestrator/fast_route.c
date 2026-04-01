@@ -124,6 +124,15 @@ static const KeywordRule RULES[] = {
     {"find in docs",     "knowledge_agent",   0.90},
     {"what does",        "knowledge_agent",   0.80},
 
+    /* OCR */
+    {"extract text",     "ocr_agent",         0.92},
+    {"read pdf",         "ocr_agent",         0.92},
+    {"parse document",   "ocr_agent",         0.92},
+    {"scan document",    "ocr_agent",         0.90},
+    {"ocr",              "ocr_agent",         0.90},
+    {"image to text",    "ocr_agent",         0.90},
+    {"convert pdf",      "ocr_agent",         0.88},
+
     /* Soul (lowest priority — catches greetings + ambiguous) */
     {"what's up",        "soul_core",         0.88},
     {"whats up",         "soul_core",         0.88},
