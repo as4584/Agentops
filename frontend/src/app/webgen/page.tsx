@@ -62,8 +62,8 @@ function WebgenPageInner() {
     void refreshProjects();
     void api.customers().then((items) => {
       setCustomers(items);
-      if (!selectedCustomerId && items.length > 0) {
-        setSelectedCustomerId(items[0].id);
+      if (items.length > 0) {
+        setSelectedCustomerId((prev) => prev ?? items[0].id);
       }
     });
   }, []);
