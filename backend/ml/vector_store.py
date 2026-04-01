@@ -31,12 +31,12 @@ try:
     QDRANT_AVAILABLE = True
 except ImportError:
     QdrantClient = None  # type: ignore[assignment,misc]
-    Distance = None  # type: ignore[assignment]
-    FieldCondition = None  # type: ignore[assignment]
-    Filter = None  # type: ignore[assignment]
-    MatchValue = None  # type: ignore[assignment]
-    PointStruct = None  # type: ignore[assignment]
-    VectorParams = None  # type: ignore[assignment]
+    Distance = None  # type: ignore[assignment,misc]
+    FieldCondition = None  # type: ignore[assignment,misc]
+    Filter = None  # type: ignore[assignment,misc]
+    MatchValue = None  # type: ignore[assignment,misc]
+    PointStruct = None  # type: ignore[assignment,misc]
+    VectorParams = None  # type: ignore[assignment,misc]
     QDRANT_AVAILABLE = False
 
 
