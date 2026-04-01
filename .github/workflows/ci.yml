@@ -46,6 +46,7 @@ jobs:
 
       - name: pip-audit — dependency CVE scan
         run: |
+          pip install --upgrade pip --quiet
           pip install pip-audit --quiet
           pip-audit --skip-editable
 
