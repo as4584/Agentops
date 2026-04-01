@@ -215,6 +215,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     set_webhook_dispatcher(_scheduler_dispatch)
     scheduler.start()
 
+    # ── Dependency Health Checker — daily CVE + outdated package scan ────────
+    scheduler.add_cron_job(
+        job_id="dep_check_daily",
+        agent_id="devops_agent",
+        message=(
+            "Run automated dependency health check: CVE scan via pip-audit, "
+            "outdated package detection, pyproject.toml ↔ requirements.txt consistency. "
+            "Log results to data/dep_check_report.json and data/shared_events.jsonl."
+        ),
+        cron_expr="0 6 * * *",  # daily at 06:00 UTC
+    )
+    logger.info("dep-checker: daily cron job registered (0 6 * * *)", event_type="dep_checker_init")
+
     # ── Social Media Manager — 24/7 analytics polling jobs ──────────────────
     # Only register if at least one platform token is configured
     _tiktok_ready = bool(os.getenv("TIKTOK_ACCESS_TOKEN"))

@@ -301,7 +301,7 @@ class TestLexRouterWithMockLLM:
 
         result = await resolve_agent("deploy the app to production")
         assert result["agent_id"] == "devops_agent"
-        assert result["method"] in ("llm", "keyword", "fallback", "c_fast", "c_redline")
+        assert result["method"] in ("lex", "keyword", "lex_fallback", "c_fast", "c_red_line")
 
     @pytest.mark.asyncio
     async def test_resolve_agent_security_via_llm(self, mock_ollama):
