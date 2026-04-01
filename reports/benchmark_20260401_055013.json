@@ -1,0 +1,290 @@
+[
+  {
+    "model": "lex-v2",
+    "accuracy": 63.3,
+    "avg_latency_ms": 960.0,
+    "p95_latency_ms": 1190.0,
+    "json_errors": 1,
+    "total": 30,
+    "correct": 19,
+    "by_category": {
+      "basic": {
+        "total": 11,
+        "correct": 11
+      },
+      "ambiguous": {
+        "total": 7,
+        "correct": 2
+      },
+      "multi-intent": {
+        "total": 2,
+        "correct": 0
+      },
+      "soul": {
+        "total": 4,
+        "correct": 4
+      },
+      "trap": {
+        "total": 3,
+        "correct": 1
+      },
+      "tool": {
+        "total": 3,
+        "correct": 1
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "total": 14,
+        "correct": 12
+      },
+      "medium": {
+        "total": 4,
+        "correct": 2
+      },
+      "hard": {
+        "total": 12,
+        "correct": 5
+      }
+    },
+    "details": [
+      {
+        "case": "route_01",
+        "status": "correct",
+        "expected": "devops_agent",
+        "got": "devops_agent",
+        "confidence": 0.95,
+        "latency_ms": 1043.1
+      },
+      {
+        "case": "route_02",
+        "status": "correct",
+        "expected": "security_agent",
+        "got": "security_agent",
+        "confidence": 0.95,
+        "latency_ms": 904.9
+      },
+      {
+        "case": "route_03",
+        "status": "correct",
+        "expected": "soul_core",
+        "got": "soul_core",
+        "confidence": 0.95,
+        "latency_ms": 905.5
+      },
+      {
+        "case": "route_04",
+        "status": "correct",
+        "expected": "self_healer_agent",
+        "got": "self_healer_agent",
+        "confidence": 0.95,
+        "latency_ms": 947.1
+      },
+      {
+        "case": "route_05",
+        "status": "correct",
+        "expected": "code_review_agent",
+        "got": "code_review_agent",
+        "confidence": 0.95,
+        "latency_ms": 973.8
+      },
+      {
+        "case": "route_06",
+        "status": "correct",
+        "expected": "monitor_agent",
+        "got": "monitor_agent",
+        "confidence": 0.9,
+        "latency_ms": 836.1
+      },
+      {
+        "case": "route_07",
+        "status": "correct",
+        "expected": "data_agent",
+        "got": "data_agent",
+        "confidence": 0.95,
+        "latency_ms": 804.8
+      },
+      {
+        "case": "route_08",
+        "status": "correct",
+        "expected": "comms_agent",
+        "got": "comms_agent",
+        "confidence": 0.9,
+        "latency_ms": 880.2
+      },
+      {
+        "case": "route_09",
+        "status": "correct",
+        "expected": "cs_agent",
+        "got": "cs_agent",
+        "confidence": 0.9,
+        "latency_ms": 806.7
+      },
+      {
+        "case": "route_10",
+        "status": "correct",
+        "expected": "knowledge_agent",
+        "got": "knowledge_agent",
+        "confidence": 0.9,
+        "latency_ms": 897.5
+      },
+      {
+        "case": "route_11",
+        "status": "correct",
+        "expected": "it_agent",
+        "got": "it_agent",
+        "confidence": 0.9,
+        "latency_ms": 896.4
+      },
+      {
+        "case": "ambig_01",
+        "status": "wrong",
+        "expected": "monitor_agent",
+        "got": "self_healer_agent",
+        "confidence": 0.8,
+        "latency_ms": 956.8
+      },
+      {
+        "case": "ambig_02",
+        "status": "correct",
+        "expected": "soul_core",
+        "got": "soul_core",
+        "confidence": 0.95,
+        "latency_ms": 976.7
+      },
+      {
+        "case": "ambig_03",
+        "status": "correct",
+        "expected": "self_healer_agent",
+        "got": "self_healer_agent",
+        "confidence": 0.95,
+        "latency_ms": 988.0
+      },
+      {
+        "case": "ambig_04",
+        "status": "wrong",
+        "expected": "security_agent",
+        "got": "security_agent,code_review_agent",
+        "confidence": 0.8,
+        "latency_ms": 1189.7
+      },
+      {
+        "case": "ambig_05",
+        "status": "wrong",
+        "expected": "devops_agent",
+        "got": "soul_core",
+        "confidence": 0.95,
+        "latency_ms": 1147.3
+      },
+      {
+        "case": "ambig_06",
+        "status": "wrong",
+        "expected": "data_agent",
+        "got": "code_review_agent",
+        "confidence": 0.8,
+        "latency_ms": 1789.3
+      },
+      {
+        "case": "ambig_07",
+        "status": "wrong",
+        "expected": "it_agent",
+        "got": "self_healer_agent",
+        "confidence": 0.95,
+        "latency_ms": 969.2
+      },
+      {
+        "case": "multi_01",
+        "status": "json_error",
+        "raw": "{\"agent_id\": \"devops_agent\", \"reasoning\": \"Deployment and testing require devops operations\", \"tools_needed\": [\"git_ops\", \"safe_shell\"], \"urgency\": \"high\", \"confidence\": 0.95}\n\n{\"agent_id\": \"devops_ag"
+      },
+      {
+        "case": "multi_02",
+        "status": "wrong",
+        "expected": "monitor_agent",
+        "got": "self_healer_agent",
+        "confidence": 0.85,
+        "latency_ms": 884.6
+      },
+      {
+        "case": "soul_01",
+        "status": "correct",
+        "expected": "soul_core",
+        "got": "soul_core",
+        "confidence": 0.9,
+        "latency_ms": 1047.4
+      },
+      {
+        "case": "soul_02",
+        "status": "correct",
+        "expected": "soul_core",
+        "got": "soul_core",
+        "confidence": 0.95,
+        "latency_ms": 986.5
+      },
+      {
+        "case": "soul_03",
+        "status": "correct",
+        "expected": "soul_core",
+        "got": "soul_core",
+        "confidence": 0.9,
+        "latency_ms": 902.0
+      },
+      {
+        "case": "soul_04",
+        "status": "correct",
+        "expected": "soul_core",
+        "got": "soul_core",
+        "confidence": 0.95,
+        "latency_ms": 1058.9
+      },
+      {
+        "case": "trap_01",
+        "status": "wrong",
+        "expected": "knowledge_agent",
+        "got": "it_agent",
+        "confidence": 0.9,
+        "latency_ms": 852.0
+      },
+      {
+        "case": "trap_02",
+        "status": "correct",
+        "expected": "devops_agent",
+        "got": "devops_agent",
+        "confidence": 0.95,
+        "latency_ms": 869.4
+      },
+      {
+        "case": "trap_03",
+        "status": "wrong",
+        "expected": "it_agent",
+        "got": "self_healer_agent",
+        "confidence": 0.95,
+        "latency_ms": 917.4
+      },
+      {
+        "case": "tool_01",
+        "status": "wrong",
+        "expected": "knowledge_agent",
+        "got": "data_agent",
+        "confidence": 0.95,
+        "latency_ms": 751.6
+      },
+      {
+        "case": "tool_02",
+        "status": "correct",
+        "expected": "devops_agent",
+        "got": "devops_agent",
+        "confidence": 0.9,
+        "latency_ms": 897.0
+      },
+      {
+        "case": "tool_03",
+        "status": "wrong",
+        "expected": "monitor_agent",
+        "got": "it_agent",
+        "confidence": 0.9,
+        "latency_ms": 748.4
+      }
+    ]
+  }
+]

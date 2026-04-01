@@ -1,0 +1,10 @@
+{
+  "id": "token_optimization",
+  "name": "Token Optimization & Vocabulary Power",
+  "version": "1.0.0",
+  "description": "LLM prompt engineering skill grounded in Shannon's information theory. Optimizes context window budget, compresses prompts using named concepts and frameworks, and manages computational cost through efficient vocabulary and knowledge cluster activation.",
+  "allowed_agents": ["*"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

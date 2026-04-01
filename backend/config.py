@@ -7,6 +7,7 @@ Environment variables override defaults for deployment flexibility.
 
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 
@@ -204,16 +205,35 @@ def _parse_cors_origins() -> list[str]:
     origins: list[str] = []
     for origin in raw.split(","):
         origin = origin.strip()
-        if origin == "*":
-            # Wildcard is incompatible with credentials and is a security risk.
-            # Silently skip it — callers must list origins explicitly.
+        if not origin:
             continue
-        if origin:
-            origins.append(origin)
+        if origin == "*":
+            raise ValueError(
+                "AGENTOP_CORS_ORIGINS cannot contain '*'. Explicit origins are required when allow_credentials=True."
+            )
+
+        parsed = urlparse(origin)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise ValueError(
+                f"Invalid origin '{origin}' in AGENTOP_CORS_ORIGINS. Expected absolute URL like http://localhost:3007"
+            )
+        if parsed.path not in {"", "/"} or parsed.params or parsed.query or parsed.fragment:
+            raise ValueError(
+                f"Invalid origin '{origin}' in AGENTOP_CORS_ORIGINS. Origins must not include paths, query, or fragments."
+            )
+
+        # Normalize trailing slash and de-duplicate while preserving order.
+        normalized = f"{parsed.scheme}://{parsed.netloc}"
+        if normalized not in origins:
+            origins.append(normalized)
     return origins or ["http://localhost:3007", "http://127.0.0.1:3007"]
 
 
 CORS_ORIGINS: list[str] = _parse_cors_origins()
+
+# Optional startup prewarm for the local knowledge vector index.
+KNOWLEDGE_SEED_ON_STARTUP: bool = os.getenv("KNOWLEDGE_SEED_ON_STARTUP", "true").lower() == "true"
+KNOWLEDGE_SEED_FORCE_REBUILD: bool = os.getenv("KNOWLEDGE_SEED_FORCE_REBUILD", "false").lower() == "true"
 
 # Prohibited patterns for safe_shell
 SAFE_SHELL_BLACKLIST: list[str] = [

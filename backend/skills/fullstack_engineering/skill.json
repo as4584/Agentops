@@ -1,0 +1,10 @@
+{
+  "id": "fullstack_engineering",
+  "name": "Full-Stack Engineering & Architecture",
+  "version": "1.0.0",
+  "description": "Comprehensive patterns for full-stack web application development. Covers API design, frontend architecture, state management, database design, deployment, and testing strategies.",
+  "allowed_agents": ["*"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

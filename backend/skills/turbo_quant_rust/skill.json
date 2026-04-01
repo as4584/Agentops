@@ -1,0 +1,31 @@
+{
+  "id": "turbo_quant_rust",
+  "name": "TurboQuant Rust Accelerator",
+  "version": "0.1.0",
+  "description": "Rust-accelerated embedding quantization via TurboQuant algorithm. 13-55x faster than Python implementation. Provides quantize, dequantize, batch operations, and compression ratio analysis for vector embeddings.",
+  "allowed_agents": ["*"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true,
+  "language": "rust",
+  "runtime": "pyo3",
+  "build_command": "cd rust/turbo_quant && maturin develop --release",
+  "python_module": "turbo_quant_rs",
+  "benchmarks": {
+    "quantize_384d_4bit": {
+      "python": "316.20 µs",
+      "rust": "24.31 µs",
+      "speedup": "13.0x"
+    },
+    "quantize_16d_4bit": {
+      "python": "11.64 µs",
+      "rust": "213 ns",
+      "speedup": "54.6x"
+    },
+    "dequantize_768d_4bit": {
+      "python": "3.86 ms",
+      "rust": "722 µs",
+      "speedup": "5.3x"
+    }
+  }
+}

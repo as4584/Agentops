@@ -239,7 +239,7 @@ def main() -> None:
             cwd=ROOT,
             label="backend",
         )
-        _wait_for_healthy(backend_port, "/health", timeout=30, label=f"Backend :{backend_port}")
+        _wait_for_healthy(backend_port, "/health", timeout=90, label=f"Backend :{backend_port}")
 
     # ---- Start Frontend ----
     print("\n🎨 Starting dashboard...")

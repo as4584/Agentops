@@ -1,0 +1,537 @@
+[
+  {
+    "model": "lex-v2",
+    "accuracy": 60.0,
+    "avg_latency_ms": 653.0,
+    "p95_latency_ms": 716.0,
+    "json_errors": 0,
+    "total": 10,
+    "correct": 6,
+    "by_category": {
+      "basic": {
+        "total": 10,
+        "correct": 6
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "total": 9,
+        "correct": 6
+      },
+      "medium": {
+        "total": 1,
+        "correct": 0
+      }
+    },
+    "details": [
+      {
+        "case": "route_01",
+        "status": "correct",
+        "expected": "devops_agent",
+        "got": "devops_agent",
+        "confidence": 0.9,
+        "latency_ms": 696.5
+      },
+      {
+        "case": "route_02",
+        "status": "correct",
+        "expected": "security_agent",
+        "got": "security_agent",
+        "confidence": 0.9,
+        "latency_ms": 670.3
+      },
+      {
+        "case": "route_03",
+        "status": "wrong",
+        "expected": "soul_core",
+        "got": "knowledge_agent",
+        "confidence": 0.8,
+        "latency_ms": 604.4
+      },
+      {
+        "case": "route_04",
+        "status": "wrong",
+        "expected": "self_healer_agent",
+        "got": "devops_agent",
+        "confidence": 0.9,
+        "latency_ms": 714.9
+      },
+      {
+        "case": "route_05",
+        "status": "correct",
+        "expected": "code_review_agent",
+        "got": "code_review_agent",
+        "confidence": 1.0,
+        "latency_ms": 697.6
+      },
+      {
+        "case": "route_06",
+        "status": "correct",
+        "expected": "monitor_agent",
+        "got": "monitor_agent",
+        "confidence": 0.9,
+        "latency_ms": 558.2
+      },
+      {
+        "case": "route_07",
+        "status": "correct",
+        "expected": "data_agent",
+        "got": "data_agent",
+        "confidence": 0.9,
+        "latency_ms": 633.2
+      },
+      {
+        "case": "route_08",
+        "status": "correct",
+        "expected": "comms_agent",
+        "got": "comms_agent",
+        "confidence": 0.9,
+        "latency_ms": 546.2
+      },
+      {
+        "case": "route_09",
+        "status": "wrong",
+        "expected": "cs_agent",
+        "got": "comms_agent",
+        "confidence": 0.9,
+        "latency_ms": 695.4
+      },
+      {
+        "case": "route_10",
+        "status": "wrong",
+        "expected": "knowledge_agent",
+        "got": "data_agent",
+        "confidence": 0.8,
+        "latency_ms": 716.4
+      }
+    ]
+  },
+  {
+    "model": "llama3.2",
+    "accuracy": 70.0,
+    "avg_latency_ms": 627.0,
+    "p95_latency_ms": 741.0,
+    "json_errors": 0,
+    "total": 10,
+    "correct": 7,
+    "by_category": {
+      "basic": {
+        "total": 10,
+        "correct": 7
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "total": 9,
+        "correct": 7
+      },
+      "medium": {
+        "total": 1,
+        "correct": 0
+      }
+    },
+    "details": [
+      {
+        "case": "route_01",
+        "status": "correct",
+        "expected": "devops_agent",
+        "got": "devops_agent",
+        "confidence": 0.9,
+        "latency_ms": 712.4
+      },
+      {
+        "case": "route_02",
+        "status": "correct",
+        "expected": "security_agent",
+        "got": "security_agent",
+        "confidence": 0.9,
+        "latency_ms": 600.2
+      },
+      {
+        "case": "route_03",
+        "status": "wrong",
+        "expected": "soul_core",
+        "got": "knowledge_agent",
+        "confidence": 0.8,
+        "latency_ms": 583.4
+      },
+      {
+        "case": "route_04",
+        "status": "wrong",
+        "expected": "self_healer_agent",
+        "got": "devops_agent",
+        "confidence": 0.9,
+        "latency_ms": 741.3
+      },
+      {
+        "case": "route_05",
+        "status": "correct",
+        "expected": "code_review_agent",
+        "got": "code_review_agent",
+        "confidence": 1.0,
+        "latency_ms": 632.9
+      },
+      {
+        "case": "route_06",
+        "status": "correct",
+        "expected": "monitor_agent",
+        "got": "monitor_agent",
+        "confidence": 0.9,
+        "latency_ms": 571.0
+      },
+      {
+        "case": "route_07",
+        "status": "correct",
+        "expected": "data_agent",
+        "got": "data_agent",
+        "confidence": 0.9,
+        "latency_ms": 536.7
+      },
+      {
+        "case": "route_08",
+        "status": "correct",
+        "expected": "comms_agent",
+        "got": "comms_agent",
+        "confidence": 0.9,
+        "latency_ms": 588.0
+      },
+      {
+        "case": "route_09",
+        "status": "wrong",
+        "expected": "cs_agent",
+        "got": "comms_agent",
+        "confidence": 0.9,
+        "latency_ms": 583.5
+      },
+      {
+        "case": "route_10",
+        "status": "correct",
+        "expected": "knowledge_agent",
+        "got": "knowledge_agent",
+        "confidence": 0.9,
+        "latency_ms": 716.4
+      }
+    ]
+  },
+  {
+    "model": "llama3.2:3b-instruct-q4_K_M",
+    "accuracy": 70.0,
+    "avg_latency_ms": 633.0,
+    "p95_latency_ms": 746.0,
+    "json_errors": 0,
+    "total": 10,
+    "correct": 7,
+    "by_category": {
+      "basic": {
+        "total": 10,
+        "correct": 7
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "total": 9,
+        "correct": 7
+      },
+      "medium": {
+        "total": 1,
+        "correct": 0
+      }
+    },
+    "details": [
+      {
+        "case": "route_01",
+        "status": "correct",
+        "expected": "devops_agent",
+        "got": "devops_agent",
+        "confidence": 0.9,
+        "latency_ms": 668.6
+      },
+      {
+        "case": "route_02",
+        "status": "correct",
+        "expected": "security_agent",
+        "got": "security_agent",
+        "confidence": 0.9,
+        "latency_ms": 745.9
+      },
+      {
+        "case": "route_03",
+        "status": "wrong",
+        "expected": "soul_core",
+        "got": "knowledge_agent",
+        "confidence": 0.8,
+        "latency_ms": 579.0
+      },
+      {
+        "case": "route_04",
+        "status": "wrong",
+        "expected": "self_healer_agent",
+        "got": "devops_agent",
+        "confidence": 0.9,
+        "latency_ms": 612.8
+      },
+      {
+        "case": "route_05",
+        "status": "correct",
+        "expected": "code_review_agent",
+        "got": "code_review_agent",
+        "confidence": 1.0,
+        "latency_ms": 611.3
+      },
+      {
+        "case": "route_06",
+        "status": "correct",
+        "expected": "monitor_agent",
+        "got": "monitor_agent",
+        "confidence": 0.9,
+        "latency_ms": 522.0
+      },
+      {
+        "case": "route_07",
+        "status": "correct",
+        "expected": "data_agent",
+        "got": "data_agent",
+        "confidence": 0.9,
+        "latency_ms": 720.2
+      },
+      {
+        "case": "route_08",
+        "status": "correct",
+        "expected": "comms_agent",
+        "got": "comms_agent",
+        "confidence": 0.9,
+        "latency_ms": 572.9
+      },
+      {
+        "case": "route_09",
+        "status": "wrong",
+        "expected": "cs_agent",
+        "got": "comms_agent",
+        "confidence": 0.9,
+        "latency_ms": 578.6
+      },
+      {
+        "case": "route_10",
+        "status": "correct",
+        "expected": "knowledge_agent",
+        "got": "knowledge_agent",
+        "confidence": 0.9,
+        "latency_ms": 720.5
+      }
+    ]
+  },
+  {
+    "model": "llama3.1:8b",
+    "accuracy": 70.0,
+    "avg_latency_ms": 1631.0,
+    "p95_latency_ms": 1944.0,
+    "json_errors": 0,
+    "total": 10,
+    "correct": 7,
+    "by_category": {
+      "basic": {
+        "total": 10,
+        "correct": 7
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "total": 9,
+        "correct": 6
+      },
+      "medium": {
+        "total": 1,
+        "correct": 1
+      }
+    },
+    "details": [
+      {
+        "case": "route_01",
+        "status": "correct",
+        "expected": "devops_agent",
+        "got": "devops_agent",
+        "confidence": 0.9,
+        "latency_ms": 1514.0
+      },
+      {
+        "case": "route_02",
+        "status": "correct",
+        "expected": "security_agent",
+        "got": "security_agent",
+        "confidence": 0.9,
+        "latency_ms": 1896.9
+      },
+      {
+        "case": "route_03",
+        "status": "correct",
+        "expected": "soul_core",
+        "got": "soul_core",
+        "confidence": 0.8,
+        "latency_ms": 1943.5
+      },
+      {
+        "case": "route_04",
+        "status": "wrong",
+        "expected": "self_healer_agent",
+        "got": "devops_agent",
+        "confidence": 0.9,
+        "latency_ms": 1478.5
+      },
+      {
+        "case": "route_05",
+        "status": "correct",
+        "expected": "code_review_agent",
+        "got": "code_review_agent",
+        "confidence": 0.9,
+        "latency_ms": 1720.6
+      },
+      {
+        "case": "route_06",
+        "status": "wrong",
+        "expected": "monitor_agent",
+        "got": "devops_agent",
+        "confidence": 0.8,
+        "latency_ms": 1607.7
+      },
+      {
+        "case": "route_07",
+        "status": "correct",
+        "expected": "data_agent",
+        "got": "data_agent",
+        "confidence": 0.9,
+        "latency_ms": 1609.3
+      },
+      {
+        "case": "route_08",
+        "status": "correct",
+        "expected": "comms_agent",
+        "got": "comms_agent",
+        "confidence": 0.9,
+        "latency_ms": 1467.3
+      },
+      {
+        "case": "route_09",
+        "status": "correct",
+        "expected": "cs_agent",
+        "got": "cs_agent",
+        "confidence": 0.9,
+        "latency_ms": 1402.3
+      },
+      {
+        "case": "route_10",
+        "status": "wrong",
+        "expected": "knowledge_agent",
+        "got": "data_agent",
+        "confidence": 0.8,
+        "latency_ms": 1672.3
+      }
+    ]
+  },
+  {
+    "model": "llama3.1:8b-instruct-q4_K_M",
+    "accuracy": 80.0,
+    "avg_latency_ms": 1558.0,
+    "p95_latency_ms": 1803.0,
+    "json_errors": 0,
+    "total": 10,
+    "correct": 8,
+    "by_category": {
+      "basic": {
+        "total": 10,
+        "correct": 8
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "total": 9,
+        "correct": 7
+      },
+      "medium": {
+        "total": 1,
+        "correct": 1
+      }
+    },
+    "details": [
+      {
+        "case": "route_01",
+        "status": "correct",
+        "expected": "devops_agent",
+        "got": "devops_agent",
+        "confidence": 0.9,
+        "latency_ms": 1514.5
+      },
+      {
+        "case": "route_02",
+        "status": "correct",
+        "expected": "security_agent",
+        "got": "security_agent",
+        "confidence": 0.9,
+        "latency_ms": 1803.5
+      },
+      {
+        "case": "route_03",
+        "status": "correct",
+        "expected": "soul_core",
+        "got": "soul_core",
+        "confidence": 0.8,
+        "latency_ms": 1684.8
+      },
+      {
+        "case": "route_04",
+        "status": "wrong",
+        "expected": "self_healer_agent",
+        "got": "devops_agent",
+        "confidence": 0.9,
+        "latency_ms": 1480.5
+      },
+      {
+        "case": "route_05",
+        "status": "correct",
+        "expected": "code_review_agent",
+        "got": "code_review_agent",
+        "confidence": 0.9,
+        "latency_ms": 1730.9
+      },
+      {
+        "case": "route_06",
+        "status": "correct",
+        "expected": "monitor_agent",
+        "got": "monitor_agent",
+        "confidence": 0.9,
+        "latency_ms": 1369.9
+      },
+      {
+        "case": "route_07",
+        "status": "correct",
+        "expected": "data_agent",
+        "got": "data_agent",
+        "confidence": 0.9,
+        "latency_ms": 1590.9
+      },
+      {
+        "case": "route_08",
+        "status": "correct",
+        "expected": "comms_agent",
+        "got": "comms_agent",
+        "confidence": 0.9,
+        "latency_ms": 1339.3
+      },
+      {
+        "case": "route_09",
+        "status": "correct",
+        "expected": "cs_agent",
+        "got": "cs_agent",
+        "confidence": 0.9,
+        "latency_ms": 1418.8
+      },
+      {
+        "case": "route_10",
+        "status": "wrong",
+        "expected": "knowledge_agent",
+        "got": "devops_agent",
+        "confidence": 0.8,
+        "latency_ms": 1649.7
+      }
+    ]
+  }
+]

@@ -1,0 +1,122 @@
+{
+  "total_commits": 32,
+  "date_range": {
+    "start": "2026-03-02T17:53:09-05:00",
+    "end": "2026-03-31T12:18:44-04:00"
+  },
+  "commits_by_week": {
+    "2026-W14": 15,
+    "2026-W13": 2,
+    "2026-W12": 2,
+    "2026-W10": 13
+  },
+  "feature_commits": [
+    {
+      "date": "2026-03-31T00:21:31-04:00",
+      "hash": "afdfd4c5",
+      "subject": "fix(e2e): mock backend APIs in chat test + fix catch-all route crash"
+    },
+    {
+      "date": "2026-03-30T23:47:20-04:00",
+      "hash": "230c7db6",
+      "subject": "fix(ci): reset addopts in ml-pipeline + boost ML coverage to 97%"
+    },
+    {
+      "date": "2026-03-30T23:15:52-04:00",
+      "hash": "29d111b3",
+      "subject": "fix(ci): resolve all act CI blockers \u2014 python-checks, frontend-checks, secret-scan green"
+    },
+    {
+      "date": "2026-03-30T22:49:50-04:00",
+      "hash": "73a7015c",
+      "subject": "chore(lint): fix ruff/format issues in new test files"
+    },
+    {
+      "date": "2026-03-30T22:49:18-04:00",
+      "hash": "788df005",
+      "subject": "fix(test): correct import path for schedule_routes in test_scheduler_routes"
+    },
+    {
+      "date": "2026-03-30T22:47:14-04:00",
+      "hash": "3717ada8",
+      "subject": "feat(webgen): persist all generated projects + add setup_deps.sh"
+    },
+    {
+      "date": "2026-03-30T22:44:02-04:00",
+      "hash": "c85d271c",
+      "subject": "feat(health): add /health/deps endpoint for dependency status"
+    },
+    {
+      "date": "2026-03-30T22:42:32-04:00",
+      "hash": "8091fc86",
+      "subject": "feat(gatekeeper): wire real pytest/ruff execution instead of trust-based checks"
+    },
+    {
+      "date": "2026-03-30T22:40:56-04:00",
+      "hash": "45084aec",
+      "subject": "chore(ci): fix ruff lint, format, mypy, test suite for CI green"
+    },
+    {
+      "date": "2026-03-30T08:56:41-04:00",
+      "hash": "2e9bdcf5",
+      "subject": "feat(ml): eval framework, A/B testing, benchmarks, Qdrant vector store, TurboQuant"
+    },
+    {
+      "date": "2026-03-30T04:09:11-04:00",
+      "hash": "44b8e493",
+      "subject": "feat: ML pipeline infrastructure + Qwen TTS + monitoring + eval framework"
+    },
+    {
+      "date": "2026-03-30T01:16:08-04:00",
+      "hash": "a493befa",
+      "subject": "feat: CI/CD hardened to production-grade"
+    },
+    {
+      "date": "2026-03-07T01:36:27-05:00",
+      "hash": "31afa3ec",
+      "subject": "feat: add GSD workflow framework (map-codebase, plan-phase, execute-phase, quick, verify-work)"
+    },
+    {
+      "date": "2026-03-06T03:51:46-05:00",
+      "hash": "d7b8824c",
+      "subject": "feat: gateway adapter, tool ID sanitization, routes, video pipeline, webgen site, Lighthouse 100/100/96/100"
+    },
+    {
+      "date": "2026-03-03T22:17:42-05:00",
+      "hash": "73bbffc9",
+      "subject": "feat: enforce local-llm sandbox release gates with integration tests"
+    },
+    {
+      "date": "2026-03-03T21:56:44-05:00",
+      "hash": "0aaf8aa6",
+      "subject": "feat: restructure repo, add sandbox + gatekeeper, and enforce LHCI/Playwright gates"
+    },
+    {
+      "date": "2026-03-03T01:46:45-05:00",
+      "hash": "c67b94ad",
+      "subject": "fix: eliminate 404/429 errors, add auto-retry and health checks"
+    },
+    {
+      "date": "2026-03-03T01:18:49-05:00",
+      "hash": "bd377183",
+      "subject": "fix: rate limit, cloud LLMs, and chat UX overhaul"
+    },
+    {
+      "date": "2026-03-03T00:43:13-05:00",
+      "hash": "e2d25376",
+      "subject": "fix: use Electron for native window on WSL instead of pywebview"
+    },
+    {
+      "date": "2026-03-03T00:22:36-05:00",
+      "hash": "4fcd25fd",
+      "subject": "fix: install PyQt5 backend for native pywebview window"
+    }
+  ],
+  "performance_improvements": [
+    {
+      "date": "2026-03-30T08:56:41-04:00",
+      "hash": "2e9bdcf5",
+      "subject": "feat(ml): eval framework, A/B testing, benchmarks, Qdrant vector store, TurboQuant"
+    }
+  ]
+}

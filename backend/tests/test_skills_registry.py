@@ -147,3 +147,36 @@ def test_skills_api_toggle_and_reload(tmp_path: Path, monkeypatch):
     reloaded = client.post("/skills/reload")
     assert reloaded.status_code == 200
     assert "loaded_count" in reloaded.json()
+
+
+def test_manifest_skill_overrides_same_id_legacy_skill(tmp_path: Path):
+    from backend.skills.registry import SkillRegistry
+
+    skills_root = tmp_path / "skills"
+    legacy_dir = tmp_path / "legacy"
+    state_path = tmp_path / "skills_state.json"
+
+    _write_manifest_skill(
+        skills_root,
+        "business_analysis_manifest",
+        "business_analysis",
+        "Business Analysis Manifest",
+    )
+
+    legacy_dir.mkdir(parents=True, exist_ok=True)
+    (legacy_dir / "business_analysis.json").write_text(
+        json.dumps(
+            {
+                "title": "Business Analysis Legacy",
+                "domain": "Legacy business domain",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    registry = SkillRegistry(skills_root=skills_root, legacy_skills_dir=legacy_dir, state_path=state_path)
+    skill = registry.get_skill("business_analysis")
+
+    assert skill is not None
+    assert skill.source_type == "manifest"
+    assert skill.name == "Business Analysis Manifest"

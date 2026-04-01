@@ -98,6 +98,25 @@ async def test_call_tool_when_cli_missing_returns_error(monkeypatch):
     assert "docker" in result["error"].lower()
 
 
+@pytest.mark.asyncio
+async def test_mcp_bridge_graceful_degradation_lifecycle_without_docker(monkeypatch):
+    """Initialise + call path should degrade cleanly when Docker CLI is absent."""
+    monkeypatch.setattr("backend.mcp.MCP_GATEWAY_ENABLED", True)
+
+    with patch("shutil.which", return_value=None):
+        bridge = MCPBridge()
+        await bridge.initialise()
+
+    status = bridge.get_status()
+    result = await bridge.call_tool("mcp_github_list_issues", "devops_agent", {})
+
+    assert status["enabled"] is True
+    assert status["initialised"] is True
+    assert status["cli_available"] is False
+    assert result["success"] is False
+    assert "docker" in result["error"].lower()
+
+
 # ---------------------------------------------------------------------------
 # Unknown tool name
 # ---------------------------------------------------------------------------

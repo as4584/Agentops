@@ -7,7 +7,7 @@ A production-grade, local-first multi-agent system with **architectural drift go
 ## Architecture Overview
 
 ```
-Next.js Dashboard (localhost:3000)
+Next.js Dashboard (localhost:3007)
          │
          │ REST API
          ▼
@@ -73,7 +73,7 @@ npm run dev
 
 ### 4. Open the Dashboard
 
-Navigate to **http://localhost:3000**
+Navigate to **http://localhost:3007**
 
 ---
 
