@@ -124,7 +124,7 @@ AGENT_ALIASES: dict[str, str] = {
 _ClientBase = discord.Client if HAS_DISCORD else object  # type: ignore[union-attr]
 
 
-class AgentopBot(_ClientBase):  # type: ignore[misc]
+class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
     """Discord bot that routes messages to Agentop agents."""
 
     def __init__(self) -> None:
