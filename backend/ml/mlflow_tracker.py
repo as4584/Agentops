@@ -13,6 +13,7 @@ Usage:
 
 from __future__ import annotations
 
+import itertools
 import json
 import time
 from collections.abc import Generator
@@ -37,6 +38,8 @@ except ImportError:
 
 class MLflowTracker:
     """MLflow-backed experiment tracker with comprehensive LLM run logging."""
+
+    _id_counter = itertools.count()
 
     def __init__(
         self,
@@ -69,7 +72,7 @@ class MLflowTracker:
     ) -> Generator[str, None, None]:
         """Context manager to start and auto-close an MLflow run."""
         if not MLFLOW_AVAILABLE:
-            run_id = f"fallback_{int(time.time() * 1000)}"
+            run_id = f"fallback_{int(time.time() * 1000)}_{next(MLflowTracker._id_counter)}"
             self._active_runs[run_id] = {
                 "name": run_name,
                 "params": params or {},
