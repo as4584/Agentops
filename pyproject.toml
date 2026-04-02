@@ -24,7 +24,7 @@ dependencies = [
     "apscheduler>=3.10.0",
     "sqlalchemy>=2.0.0",
     "playwright>=1.40.0",
-    "anthropic>=0.40.0",
+    "anthropic>=0.87.0",
     "pypdf>=4.0.0",
     "numpy>=1.26.0",
 ]
@@ -99,6 +99,23 @@ check_untyped_defs = false
 asyncio_mode = "auto"
 addopts = "-x --tb=short -q --cov=backend --cov=deerflow --cov-report=term-missing"
 testpaths = ["backend/tests", "deerflow/tests"]
+markers = [
+    "ml: ML subsystem — eval framework, scoring, pipeline, experiments",
+    "gateway: API gateway — auth, ACL, secrets, rate-limiting",
+    "sandbox: Docker sandbox isolation and execution routing",
+    "agents: Agent orchestration — GSD, Gatekeeper, agent-to-agent",
+    "tools: Native tool implementations and tool ID registry",
+    "skills: Skill registry, manifest loading, skill CRUD",
+    "webgen: Website generation pipeline and enforcement",
+    "browser: Browser automation, Playwright, CDP",
+    "mcp: MCP Docker bridge and tool routing",
+    "middleware: Drift Guard governance middleware",
+    "memory: MemoryStore namespaced persistence",
+    "models: Pydantic model validation",
+    "deerflow: DeerFlow delegation, execution, middleware",
+    "integration: Multi-component integration tests",
+    "unit: Pure unit tests with full mocking",
+]
 
 [tool.coverage.run]
 omit = [

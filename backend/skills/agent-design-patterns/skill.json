@@ -1,0 +1,10 @@
+{
+  "id": "agent-design-patterns",
+  "name": "AI Agent Design Patterns",
+  "version": "1.0.0",
+  "description": "Production agent architecture patterns extracted from ordostudio. Covers agent behavior contracts, 15-20 tool orchestration, memory isolation, human-agent boundaries, and CRM-integrated workflows.",
+  "allowed_agents": ["*"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

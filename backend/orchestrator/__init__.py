@@ -615,6 +615,20 @@ class AgentOrchestrator:
             "business_profiles_size_mb": round(stats["business_profiles_size_bytes"] / (1024 * 1024), 4),
         }
 
+    async def ensure_knowledge_index(self, force_rebuild: bool = False) -> dict[str, Any]:
+        """Load/build the local vector DB and return index stats."""
+        await self._knowledge_store.ensure_index(force_rebuild=force_rebuild)
+        stats = self._knowledge_store.stats()
+        return {
+            "agent_id": self._knowledge_agent_id,
+            "chunks": stats["chunks"],
+            "index_size_bytes": stats["file_size_bytes"],
+            "index_size_mb": round(stats["file_size_bytes"] / (1024 * 1024), 4),
+            "business_profile_vectors": stats["business_profile_vectors"],
+            "business_profiles_size_bytes": stats["business_profiles_size_bytes"],
+            "business_profiles_size_mb": round(stats["business_profiles_size_bytes"] / (1024 * 1024), 4),
+        }
+
     def get_agent_memory_usage(self) -> list[dict[str, Any]]:
         """Return per-agent memory usage in bytes and megabytes for all agents."""
         results = []

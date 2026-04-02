@@ -23,7 +23,7 @@ jobs:
           cache: pip
 
       - name: Install dev dependencies
-        run: pip install -e ".[dev]" --quiet
+        run: pip install -e ".[dev]" --quiet --root-user-action=ignore
 
       - name: Ruff — lint
         run: ruff check .
@@ -46,7 +46,8 @@ jobs:
 
       - name: pip-audit — dependency CVE scan
         run: |
-          pip install pip-audit --quiet
+          pip install --upgrade pip --quiet --root-user-action=ignore
+          pip install pip-audit --quiet --root-user-action=ignore
           pip-audit --skip-editable
 
   # ── Frontend: lint + typecheck + build + CVE scan ────────────────────
@@ -88,7 +89,8 @@ jobs:
 
       - name: Detect secrets (detect-secrets)
         run: |
-          pip install detect-secrets --quiet
+          python3 -m pip install --upgrade pip --quiet 2>/dev/null || true
+          pip install detect-secrets --quiet --root-user-action=ignore 2>/dev/null || pip install detect-secrets --quiet
           detect-secrets scan \
             --exclude-files '\.env\.example$' \
             --exclude-files '\.actrc$' \

@@ -70,6 +70,9 @@ data/*.db
 data/*.json
 data/agents/
 
+# Social media runtime token cache (sensitive)
+backend/memory/social_media/*.json
+
 # Generated reports/artifacts
 reports/lhci/mobile/
 reports/lhci/desktop/
@@ -87,3 +90,6 @@ data/higgsfield/.session_cookies.json
 data/higgsfield/evidence/
 *.coverage
 backend/ml/experiments/
+*.so
+.openclaw/
+.openclaw/

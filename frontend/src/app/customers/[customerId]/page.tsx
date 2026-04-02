@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import {
@@ -42,32 +42,32 @@ export default function CustomerDetailPage() {
   const [deploymentQuery, setDeploymentQuery] = useState('');
   const [qrFilter, setQrFilter] = useState<string>('all');
 
-  async function loadCustomer() {
+  const loadCustomer = useCallback(async () => {
     setLoading(true);
     try {
       const data = await api.customer(customerId);
       setCustomer(data);
       const deploymentResponse = await api.customerDeployments(customerId);
       setDeployments(deploymentResponse.deployments);
-      if (data.services.length > 0 && !selectedServiceId) {
-        setSelectedServiceId(data.services[0].id);
+      if (data.services.length > 0) {
+        setSelectedServiceId((prev) => prev ?? data.services[0].id);
       }
     } finally {
       setLoading(false);
     }
-  }
+  }, [customerId]);
 
-  async function loadTimeline(serviceId: string) {
+  const loadTimeline = useCallback(async (serviceId: string) => {
     const timeline = await api.customerServiceTimeline(customerId, serviceId);
     setTimelineEvents(timeline.events);
-  }
+  }, [customerId]);
 
   useEffect(() => {
     if (!customerId) {
       return;
     }
     void loadCustomer();
-  }, [customerId]);
+  }, [customerId, loadCustomer]);
 
   useEffect(() => {
     if (!selectedServiceId) {
@@ -75,7 +75,7 @@ export default function CustomerDetailPage() {
       return;
     }
     void loadTimeline(selectedServiceId);
-  }, [selectedServiceId]);
+  }, [selectedServiceId, loadTimeline]);
 
   const tokenUsagePercent = useMemo(() => {
     if (!customer || customer.monthly_token_budget <= 0) {

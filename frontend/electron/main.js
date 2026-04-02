@@ -13,6 +13,9 @@ app.disableHardwareAcceleration()
 app.commandLine.appendSwitch('no-sandbox')
 app.commandLine.appendSwitch('disable-setuid-sandbox')
 app.commandLine.appendSwitch('disable-dev-shm-usage')
+app.commandLine.appendSwitch('disable-software-rasterizer')
+app.commandLine.appendSwitch('disable-gpu-compositing')
+app.commandLine.appendSwitch('in-process-gpu')
 
 let mainWindow
 let tray
@@ -48,6 +51,9 @@ const DASHBOARD_URL = `http://localhost:${DASHBOARD_PORT}`
 function waitForPort(url, maxMs = 60000) {
   return new Promise((resolve, reject) => {
     const start = Date.now()
+    const delay = 800   // initial poll interval
+    const maxDelay = 3000
+    let currentDelay = delay
     const check = () => {
       http.get(url, (res) => {
         // Only accept 200 — not 404 or other codes
@@ -65,7 +71,8 @@ function waitForPort(url, maxMs = 60000) {
         reject(new Error(`Timed out waiting for ${url} after ${maxMs}ms`))
         return
       }
-      setTimeout(check, 800)
+      setTimeout(check, currentDelay)
+      currentDelay = Math.min(currentDelay * 1.5, maxDelay)
     }
     check()
   })
@@ -91,6 +98,14 @@ async function createWindow() {
   })
 
   mainWindow.removeMenu()
+
+  // Wait for backend API to be healthy before loading frontend
+  try {
+    await waitForPort(`http://localhost:8000/health`, 90000)
+    console.log('Backend API healthy')
+  } catch (err) {
+    console.warn('Backend not ready:', err.message, '— loading frontend anyway')
+  }
 
   // Wait for Next.js to be ready before loading
   try {

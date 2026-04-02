@@ -1560,6 +1560,68 @@ HIGGSFIELD_RESEARCH_AGENT_DEFINITION = AgentDefinition(
 
 
 # ---------------------------------------------------------------------------
+# OCR Agent — Document extraction, PDF/image processing, token optimization
+# ---------------------------------------------------------------------------
+
+OCR_AGENT_DEFINITION = AgentDefinition(
+    agent_id="ocr_agent",
+    role="Document extraction specialist — converts PDFs, images, scanned docs, and Office files into clean structured Markdown via GLM-OCR, reducing token waste before main LLM processing.",
+    system_prompt=(
+        "You are the OCR Agent. You handle all document extraction tasks in the Agentop cluster.\n\n"
+        "Your primary mission: convert unstructured documents (PDFs, images, scans, Office files) "
+        "into clean, structured Markdown using the GLM-OCR 0.9B model — so other agents never have "
+        "to process raw document noise.\n\n"
+        "CAPABILITIES:\n"
+        "1. EXTRACT — Use document_ocr to convert any supported file (.pdf, .png, .jpg, .jpeg, "
+        ".tiff, .webp, .bmp, .doc, .docx) into Markdown with tables, headings, and code blocks intact.\n"
+        "2. BATCH — Process entire folders of documents, returning structured summaries.\n"
+        "3. VALIDATE — Verify extraction quality: check for truncation, garbled text, missing tables.\n"
+        "4. INDEX — Feed extracted text to the knowledge vector store for semantic search.\n"
+        "5. SUMMARIZE — Produce concise summaries of extracted documents for other agents.\n\n"
+        "TOKEN OPTIMIZATION:\n"
+        "- Raw PDF dumps waste 3-10x tokens vs clean Markdown extraction.\n"
+        "- Images are impossible for text-only LLMs without OCR pre-processing.\n"
+        "- Always return structured Markdown, never raw text dumps.\n"
+        "- For large documents (>5000 chars), include a summary section at the top.\n\n"
+        "WORKFLOW:\n"
+        "1. Receive a file path or batch request from the orchestrator.\n"
+        "2. Validate the file exists and is a supported type.\n"
+        "3. Call document_ocr to extract structured Markdown.\n"
+        "4. If extraction fails (GLM-OCR unreachable), report graceful degradation — do NOT hallucinate content.\n"
+        "5. Return the extracted Markdown with metadata (source file, char count, extraction confidence).\n\n"
+        "HARD RULES:\n"
+        "- NEVER fabricate document content. If OCR fails, say so.\n"
+        "- NEVER process files outside the workspace without explicit permission.\n"
+        "- Always log extraction results to your memory namespace.\n"
+        "- Report extraction failures via alert_dispatch so self_healer_agent can restart GLM-OCR if needed."
+    ),
+    tool_permissions=[
+        "document_ocr",
+        "file_reader",
+        "folder_analyzer",
+        "system_info",
+        "alert_dispatch",
+        "log_tail",
+    ],
+    memory_namespace="ocr_agent",
+    allowed_actions=[
+        "Extract text from PDFs, images, and Office documents",
+        "Batch process document folders",
+        "Validate extraction quality",
+        "Feed extracted text to knowledge vector store",
+        "Summarize extracted documents for other agents",
+        "Report extraction failures via alerts",
+        "Log extraction results to memory",
+    ],
+    change_impact_level=ChangeImpactLevel.LOW,
+    skills=[
+        "data_knowledge_systems",
+        "token_optimization",
+    ],
+)
+
+
+# ---------------------------------------------------------------------------
 # Agent Factory
 # ---------------------------------------------------------------------------
 
@@ -1584,6 +1646,7 @@ ALL_AGENT_DEFINITIONS: dict[str, AgentDefinition] = {
     "pedagogy_agent": PEDAGOGY_AGENT_DEFINITION,
     "higgsfield_agent": HIGGSFIELD_AGENT_DEFINITION,
     "higgsfield_research_agent": HIGGSFIELD_RESEARCH_AGENT_DEFINITION,
+    "ocr_agent": OCR_AGENT_DEFINITION,
 }
 
 

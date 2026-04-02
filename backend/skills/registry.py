@@ -101,6 +101,11 @@ class SkillRegistry:
 
         for loaded in self._load_manifest_skills() + self._load_legacy_skills():
             if loaded.skill_id in staged:
+                # Manifest skills intentionally override legacy JSON skills with the
+                # same ID during migration. Only treat all other duplicates as invalid.
+                existing = staged[loaded.skill_id]
+                if existing.source_type == "manifest" and loaded.source_type == "legacy_json":
+                    continue
                 self._invalid[loaded.skill_id] = "duplicate_skill_id"
                 continue
 

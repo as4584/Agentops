@@ -33,6 +33,8 @@ from backend.config import (
     BACKEND_HOST,
     BACKEND_PORT,
     CORS_ORIGINS,
+    KNOWLEDGE_SEED_FORCE_REBUILD,
+    KNOWLEDGE_SEED_ON_STARTUP,
     LLM_MONTHLY_BUDGET,
     LLM_RATE_LIMIT_RPM,
     MAX_CHAT_MESSAGE_LENGTH,
@@ -61,6 +63,7 @@ from backend.models import (
     SystemStatus,
 )
 from backend.orchestrator import AgentOrchestrator
+from backend.orchestrator.openclaw_bridge import router as openclaw_router
 from backend.routes.a2ui import router as a2ui_router
 from backend.routes.agent_control import (
     a2a_router,
@@ -71,6 +74,7 @@ from backend.routes.agent_control import (
 from backend.routes.agent_control import (
     set_orchestrator as set_agent_control_orchestrator,
 )
+from backend.routes.auth_oauth import router as auth_oauth_router
 from backend.routes.content_pipeline import router as content_pipeline_router
 from backend.routes.customers import router as customers_router
 from backend.routes.gateway import router as gateway_router
@@ -86,6 +90,7 @@ from backend.routes.ml_training import router as ml_training_router
 from backend.routes.sandbox import router as sandbox_router
 from backend.routes.schedule_routes import router as scheduler_router
 from backend.routes.skills import router as skills_router
+from backend.routes.social_media import router as social_media_router
 from backend.routes.task_management import router as task_management_router
 from backend.routes.webgen_builder import router as webgen_builder_router
 from backend.routes.webhooks import router as webhooks_router
@@ -160,6 +165,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     global _start_time, _orchestrator, _llm_client, _execution_recorder, _execution_analyzer
 
     _start_time = time.time()
+    _knowledge_seed_task: asyncio.Task[None] | None = None
+
+    # Auto-decrypt .env if only .env.enc exists (secrets at rest)
+    _env_path = PROJECT_ROOT / ".env"
+    _enc_path = PROJECT_ROOT / ".env.enc"
+    if not _env_path.exists() and _enc_path.exists():
+        try:
+            from scripts.encrypt_env import cmd_auto_decrypt_for_startup
+
+            cmd_auto_decrypt_for_startup()
+            logger.info("Auto-decrypted .env.enc → .env for startup")
+        except Exception as exc:
+            logger.warning(f"Could not auto-decrypt .env.enc: {exc}")
 
     # Initialize LLM client
     _llm_client = OllamaClient()
@@ -197,6 +215,74 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     set_webhook_dispatcher(_scheduler_dispatch)
     scheduler.start()
 
+    # ── Dependency Health Checker — daily CVE + outdated package scan ────────
+    scheduler.add_cron_job(
+        job_id="dep_check_daily",
+        agent_id="devops_agent",
+        message=(
+            "Run automated dependency health check: CVE scan via pip-audit, "
+            "outdated package detection, pyproject.toml ↔ requirements.txt consistency. "
+            "Log results to data/dep_check_report.json and data/shared_events.jsonl."
+        ),
+        cron_expr="0 6 * * *",  # daily at 06:00 UTC
+    )
+    logger.info("dep-checker: daily cron job registered (0 6 * * *)", event_type="dep_checker_init")
+
+    # ── Social Media Manager — 24/7 analytics polling jobs ──────────────────
+    # Only register if at least one platform token is configured
+    _tiktok_ready = bool(os.getenv("TIKTOK_ACCESS_TOKEN"))
+    _meta_ready = bool(os.getenv("META_PAGE_ACCESS_TOKEN"))
+    _ig_ready = bool(os.getenv("INSTAGRAM_BUSINESS_ID"))
+    _upload_hour = os.getenv("UPLOAD_HOUR_UTC", "18")
+
+    if _tiktok_ready:
+        scheduler.add_interval_job(
+            job_id="social_tiktok_analytics_poll",
+            agent_id="monitor_agent",
+            message="Poll TikTok analytics for all tracked videos. Fetch view_count, like_count, comment_count, share_count. Store to backend/memory/social_media/analytics_cache.json. Alert if viral velocity threshold exceeded.",
+            seconds=900,  # every 15 minutes
+        )
+        scheduler.add_cron_job(
+            job_id="social_tiktok_trending_check",
+            agent_id="monitor_agent",
+            message="Run TikTok viral velocity check. Compare current view counts against stored baselines. Fire alert_dispatch if VIEW_VELOCITY_THRESHOLD crossed within VIEW_VELOCITY_WINDOW_HOURS.",
+            cron_expr="0 */6 * * *",
+        )
+        logger.info("Social media: TikTok polling jobs registered", event_type="social_media_init")
+
+    if _meta_ready:
+        scheduler.add_interval_job(
+            job_id="social_facebook_insights_poll",
+            agent_id="monitor_agent",
+            message="Poll Facebook Page insights: page_impressions, page_engaged_users, page_fan_adds, page_views_total. Period=day. Store to backend/memory/social_media/analytics_cache.json.",
+            seconds=3600,  # every 60 minutes
+        )
+        logger.info("Social media: Facebook polling job registered", event_type="social_media_init")
+
+    if _ig_ready and _meta_ready:
+        scheduler.add_interval_job(
+            job_id="social_instagram_insights_poll",
+            agent_id="monitor_agent",
+            message="Poll Instagram profile insights: impressions, reach, profile_views, accounts_engaged. Period=day. Check content_publishing_limit quota. Store to backend/memory/social_media/analytics_cache.json.",
+            seconds=1800,  # every 30 minutes
+        )
+        logger.info("Social media: Instagram polling job registered", event_type="social_media_init")
+
+    if _tiktok_ready or _meta_ready:
+        scheduler.add_cron_job(
+            job_id="social_daily_performance_report",
+            agent_id="monitor_agent",
+            message="Generate daily social media performance report. Aggregate 24h metrics from backend/memory/social_media/analytics_cache.json across all platforms. Log summary to system.jsonl.",
+            cron_expr=f"0 {_upload_hour} * * *",
+        )
+        scheduler.add_cron_job(
+            job_id="social_token_refresh_check",
+            agent_id="monitor_agent",
+            message="Check social media access token expiry. Alert operator via alert_dispatch if TIKTOK_ACCESS_TOKEN or META_PAGE_ACCESS_TOKEN expires within 7 days.",
+            cron_expr="0 2 * * *",
+        )
+        logger.info("Social media: Daily report + token check jobs registered", event_type="social_media_init")
+
     # Boot the Soul Agent — loads identity, goals, and reflection history
     soul_boot = await _orchestrator.boot_soul()
     logger.info(f"Soul boot: {soul_boot}")
@@ -224,6 +310,37 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         f"MCP Gateway: enabled={mcp_status['enabled']}, cli={mcp_status['cli_available']}, tools={mcp_status['discovered_tools']}/{mcp_status['declared_tool_count']}"
     )
 
+    # Optional startup prewarm so the first semantic retrieval does not pay
+    # indexing cost at request time.
+    if KNOWLEDGE_SEED_ON_STARTUP and _orchestrator is not None:
+
+        async def _seed_knowledge_index() -> None:
+            try:
+                if hasattr(_orchestrator, "ensure_knowledge_index"):
+                    stats = await _orchestrator.ensure_knowledge_index(force_rebuild=KNOWLEDGE_SEED_FORCE_REBUILD)  # type: ignore[union-attr]
+                else:
+                    stats = {"chunks": 0, "index_size_bytes": 0, "skipped": "method not implemented"}
+                logger.info(
+                    "Knowledge index seeded on startup",
+                    event_type="knowledge_seeded_startup",
+                    force_rebuild=KNOWLEDGE_SEED_FORCE_REBUILD,
+                    chunks=stats.get("chunks", 0),
+                    index_size_bytes=stats.get("index_size_bytes", 0),
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Knowledge index seed failed",
+                    event_type="knowledge_seed_failed",
+                    error=str(exc),
+                )
+
+        _knowledge_seed_task = asyncio.create_task(_seed_knowledge_index())
+        logger.info(
+            "Knowledge startup seed scheduled",
+            event_type="knowledge_seed_scheduled",
+            force_rebuild=KNOWLEDGE_SEED_FORCE_REBUILD,
+        )
+
     # WebSocket hub — heartbeat + task event emitter
     async def _ws_task_event_emitter() -> None:
         """Subscribe to TaskTracker SSE bus and forward events to WS 'tasks' channel."""
@@ -245,11 +362,27 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     _ws_emitter_task = asyncio.create_task(_ws_task_event_emitter())
     logger.info("WebSocket hub started (heartbeat + task emitter)")
 
+    # ── Discord Bot (optional — runs alongside backend) ─────────────────
+    _discord_task: asyncio.Task[None] | None = None
+    if os.getenv("DISCORD_BOT_TOKEN"):
+        from backend.discord_bot import start_bot as _start_discord_bot
+
+        _discord_task = asyncio.create_task(_start_discord_bot())
+        logger.info("Discord bot starting in background")
+    else:
+        logger.info("Discord bot disabled (DISCORD_BOT_TOKEN not set)")
+
     yield  # Application runs here
 
     # Shutdown
+    if _discord_task is not None and not _discord_task.done():
+        _discord_task.cancel()
+        await asyncio.gather(_discord_task, return_exceptions=True)
     _ws_heartbeat_task.cancel()
     _ws_emitter_task.cancel()
+    if _knowledge_seed_task is not None and not _knowledge_seed_task.done():
+        _knowledge_seed_task.cancel()
+        await asyncio.gather(_knowledge_seed_task, return_exceptions=True)
     set_agent_control_orchestrator(None)
     set_webhook_dispatcher(None)
     scheduler.shutdown()
@@ -306,10 +439,13 @@ app.include_router(webhooks_router)
 app.include_router(skills_router)
 app.include_router(higgsfield_router)
 app.include_router(a2ui_router)
+app.include_router(auth_oauth_router)
+app.include_router(social_media_router)
 app.include_router(gsd_router)
 app.include_router(ml_router)
 app.include_router(ml_eval_router)
 app.include_router(ml_training_router)
+app.include_router(openclaw_router)
 
 # Gateway — OpenAI-compatible API + admin endpoints
 if GATEWAY_ENABLED:
@@ -555,10 +691,19 @@ async def chat(request: ChatRequest) -> ChatResponse:
                 detail="Message contains disallowed content",
             )
 
+    # ── Lex Router: auto-resolve agent when agent_id is "auto" ───────
+    resolved_agent_id = request.agent_id
+    routing_meta: dict[str, Any] = {}
+    if request.agent_id == "auto":
+        from backend.orchestrator.lex_router import resolve_agent
+
+        routing_meta = await resolve_agent(request.message)
+        resolved_agent_id = routing_meta["agent_id"]
+
     result = await _orchestrator.process_message(
-        agent_id=request.agent_id,
+        agent_id=resolved_agent_id,
         message=request.message,
-        context=request.context,
+        context={**request.context, "routing": routing_meta} if routing_meta else request.context,
     )
 
     # Fire-and-forget post-run analysis (OpenSpace-inspired)
@@ -584,7 +729,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
         raise HTTPException(status_code=400, detail=result["error"])
 
     return ChatResponse(
-        agent_id=request.agent_id,
+        agent_id=resolved_agent_id,
         message=result.get("response", ""),
         drift_status=DriftStatus(result.get("drift_status", "GREEN")),
         timestamp=datetime.utcnow(),

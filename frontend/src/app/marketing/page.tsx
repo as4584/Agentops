@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   ActionIcon,
@@ -67,22 +67,22 @@ export default function MarketingPage() {
     }
   }
 
-  async function loadCustomers() {
+  const loadCustomers = useCallback(async () => {
     const response = await fetch(`${API_BASE}/api/customers/`);
     if (!response.ok) {
       return;
     }
     const data = await response.json();
     setCustomers(data || []);
-    if (!selectedCustomerId && Array.isArray(data) && data.length > 0) {
-      setSelectedCustomerId(data[0].id);
+    if (Array.isArray(data) && data.length > 0) {
+      setSelectedCustomerId((prev) => prev ?? data[0].id);
     }
-  }
+  }, []);
 
   useEffect(() => {
     void loadFaq();
     void loadCustomers();
-  }, []);
+  }, [loadCustomers]);
 
   async function askQuestion(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
