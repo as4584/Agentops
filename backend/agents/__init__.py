@@ -796,6 +796,8 @@ DEVOPS_AGENT_DEFINITION = AgentDefinition(
         "mcp_docker_get_container_logs",
         "mcp_docker_inspect_container",
         "mcp_time_get_current_time",
+        # Kubernetes
+        "k8s_control",
     ],
     memory_namespace="devops_agent",
     allowed_actions=[
