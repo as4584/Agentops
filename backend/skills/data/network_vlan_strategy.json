@@ -4,8 +4,44 @@
   "hardware": {
     "router": "TP-Link Omada ER605",
     "ap": "TP-Link A2300",
+    "powerline": "AV1000 (ethernet-over-powerline bridge — not VLAN-aware)",
     "cluster": "Kubernetes single-node (desktop-control-plane) on WSL2",
     "notes": "WSL2 IP is in 172.21.0.0/20 subnet. Kubernetes pod network is 10.244.0.0/16. Router gateway is on LAN segment."
+  },
+  "physical_port_map": {
+    "description": "ER605 physical port layout. Port numbers match the VLAN configuration UI (ports 1-5).",
+    "ports": {
+      "port_1": {
+        "label": "WAN",
+        "connected_to": "Modem (ISP uplink)",
+        "vlan_role": "WAN — vlan4094, do not modify",
+        "notes": "Never add LAN VLANs to this port"
+      },
+      "port_2": {
+        "label": "LAN 1",
+        "connected_to": "AV1000 powerline adapter",
+        "vlan_role": "Access — UNTAG VLAN 10 (Trusted). AV1000 is a dumb bridge, no VLAN awareness. All powerline devices inherit the untagged VLAN.",
+        "notes": "Devices reachable via powerline: dev machine, gaming PC — all treated as Trusted"
+      },
+      "port_3": {
+        "label": "LAN 2",
+        "connected_to": "A2300 WiFi access point",
+        "vlan_role": "TRUNK — TAG all VLANs (10 Trusted, 20 IoT, 30 Guest, 40 Infra). A2300 separates SSIDs per VLAN.",
+        "notes": "This is the most important port. Must carry all 4 VLANs tagged so the A2300 can broadcast Trusted/IoT/Guest SSIDs independently."
+      },
+      "port_4": {
+        "label": "LAN 3",
+        "connected_to": "EMPTY",
+        "vlan_role": "Unassigned",
+        "notes": "Available for future wired device"
+      },
+      "port_5": {
+        "label": "LAN 4",
+        "connected_to": "EMPTY",
+        "vlan_role": "Unassigned",
+        "notes": "Available for future wired device"
+      }
+    }
   },
   "vlans": {
     "VLAN_10": {
@@ -111,9 +147,18 @@
     "Any → noVNC (6080): BLOCK from WAN and IoT, ALLOW Trusted only"
   ],
   "dns_strategy": {
-    "all_vlans": "Point to router (ER605) for DNS. Router forwards to 1.1.1.1 or local Pi-hole.",
-    "iot_vlan": "DNS filtering recommended — block known IoT tracking domains",
-    "notes": "Do not expose internal DNS records to Guest VLAN"
+    "all_vlans": "Point to AdGuard Home (k8s pod in agent-ops namespace, port-forwarded to localhost:5353). AdGuard upstream: Cloudflare DoH + Google DoH. 682K+ blocklist rules active (AdGuard DNS, AdAway, Steven Black, OISD Big).",
+    "adguard_home": {
+      "deployment": "k8s/adguard-home/deployment.yaml",
+      "namespace": "agent-ops",
+      "web_ui": "localhost:3053 (admin / REDACTED_ADGUARD_PWD)",
+      "dns_port": "localhost:5353",
+      "blocklists": ["AdGuard DNS filter (166K)", "AdAway (6.5K)", "Steven Black Unified (92K)", "OISD Big (417K)"],
+      "upstream": ["https://dns.cloudflare.com/dns-query", "https://dns.google/dns-query"],
+      "custom_rules": ["IoT telemetry blocking (Xiaomi, Roku, Amazon)", "Local DNS: router.local → 192.168.0.1, wap.local → 192.168.0.103"]
+    },
+    "iot_vlan": "DNS filtering via AdGuard blocks known IoT tracking domains",
+    "notes": "Do not expose internal DNS records to Guest VLAN. ER605 should point LAN DNS to AdGuard pod IP."
   },
   "monitoring_hooks": {
     "syslog_target": "Send ER605 syslog to WSL2 IP (172.21.x.x) port 514 — monitor_agent tails this",

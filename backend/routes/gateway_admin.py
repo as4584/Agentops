@@ -38,7 +38,7 @@ from backend.gateway.auth import (
 )
 from backend.gateway.health import all_circuit_status, get_health_monitor
 from backend.gateway.middleware import GatewayContext, require_admin_auth
-from backend.gateway.secrets import get_vault
+from backend.gateway.secrets import get_vault, set_infra_credential, get_infra_credential, list_infra_devices, INFRA_DEVICES
 from backend.gateway.usage import get_usage_tracker
 from backend.llm.unified_registry import UNIFIED_MODEL_REGISTRY
 
@@ -85,6 +85,12 @@ class UpdateKeyRequest(BaseModel):
 class SetSecretRequest(BaseModel):
     provider: str
     api_key: str = Field(..., min_length=1)
+
+
+class SetInfraCredentialRequest(BaseModel):
+    device: str = Field(..., min_length=1, max_length=50)
+    username: str = Field(..., min_length=1)
+    password: str = Field(..., min_length=1)
 
 
 def _key_to_dict(k: APIKey, include_hashes: bool = False) -> dict[str, Any]:
@@ -366,6 +372,49 @@ async def list_secret_providers(
     vault = get_vault()
     providers = [k.removeprefix("provider:") for k in vault.list_keys() if k.startswith("provider:")]
     return JSONResponse({"providers": providers})
+
+
+# ---------------------------------------------------------------------------
+# Infrastructure credentials vault
+# ---------------------------------------------------------------------------
+
+
+@router.post("/infra-credentials")
+async def set_infra_cred(
+    body: SetInfraCredentialRequest,
+    ctx: GatewayContext = Depends(require_admin_auth),
+) -> Any:
+    try:
+        set_infra_credential(body.device, body.username, body.password)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return JSONResponse({
+        "stored": True,
+        "device": body.device,
+        "message": "Credential encrypted and stored in vault.",
+    })
+
+
+@router.get("/infra-credentials")
+async def list_infra_creds(
+    ctx: GatewayContext = Depends(require_admin_auth),
+) -> Any:
+    return JSONResponse({
+        "devices_with_credentials": list_infra_devices(),
+        "valid_devices": sorted(INFRA_DEVICES),
+    })
+
+
+@router.delete("/infra-credentials/{device}")
+async def delete_infra_cred(
+    device: str,
+    ctx: GatewayContext = Depends(require_admin_auth),
+) -> Any:
+    vault = get_vault()
+    deleted = vault.delete(f"infra:{device}")
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"No credential found for device {device!r}")
+    return JSONResponse({"deleted": device})
 
 
 # ---------------------------------------------------------------------------

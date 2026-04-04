@@ -1,0 +1,147 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-ops
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adguard-config
+  namespace: agent-ops
+data:
+  AdGuardHome.yaml: |
+    http:
+      pprof:
+        port: 6060
+        enabled: false
+      address: 0.0.0.0:3000
+      session_ttl: 720h
+    users:
+      - name: admin
+        password: "REDACTED_BCRYPT_HASH"
+    dns:
+      bind_hosts:
+        - 0.0.0.0
+      port: 53
+      upstream_dns:
+        - https://dns.cloudflare.com/dns-query
+        - https://dns.google/dns-query
+      bootstrap_dns:
+        - 1.1.1.1
+        - 8.8.8.8
+      all_servers: true
+      fastest_addr: true
+      cache_size: 4194304
+      cache_ttl_min: 300
+      cache_ttl_max: 86400
+      protection_enabled: true
+      blocking_mode: default
+      filtering_enabled: true
+      filters_update_interval: 24
+      parental:
+        enabled: false
+      safesearch:
+        enabled: false
+      safebrowsing:
+        enabled: true
+    filters:
+      - enabled: true
+        url: https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt
+        name: AdGuard DNS filter
+        id: 1
+      - enabled: true
+        url: https://adguardteam.github.io/HostlistsRegistry/assets/filter_2.txt
+        name: AdAway Default Blocklist
+        id: 2
+      - enabled: true
+        url: https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+        name: Steven Black Unified
+        id: 3
+      - enabled: true
+        url: https://big.oisd.nl
+        name: OISD Big
+        id: 4
+    tls:
+      enabled: false
+    schema_version: 28
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adguard-home
+  namespace: agent-ops
+  labels:
+    app: adguard-home
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adguard-home
+  template:
+    metadata:
+      labels:
+        app: adguard-home
+    spec:
+      initContainers:
+        - name: copy-config
+          image: busybox:1.36
+          command: ["sh", "-c", "cp /tmp/cfg/AdGuardHome.yaml /opt/adguardhome/conf/AdGuardHome.yaml"]
+          volumeMounts:
+            - name: config-src
+              mountPath: /tmp/cfg
+            - name: config-rw
+              mountPath: /opt/adguardhome/conf
+      containers:
+        - name: adguard
+          image: adguard/adguardhome:latest
+          ports:
+            - containerPort: 3000
+              name: web-ui
+            - containerPort: 53
+              name: dns-tcp
+              protocol: TCP
+            - containerPort: 53
+              name: dns-udp
+              protocol: UDP
+          volumeMounts:
+            - name: config-rw
+              mountPath: /opt/adguardhome/conf
+            - name: data
+              mountPath: /opt/adguardhome/work
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+      volumes:
+        - name: config-src
+          configMap:
+            name: adguard-config
+        - name: config-rw
+          emptyDir: {}
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adguard-home
+  namespace: agent-ops
+spec:
+  selector:
+    app: adguard-home
+  ports:
+    - name: web-ui
+      port: 3000
+      targetPort: 3000
+    - name: dns-tcp
+      port: 53
+      targetPort: 53
+      protocol: TCP
+    - name: dns-udp
+      port: 53
+      targetPort: 53
+      protocol: UDP
+  type: ClusterIP

@@ -214,3 +214,49 @@ def get_provider_key(provider: str) -> SecretStr | None:
         if val:
             return SecretStr(val)
     return None
+
+
+# ---------------------------------------------------------------------------
+# Infrastructure credential helpers
+# ---------------------------------------------------------------------------
+
+# Valid infrastructure device categories.  Keys are stored as
+# "infra:<device>" in the vault (e.g. "infra:router", "infra:wap").
+INFRA_DEVICES = frozenset({
+    "router",       # ER605 admin
+    "wap",          # A2300 WAP admin
+    "godaddy",      # GoDaddy API key + secret
+    "ddns",         # Dynamic DNS credentials
+    "doppler",      # Doppler service token
+    "discord",      # Discord bot token
+})
+
+
+def set_infra_credential(device: str, username: str, password: str) -> None:
+    """Store an infrastructure credential pair in the vault."""
+    device = device.lower()
+    if device not in INFRA_DEVICES:
+        raise ValueError(f"Unknown infra device: {device}. Valid: {sorted(INFRA_DEVICES)}")
+    payload = json.dumps({"username": username, "password": password})
+    get_vault().set(f"infra:{device}", payload)
+
+
+def get_infra_credential(device: str) -> dict[str, str] | None:
+    """Retrieve an infrastructure credential pair from the vault.
+
+    Returns {"username": ..., "password": ...} or None.
+    """
+    device = device.lower()
+    secret = get_vault().get(f"infra:{device}")
+    if not secret:
+        return None
+    try:
+        return json.loads(secret.get_secret_value())
+    except (json.JSONDecodeError, KeyError):
+        return None
+
+
+def list_infra_devices() -> list[str]:
+    """Return infra device names that have stored credentials."""
+    vault = get_vault()
+    return [k.removeprefix("infra:") for k in vault.list_keys() if k.startswith("infra:")]
