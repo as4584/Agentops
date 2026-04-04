@@ -173,6 +173,15 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.READ_ONLY,
         requires_doc_update=False,
     ),
+    "k8s_control": ToolDefinition(
+        name="k8s_control",
+        description=(
+            "Control Kubernetes cluster: create jobs, get pods/services, check status. "
+            "Enables agents to deploy themselves and manage workloads autonomously."
+        ),
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
     # =========================================================
     # MCP Gateway Tools — routed through Docker MCP Gateway
     # Statically declared (INV-3). Executed via MCPBridge.
@@ -1404,6 +1413,207 @@ async def folder_analyzer(
 
 
 # ---------------------------------------------------------------------------
+# k8s_control — Kubernetes cluster management
+# ---------------------------------------------------------------------------
+
+
+async def k8s_control(
+    action: str,
+    agent_id: str,
+    job_name: str = "",
+    image: str = "",
+    command: str = "",
+    namespace: str = "agent-ops",
+) -> dict[str, Any]:
+    """
+    Control Kubernetes cluster for autonomous agent deployment.
+    
+    STATE_MODIFY — creates/deletes K8s resources.
+    
+    Supported actions:
+    - list_pods: Get all pods in namespace
+    - list_jobs: Get all jobs in namespace
+    - create_job: Create a new job (requires job_name, image, command)
+    - delete_job: Delete a job by name
+    - get_logs: Get logs from most recent pod
+    
+    Args:
+        action: The K8s operation to perform.
+        agent_id: The calling agent's ID.
+        job_name: Name for job operations.
+        image: Container image (e.g., 'python:3.11', 'busybox').
+        command: Shell command to run in job.
+        namespace: K8s namespace (default: agent-ops).
+    
+    Returns:
+        Dict with output, success status, and metadata.
+    
+    Example:
+        # List all pods
+        await k8s_control("list_pods", "devops_agent", namespace="agent-ops")
+        
+        # Deploy a monitoring agent
+        await k8s_control(
+            "create_job",
+            "devops_agent",
+            job_name="network-monitor",
+            image="python:3.11",
+            command="pip install scapy && python monitor.py",
+            namespace="agent-ops"
+        )
+    """
+    logger.info(f"k8s_control called by {agent_id}: action={action}, namespace={namespace}")
+    
+    try:
+        if action == "list_pods":
+            process = await asyncio.create_subprocess_exec(
+                "kubectl", "get", "pods", "-n", namespace, "-o", "wide",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=10)
+            
+            if process.returncode != 0:
+                return {
+                    "success": False,
+                    "error": stderr.decode("utf-8", errors="replace"),
+                    "action": action,
+                }
+            
+            return {
+                "success": True,
+                "output": stdout.decode("utf-8", errors="replace"),
+                "action": action,
+                "namespace": namespace,
+            }
+        
+        elif action == "list_jobs":
+            process = await asyncio.create_subprocess_exec(
+                "kubectl", "get", "jobs", "-n", namespace, "-o", "wide",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=10)
+            
+            if process.returncode != 0:
+                return {
+                    "success": False,
+                    "error": stderr.decode("utf-8", errors="replace"),
+                    "action": action,
+                }
+            
+            return {
+                "success": True,
+                "output": stdout.decode("utf-8", errors="replace"),
+                "action": action,
+                "namespace": namespace,
+            }
+        
+        elif action == "create_job":
+            if not job_name or not image or not command:
+                return {
+                    "success": False,
+                    "error": "create_job requires job_name, image, and command",
+                    "action": action,
+                }
+            
+            # Security: sanitize job name (K8s naming rules)
+            safe_name = re.sub(r"[^a-z0-9-]", "-", job_name.lower())[:63]
+            
+            process = await asyncio.create_subprocess_exec(
+                "kubectl", "create", "job", safe_name,
+                f"--image={image}",
+                "-n", namespace,
+                "--", "/bin/sh", "-c", command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
+            
+            if process.returncode != 0:
+                return {
+                    "success": False,
+                    "error": stderr.decode("utf-8", errors="replace"),
+                    "action": action,
+                }
+            
+            logger.info(f"k8s_control: Job '{safe_name}' created by {agent_id}")
+            return {
+                "success": True,
+                "output": stdout.decode("utf-8", errors="replace"),
+                "action": action,
+                "job_name": safe_name,
+                "namespace": namespace,
+            }
+        
+        elif action == "delete_job":
+            if not job_name:
+                return {
+                    "success": False,
+                    "error": "delete_job requires job_name",
+                    "action": action,
+                }
+            
+            process = await asyncio.create_subprocess_exec(
+                "kubectl", "delete", "job", job_name, "-n", namespace,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=10)
+            
+            if process.returncode != 0:
+                return {
+                    "success": False,
+                    "error": stderr.decode("utf-8", errors="replace"),
+                    "action": action,
+                }
+            
+            logger.info(f"k8s_control: Job '{job_name}' deleted by {agent_id}")
+            return {
+                "success": True,
+                "output": stdout.decode("utf-8", errors="replace"),
+                "action": action,
+                "job_name": job_name,
+            }
+        
+        elif action == "get_logs":
+            # Get logs from most recent pod in namespace
+            process = await asyncio.create_subprocess_exec(
+                "kubectl", "logs", "-n", namespace, "--tail=100", "-l", "app=agentop",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=10)
+            
+            return {
+                "success": process.returncode == 0,
+                "output": stdout.decode("utf-8", errors="replace"),
+                "error": stderr.decode("utf-8", errors="replace") if process.returncode != 0 else None,
+                "action": action,
+            }
+        
+        else:
+            return {
+                "success": False,
+                "error": f"Unknown action: {action}. Supported: list_pods, list_jobs, create_job, delete_job, get_logs",
+                "action": action,
+            }
+    
+    except TimeoutError:
+        return {
+            "success": False,
+            "error": f"kubectl {action} timed out after 15 seconds",
+            "action": action,
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Unexpected error: {str(e)}",
+            "action": action,
+        }
+
+
+# ---------------------------------------------------------------------------
 # Tool Executor — Routes tool calls through DriftGuard middleware
 # ---------------------------------------------------------------------------
 
@@ -1491,6 +1701,14 @@ async def execute_tool(
         "document_ocr": lambda: document_ocr(
             file_path=kwargs.get("file_path", ""),
             agent_id=agent_id,
+        ),
+        "k8s_control": lambda: k8s_control(
+            action=kwargs.get("action", ""),
+            agent_id=agent_id,
+            job_name=kwargs.get("job_name", ""),
+            image=kwargs.get("image", ""),
+            command=kwargs.get("command", ""),
+            namespace=kwargs.get("namespace", "agent-ops"),
         ),
     }
 
