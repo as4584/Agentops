@@ -1,0 +1,10 @@
+{
+  "id": "api_design",
+  "name": "API Design",
+  "version": "1.0.0",
+  "description": "REST API design patterns — resource naming, status codes, pagination, filtering, error responses, versioning, and rate limiting.",
+  "allowed_agents": ["code_review_agent", "devops_agent", "data_agent"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

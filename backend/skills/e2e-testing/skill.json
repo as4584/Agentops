@@ -1,0 +1,10 @@
+{
+  "id": "e2e_testing",
+  "name": "E2E Testing",
+  "version": "1.0.0",
+  "description": "Playwright E2E testing patterns, Page Object Model, CI/CD integration, artifact management, and flaky test strategies.",
+  "allowed_agents": ["code_review_agent", "devops_agent"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

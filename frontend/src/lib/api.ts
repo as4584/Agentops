@@ -193,6 +193,12 @@ export interface TaskStats {
   failed: number;
 }
 
+export interface AgentVisualSnapshot {
+  agent_id: string;
+  visual_state: string;
+  visual_detail: string;
+}
+
 export interface LLMModel {
   model_id: string;
   family: string;
@@ -572,4 +578,6 @@ export const api = {
     fetchAPI<Array<{ task_id: string; task_type: string; description: string; difficulty: string }>>('/ml/eval/golden'),
   mlTrainingFiles: () =>
     fetchAPI<{ files: Array<{ name: string; size_bytes: number; line_count: number }>; total_files: number; total_lines: number }>('/api/ml/training/files'),
+  visualStates: () =>
+    fetchAPI<AgentVisualSnapshot[]>('/api/agents/visual'),
 };

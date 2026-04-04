@@ -1,0 +1,59 @@
+{
+  "id": "pretext",
+  "name": "Pretext",
+  "version": "0.1.0",
+  "description": "Pure JS/TS text measurement & layout engine (no DOM reflow). Uses Canvas measureText + Intl.Segmenter for pixel-accurate multilingual text sizing. Powers masonry grids, virtual scroll, canvas/SVG rendering, shrink-wrap titles, and typographic animations. Source: github.com/chenglou/pretext v0.0.4.",
+  "allowed_agents": ["devops_agent", "code_review_agent", "cs_agent", "knowledge_agent"],
+  "required_tools": ["file_reader", "doc_updater", "safe_shell"],
+  "risk_level": "low",
+  "enabled": true,
+  "source_repo": "https://github.com/chenglou/pretext",
+  "npm_package": "@chenglou/pretext",
+  "bundle_path": "backend/skills/pretext/dist/pretext.min.js",
+  "capabilities": [
+    "measure paragraph height without DOM reflow",
+    "layout text into lines with fixed or variable widths",
+    "shrink-wrap multiline text to tightest container width",
+    "flow text around floated elements (variable-width lines)",
+    "canvas / SVG / WebGL text rendering",
+    "CJK, Arabic, Hebrew, Thai, emoji, mixed-bidi support",
+    "virtualized lists without height guesses",
+    "masonry grid layout powered by real text heights",
+    "animated typographic reveals and canvas text effects",
+    "pre-wrap textarea-like layouts"
+  ],
+  "api_summary": {
+    "prepare": "prepare(text, font, opts?) → PreparedText — one-time segmentation + canvas measurement",
+    "layout": "layout(prepared, maxWidth, lineHeight) → { height, lineCount } — pure arithmetic, call on resize",
+    "prepareWithSegments": "prepareWithSegments(text, font, opts?) → PreparedTextWithSegments",
+    "layoutWithLines": "layoutWithLines(prepared, maxWidth, lineHeight) → { height, lineCount, lines }",
+    "walkLineRanges": "walkLineRanges(prepared, maxWidth, onLine) → number — low-level, no string alloc",
+    "layoutNextLine": "layoutNextLine(prepared, cursor, maxWidth) → LayoutLine | null — variable-width iterator"
+  },
+  "usage_examples": [
+    {
+      "name": "Measure paragraph height (no DOM)",
+      "code": "const p = prepare('Hello world', '16px Inter'); const { height } = layout(p, 320, 24);"
+    },
+    {
+      "name": "Masonry grid",
+      "code": "items.forEach(item => { const p = prepare(item.text, '15px system-ui'); item.height = layout(p, colWidth, 22).height + PADDING; });"
+    },
+    {
+      "name": "Shrink-wrap container width",
+      "code": "let maxW = 0; walkLineRanges(prepared, 9999, l => { if (l.width > maxW) maxW = l.width; });"
+    },
+    {
+      "name": "Text flow around image",
+      "code": "let cursor = {segmentIndex:0,graphemeIndex:0}; let y=0; while(true){ const w = y < img.bottom ? col - img.width : col; const line = layoutNextLine(p, cursor, w); if(!line) break; ctx.fillText(line.text, 0, y); cursor=line.end; y+=26; }"
+    }
+  ],
+  "integration_notes": [
+    "Bundle is IIFE format — exposes global `Pretext` object with all exported functions.",
+    "canvas element must exist in DOM before calling prepare() in browser (canvas.getContext('2d') is used internally).",
+    "Call prepare() once per text+font combination. Only re-call if text or font changes.",
+    "Call layout() / layoutWithLines() on every resize — it is ~0.09ms per call.",
+    "Server-side usage is experimental — canvas polyfill (e.g. node-canvas) required.",
+    "system-ui font gives inaccurate results on macOS. Use named fonts (Inter, Georgia, etc.)."
+  ]
+}

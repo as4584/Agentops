@@ -222,14 +222,16 @@ def get_provider_key(provider: str) -> SecretStr | None:
 
 # Valid infrastructure device categories.  Keys are stored as
 # "infra:<device>" in the vault (e.g. "infra:router", "infra:wap").
-INFRA_DEVICES = frozenset({
-    "router",       # ER605 admin
-    "wap",          # A2300 WAP admin
-    "godaddy",      # GoDaddy API key + secret
-    "ddns",         # Dynamic DNS credentials
-    "doppler",      # Doppler service token
-    "discord",      # Discord bot token
-})
+INFRA_DEVICES = frozenset(
+    {
+        "router",  # ER605 admin
+        "wap",  # A2300 WAP admin
+        "godaddy",  # GoDaddy API key + secret
+        "ddns",  # Dynamic DNS credentials
+        "doppler",  # Doppler service token
+        "discord",  # Discord bot token
+    }
+)
 
 
 def set_infra_credential(device: str, username: str, password: str) -> None:

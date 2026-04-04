@@ -1,0 +1,10 @@
+{
+  "id": "security_review",
+  "name": "Security Review",
+  "version": "1.0.0",
+  "description": "Security checklist and patterns for authentication, secrets management, input validation, API endpoint hardening, and vulnerability prevention.",
+  "allowed_agents": ["security_agent", "code_review_agent", "devops_agent"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

@@ -1,0 +1,10 @@
+{
+  "id": "mcp_server_patterns",
+  "name": "MCP Server Patterns",
+  "version": "1.0.0",
+  "description": "Build MCP servers with Node/TypeScript SDK — tools, resources, prompts, Zod validation, stdio vs Streamable HTTP transport patterns.",
+  "allowed_agents": ["it_agent", "devops_agent"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

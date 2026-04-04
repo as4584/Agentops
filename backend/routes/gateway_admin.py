@@ -38,7 +38,12 @@ from backend.gateway.auth import (
 )
 from backend.gateway.health import all_circuit_status, get_health_monitor
 from backend.gateway.middleware import GatewayContext, require_admin_auth
-from backend.gateway.secrets import get_vault, set_infra_credential, get_infra_credential, list_infra_devices, INFRA_DEVICES
+from backend.gateway.secrets import (
+    INFRA_DEVICES,
+    get_vault,
+    list_infra_devices,
+    set_infra_credential,
+)
 from backend.gateway.usage import get_usage_tracker
 from backend.llm.unified_registry import UNIFIED_MODEL_REGISTRY
 
@@ -388,21 +393,25 @@ async def set_infra_cred(
         set_infra_credential(body.device, body.username, body.password)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return JSONResponse({
-        "stored": True,
-        "device": body.device,
-        "message": "Credential encrypted and stored in vault.",
-    })
+    return JSONResponse(
+        {
+            "stored": True,
+            "device": body.device,
+            "message": "Credential encrypted and stored in vault.",
+        }
+    )
 
 
 @router.get("/infra-credentials")
 async def list_infra_creds(
     ctx: GatewayContext = Depends(require_admin_auth),
 ) -> Any:
-    return JSONResponse({
-        "devices_with_credentials": list_infra_devices(),
-        "valid_devices": sorted(INFRA_DEVICES),
-    })
+    return JSONResponse(
+        {
+            "devices_with_credentials": list_infra_devices(),
+            "valid_devices": sorted(INFRA_DEVICES),
+        }
+    )
 
 
 @router.delete("/infra-credentials/{device}")

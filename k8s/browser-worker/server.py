@@ -47,9 +47,7 @@ _DEFAULT_ALLOWED = (
 )
 
 ALLOWED_PREFIXES: list[str] = [
-    p.strip()
-    for p in os.environ.get("BROWSER_ALLOWED_PREFIXES", _DEFAULT_ALLOWED).split(",")
-    if p.strip()
+    p.strip() for p in os.environ.get("BROWSER_ALLOWED_PREFIXES", _DEFAULT_ALLOWED).split(",") if p.strip()
 ]
 
 NAV_TIMEOUT_MS = int(os.environ.get("NAV_TIMEOUT_MS", "30000"))
@@ -102,7 +100,7 @@ def _check_url(url: str) -> None:
     if not any(url.startswith(prefix) for prefix in ALLOWED_PREFIXES):
         raise HTTPException(
             status_code=403,
-            detail=f"URL not in allowed prefixes. Configure BROWSER_ALLOWED_PREFIXES env var.",
+            detail="URL not in allowed prefixes. Configure BROWSER_ALLOWED_PREFIXES env var.",
         )
 
 

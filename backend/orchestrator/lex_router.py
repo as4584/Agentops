@@ -30,6 +30,20 @@ from backend.config import OLLAMA_BASE_URL
 from backend.utils import logger
 
 LLM_ROUTER_MODE: str = os.getenv("LLM_ROUTER_MODE", "hybrid")
+
+# ── Decision collector (lazy import to avoid circular deps) ──────────
+_decision_collector = None
+
+
+def _get_collector():  # noqa: ANN202
+    global _decision_collector
+    if _decision_collector is None:
+        from backend.ml.decision_collector import decision_collector
+
+        _decision_collector = decision_collector
+    return _decision_collector
+
+
 LEX_ROUTER_MODEL: str = os.getenv("LEX_ROUTER_MODEL", "lex")
 
 # ── C-accelerated pre-filter (optional, degrades to Python keywords) ─────
@@ -164,22 +178,30 @@ async def resolve_agent(message: str) -> dict[str, Any]:
     The C layer handles unambiguous keywords in ~0.01ms, skipping the
     800ms LLM call entirely for clear-cut requests.
 
+    Every routing decision is recorded by the DecisionCollector for
+    training data generation (routing pairs + DPO preference pairs).
+
     Returns:
         {"agent_id": str, "method": "c_fast"|"lex"|"keyword", "confidence": float}
     """
+    import time as _time
+
     mode = LLM_ROUTER_MODE.lower()
+    _t0 = _time.monotonic()
 
     # ── Stage 0: C red-line check (blocks dangerous requests) ────────
     if _fast_router and _fast_router.available:
         if _fast_router.check_red_line(message):
             logger.warning(f"[LexRouter] Red line blocked: {message[:80]}")
-            return {
+            result = {
                 "agent_id": "soul_core",
                 "method": "c_red_line",
                 "confidence": 1.0,
                 "blocked": True,
                 "reason": "Red line violation",
             }
+            _record_decision(message, result, _t0)
+            return result
 
     # ── Stage 1: C keyword pre-filter (~0.01ms) ─────────────────────
     if _fast_router and _fast_router.available and mode != "keyword":
@@ -188,19 +210,45 @@ async def resolve_agent(message: str) -> dict[str, Any]:
             agent_id = c_result["agent_id"]
             if agent_id in VALID_AGENTS:
                 logger.info(f"[LexRouter] C fast-routed to {agent_id} (confidence={c_result['confidence']:.2f})")
-                return {"agent_id": agent_id, "method": "c_fast", "confidence": c_result["confidence"]}
+                result = {"agent_id": agent_id, "method": "c_fast", "confidence": c_result["confidence"]}
+                _record_decision(message, result, _t0)
+                return result
 
     # ── Stage 2: LLM routing via Ollama (~800ms) ────────────────────
     if mode == "lex" or mode == "hybrid":
         agent_id, confidence = await _lex_route(message)
         if agent_id:
             logger.info(f"[LexRouter] Routed to {agent_id} (confidence={confidence:.2f})")
-            return {"agent_id": agent_id, "method": "lex", "confidence": confidence}
+            result = {"agent_id": agent_id, "method": "lex", "confidence": confidence}
+            _record_decision(message, result, _t0)
+            return result
         if mode == "lex":
             # Strict mode: fall back to soul rather than keyword
-            return {"agent_id": "soul_core", "method": "lex_fallback", "confidence": 0.0}
+            result = {"agent_id": "soul_core", "method": "lex_fallback", "confidence": 0.0}
+            _record_decision(message, result, _t0)
+            return result
 
     # ── Stage 3: Python keyword fallback ─────────────────────────────
     agent_id = _keyword_route(message)
     logger.info(f"[LexRouter] Keyword routed to {agent_id}")
-    return {"agent_id": agent_id, "method": "keyword", "confidence": 0.8}
+    result = {"agent_id": agent_id, "method": "keyword", "confidence": 0.8}
+    _record_decision(message, result, _t0)
+    return result
+
+
+def _record_decision(message: str, result: dict[str, Any], start_time: float) -> None:
+    """Record a routing decision to the decision collector (best-effort)."""
+    import time as _time
+
+    try:
+        collector = _get_collector()
+        collector.record_routing_decision(
+            user_message=message,
+            chosen_agent=result.get("agent_id", "unknown"),
+            method=result.get("method", "unknown"),
+            confidence=result.get("confidence", 0.0),
+            latency_ms=(_time.monotonic() - start_time) * 1000,
+            reasoning=result.get("reason", ""),
+        )
+    except Exception as exc:
+        logger.info(f"[LexRouter] Decision recording failed (non-fatal): {exc}")

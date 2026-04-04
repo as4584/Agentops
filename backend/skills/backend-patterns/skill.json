@@ -1,0 +1,10 @@
+{
+  "id": "backend_patterns",
+  "name": "Backend Patterns",
+  "version": "1.0.0",
+  "description": "Backend architecture patterns, API design, database optimization, and server-side best practices for scalable applications.",
+  "allowed_agents": ["devops_agent", "code_review_agent", "data_agent"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

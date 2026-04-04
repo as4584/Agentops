@@ -1,0 +1,10 @@
+{
+  "id": "tdd_workflow",
+  "name": "TDD Workflow",
+  "version": "1.0.0",
+  "description": "Test-driven development with 80%+ coverage — unit, integration, and E2E test patterns. Red-green-refactor loop enforcement.",
+  "allowed_agents": ["code_review_agent", "devops_agent"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}
