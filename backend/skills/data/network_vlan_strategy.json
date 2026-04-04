@@ -1,0 +1,128 @@
+{
+  "skill_id": "network_vlan_strategy",
+  "description": "Home network VLAN segmentation strategy and port assignment policy for lex's homelab. Use this when diagnosing network issues, planning firewall rules, or assessing device trust levels.",
+  "hardware": {
+    "router": "TP-Link Omada ER605",
+    "ap": "TP-Link A2300",
+    "cluster": "Kubernetes single-node (desktop-control-plane) on WSL2",
+    "notes": "WSL2 IP is in 172.21.0.0/20 subnet. Kubernetes pod network is 10.244.0.0/16. Router gateway is on LAN segment."
+  },
+  "vlans": {
+    "VLAN_10": {
+      "name": "Trusted",
+      "purpose": "Personal computers, dev machines, WSL2, homelab servers",
+      "ssid": "Lex-Trusted",
+      "inter_vlan_routing": true,
+      "internet_access": true,
+      "allowed_inbound_from": ["VLAN_10"],
+      "blocked_inbound_from": ["VLAN_20", "VLAN_30"],
+      "example_devices": ["dev machine (WSL2)", "gaming PC", "Xbox"]
+    },
+    "VLAN_20": {
+      "name": "IoT",
+      "purpose": "Smart home devices with no trust — cameras, TVs, Google Nest, sensors",
+      "ssid": "Lex-IoT",
+      "inter_vlan_routing": false,
+      "internet_access": true,
+      "allowed_inbound_from": [],
+      "blocked_inbound_from": ["VLAN_10", "VLAN_30", "VLAN_20"],
+      "example_devices": ["smart TVs", "IP cameras", "Google Nest", "smart plugs", "Hue bridge"]
+    },
+    "VLAN_30": {
+      "name": "Guest",
+      "purpose": "Untrusted visitors — internet only, no LAN access",
+      "ssid": "Lex-Guest",
+      "inter_vlan_routing": false,
+      "internet_access": true,
+      "allowed_inbound_from": [],
+      "blocked_inbound_from": ["VLAN_10", "VLAN_20", "VLAN_30"],
+      "rate_limit_mbps": 25,
+      "example_devices": ["visitor phones", "temporary devices"]
+    },
+    "VLAN_40": {
+      "name": "Infra",
+      "purpose": "Homelab infrastructure — Kubernetes nodes, Ollama server, NAS, switches",
+      "ssid": null,
+      "inter_vlan_routing": true,
+      "internet_access": true,
+      "allowed_inbound_from": ["VLAN_10", "VLAN_40"],
+      "blocked_inbound_from": ["VLAN_20", "VLAN_30"],
+      "example_devices": ["k8s node", "Ollama host", "NAS", "Agentop backend"]
+    }
+  },
+  "port_policy": {
+    "description": "TCP/UDP port assignments and firewall rules by trust zone. Applies to all VLAN-to-VLAN and VLAN-to-WAN traffic.",
+    "ranges": {
+      "0-1023": {
+        "name": "Well-Known / System Ports",
+        "policy": "Restricted. Only explicitly allowed services open per VLAN. Never expose to Guest or IoT inbound.",
+        "allowed_vlans_inbound": ["VLAN_10", "VLAN_40"],
+        "notable_ports": {
+          "22": "SSH — Trusted + Infra only",
+          "53": "DNS — all VLANs outbound to router only",
+          "80": "HTTP — all VLANs outbound to WAN",
+          "443": "HTTPS — all VLANs outbound to WAN",
+          "67-68": "DHCP — all VLANs to router only"
+        }
+      },
+      "1024-49151": {
+        "name": "Registered / Application Ports",
+        "policy": "Service-specific rules. Homelab services live here. IoT and Guest blocked from inbound access.",
+        "allowed_vlans_inbound": ["VLAN_10", "VLAN_40"],
+        "notable_ports": {
+          "3000-3010": "Agentop frontend + dev servers (Trusted/Infra only)",
+          "8000": "Agentop FastAPI backend (Trusted/Infra only)",
+          "8080": "browser-worker API in k8s (Infra only)",
+          "6080": "noVNC viewer — browser-worker pod (Trusted only, never WAN)",
+          "11434": "Ollama LLM inference (Infra only, never WAN)",
+          "5432": "PostgreSQL (Infra only)",
+          "6379": "Redis (Infra only)",
+          "6443": "Kubernetes API server (Infra only)",
+          "9090": "Prometheus metrics (Trusted/Infra only)",
+          "3001": "Grafana dashboard (Trusted/Infra only)"
+        }
+      },
+      "49152-65535": {
+        "name": "Ephemeral / Dynamic Ports",
+        "policy": "Client-initiated outbound connections. Allow outbound from all VLANs. Block inbound on all VLANs except established sessions.",
+        "allowed_vlans_inbound": [],
+        "notes": "Used by OS for outbound TCP/UDP connections. No services should bind here permanently."
+      }
+    },
+    "reserved_do_not_touch": {
+      "description": "Ports reserved for Xbox Live and gaming. Do NOT add firewall rules, NAT, or QoS policies affecting these without explicit approval.",
+      "xbox_live_ports": {
+        "udp": [88, 500, 3544, 4500],
+        "tcp_udp": [3074],
+        "notes": "Xbox Live requires these for NAT traversal and multiplayer. ER605 should have these open outbound on VLAN_10. Do not block, reroute, or rate-limit."
+      }
+    }
+  },
+  "firewall_rules_intent": [
+    "IoT → LAN: BLOCK ALL (IoT devices must never initiate connections to Trusted or Infra)",
+    "IoT → WAN: ALLOW (cameras, TVs need cloud access)",
+    "Guest → LAN: BLOCK ALL",
+    "Guest → WAN: ALLOW (rate limited to 25 Mbps)",
+    "Trusted → IoT: ALLOW established/related only (Trusted can push to IoT, not vice versa)",
+    "Trusted → Infra: ALLOW ALL",
+    "Infra → Trusted: ALLOW established/related",
+    "Any → Ollama (11434): BLOCK from WAN, ALLOW from Trusted + Infra only",
+    "Any → k8s API (6443): BLOCK from WAN, ALLOW from Trusted + Infra only",
+    "Any → noVNC (6080): BLOCK from WAN and IoT, ALLOW Trusted only"
+  ],
+  "dns_strategy": {
+    "all_vlans": "Point to router (ER605) for DNS. Router forwards to 1.1.1.1 or local Pi-hole.",
+    "iot_vlan": "DNS filtering recommended — block known IoT tracking domains",
+    "notes": "Do not expose internal DNS records to Guest VLAN"
+  },
+  "monitoring_hooks": {
+    "syslog_target": "Send ER605 syslog to WSL2 IP (172.21.x.x) port 514 — monitor_agent tails this",
+    "snmp_community": "Set read-only SNMP on ER605, poll from Infra VLAN only",
+    "it_agent_checks": [
+      "alert if IoT device initiates connection to Trusted VLAN",
+      "alert if any VLAN device attempts to reach Ollama port 11434 from outside Trusted/Infra",
+      "alert if noVNC port 6080 is reachable from WAN",
+      "alert if Xbox ports (3074, 88) become blocked"
+    ]
+  }
+}
