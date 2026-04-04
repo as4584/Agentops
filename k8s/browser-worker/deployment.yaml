@@ -1,0 +1,90 @@
+---
+# browser-worker Deployment
+# Runs a headed Chromium browser inside the cluster with a noVNC web viewer.
+#
+# Watch live:  kubectl port-forward -n agent-ops svc/browser-worker 6080:6080
+#              then open http://localhost:6080/vnc.html in your Windows browser
+#
+# Agentop API: kubectl port-forward -n agent-ops svc/browser-worker 8082:8080
+#              (or just call http://browser-worker.agent-ops:8080 from within cluster)
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: browser-worker
+  namespace: agent-ops
+  labels:
+    app: browser-worker
+    tier: tooling
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: browser-worker
+  template:
+    metadata:
+      labels:
+        app: browser-worker
+    spec:
+      containers:
+        - name: browser-worker
+          image: agentop/browser-worker:latest
+          imagePullPolicy: Never   # local kind image — no registry needed
+          ports:
+            - name: api
+              containerPort: 8080
+            - name: novnc
+              containerPort: 6080
+          env:
+            - name: BROWSER_ALLOWED_PREFIXES
+              # Adjust to match your router's LAN subnet
+              value: "http://192.168.,https://192.168.,http://10.,https://10."
+            - name: DISPLAY
+              value: ":99"
+            - name: NAV_TIMEOUT_MS
+              value: "30000"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          securityContext:
+            runAsNonRoot: false   # x11vnc/Xvfb need some privs
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+              add: ["SYS_PTRACE"]   # needed by Chromium sandbox check
+---
+# Service — ClusterIP for in-cluster access + named ports for port-forward
+apiVersion: v1
+kind: Service
+metadata:
+  name: browser-worker
+  namespace: agent-ops
+  labels:
+    app: browser-worker
+spec:
+  selector:
+    app: browser-worker
+  type: ClusterIP
+  ports:
+    - name: api
+      port: 8080
+      targetPort: 8080
+    - name: novnc
+      port: 6080
+      targetPort: 6080
