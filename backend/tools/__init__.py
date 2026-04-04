@@ -182,6 +182,16 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.STATE_MODIFY,
         requires_doc_update=False,
     ),
+    "browser_control": ToolDefinition(
+        name="browser_control",
+        description=(
+            "Drive a headed Chromium browser running in the browser-worker pod. "
+            "Actions: navigate, click, fill, select, screenshot, evaluate, back, url. "
+            "Watched live via noVNC at http://localhost:6080/vnc.html after port-forward."
+        ),
+        modification_type=ModificationType.STATE_MODIFY,
+        requires_doc_update=False,
+    ),
     # =========================================================
     # MCP Gateway Tools — routed through Docker MCP Gateway
     # Statically declared (INV-3). Executed via MCPBridge.
@@ -1614,6 +1624,85 @@ async def k8s_control(
 
 
 # ---------------------------------------------------------------------------
+# browser_control — Drive browser-worker pod via HTTP
+# ---------------------------------------------------------------------------
+
+import os as _os
+
+_BROWSER_WORKER_URL = _os.environ.get(
+    "BROWSER_WORKER_URL",
+    "http://browser-worker.agent-ops.svc.cluster.local:8080",
+)
+
+_BROWSER_ACTIONS = {"navigate", "click", "fill", "select", "screenshot", "evaluate", "back", "url"}
+
+
+async def browser_control(
+    action: str,
+    agent_id: str,
+    **kwargs: Any,
+) -> dict[str, Any]:
+    """HTTP proxy to the browser-worker pod.
+
+    Supported actions: navigate, click, fill, select, screenshot, evaluate, back, url.
+    """
+    import httpx
+
+    if action not in _BROWSER_ACTIONS:
+        return {
+            "success": False,
+            "error": f"Unknown action '{action}'. Supported: {sorted(_BROWSER_ACTIONS)}",
+        }
+
+    endpoint = f"{_BROWSER_WORKER_URL}/{action}"
+
+    # Build payload — screenshot/back/url take no body
+    payload: dict[str, Any] = {}
+    if action == "navigate":
+        payload = {"url": kwargs.get("url", "")}
+    elif action == "click":
+        payload = {"selector": kwargs.get("selector", ""), "timeout_ms": int(kwargs.get("timeout_ms", 10000))}
+    elif action == "fill":
+        payload = {
+            "selector": kwargs.get("selector", ""),
+            "value": kwargs.get("value", ""),
+            "field_name": kwargs.get("field_name", "value"),
+            "timeout_ms": int(kwargs.get("timeout_ms", 10000)),
+        }
+    elif action == "select":
+        payload = {
+            "selector": kwargs.get("selector", ""),
+            "option_value": kwargs.get("option_value", ""),
+            "timeout_ms": int(kwargs.get("timeout_ms", 10000)),
+        }
+    elif action == "evaluate":
+        payload = {"expression": kwargs.get("expression", "")}
+
+    method = "GET" if action == "url" else "POST"
+
+    try:
+        async with httpx.AsyncClient(timeout=35.0) as client:
+            if method == "GET":
+                resp = await client.get(endpoint)
+            else:
+                resp = await client.post(endpoint, json=payload if payload else None)
+        resp.raise_for_status()
+        data = resp.json()
+        logger.info(f"browser_control [{action}] by {agent_id}: {data}")
+        return {"success": True, "action": action, **data}
+    except httpx.ConnectError:
+        return {
+            "success": False,
+            "error": "Cannot reach browser-worker pod. Is it deployed and port-forwarded?",
+            "hint": "kubectl port-forward -n agent-ops svc/browser-worker 8082:8080",
+        }
+    except httpx.HTTPStatusError as exc:
+        return {"success": False, "error": f"browser-worker returned {exc.response.status_code}: {exc.response.text}"}
+    except Exception as exc:
+        return {"success": False, "error": str(exc)}
+
+
+# ---------------------------------------------------------------------------
 # Tool Executor — Routes tool calls through DriftGuard middleware
 # ---------------------------------------------------------------------------
 
@@ -1709,6 +1798,17 @@ async def execute_tool(
             image=kwargs.get("image", ""),
             command=kwargs.get("command", ""),
             namespace=kwargs.get("namespace", "agent-ops"),
+        ),
+        "browser_control": lambda: browser_control(
+            action=kwargs.get("action", ""),
+            agent_id=agent_id,
+            url=kwargs.get("url", ""),
+            selector=kwargs.get("selector", ""),
+            value=kwargs.get("value", ""),
+            field_name=kwargs.get("field_name", "value"),
+            option_value=kwargs.get("option_value", ""),
+            expression=kwargs.get("expression", ""),
+            timeout_ms=kwargs.get("timeout_ms", 10000),
         ),
     }
 

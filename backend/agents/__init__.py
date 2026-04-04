@@ -798,6 +798,8 @@ DEVOPS_AGENT_DEFINITION = AgentDefinition(
         "mcp_time_get_current_time",
         # Kubernetes
         "k8s_control",
+        # Browser worker pod
+        "browser_control",
     ],
     memory_namespace="devops_agent",
     allowed_actions=[
