@@ -1,0 +1,92 @@
+{
+  "skill_id": "agent_context_protection",
+  "name": "Agent Context Protection Policy",
+  "version": "1.0.0",
+  "description": "Mandatory operational safety rules for all agents interacting with external UIs, browser automation, credential handling, and context-window management. Protection-first mindset.",
+  "domain": "security",
+  "rules": [
+    {
+      "id": "ACP-1",
+      "title": "Never accumulate binary assets in conversation context",
+      "severity": "CRITICAL",
+      "description": "Screenshots, images, and large base64 payloads must NOT be repeatedly loaded into agent conversation context. Each message re-transmits the full history — accumulated images will exceed API size limits and cause unrecoverable 400 errors ('Could not process image'). The conversation becomes permanently broken.",
+      "mitigation": [
+        "Save screenshots to disk (/tmp/ or data/) — do NOT call view_image on every navigation step",
+        "Describe screenshot contents in text instead of embedding the image",
+        "If an image must be viewed, view it ONCE, summarize findings, then never reference it again",
+        "Keep total image views per conversation under 10",
+        "Use small viewport sizes (1280x800 max) to reduce image payload size"
+      ]
+    },
+    {
+      "id": "ACP-2",
+      "title": "Credential isolation — zero trust by default",
+      "severity": "CRITICAL",
+      "description": "Agent conversations are logged, cached, and potentially transmitted to remote APIs. Credentials must NEVER appear in agent context, tool parameters, or logs.",
+      "mitigation": [
+        "Use noVNC visual login: agent navigates to login page, human types credentials in the browser window",
+        "Store secrets in SecretsVault (AES-256-GCM) via backend/gateway/secrets.py",
+        "Reference secrets by vault key name, never by value",
+        "If an agent needs a credential at runtime, it reads from vault — the value is never echoed or logged",
+        "Router admin, GoDaddy, Doppler, and all service passwords are vault-only"
+      ]
+    },
+    {
+      "id": "ACP-3",
+      "title": "Browser session timeout awareness",
+      "severity": "HIGH",
+      "description": "Router admin UIs, cloud dashboards, and authenticated web apps have session timeouts (typically 5 minutes). Agents must work fast and save frequently.",
+      "mitigation": [
+        "After every significant config change, click Save/Apply immediately",
+        "Do not leave authenticated sessions idle while performing other work",
+        "If a session times out, request human re-login via noVNC — do NOT attempt to auto-login",
+        "Batch related UI changes together to minimize session timeout risk"
+      ]
+    },
+    {
+      "id": "ACP-4",
+      "title": "Network device safety — reserved ports and configs",
+      "severity": "CRITICAL",
+      "description": "Some network configurations are explicitly protected. Agents must check the reserved_do_not_touch list before modifying any port, VLAN, or firewall rule.",
+      "mitigation": [
+        "Xbox Live ports (3074, 88, 500, 3544, 4500) are NEVER modified",
+        "Check network_vlan_strategy.json reserved_do_not_touch before any firewall/port change",
+        "WAN port configuration requires explicit human approval",
+        "Port forwarding rules are append-only — never delete existing rules without human confirmation"
+      ]
+    },
+    {
+      "id": "ACP-5",
+      "title": "Context window preservation",
+      "severity": "HIGH",
+      "description": "Long-running multi-step tasks accumulate context. When context grows too large, the conversation degrades or fails. Agents must actively manage context budget.",
+      "mitigation": [
+        "For multi-step UI automation, summarize progress in memory files rather than keeping full history in context",
+        "Use session memory (/memories/session/) to checkpoint progress so new conversations can resume",
+        "When a conversation hits 15+ tool calls, consider checkpointing to memory and suggesting a fresh chat",
+        "Store structured state (VLAN configs, device IPs, task progress) in data/ files, not conversation history"
+      ]
+    },
+    {
+      "id": "ACP-6",
+      "title": "Browser-worker isolation",
+      "severity": "HIGH",
+      "description": "The browser-worker pod runs inside Kubernetes for isolation. Agents must not bypass this boundary.",
+      "mitigation": [
+        "All browser automation goes through the browser-worker REST API (localhost:8082)",
+        "BROWSER_ALLOWED_PREFIXES restricts navigation to LAN IPs only by default",
+        "To access external sites (GoDaddy, etc.), allowlist must be explicitly expanded with human approval",
+        "Browser-worker has no access to the host filesystem or other pods"
+      ]
+    }
+  ],
+  "incident_log": [
+    {
+      "date": "2026-04-04",
+      "incident": "Conversation permanently broken by accumulated router screenshots",
+      "cause": "Agent called view_image on every router navigation step (~20+ screenshots). API returned 400 'Could not process image' on all subsequent messages.",
+      "resolution": "Started new chat. Created ACP-1 rule to prevent recurrence.",
+      "severity": "CRITICAL"
+    }
+  ]
+}

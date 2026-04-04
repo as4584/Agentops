@@ -27,8 +27,10 @@ These invariants MUST hold at all times. Violation halts execution.
 | INV-13| All cloud LLM calls MUST route through LLMRouter — no direct OpenRouter calls | HIGH |
 | INV-14| API keys MUST live in .env with chmod 600 — never committed to git | CRITICAL |
 | INV-15| Monthly cloud LLM cost MUST NOT exceed budget without soul_core approval | HIGH |
-| INV-16| Embeddings MUST use local models only — cloud does not support them | MEDIUM |
-
+| INV-16| Embeddings MUST use local models only — cloud does not support them | MEDIUM || INV-17| Agents MUST NOT accumulate images/screenshots in conversation context — max 10 per session | CRITICAL |
+| INV-18| Credentials MUST NEVER appear in agent context, tool params, or logs — vault-only | CRITICAL |
+| INV-19| Browser automation MUST go through browser-worker pod — no host-level Playwright | HIGH     |
+| INV-20| Network reserved ports (Xbox: 3074,88,500,3544,4500) MUST NOT be modified by agents | CRITICAL |
 ## 2. System Boundaries
 
 ```

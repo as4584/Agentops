@@ -759,7 +759,7 @@ SOUL_AGENT_DEFINITION = AgentDefinition(
         "Update governance documentation",
     ],
     change_impact_level=ChangeImpactLevel.CRITICAL,
-    skills=["agent_design_patterns", "business_operations"],
+    skills=["agent_design_patterns", "business_operations", "agent_context_protection"],
 )
 
 
