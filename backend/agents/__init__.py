@@ -678,7 +678,7 @@ IT_AGENT_DEFINITION = AgentDefinition(
         "Report status to dashboard",
     ],
     change_impact_level=ChangeImpactLevel.HIGH,
-    skills=["infrastructure_resilience", "release_engineering"],
+    skills=["infrastructure_resilience", "release_engineering", "network_vlan_strategy"],
 )
 
 
