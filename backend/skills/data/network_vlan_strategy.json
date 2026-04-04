@@ -47,7 +47,7 @@
     "VLAN_10": {
       "name": "Trusted",
       "purpose": "Personal computers, dev machines, WSL2, homelab servers",
-      "ssid": "Lex-Trusted",
+      "ssid": "LexLab",
       "inter_vlan_routing": true,
       "internet_access": true,
       "allowed_inbound_from": ["VLAN_10"],
@@ -57,7 +57,7 @@
     "VLAN_20": {
       "name": "IoT",
       "purpose": "Smart home devices with no trust — cameras, TVs, Google Nest, sensors",
-      "ssid": "Lex-IoT",
+      "ssid": "LexLab-IoT",
       "inter_vlan_routing": false,
       "internet_access": true,
       "allowed_inbound_from": [],
@@ -67,7 +67,7 @@
     "VLAN_30": {
       "name": "Guest",
       "purpose": "Untrusted visitors — internet only, no LAN access",
-      "ssid": "Lex-Guest",
+      "ssid": "LexLab-Guest",
       "inter_vlan_routing": false,
       "internet_access": true,
       "allowed_inbound_from": [],

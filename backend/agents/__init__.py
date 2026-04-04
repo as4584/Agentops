@@ -647,14 +647,67 @@ class SoulAgent(BaseAgent):
 
 IT_AGENT_DEFINITION = AgentDefinition(
     agent_id="it_agent",
-    role="Infrastructure monitoring, system diagnostics, and operational tasks.",
+    role="Infrastructure monitoring, network expert, system diagnostics, and operational tasks.",
     system_prompt=(
-        "You are the IT Infrastructure Agent. Your role is to monitor system health, "
-        "diagnose infrastructure issues, execute safe system commands, and report "
-        "operational status. You must log all actions and never modify system "
-        "architecture without updating governance documentation. You operate within "
-        "strict boundaries: only use your whitelisted tools, only access your "
-        "memory namespace, and always report changes through proper channels."
+        "You are the IT Infrastructure Agent — the network and infrastructure expert "
+        "for Lex Santiago's homelab and production systems. You must answer every "
+        "infrastructure and network question with expert-level accuracy.\n\n"
+        "## Network Architecture (memorise this)\n"
+        "- **Router:** TP-Link Omada ER605 (gateway 192.168.0.1)\n"
+        "- **AP:** TP-Link A2300 (trunk port carrying all VLANs)\n"
+        "- **Powerline:** AV1000 (dumb bridge, not VLAN-aware, carries VLAN 10 untagged)\n"
+        "- **Cluster:** Kubernetes single-node (desktop-control-plane) on WSL2\n\n"
+        "## VLANs\n"
+        "- **VLAN 10 (Trusted / LexLab):** Dev machines, WSL2, gaming PC, Xbox. "
+        "Inter-VLAN routing ON. Full LAN + Internet access.\n"
+        "- **VLAN 20 (IoT / LexLab-IoT):** Smart TVs, cameras, Nest, plugs. "
+        "ISOLATED — no inter-VLAN routing. Internet only. Blocked from Trusted & Infra.\n"
+        "- **VLAN 30 (Guest / LexLab-Guest):** Visitor phones. Internet only, "
+        "rate-limited 25 Mbps. Blocked from all LAN segments.\n"
+        "- **VLAN 40 (Infra):** K8s nodes, Ollama host (port 11434), NAS, Agentop backend. "
+        "Accessible from Trusted only. Blocked from IoT & Guest.\n\n"
+        "## Physical Port Map\n"
+        "- Port 1: WAN (ISP modem)\n"
+        "- Port 2: LAN1 → AV1000 powerline (untagged VLAN 10)\n"
+        "- Port 3: LAN2 → A2300 AP (trunk — tagged VLANs 10,20,30,40)\n"
+        "- Port 4-5: Empty (future use)\n\n"
+        "## Firewall ACL Rules (LAN)\n"
+        "1. IoT_Block_Trusted: DROP IoT → Trusted\n"
+        "2. Guest_Allow_Internet: ACCEPT Guest → WAN\n"
+        "3. IoT_Block_Infra: DROP IoT → Infra\n"
+        "4. Guest_Block_LAN: DROP Guest → All Private\n"
+        "5. Trusted_Allow_Infra: ACCEPT Trusted → Infra\n\n"
+        "## Critical Ports\n"
+        "- 8000: Agentop FastAPI (Trusted/Infra only)\n"
+        "- 3007: Next.js dashboard (Trusted/Infra only)\n"
+        "- 11434: Ollama LLM (Infra only, NEVER WAN)\n"
+        "- 6443: K8s API (Infra only)\n"
+        "- 6080: noVNC browser-worker (Trusted only, NEVER WAN)\n"
+        "- 8080: browser-worker API (Infra only)\n"
+        "- 5353→53: AdGuard DNS (all VLANs)\n"
+        "- Xbox Live: UDP 88,500,3544,4500 + TCP/UDP 3074 (NEVER block on VLAN 10)\n\n"
+        "## DNS Strategy\n"
+        "- All VLANs → AdGuard Home (k8s pod, agent-ops namespace, port 5353)\n"
+        "- AdGuard upstream: Cloudflare DoH + Google DoH\n"
+        "- 682K+ blocklist rules (AdGuard DNS, AdAway, Steven Black, OISD Big)\n"
+        "- IoT telemetry domains blocked (Xiaomi, Roku, Amazon)\n\n"
+        "## Kubernetes Cluster\n"
+        "- Single node: desktop-control-plane (Kind cluster in WSL2)\n"
+        "- Namespace: agent-ops (AdGuard Home, browser-worker, hello test pod)\n"
+        "- Pod network: 10.244.0.0/16\n"
+        "- WSL2 network: 172.21.0.0/20\n\n"
+        "## Production Servers\n"
+        "- Portfolio droplet: 104.236.100.245 (DigitalOcean) — lexmakesit.com\n"
+        "- AI receptionist: 174.138.67.169 — DO NOT touch for portfolio\n"
+        "- Auto-deploy: push to master → GitHub Actions → SCP + restart\n\n"
+        "## Monitoring Hooks\n"
+        "- ER605 syslog → WSL2 IP port 514\n"
+        "- SNMP read-only from Infra VLAN\n"
+        "- Alert if: IoT→Trusted connection, Ollama exposed outside Trusted/Infra, "
+        "noVNC reachable from WAN, Xbox ports blocked\n\n"
+        "You must log all actions and never modify system architecture without "
+        "updating governance documentation. Only use your whitelisted tools and "
+        "your memory namespace. Always report changes through proper channels."
     ),
     tool_permissions=[
         "safe_shell",
@@ -662,6 +715,9 @@ IT_AGENT_DEFINITION = AgentDefinition(
         "system_info",
         "doc_updater",
         "folder_analyzer",
+        "health_check",
+        "log_tail",
+        "document_ocr",
         # MCP tools
         "mcp_filesystem_read_file",
         "mcp_filesystem_list_directory",
@@ -674,6 +730,9 @@ IT_AGENT_DEFINITION = AgentDefinition(
         "Execute whitelisted shell commands",
         "Read system files",
         "Query system information",
+        "Run health checks on services and ports",
+        "Tail and analyze log files",
+        "Extract text from documents and images via GLM-OCR",
         "Update documentation (with governance check)",
         "Report status to dashboard",
     ],
@@ -1005,6 +1064,7 @@ DATA_AGENT_DEFINITION = AgentDefinition(
         "doc_updater",
         "alert_dispatch",
         "folder_analyzer",
+        "document_ocr",
         # MCP tools
         "mcp_sqlite_read_query",
         "mcp_sqlite_list_tables",
@@ -1015,6 +1075,7 @@ DATA_AGENT_DEFINITION = AgentDefinition(
     allowed_actions=[
         "Execute read-only SQLite queries",
         "Read data pipeline configuration files",
+        "Extract text from documents and images via GLM-OCR",
         "Detect schema drift against documented structure",
         "Dispatch data quality alerts",
         "Update data documentation",
@@ -1654,17 +1715,22 @@ ALL_AGENT_DEFINITIONS: dict[str, AgentDefinition] = {
 }
 
 
-def create_agent(agent_id: str, llm_client: OllamaClient) -> BaseAgent:
+def create_agent(
+    agent_id: str,
+    llm_client: OllamaClient,
+    definition: AgentDefinition | None = None,
+) -> BaseAgent:
     """
     Factory function to create agents by ID.
 
-    Only agents defined in ALL_AGENT_DEFINITIONS (and AGENT_REGISTRY.md) can be created here.
-    This enforces INV-3 (no dynamic registration) at the agent level.
+    For static agents, looks up the definition in ALL_AGENT_DEFINITIONS.
+    For factory-created agents, an external definition can be passed directly.
 
     The soul_core agent is created as a SoulAgent instance.
     All others are created as BaseAgent instances.
     """
-    definition = ALL_AGENT_DEFINITIONS.get(agent_id)
+    if definition is None:
+        definition = ALL_AGENT_DEFINITIONS.get(agent_id)
     if definition is None:
         raise ValueError(
             f"Agent '{agent_id}' not found in registry. "

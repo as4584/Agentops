@@ -1,0 +1,10 @@
+{
+  "id": "deep_research",
+  "name": "Deep Research",
+  "version": "1.0.0",
+  "description": "Multi-source deep research methodology — web search, synthesis, evidence gathering, and cited report generation with source attribution.",
+  "allowed_agents": ["knowledge_agent", "cs_agent", "soul_core"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

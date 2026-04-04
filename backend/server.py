@@ -74,6 +74,7 @@ from backend.routes.agent_control import (
 from backend.routes.agent_control import (
     set_orchestrator as set_agent_control_orchestrator,
 )
+from backend.routes.agent_factory import router as agent_factory_router
 from backend.routes.auth_oauth import router as auth_oauth_router
 from backend.routes.content_pipeline import router as content_pipeline_router
 from backend.routes.customers import router as customers_router
@@ -445,6 +446,7 @@ app.include_router(gsd_router)
 app.include_router(ml_router)
 app.include_router(ml_eval_router)
 app.include_router(ml_training_router)
+app.include_router(agent_factory_router)
 app.include_router(openclaw_router)
 
 # Gateway — OpenAI-compatible API + admin endpoints

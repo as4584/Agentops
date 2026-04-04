@@ -1,0 +1,10 @@
+{
+  "id": "cost_aware_llm_pipeline",
+  "name": "Cost-Aware LLM Pipeline",
+  "version": "1.0.0",
+  "description": "Cost optimization patterns for LLM API usage — model routing by task complexity, budget tracking, retry logic, and prompt caching.",
+  "allowed_agents": ["prompt_engineer", "token_optimizer", "soul_core"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

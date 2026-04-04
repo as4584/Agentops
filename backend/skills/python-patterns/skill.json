@@ -1,0 +1,10 @@
+{
+  "id": "python_patterns",
+  "name": "Python Patterns",
+  "version": "1.0.0",
+  "description": "Pythonic idioms, PEP 8 standards, type hints, and best practices for building robust, efficient, and maintainable Python applications.",
+  "allowed_agents": ["code_review_agent", "devops_agent", "data_agent", "it_agent"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

@@ -1,0 +1,10 @@
+{
+  "id": "docker_patterns",
+  "name": "Docker Patterns",
+  "version": "1.0.0",
+  "description": "Docker and Docker Compose patterns for local development, container security, networking, volume strategies, and multi-service orchestration.",
+  "allowed_agents": ["devops_agent", "self_healer_agent", "it_agent"],
+  "required_tools": [],
+  "risk_level": "low",
+  "enabled": true
+}

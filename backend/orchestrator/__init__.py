@@ -32,6 +32,7 @@ from backend.knowledge import KnowledgeVectorStore
 from backend.llm import OllamaClient
 from backend.memory import memory_store
 from backend.middleware import drift_guard
+from backend.ml.decision_collector import decision_collector
 from backend.models import (
     AgentDefinition,
     AgentState,
@@ -40,6 +41,8 @@ from backend.models import (
     DriftReport,
     DriftStatus,
 )
+from backend.orchestrator.agent_factory import AgentBlueprint, FactoryResult, agent_factory
+from backend.orchestrator.agent_factory import AgentFactory as AgentFactory
 from backend.tasks import TaskStatus, task_tracker
 from backend.utils import logger
 from backend.utils.tool_ids import ToolIdRegistry
@@ -132,6 +135,7 @@ class AgentOrchestrator:
         self._knowledge_store = KnowledgeVectorStore(llm_client)
         self._knowledge_agent_id = "knowledge_agent"
         self._intake_namespace = "social_intake"
+        self._factory = agent_factory
         # Build the knowledge-agent definition separately (uses vector store internally)
         self._agent_definition = AgentDefinition(
             agent_id=self._knowledge_agent_id,
@@ -290,7 +294,9 @@ class AgentOrchestrator:
             agent = self._agents[target]
             if isinstance(agent, _BaseAgent):
                 try:
+                    _t0 = datetime.now(UTC)
                     response = await agent.process_message(message, context)
+                    _duration_ms = (datetime.now(UTC) - _t0).total_seconds() * 1000
                     memory_store.append_shared_event(
                         {
                             "type": "AGENT_RESPONSE",
@@ -298,6 +304,18 @@ class AgentOrchestrator:
                             "message_preview": message[:100],
                             "response_preview": response[:100],
                         }
+                    )
+                    # Record trajectory for training data
+                    decision_collector.record_trajectory(
+                        task=message[:200],
+                        task_type="agent_response",
+                        goal=message[:120],
+                        chosen_agent=target,
+                        actions=[f"{target}: processed message"],
+                        result=response[:200],
+                        success=True,
+                        duration_ms=_duration_ms,
+                        why_correct=f"Orchestrator routed to {target}",
                     )
                     return {"response": response, "error": None}
                 except Exception as exc:
@@ -505,12 +523,102 @@ class AgentOrchestrator:
         return self._agent_definition
 
     def get_all_agent_definitions(self) -> list[AgentDefinition]:
-        """Return all agent definitions (knowledge + registered agents)."""
+        """Return all agent definitions (knowledge + registered + factory agents)."""
         defs = [self._agent_definition]
         for agent in self._agents.values():
             if hasattr(agent, "definition"):
                 defs.append(agent.definition)
+        for defn in self._factory.list_agents():
+            defs.append(defn)
         return defs
+
+    # -----------------------------------------------------------------
+    # Agent Factory — Dynamic agent creation
+    # -----------------------------------------------------------------
+
+    def create_dynamic_agent(self, blueprint: AgentBlueprint) -> FactoryResult:
+        """
+        Create a new agent at runtime via the factory.
+
+        The orchestrator validates the blueprint, creates the agent definition,
+        instantiates it, and registers it in the live cluster.
+        """
+        existing_ids = self._all_agent_ids
+        result = self._factory.create_agent(blueprint, existing_ids)
+
+        if result.success and result.definition:
+            # Instantiate and register the agent in the live cluster
+            try:
+                agent = create_agent(result.definition.agent_id, self.llm_client, result.definition)
+                self._agents[result.definition.agent_id] = agent
+                logger.info(f"Factory agent instantiated and registered: {result.definition.agent_id}")
+            except Exception as exc:
+                logger.error(f"Factory agent instantiation failed: {exc}")
+                # Definition was persisted but agent couldn't start — record error
+                result = FactoryResult(
+                    success=False,
+                    agent_id=blueprint.agent_id,
+                    definition=result.definition,
+                    error=f"Created but failed to instantiate: {exc}",
+                )
+
+            # Record shared event
+            if result.definition is not None:
+                memory_store.append_shared_event(
+                    {
+                        "type": "AGENT_CREATED",
+                        "agent_id": result.definition.agent_id,
+                        "requested_by": blueprint.requested_by,
+                        "rationale": blueprint.rationale,
+                        "impact_level": blueprint.change_impact_level.value,
+                    }
+                )
+
+        return result
+
+    def list_factory_agents(self) -> list[AgentDefinition]:
+        """Return all dynamically created agents."""
+        return self._factory.list_agents()
+
+    def delete_factory_agent(self, agent_id: str) -> bool:
+        """Remove a factory-created agent from the cluster."""
+        if agent_id in self._agents:
+            del self._agents[agent_id]
+        return self._factory.delete_agent(agent_id)
+
+    # -----------------------------------------------------------------
+    # Training Data — Decision collection & trajectory recording
+    # -----------------------------------------------------------------
+
+    def get_training_stats(self) -> dict[str, Any]:
+        """Return stats about collected training data."""
+        return decision_collector.get_stats()
+
+    def record_routing_feedback(
+        self,
+        user_message: str,
+        original_agent: str,
+        correct_agent: str,
+        reasoning: str = "",
+    ) -> dict[str, Any]:
+        """Record human feedback that a routing decision was wrong."""
+        pair = decision_collector.record_feedback(
+            user_message=user_message,
+            original_agent=original_agent,
+            correct_agent=correct_agent,
+            reasoning=reasoning,
+        )
+        return pair.model_dump()
+
+    def export_training_data(self) -> dict[str, Any]:
+        """Export all collected training data for lex model fine-tuning."""
+        lex_data = decision_collector.export_lex_training_data()
+        dpo_data = decision_collector.export_dpo_pairs()
+        return {
+            "lex_training": lex_data,
+            "dpo_pairs": dpo_data,
+            "stats": decision_collector.get_stats(),
+        }
 
     def send_agent_message(
         self,

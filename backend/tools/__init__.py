@@ -38,6 +38,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import os as _os
 import platform
 import re
 import shutil
@@ -1437,16 +1438,16 @@ async def k8s_control(
 ) -> dict[str, Any]:
     """
     Control Kubernetes cluster for autonomous agent deployment.
-    
+
     STATE_MODIFY — creates/deletes K8s resources.
-    
+
     Supported actions:
     - list_pods: Get all pods in namespace
     - list_jobs: Get all jobs in namespace
     - create_job: Create a new job (requires job_name, image, command)
     - delete_job: Delete a job by name
     - get_logs: Get logs from most recent pod
-    
+
     Args:
         action: The K8s operation to perform.
         agent_id: The calling agent's ID.
@@ -1454,14 +1455,14 @@ async def k8s_control(
         image: Container image (e.g., 'python:3.11', 'busybox').
         command: Shell command to run in job.
         namespace: K8s namespace (default: agent-ops).
-    
+
     Returns:
         Dict with output, success status, and metadata.
-    
+
     Example:
         # List all pods
         await k8s_control("list_pods", "devops_agent", namespace="agent-ops")
-        
+
         # Deploy a monitoring agent
         await k8s_control(
             "create_job",
@@ -1473,52 +1474,64 @@ async def k8s_control(
         )
     """
     logger.info(f"k8s_control called by {agent_id}: action={action}, namespace={namespace}")
-    
+
     try:
         if action == "list_pods":
             process = await asyncio.create_subprocess_exec(
-                "kubectl", "get", "pods", "-n", namespace, "-o", "wide",
+                "kubectl",
+                "get",
+                "pods",
+                "-n",
+                namespace,
+                "-o",
+                "wide",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=10)
-            
+
             if process.returncode != 0:
                 return {
                     "success": False,
                     "error": stderr.decode("utf-8", errors="replace"),
                     "action": action,
                 }
-            
+
             return {
                 "success": True,
                 "output": stdout.decode("utf-8", errors="replace"),
                 "action": action,
                 "namespace": namespace,
             }
-        
+
         elif action == "list_jobs":
             process = await asyncio.create_subprocess_exec(
-                "kubectl", "get", "jobs", "-n", namespace, "-o", "wide",
+                "kubectl",
+                "get",
+                "jobs",
+                "-n",
+                namespace,
+                "-o",
+                "wide",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=10)
-            
+
             if process.returncode != 0:
                 return {
                     "success": False,
                     "error": stderr.decode("utf-8", errors="replace"),
                     "action": action,
                 }
-            
+
             return {
                 "success": True,
                 "output": stdout.decode("utf-8", errors="replace"),
                 "action": action,
                 "namespace": namespace,
             }
-        
+
         elif action == "create_job":
             if not job_name or not image or not command:
                 return {
@@ -1526,27 +1539,34 @@ async def k8s_control(
                     "error": "create_job requires job_name, image, and command",
                     "action": action,
                 }
-            
+
             # Security: sanitize job name (K8s naming rules)
             safe_name = re.sub(r"[^a-z0-9-]", "-", job_name.lower())[:63]
-            
+
             process = await asyncio.create_subprocess_exec(
-                "kubectl", "create", "job", safe_name,
+                "kubectl",
+                "create",
+                "job",
+                safe_name,
                 f"--image={image}",
-                "-n", namespace,
-                "--", "/bin/sh", "-c", command,
+                "-n",
+                namespace,
+                "--",
+                "/bin/sh",
+                "-c",
+                command,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
-            
+
             if process.returncode != 0:
                 return {
                     "success": False,
                     "error": stderr.decode("utf-8", errors="replace"),
                     "action": action,
                 }
-            
+
             logger.info(f"k8s_control: Job '{safe_name}' created by {agent_id}")
             return {
                 "success": True,
@@ -1555,7 +1575,7 @@ async def k8s_control(
                 "job_name": safe_name,
                 "namespace": namespace,
             }
-        
+
         elif action == "delete_job":
             if not job_name:
                 return {
@@ -1563,21 +1583,26 @@ async def k8s_control(
                     "error": "delete_job requires job_name",
                     "action": action,
                 }
-            
+
             process = await asyncio.create_subprocess_exec(
-                "kubectl", "delete", "job", job_name, "-n", namespace,
+                "kubectl",
+                "delete",
+                "job",
+                job_name,
+                "-n",
+                namespace,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=10)
-            
+
             if process.returncode != 0:
                 return {
                     "success": False,
                     "error": stderr.decode("utf-8", errors="replace"),
                     "action": action,
                 }
-            
+
             logger.info(f"k8s_control: Job '{job_name}' deleted by {agent_id}")
             return {
                 "success": True,
@@ -1585,30 +1610,36 @@ async def k8s_control(
                 "action": action,
                 "job_name": job_name,
             }
-        
+
         elif action == "get_logs":
             # Get logs from most recent pod in namespace
             process = await asyncio.create_subprocess_exec(
-                "kubectl", "logs", "-n", namespace, "--tail=100", "-l", "app=agentop",
+                "kubectl",
+                "logs",
+                "-n",
+                namespace,
+                "--tail=100",
+                "-l",
+                "app=agentop",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=10)
-            
+
             return {
                 "success": process.returncode == 0,
                 "output": stdout.decode("utf-8", errors="replace"),
                 "error": stderr.decode("utf-8", errors="replace") if process.returncode != 0 else None,
                 "action": action,
             }
-        
+
         else:
             return {
                 "success": False,
                 "error": f"Unknown action: {action}. Supported: list_pods, list_jobs, create_job, delete_job, get_logs",
                 "action": action,
             }
-    
+
     except TimeoutError:
         return {
             "success": False,
@@ -1626,8 +1657,6 @@ async def k8s_control(
 # ---------------------------------------------------------------------------
 # browser_control — Drive browser-worker pod via HTTP
 # ---------------------------------------------------------------------------
-
-import os as _os
 
 _BROWSER_WORKER_URL = _os.environ.get(
     "BROWSER_WORKER_URL",
