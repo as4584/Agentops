@@ -50,6 +50,9 @@ class PublisherAgent(ContentAgent):
         # Export publish package
         self._export_package(job, caption, hashtags, scheduled_time)
 
+        # Log platform auth status (no crash if not authenticated — warns only)
+        self._check_platform_auth()
+
         updated = self.store.transition_job(
             job.job_id,
             JobStatus.SCHEDULED,
@@ -228,3 +231,17 @@ class PublisherAgent(ContentAgent):
         pkg_path = PUBLISH_DIR / f"{job.job_id}_package.json"
         pkg_path.write_text(json.dumps(package, indent=2))
         logger.info(f"[{self.name}] Package exported: {pkg_path}")
+
+    def _check_platform_auth(self) -> dict[str, bool]:
+        """Return which platforms have valid credentials available."""
+        from backend.content.publishers.youtube_auth import TOKEN_PATH, is_authenticated
+
+        statuses = {"youtube": is_authenticated()}
+        missing = [p for p, ok in statuses.items() if not ok]
+        if missing:
+            logger.warning(
+                f"[{self.name}] Platform(s) not authenticated: {', '.join(missing)}. "
+                "Upload will be skipped. Run POST /content/auth/youtube/start to authenticate."
+            )
+        return statuses
+

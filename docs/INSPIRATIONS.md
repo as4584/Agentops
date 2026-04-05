@@ -10,6 +10,7 @@
 |---|---|---|---|---|
 | [deer-flow](https://github.com/bytedance/deer-flow) | ByteDance | MIT | Ordered middleware chain, LLM-powered fact memory, context summarization, sub-agent delegation, progressive skill loading | `deerflow/` — 7-layer MiddlewareChain |
 | [OpenSpace](https://github.com/HKUDS/OpenSpace) | HKUDS | MIT | Post-execution analysis loop, execution trajectory recording, fallback-rate metric, anti-loop repair guards, skill evolution concepts | `deerflow/execution/` — ExecutionRecorder + ExecutionAnalyzer |
+| [CosyVoice](https://github.com/FunAudioLLM/CosyVoice) | FunAudioLLM (Alibaba) | Apache-2.0 | Local open-source TTS backbone — CosyVoice2 0.5B model used as best-quality backend in VoiceAgent | `backend/content/voice_agent.py` — Tier-1 TTS backend |
 
 ---
 
@@ -78,6 +79,28 @@
 
 ---
 
+## CosyVoice (FunAudioLLM / Alibaba)
+
+**Repository:** [github.com/FunAudioLLM/CosyVoice](https://github.com/FunAudioLLM/CosyVoice)
+**License:** Apache-2.0
+**What it is:** A multilingual speech synthesis model family from Alibaba. CosyVoice2 is a 0.5B parameter streaming TTS model with natural prosody, voice cloning, and cross-lingual capabilities. Fully open-source and runs locally.
+
+### What We Use
+
+| Feature | Agentop Usage |
+|---|---|
+| **CosyVoice2 0.5B** | Tier-1 TTS backend in `VoiceAgent` — highest quality option in the fallback chain |
+| **`inference_sft()`** | SFT (supervised fine-tuned) inference path used for standard voice synthesis |
+| **Streaming chunks** | Audio chunks collected and concatenated via `torchaudio.save()` |
+| **`QWEN_TTS_VOICE`** | Voice profile set via env var (default: `中文女`) |
+
+### Key Differences (What We Didn't Take)
+
+- We don't use voice cloning (cross-lingual zero-shot) — our use case is scripted content
+- We wrap it behind a 4-backend fallback chain (CosyVoice → Piper → Coqui → eSpeak) so VoiceAgent works on any machine even without GPU
+
+---
+
 ## LangGraph (LangChain)
 
 **Repository:** [github.com/langchain-ai/langgraph](https://github.com/langchain-ai/langgraph)
@@ -96,4 +119,5 @@ LLM abstractions and tool patterns that informed our `BaseAgent` and `OllamaClie
 
 ---
 
-_Last updated: 2026-03-29_
+_Last updated: 2026-04-05_
+

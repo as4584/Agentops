@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# lex-v3: Gemma 3 12B (default) — also supports Qwen2.5 via LEX_BASE_MODEL env
 """
 scripts/finetune_lex.py
 ───────────────────────
@@ -31,11 +32,11 @@ Usage:
 
 Environment:
   OLLAMA_MODEL          Base model name for Ollama import (default: lex)
-  LEX_BASE_MODEL        HuggingFace base model (default: unsloth/Qwen2.5-7B-Instruct-bnb-4bit)
+  LEX_BASE_MODEL        HuggingFace base model (default: google/gemma-3-12b-it)
   LEX_EPOCHS            Training epochs (default: 3)
   LEX_LR                Learning rate (default: 2e-4)
-  LEX_BATCH_SIZE        Per-device batch size (default: 2)
-  LEX_GRAD_ACCUM        Gradient accumulation steps (default: 4)
+  LEX_BATCH_SIZE        Per-device batch size (default: 1, safe for 12GB VRAM with Gemma3)
+  LEX_GRAD_ACCUM        Gradient accumulation steps (default: 8, effective batch=8)
   LEX_MAX_SEQ_LEN       Maximum sequence length (default: 4096)
   LEX_LORA_R            LoRA rank (default: 64)
   LEX_LORA_ALPHA         LoRA alpha (default: 16)
@@ -66,11 +67,11 @@ GGUF_DIR = OUTPUT_DIR / "gguf"
 
 # ── Hyperparameters (env-overridable) ─────────────────────────────────────
 class HParams:
-    base_model: str = os.getenv("LEX_BASE_MODEL", "unsloth/Qwen2.5-7B-Instruct-bnb-4bit")
+    base_model: str = os.getenv("LEX_BASE_MODEL", "google/gemma-3-12b-it")
     epochs: int = int(os.getenv("LEX_EPOCHS", "3"))
     lr: float = float(os.getenv("LEX_LR", "2e-4"))
-    batch_size: int = int(os.getenv("LEX_BATCH_SIZE", "2"))
-    grad_accum: int = int(os.getenv("LEX_GRAD_ACCUM", "4"))
+    batch_size: int = int(os.getenv("LEX_BATCH_SIZE", "1"))   # 1 safe for 12GB VRAM w/ Gemma3
+    grad_accum: int = int(os.getenv("LEX_GRAD_ACCUM", "8"))  # effective batch = 8
     max_seq_len: int = int(os.getenv("LEX_MAX_SEQ_LEN", "4096"))
     lora_r: int = int(os.getenv("LEX_LORA_R", "64"))
     lora_alpha: int = int(os.getenv("LEX_LORA_ALPHA", "16"))
@@ -211,22 +212,57 @@ def split_train_eval(records: list[dict]) -> tuple[list[dict], list[dict]]:
     return shuffled[:split_idx], shuffled[split_idx:]
 
 
+LEX_SYSTEM_PROMPT = (
+    "You are Lex, Damian's personal AI assistant and OpenClaw router agent "
+    "for the Agentop multi-agent system. You route requests to the correct "
+    "agent, select appropriate tools, and provide expert help on Agentop's "
+    "architecture, Python, Rust, TypeScript, DevOps, and ML engineering. "
+    "You follow docs-first governance and never hallucinate agent capabilities."
+)
+
+
+def _is_gemma_model(model_name: str) -> bool:
+    return "gemma" in model_name.lower()
+
+
 def sharegpt_to_chatml(record: dict) -> str:
-    """Convert a single ShareGPT record to ChatML format for training."""
+    """Convert a ShareGPT record to the correct template for the configured base model.
+
+    - Gemma 3 models  → <start_of_turn>user/model template
+    - All others       → ChatML (<|im_start|>) template
+    """
+    if _is_gemma_model(HP.base_model):
+        return _sharegpt_to_gemma3(record)
+    return _sharegpt_to_chatml(record)
+
+
+def _sharegpt_to_chatml(record: dict) -> str:
+    """Convert a single ShareGPT record to ChatML format."""
     messages = []
-    # Add system prompt for Lex identity
     messages.append(
-        "<|im_start|>system\n"
-        "You are Lex, Damian's personal AI assistant and OpenClaw router agent "
-        "for the Agentop multi-agent system. You route requests to the correct "
-        "agent, select appropriate tools, and provide expert help on Agentop's "
-        "architecture, Python, Rust, TypeScript, DevOps, and ML engineering. "
-        "You follow docs-first governance and never hallucinate agent capabilities."
-        "<|im_end|>\n"
+        "<|im_start|>system\n" + LEX_SYSTEM_PROMPT + "<|im_end|>\n"
     )
     for turn in record.get("conversations", []):
         role = "user" if turn["from"] == "human" else "assistant"
         messages.append(f"<|im_start|>{role}\n{turn['value']}<|im_end|>\n")
+    return "".join(messages)
+
+
+def _sharegpt_to_gemma3(record: dict) -> str:
+    """Convert a single ShareGPT record to Gemma 3 turn format."""
+    messages = []
+    # Gemma 3 embeds the system prompt inside the first user turn
+    first_user_injected = False
+    for turn in record.get("conversations", []):
+        if turn["from"] == "human":
+            if not first_user_injected:
+                content = LEX_SYSTEM_PROMPT + "\n\n" + turn["value"]
+                first_user_injected = True
+            else:
+                content = turn["value"]
+            messages.append(f"<start_of_turn>user\n{content}<end_of_turn>\n")
+        else:
+            messages.append(f"<start_of_turn>model\n{turn['value']}<end_of_turn>\n")
     return "".join(messages)
 
 
@@ -535,19 +571,35 @@ def create_modelfile(gguf_path: Path) -> Path:
     else:
         gguf_ref = f"lex-{HP.quant_method}.gguf"
 
+    base_short = HP.base_model.split("/")[-1]
+    is_gemma = _is_gemma_model(HP.base_model)
+
+    if is_gemma:
+        template_block = (
+            'TEMPLATE """<start_of_turn>user\n'
+            "{{ .System }}\n\n{{ .Prompt }}<end_of_turn>\n"
+            "<start_of_turn>model\n"
+            '"""'
+        )
+        stop_params = 'PARAMETER stop "<end_of_turn>"'
+    else:
+        template_block = (
+            'TEMPLATE """<|im_start|>system\n'
+            "{{ .System }}<|im_end|>\n"
+            "<|im_start|>user\n{{ .Prompt }}<|im_end|>\n"
+            "<|im_start|>assistant\n"
+            '"""'
+        )
+        stop_params = 'PARAMETER stop "<|im_end|>"\nPARAMETER stop "<|im_start|>"'
+
     content = f"""# Lex — Damian's OpenClaw Router Agent
 # Fine-tuned on Agentop routing, tool selection, and personal preferences
-# Base: Qwen2.5-7B-Instruct | Method: QLoRA (r={HP.lora_r}) + DPO
+# Base: {base_short} | Method: QLoRA (r={HP.lora_r}) + DPO
 # Generated: {datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")}
 
 FROM ./gguf/{gguf_ref}
 
-TEMPLATE \"\"\"<|im_start|>system
-{{{{ .System }}}}<|im_end|>
-<|im_start|>user
-{{{{ .Prompt }}}}<|im_end|>
-<|im_start|>assistant
-\"\"\"
+{template_block}
 
 SYSTEM \"\"\"You are Lex, Damian's personal AI assistant and OpenClaw router agent for the Agentop multi-agent system. You excel at:
 
@@ -570,8 +622,7 @@ PARAMETER top_p 0.9
 PARAMETER top_k 40
 PARAMETER num_ctx 4096
 PARAMETER repeat_penalty 1.1
-PARAMETER stop "<|im_end|>"
-PARAMETER stop "<|im_start|>"
+{stop_params}
 """
 
     modelfile_path.write_text(content)

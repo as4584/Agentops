@@ -24,7 +24,19 @@ from backend.utils import logger
 VIDEO_DIR = MEMORY_DIR / "content_video"
 VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
-AVATAR_IMAGE_PATH = MEMORY_DIR / "avatar" / "creator.png"
+AVATAR_DIR = MEMORY_DIR / "avatar"
+AVATAR_DIR.mkdir(parents=True, exist_ok=True)
+AVATAR_IMAGE_PATH = AVATAR_DIR / "creator.png"
+
+# Create a minimal placeholder PNG if none exists so the FFmpeg fallback works
+# immediately. 1x1 black pixel, standard PNG header.
+if not AVATAR_IMAGE_PATH.exists():
+    import base64
+
+    _PLACEHOLDER_PNG = base64.b64decode(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    )
+    AVATAR_IMAGE_PATH.write_bytes(_PLACEHOLDER_PNG)
 
 
 class AvatarVideoAgent(ContentAgent):
@@ -47,6 +59,10 @@ class AvatarVideoAgent(ContentAgent):
             success = self._generate_sadtalker(audio_path, video_path)
         elif self._has_wav2lip():
             success = self._generate_wav2lip(audio_path, video_path)
+
+        # Try Docker SadTalker (no host model download required)
+        if not success:
+            success = self._generate_docker_sadtalker(audio_path, video_path)
 
         # Fallback: static image + audio composite
         if not success:
@@ -76,6 +92,42 @@ class AvatarVideoAgent(ContentAgent):
 
     def _has_wav2lip(self) -> bool:
         return shutil.which("wav2lip") is not None
+
+    def _has_docker(self) -> bool:
+        return shutil.which("docker") is not None
+
+    def _generate_docker_sadtalker(self, audio: Path, output: Path) -> bool:
+        """
+        Run SadTalker via Docker — no model download required on the host.
+        Image: vinthony/sadtalker (pulls automatically on first run).
+        """
+        if not self._has_docker():
+            return False
+        if not AVATAR_IMAGE_PATH.exists():
+            logger.warning(f"[{self.name}] No avatar image at {AVATAR_IMAGE_PATH}")
+            return False
+        try:
+            cmd = [
+                "docker", "run", "--rm",
+                "--gpus", "all",
+                "-v", f"{audio.parent}:/audio",
+                "-v", f"{AVATAR_DIR}:/avatar",
+                "-v", f"{output.parent}:/output",
+                "vinthony/sadtalker",
+                "--driven_audio", f"/audio/{audio.name}",
+                "--source_image", f"/avatar/{AVATAR_IMAGE_PATH.name}",
+                "--result_dir", "/output",
+                "--still", "--preprocess", "crop",
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            if result.returncode == 0 and output.exists():
+                logger.info(f"[{self.name}] Docker SadTalker success")
+                return True
+            logger.warning(f"[{self.name}] Docker SadTalker failed: {result.stderr[:200]}")
+            return False
+        except Exception as e:
+            logger.warning(f"[{self.name}] Docker SadTalker error: {e}")
+            return False
 
     def _generate_sadtalker(self, audio: Path, output: Path) -> bool:
         """Generate talking-head video using SadTalker (local)."""
