@@ -6,7 +6,7 @@
     "ap": "TP-Link A2300",
     "powerline": "AV1000 (ethernet-over-powerline bridge — not VLAN-aware)",
     "cluster": "Kubernetes single-node (desktop-control-plane) on WSL2",
-    "notes": "WSL2 IP is in 172.21.0.0/20 subnet. Kubernetes pod network is 10.244.0.0/16. Router gateway is on LAN segment."
+    "notes": "WSL2 IP is on a private subnet. Kubernetes pod network is 10.244.0.0/16. Router gateway is on LAN segment."
   },
   "physical_port_map": {
     "description": "ER605 physical port layout. Port numbers match the VLAN configuration UI (ports 1-5).",
@@ -151,7 +151,7 @@
     "adguard_home": {
       "deployment": "k8s/adguard-home/deployment.yaml",
       "namespace": "agent-ops",
-      "web_ui": "localhost:3053 (admin / REDACTED_ADGUARD_PWD)",
+      "web_ui": "localhost:3053 (credentials in .env)",
       "dns_port": "localhost:5353",
       "blocklists": ["AdGuard DNS filter (166K)", "AdAway (6.5K)", "Steven Black Unified (92K)", "OISD Big (417K)"],
       "upstream": ["https://dns.cloudflare.com/dns-query", "https://dns.google/dns-query"],
@@ -161,8 +161,8 @@
     "notes": "Do not expose internal DNS records to Guest VLAN. ER605 should point LAN DNS to AdGuard pod IP."
   },
   "monitoring_hooks": {
-    "syslog_target": "Send ER605 syslog to WSL2 IP (172.21.x.x) port 514 — monitor_agent tails this",
-    "snmp_community": "Set read-only SNMP on ER605, poll from Infra VLAN only",
+    "syslog_target": "Send ER605 syslog to WSL2 IP port 514 — monitor_agent tails this",
+    "snmp_community": "Set read-only SNMP on ER605 (community string in .env), poll from Infra VLAN only",
     "it_agent_checks": [
       "alert if IoT device initiates connection to Trusted VLAN",
       "alert if any VLAN device attempts to reach Ollama port 11434 from outside Trusted/Infra",
