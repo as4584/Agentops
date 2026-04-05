@@ -74,7 +74,7 @@ Coax wall jack (Optimum / Altice)
 
 | Device | MAC | Reserved IP | Network | Notes |
 |--------|-----|-------------|---------|-------|
-| Xbox | `A8:8C:3E:B3:7D:55` | `192.168.0.133` | LexLab (testing) / MyOptimum (stable) | Party/social works on MyOptimum only |
+| Xbox | `[redacted]` | `192.168.0.133` | LexLab (testing) / MyOptimum (stable) | Party/social works on MyOptimum only |
 | Laptop (Windows + WSL) | — | DHCP | LexLab | Primary dev machine |
 | iPhone | — | DHCP | LexLab | General use |
 
