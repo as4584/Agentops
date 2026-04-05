@@ -124,16 +124,59 @@ This section documents the incremental engineering work that brought Agentop fro
 
 ### Phase 9 — Network & Infrastructure Expansion
 
-**Problem:** The system could manage agents but not the network they run on.
+**Problem:** The system could manage agents but not the physical network it ran on. Agents orchestrated software beautifully but had zero visibility into the LAN, no VLAN isolation, no DNS filtering, and no fleet management.
 
 **What we built:**
-- **IT Agent upgrade** — network expert with SSH node registry, VLAN topology, DNS diagnostics, ER605 firewall ACL rules
-- **Network routes** — 7 endpoints for node CRUD, health checks, remote dispatch, fleet topology
-- **K8s integration** — Kind cluster with metrics-server, browser-worker pod orchestration, `k8s_metrics` tool
-- **ER605 firewall rules** — 5 LAN ACLs for VLAN isolation, DNS pinning, IoT quarantine
-- **Agent handoff memory** — inter-agent context passing with TTL-based auto-expiry and consume-once semantics
 
-**Result:** Agents can manage real infrastructure. Network fleet visible. K8s metrics flowing.
+**VLAN segmentation (TP-Link Omada ER605):**
+
+| VLAN | Name | Subnet | Purpose | Inter-VLAN |
+|------|------|--------|---------|------------|
+| 10 | Trusted (LexLab) | 192.168.10.0/24 | Dev machines, WSL2, Xbox, homelab | Full routing |
+| 20 | IoT (LexLab-IoT) | 192.168.20.0/24 | Smart TVs, cameras, Nest | **Isolated** — no routing |
+| 30 | Guest (LexLab-Guest) | 192.168.30.0/24 | Visitor devices | **Isolated** — rate-limited 25 Mbps |
+| 40 | Infra | 192.168.40.0/24 | K8s, Ollama, NAS | Routes to Trusted + Infra only |
+
+**Firewall ACL rules (5 LAN policies):**
+
+| Rule | Source → Destination | Action | Why |
+|------|----------------------|--------|-----|
+| Block IoT→Trusted | VLAN 20 → VLAN 10 | DROP | Prevent IoT lateral movement |
+| Block Guest→All | VLAN 30 → ALL internal | DROP | Guest isolation |
+| Allow Infra↔Trusted | VLAN 40 ↔ VLAN 10 | ACCEPT | K8s + dev machine need each other |
+| DNS pinning | ALL VLANs | REDIRECT 53 → AdGuard | Force all DNS through filtering |
+| Ollama + K8s lockdown | WAN → 11434, 6443 | DROP | **Never** expose LLM or K8s API to internet |
+
+**Physical port map (ER605):**
+- Port 1 (WAN): ISP modem uplink
+- Port 2 (LAN 1): AV1000 powerline adapter → dev machines (untagged VLAN 10)
+- Port 3 (LAN 2): A2300 WiFi AP (trunk — tagged VLANs 10, 20, 30, 40 for per-SSID segmentation)
+- Ports 4-5: Unassigned (future expansion)
+
+**DNS filtering (AdGuard Home on K8s):**
+- Deployed as K8s pod in `agent-ops` namespace with 4 blocklists (682K+ rules)
+- Upstream: Cloudflare DoH + Google DoH — all DNS encrypted
+- Forces all VLANs through filtered DNS via firewall redirect
+
+**Kubernetes infrastructure:**
+- Kind cluster with metrics-server for resource monitoring
+- Browser-worker pod with noVNC (port 6080) for live browser inspection
+- `k8s_control` tool: list pods, create/delete jobs — agents can orchestrate K8s workloads
+
+**Network fleet management (7 REST endpoints):**
+- Node CRUD (`GET/POST/DELETE /network/nodes`) — register machines with roles and SSH keys
+- Health checks (`POST /network/nodes/{host}/health`, `/network/health-all`) — SSH reachability, Ollama status, Agentop status, latency measurement
+- Remote dispatch (`POST /network/dispatch`) — execute agent work on remote nodes via SSH
+- Fleet topology (`GET /network/topology`) — total/healthy nodes, role distribution map
+
+**IT Agent as network expert:**
+- System prompt injected with full VLAN topology, port map, firewall rules, DNS strategy
+- Domain skill: `network_vlan_strategy.json` — machine-readable network config agents can query
+- 15 tool permissions including safe_shell, health_check, system_info, MCP Docker/filesystem
+
+**Agent handoff memory** — inter-agent context passing with TTL-based auto-expiry and consume-once semantics.
+
+**Result:** Agents manage real infrastructure — VLAN-segmented, firewall-hardened, DNS-filtered, fleet-monitored. The system went from "software-only orchestration" to "full-stack network + agent management."
 
 ### Phase 10 — Browser Security & Skill System
 
@@ -368,7 +411,7 @@ The DriftGuard middleware intercepts every tool call. `ARCHITECTURAL_MODIFY` too
 | `ocr_agent` | 2 | Document extraction, table parsing (GLM-OCR) |
 | `comms_agent` | 3 | Webhooks, incidents, stakeholder alerts |
 | `cs_agent` | 3 | Customer support, FAQ, knowledge base |
-| `it_agent` | 3 | Infrastructure diagnostics, network |
+| `it_agent` | 3 | Network expert — VLAN topology, ER605 firewall, DNS, fleet management |
 | `knowledge_agent` | 3 | Semantic Q&A over vectorized corpus |
 
 ### Pipeline Agents
@@ -483,6 +526,67 @@ Agentop/
 | POST | `/webgen/build` | Start website generation |
 | GET | `/memory` | Memory namespaces |
 | GET | `/events` | Shared events |
+| GET | `/network/nodes` | List registered network nodes |
+| POST | `/network/nodes` | Register new node |
+| DELETE | `/network/nodes/{host}` | Remove node |
+| POST | `/network/nodes/{host}/health` | Health-check single node (SSH, Ollama, Agentop) |
+| POST | `/network/health-all` | Concurrent health-check all fleet nodes |
+| POST | `/network/dispatch` | Remote command dispatch via SSH |
+| GET | `/network/topology` | Fleet topology overview |
+
+---
+
+## Network Architecture
+
+> The network layer gives agents visibility and control over the physical infrastructure they run on.
+
+```
+                    ┌──────────────┐
+                    │   ISP Modem  │
+                    └──────┬───────┘
+                           │ WAN (Port 1)
+                    ┌──────┴───────┐
+                    │  ER605 Router │
+                    │  (Omada SDN)  │
+                    └┬──────┬──────┘
+           ┌─────────┤      │
+     Port 2│         │Port 3│
+    ┌──────┴──────┐  │  ┌───┴──────────┐
+    │  AV1000     │  │  │  A2300 WiFi  │
+    │  Powerline  │  │  │  Access Point│
+    │  (VLAN 10)  │  │  │  (Trunk:     │
+    └──────┬──────┘  │  │   10,20,30,40│)
+           │         │  └───┬──┬──┬────┘
+     ┌─────┴─────┐   │     │  │  │
+     │Dev Machine│   │   ┌─┘  │  └─────────┐
+     │WSL2+K8s   │   │   │    │            │
+     │RTX 4070   │   │ LexLab LexLab-IoT LexLab-Guest
+     └───────────┘   │ (VLAN10)(VLAN20)   (VLAN30)
+                     │
+              ┌──────┴───────┐
+              │  K8s Cluster  │
+              │  (VLAN 40)    │
+              ├───────────────┤
+              │ AdGuard Home  │ ← DNS filter (682K rules)
+              │ Browser Worker│ ← noVNC + Chromium
+              │ Metrics Server│ ← Resource monitoring
+              └───────────────┘
+```
+
+**Port Reservation Strategy:**
+
+| Port Range | Service | VLAN Access |
+|------------|---------|-------------|
+| 8000 | FastAPI Backend | Trusted + Infra |
+| 3007 | Next.js Dashboard | Trusted |
+| 11434 | Ollama LLM | Infra only — **blocked from WAN** |
+| 6443 | K8s API | Infra only — **blocked from WAN** |
+| 6080 | noVNC Browser | Trusted only |
+| 53 | AdGuard DNS | All VLANs (forced via firewall redirect) |
+| 22 | SSH | Trusted + Infra only |
+| 88,500,3074,3544,4500 | Xbox Live | VLAN 10 — **never block** |
+
+See [docs/NETWORK.md](docs/NETWORK.md) for the full physical topology, and [docs/PORTS.md](docs/PORTS.md) for port allocation rules.
 
 ---
 
@@ -684,6 +788,26 @@ A system that runs shell commands and browses the web needs real security:
 
 ---
 
+### Chapter 9b: Network-Aware Agents
+
+Software agents are useless if they can't see the network they run on. The system needed to manage real infrastructure — not just code.
+
+**The network problem:** A single flat LAN is a security liability. IoT devices talk to dev machines. Guest phones see internal services. The LLM API (Ollama on port 11434) is exposed to every device on the network.
+
+**Solution — VLAN segmentation + agent-managed firewall:**
+
+The TP-Link ER605 router was configured with 4 VLANs (Trusted, IoT, Guest, Infra) using Omada SDN. The A2300 WiFi AP runs as a trunk — each SSID maps to a VLAN, so a phone connecting to "LexLab-Guest" is automatically isolated from the dev machines on "LexLab".
+
+5 firewall ACL rules enforce invariants: IoT can't reach Trusted, Guest can't reach anything internal, Ollama and K8s API are invisible from WAN. All DNS is forced through AdGuard Home (682K+ blocklist rules) running as a K8s pod.
+
+The IT Agent has the entire topology baked into its system prompt via `network_vlan_strategy.json` — a domain skill that contains every VLAN, port, firewall rule, and physical port mapping. When you ask "why can't my smart TV reach the dev server?", it_agent knows the answer is VLAN 20 → VLAN 10 is DROP'd by ACL rule #1.
+
+7 fleet management endpoints give agents the ability to register nodes, health-check the entire fleet concurrently, dispatch work remotely via SSH, and visualize the network topology.
+
+**Key insight**: Network architecture is a first-class skill. VLANs, firewall rules, and DNS policies should be as observable and version-controlled as application code. By encoding the network topology as a domain skill, agents can reason about infrastructure the same way they reason about code.
+
+---
+
 ### Chapter 10: Where It Stands Now
 
 | Metric | Count |
@@ -703,6 +827,9 @@ A system that runs shell commands and browses the web needs real security:
 | CVEs | 0 |
 | Training data files | 186 JSONL (5,624 examples) |
 | External integrations | OpenClaw, UI/UX Pro Max, OpenScreen, 119 Claude Code skills |
+| Network VLANs | 4 (Trusted, IoT, Guest, Infra) with 5 firewall ACLs |
+| DNS blocklist rules | 682K+ via AdGuard Home on K8s |
+| Fleet management endpoints | 7 (node CRUD, health, dispatch, topology) |
 | Governance invariants | 10 (enforced by DriftGuard middleware) |
 
 **What's connected:**
@@ -711,6 +838,8 @@ A system that runs shell commands and browses the web needs real security:
 - OpenClaw gateway (Discord/Telegram/Slack → agent routing via openclaw_bridge.py)
 - K8s cluster (Kind, metrics-server, browser-worker pods)
 - Network fleet (SSH node registry, health checks, remote dispatch)
+- ER605 VLAN segmentation (4 VLANs, 5 ACL rules, DNS pinning)
+- AdGuard Home DNS filtering (682K blocklist rules on K8s)
 - Scheduled automation (dependency audits, social media polling, tech news digests)
 - OpenScreen recording pipeline (ffmpeg-based demo capture → MP4/GIF)
 - ML Learning Lab (unified experiment runner, golden eval set, boundary coverage)
@@ -755,6 +884,11 @@ A system that runs shell commands and browses the web needs real security:
 | **Learning Lab** | Unified ML experimentation entry point — health reports, golden eval set, boundary coverage |
 | **Golden Eval Set** | Canonical test cases for regression-testing the lex-v2 router on hard boundaries |
 | **Boundary Coverage** | Metric counting training examples per agent-pair boundary (e.g., knowledge↔soul) |
+| **VLAN** | Virtual LAN — logical network segment isolating device groups (Trusted, IoT, Guest, Infra) |
+| **ER605** | TP-Link Omada router running 4-VLAN segmentation with 5 ACL firewall rules |
+| **AdGuard Home** | DNS filtering server with 682K+ blocklist rules, deployed on K8s in agent-ops namespace |
+| **Fleet** | Set of registered network nodes managed via SSH — health-checked, work-dispatched, topology-mapped |
+| **ACL** | Access Control List — firewall rule controlling traffic between VLANs (e.g., Block IoT→Trusted) |
 
 ---
 
