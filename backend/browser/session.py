@@ -151,8 +151,16 @@ class BrowserSession:
         self._touch()
         self._log_action("browser_open", {"url": url})
         await self._page.goto(url, wait_until="domcontentloaded")
+        # Re-validate final URL after redirects to prevent redirect-chain SSRF
+        final_url = self._page.url
+        if final_url and final_url != url:
+            try:
+                _validate_url(final_url)
+            except ValueError:
+                await self._page.goto("about:blank")
+                raise ValueError(f"SSRF policy blocked redirect target: {url!r} → {final_url!r}")
         title = await self._page.title()
-        return {"ok": True, "url": url, "title": title}
+        return {"ok": True, "url": final_url or url, "title": title}
 
     # ------------------------------------------------------------------
     # Interactions

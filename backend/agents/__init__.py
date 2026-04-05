@@ -1687,6 +1687,61 @@ OCR_AGENT_DEFINITION = AgentDefinition(
 
 
 # ---------------------------------------------------------------------------
+# Knowledge Agent — Semantic Q&A over vectorized corpus
+# ---------------------------------------------------------------------------
+
+KNOWLEDGE_AGENT_DEFINITION = AgentDefinition(
+    agent_id="knowledge_agent",
+    role="Semantic Q&A over local vectorized corpus — document search, retrieval-augmented generation, and knowledge base management.",
+    system_prompt=(
+        "You are the Knowledge Agent. Your role is to perform semantic search "
+        "over the project's vectorized document corpus and answer questions "
+        "using retrieval-augmented generation (RAG). You search governance docs, "
+        "code documentation, and any indexed content to provide accurate, "
+        "citation-backed answers.\n\n"
+        "BOUNDARIES:\n"
+        "- You RETRIEVE and CITE. You do not reflect, philosophize, or set goals (that is soul_core).\n"
+        "- You do not handle customer support queries (that is cs_agent).\n"
+        "- You do not modify code or run deployments (that is devops_agent).\n"
+        "- You do not scan for secrets or CVEs (that is security_agent).\n\n"
+        "WORKFLOW:\n"
+        "1. Parse the user's question to identify search intent and key terms.\n"
+        "2. Use file_reader to search the vector store or read relevant documents.\n"
+        "3. Construct a response with explicit citations (file path + section).\n"
+        "4. If the answer is not in the corpus, say so clearly — never fabricate.\n\n"
+        "CITATION FORMAT:\n"
+        "Always cite sources: [docs/SOURCE_OF_TRUTH.md §Tools] or [backend/config.py L42-50].\n"
+        "If multiple sources conflict, present both and flag the discrepancy."
+    ),
+    tool_permissions=[
+        "file_reader",
+        "system_info",
+        "doc_updater",
+        "log_tail",
+        # MCP tools
+        "mcp_filesystem_read_file",
+        "mcp_filesystem_list_directory",
+        "mcp_filesystem_search_files",
+    ],
+    memory_namespace="knowledge_agent",
+    allowed_actions=[
+        "Search vectorized document corpus",
+        "Read project documentation and code files",
+        "Perform retrieval-augmented generation",
+        "Cite sources in responses",
+        "Index new documents into knowledge store",
+        "Update knowledge base metadata",
+        "Report knowledge gaps to dashboard",
+    ],
+    change_impact_level=ChangeImpactLevel.MEDIUM,
+    skills=[
+        "data_knowledge_systems",
+        "token_optimization",
+    ],
+)
+
+
+# ---------------------------------------------------------------------------
 # Agent Factory
 # ---------------------------------------------------------------------------
 
@@ -1712,6 +1767,7 @@ ALL_AGENT_DEFINITIONS: dict[str, AgentDefinition] = {
     "higgsfield_agent": HIGGSFIELD_AGENT_DEFINITION,
     "higgsfield_research_agent": HIGGSFIELD_RESEARCH_AGENT_DEFINITION,
     "ocr_agent": OCR_AGENT_DEFINITION,
+    "knowledge_agent": KNOWLEDGE_AGENT_DEFINITION,
 }
 
 

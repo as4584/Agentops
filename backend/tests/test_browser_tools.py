@@ -24,6 +24,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 def _make_mock_page() -> MagicMock:
     page = AsyncMock()
     page.title = AsyncMock(return_value="Test Page")
+    page.url = "https://example.com/"
     page.goto = AsyncMock()
     page.click = AsyncMock()
     page.fill = AsyncMock()

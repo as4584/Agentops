@@ -1,0 +1,10 @@
+{
+  "id": "website_cloner",
+  "name": "AI Website Cloner",
+  "version": "1.0.0",
+  "description": "Clone any website into a clean Next.js codebase using a 5-phase AI pipeline: reconnaissance, foundation build, component spec & dispatch, page assembly, and visual QA diff. Based on the ai-website-cloner-template methodology (MIT). Uses browser automation for pixel-perfect extraction and parallel builder agents for component generation.",
+  "allowed_agents": ["devops_agent", "code_review_agent"],
+  "required_tools": ["safe_shell", "browser_control", "file_reader", "doc_updater", "git_ops"],
+  "risk_level": "medium",
+  "enabled": true
+}

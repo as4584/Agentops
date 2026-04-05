@@ -88,6 +88,7 @@ from backend.routes.memory_management import router as memory_management_router
 from backend.routes.ml import router as ml_router
 from backend.routes.ml_eval import router as ml_eval_router
 from backend.routes.ml_training import router as ml_training_router
+from backend.routes.network import router as network_router
 from backend.routes.sandbox import router as sandbox_router
 from backend.routes.schedule_routes import router as scheduler_router
 from backend.routes.skills import router as skills_router
@@ -284,6 +285,46 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         )
         logger.info("Social media: Daily report + token check jobs registered", event_type="social_media_init")
 
+    # ── Tech News Cron — free RSS/web scrape for tech updates ───────────────
+    scheduler.add_cron_job(
+        job_id="tech_news_morning_digest",
+        agent_id="knowledge_agent",
+        message=(
+            "Fetch today's top tech news from free RSS feeds and public sources. "
+            "Sources: Hacker News (news.ycombinator.com/rss), TechCrunch RSS, "
+            "The Verge RSS, ArsTechnica RSS, GitHub Trending, Product Hunt. "
+            "Summarize top 10 stories with title, source, one-line summary, and URL. "
+            "Save digest to data/agents/knowledge_agent/tech_news_latest.json. "
+            "If any story mentions AI agents, multi-agent systems, LLM fine-tuning, "
+            "Ollama, or local-first AI, flag it as HIGH RELEVANCE."
+        ),
+        cron_expr="0 7 * * *",  # daily at 07:00 UTC
+    )
+    scheduler.add_cron_job(
+        job_id="tech_news_evening_scan",
+        agent_id="knowledge_agent",
+        message=(
+            "Evening tech news scan — check for breaking news since morning digest. "
+            "Focus on: AI/ML announcements, new open-source tools, security advisories, "
+            "framework releases (Next.js, FastAPI, Ollama, LangChain, etc.). "
+            "Append any new stories to data/agents/knowledge_agent/tech_news_latest.json. "
+            "Alert via alert_dispatch if any critical security advisory found."
+        ),
+        cron_expr="0 19 * * *",  # daily at 19:00 UTC
+    )
+    scheduler.add_cron_job(
+        job_id="tech_news_weekly_roundup",
+        agent_id="knowledge_agent",
+        message=(
+            "Generate weekly tech news roundup from the past 7 days of daily digests. "
+            "Group by category: AI/ML, DevOps, Security, Open Source, Industry. "
+            "Highlight top 3 most relevant stories for Agentop development. "
+            "Save to data/agents/knowledge_agent/tech_news_weekly.json."
+        ),
+        cron_expr="0 10 * * 0",  # Sunday at 10:00 UTC
+    )
+    logger.info("Tech news: 3 cron jobs registered (morning, evening, weekly)", event_type="tech_news_init")
+
     # Boot the Soul Agent — loads identity, goals, and reflection history
     soul_boot = await _orchestrator.boot_soul()
     logger.info(f"Soul boot: {soul_boot}")
@@ -448,6 +489,7 @@ app.include_router(ml_eval_router)
 app.include_router(ml_training_router)
 app.include_router(agent_factory_router)
 app.include_router(openclaw_router)
+app.include_router(network_router)
 
 # Gateway — OpenAI-compatible API + admin endpoints
 if GATEWAY_ENABLED:
