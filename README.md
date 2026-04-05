@@ -110,6 +110,18 @@ This section documents the incremental engineering work that brought Agentop fro
 
 **Result:** Self-improving routing loop. Each session makes lex-v2 better at the boundaries where it struggles most.
 
+### Phase 8b — ML Learning Lab
+
+**Problem:** ML infrastructure was spread across 12 modules with no unified entry point. No golden eval set. No way to see overall health at a glance.
+
+**What we built:**
+- **LearningLab class** (`backend/ml/learning_lab.py`) — single entry point for training data summary, health reports, golden eval set management, and boundary coverage analysis
+- **Golden eval set** — JSONL-based canonical test set (`data/training/golden_eval_set.jsonl`) for regression testing the router across known hard boundaries
+- **5 Learning Lab API endpoints** — `GET /api/ml/training/lab/health`, `/lab/summary`, `/lab/golden-tasks`, `/lab/boundaries`, `POST /lab/golden-tasks`
+- **Boundary coverage analysis** — automatically scans all training data and reports coverage per agent-pair boundary (knowledge↔soul, monitor↔it, etc.)
+
+**Result:** One-call health check for the entire ML pipeline. Golden eval set ensures lex-v2 never regresses on solved boundaries.
+
 ### Phase 9 — Network & Infrastructure Expansion
 
 **Problem:** The system could manage agents but not the network they run on.
@@ -130,12 +142,25 @@ This section documents the incremental engineering work that brought Agentop fro
 **What we built:**
 - **Browser security audit** — 5 controls validated (SSRF, secret redaction, session isolation, timeouts, headless)
 - **Redirect-chain SSRF protection** — re-validates final URL after browser redirects to prevent SSRF via redirect
-- **17+ manifest skills** including OpenScreen Demo (ffmpeg-based UI recording), Website Cloner (5-phase pipeline), and domain knowledge packs
+- **22 manifest skills** including OpenScreen Demo (ffmpeg-based UI recording), Website Cloner (5-phase pipeline), and domain knowledge packs
 - **Knowledge agent ghost fix** — referenced in 70+ files but never registered. Now defined as 21st agent with RAG-focused system prompt
 - **Tech news cron jobs** — 3 automated jobs: morning digest (HN, TechCrunch, GitHub Trending), evening security scan, weekly roundup
 - **Ollama model pruning** — 9 models → 4, freed ~13.5GB disk
 
-**Result:** 17+ skills, 21 agents, hardened browser, automated tech news pipeline, leaner model footprint.
+**Result:** 22 skills, 21 agents, hardened browser, automated tech news pipeline, leaner model footprint.
+
+### Phase 11 — External Repo Integration & Repo Cleanup
+
+**Problem:** Sandbox repos (UI/UX Pro Max, OpenClaw/GoClaw, Claude Code skills) were sitting unused. Root directory was cluttered with scratch files. No documentation of the OpenClaw bridge architecture.
+
+**What we built:**
+- **UI/UX Design skill** (`backend/skills/ui_ux_design/`) — references the UI/UX Pro Max toolkit: 67 design styles, 161 reasoning rules, 13 framework stacks, BM25 search across 8 domain databases
+- **OpenClaw Gateway skill** (`backend/skills/openclaw_gateway/`) — documents how Agentop built on top of OpenClaw/GoClaw: Node.js multi-channel gateway (port 18789) bridging Discord, Telegram, and Slack into the orchestrator via `openclaw_bridge.py`, with 12 red-line firewall patterns and lex-v2 routing at 94.9% accuracy
+- **ML Learning Lab skill** (`backend/skills/ml_learning_lab/`) — documents the unified ML experimentation system: 12 components, 54 API endpoints, 3 guided workflows
+- **OpenScreen Demo skill** — ffmpeg + browser automation for recording polished demos of the dashboard (MP4/GIF with annotations) for career fairs and portfolio
+- **Root directory cleanup** — moved 5 misplaced files (`test_k8s_*.py` → `sandbox/experimental/`, `decode.py`, `read.md`, `output.txt` → `sandbox/scratch/`), added sandbox README, updated `.gitignore` for runtime artifacts
+
+**Result:** 22 manifest skills (up from 17), sandbox repos properly referenced, root directory clean and professional.
 
 ### Cumulative Stats
 
@@ -147,12 +172,13 @@ This section documents the incremental engineering work that brought Agentop fro
 | Native tools | 13 (12 original + document_ocr) |
 | MCP tools | 26 (via Docker bridge) |
 | Browser tools | 8 |
-| Skills | 17+ manifest + 15 legacy domain packs |
-| HTTP endpoints | 190+ across 27 route files |
+| Skills | 22 manifest + 17 legacy domain packs |
+| HTTP endpoints | 195+ across 27 route files |
 | Languages | 4 (Python, C, Go, Rust) |
 | Cron jobs | 10+ automated |
-| Training data files | 85+ JSONL |
-| Files changed (dev cycle) | 475+ files, +54,000+ lines |
+| Training data files | 186 JSONL (5,624 examples) |
+| External integrations | OpenClaw gateway, UI/UX Pro Max, 119 Claude Code skills |
+| Files changed (dev cycle) | 520+ files, +56,000+ lines |
 | CI pipelines | 2 (CI Gate + ML Pipeline) |
 | CVEs | 0 |
 
@@ -399,8 +425,8 @@ Agentop/
 │   │   ├── lex_router.py          # 3-tier routing (C → LLM → keyword)
 │   │   └── lex_router_fast.c      # C fast router (compiled .so)
 │   ├── routes/                    # FastAPI route handlers (11 files)
-│   ├── skills/                    # Skill registry + 15 domain knowledge packs
-│   ├── tests/                     # 1,140 tests
+│   ├── skills/                    # Skill registry (22 manifest + 17 domain packs)
+│   ├── tests/                     # 1,165+ tests
 │   ├── tools/                     # 13 native tool implementations
 │   └── content/ webgen/ browser/  # Pipeline agents
 ├── deerflow/                      # DeerFlow integration layer
@@ -411,7 +437,12 @@ Agentop/
 │   ├── synthesize_training_data.py # DPO preference pairs
 │   ├── finetune_lex.py            # LoRA fine-tuning
 │   └── setup_deps.sh              # Dependency setup
-├── data/training/                 # lex-v2 training JSONL
+├── data/training/                 # lex-v2 training JSONL (186 files, 5,624 examples)
+├── sandbox/
+│   ├── everything-claude-code/    # 119 Claude Code skill packages
+│   ├── ui-ux-pro-max-skill/       # UI/UX design intelligence toolkit
+│   ├── experimental/              # One-off test scripts
+│   └── scratch/                   # Temp files and debug artifacts
 ├── docs/                          # Governance documents
 └── pyproject.toml                 # Python project config + dev deps
 ```
@@ -485,6 +516,10 @@ python -m backend.port_guard kill 8000 # Kill conflicting process
 | **LangGraph** (LangChain) | Stateful graph orchestration, checkpointing, conditional routing | [github.com/langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) |
 | **LangChain** | LLM abstractions, tool system patterns, chain composition | [github.com/langchain-ai/langchain](https://github.com/langchain-ai/langchain) |
 | **GLM-OCR** (THUDM) | Document extraction, multi-modal pre-processing | [github.com/THUDM/GLM-OCR](https://github.com/THUDM/GLM-OCR) |
+| **OpenClaw / GoClaw** | Multi-channel gateway pattern — bridging Discord, Telegram, Slack into a unified agent orchestrator. We built `openclaw_bridge.py` with a 12-pattern firewall and rate limiting on top of this architecture | Skill: `backend/skills/openclaw_gateway/` |
+| **UI/UX Pro Max** | Design intelligence toolkit — 67 styles, 161 reasoning rules, 13 framework stacks, BM25 search across domain databases | Skill: `backend/skills/ui_ux_design/` |
+| **OpenScreen** | Screen recording concept adapted for agent demo creation — ffmpeg x11grab + browser automation for MP4/GIF demos with annotations | Skill: `backend/skills/openscreen_demo/` |
+| **Claude Code Skills** (119) | Agentic engineering, eval harness, market research, and 116 more skill packages in `sandbox/everything-claude-code/` — referenced by Agentop's skill system | `sandbox/everything-claude-code/skills/` |
 
 See [docs/INSPIRATIONS.md](docs/INSPIRATIONS.md) for detailed breakdowns.
 
@@ -658,23 +693,27 @@ A system that runs shell commands and browses the web needs real security:
 | Native tools | 13 |
 | MCP tools | 26 (via Docker bridge) |
 | Browser tools | 8 |
-| HTTP endpoints | 190+ across 27 route files |
-| Skills | 17+ manifest + 15 legacy domain packs |
+| HTTP endpoints | 195+ across 27 route files |
+| Skills | 22 manifest + 17 legacy domain packs |
 | Tests | 1,165+ passing |
 | Coverage | 63% (97% on ML module) |
 | Languages | 4 (Python, C, Go, Rust) |
 | Databases | 4 (SQLite ×3 + JSON stores) |
 | Cron jobs | 10+ automated (dep check, social media, tech news) |
 | CVEs | 0 |
-| Training data files | 85+ JSONL files |
+| Training data files | 186 JSONL (5,624 examples) |
+| External integrations | OpenClaw, UI/UX Pro Max, OpenScreen, 119 Claude Code skills |
 | Governance invariants | 10 (enforced by DriftGuard middleware) |
 
 **What's connected:**
 - VS Code extension (`@agentop` chat participant)
 - Discord bot (slash commands → agent routing)
+- OpenClaw gateway (Discord/Telegram/Slack → agent routing via openclaw_bridge.py)
 - K8s cluster (Kind, metrics-server, browser-worker pods)
 - Network fleet (SSH node registry, health checks, remote dispatch)
 - Scheduled automation (dependency audits, social media polling, tech news digests)
+- OpenScreen recording pipeline (ffmpeg-based demo capture → MP4/GIF)
+- ML Learning Lab (unified experiment runner, golden eval set, boundary coverage)
 
 **What's next:**
 - [ ] VoiceAgent + AvatarVideoAgent — wire real TTS/video providers
@@ -683,6 +722,8 @@ A system that runs shell commands and browses the web needs real security:
 - [ ] Agent handoff memory → full multi-agent chains
 - [ ] Proxy/VPN layer for anonymous agent web browsing
 - [ ] lex-v3 — larger training corpus, boundary-specific hard negatives
+- [ ] OpenClaw — finish Discord integration, implement Telegram/Slack bridges
+- [ ] Record demo videos with OpenScreen for portfolio and career fairs
 
 ---
 
@@ -709,6 +750,59 @@ A system that runs shell commands and browses the web needs real security:
 | **TurboQuant** | Rust-based embedding quantizer — 8x compression for knowledge vector store |
 | **fast_route** | C shared library for sub-millisecond keyword routing and red-line blocking |
 | **Soul** | The soul_core agent — persistent governing intelligence with autobiographical memory |
+| **OpenClaw** | Multi-channel gateway bridging Discord/Telegram/Slack into Agentop's orchestrator |
+| **OpenScreen** | Screen recording skill using ffmpeg x11grab + browser automation for demo videos |
+| **Learning Lab** | Unified ML experimentation entry point — health reports, golden eval set, boundary coverage |
+| **Golden Eval Set** | Canonical test cases for regression-testing the lex-v2 router on hard boundaries |
+| **Boundary Coverage** | Metric counting training examples per agent-pair boundary (e.g., knowledge↔soul) |
+
+---
+
+## Recording Demos with OpenScreen
+
+> Use the `openscreen_demo` skill to record polished demos of Agentop for career fairs, portfolios, and social media.
+
+### Quick Start
+
+```bash
+# Ensure both servers are running
+curl -s localhost:8000/health && curl -s localhost:3007 > /dev/null && echo "Ready"
+
+# Record 30-second dashboard demo (requires ffmpeg + Xvfb for headless)
+ffmpeg -f x11grab -video_size 1920x1080 -i :0 -t 30 -c:v libx264 -preset fast output/demos/dashboard.mp4
+
+# Convert to GIF for README/social media
+ffmpeg -i output/demos/dashboard.mp4 \
+  -vf "fps=10,scale=800:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" \
+  output/demos/dashboard.gif
+
+# Add annotation overlay
+ffmpeg -i output/demos/dashboard.mp4 \
+  -vf "drawtext=text='Agentop Control Center':x=20:y=20:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.6" \
+  output/demos/dashboard_annotated.mp4
+```
+
+### Demo Scenarios
+
+| Scenario | What to Record | Duration |
+|----------|---------------|----------|
+| **Agent Floor** | Navigate dashboard, show all agents in visual states | 15-30s |
+| **Live Chat** | Send a message, watch lex-v2 route → agent respond | 20-30s |
+| **Pipeline Run** | Trigger content or webgen pipeline, show progress | 30-60s |
+| **ML Learning Lab** | Hit `/api/ml/training/lab/health`, show training stats | 15s |
+| **Drift Detection** | Trigger a DriftGuard warning, show RED→GREEN recovery | 20s |
+
+### Output Structure
+
+```
+output/demos/
+├── dashboard.mp4          # Full resolution recording
+├── dashboard.gif          # Optimized GIF for README
+├── dashboard_annotated.mp4 # With text overlay
+└── thumbnails/            # First-frame PNGs
+```
+
+For full methodology, see [backend/skills/openscreen_demo/SKILL.md](backend/skills/openscreen_demo/SKILL.md).
 
 ---
 
