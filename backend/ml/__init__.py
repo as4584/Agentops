@@ -13,6 +13,7 @@ from backend.ml.data_version import DataVersioner
 from backend.ml.doc_enforcer import MLDocEnforcer
 from backend.ml.eval_framework import EvalCase, EvalDimension, EvalResult, LLMEvalFramework
 from backend.ml.experiment_tracker import ExperimentTracker
+from backend.ml.learning_lab import DatasetStats, LabHealthReport, LearningLab
 from backend.ml.mlflow_tracker import MLflowTracker
 from backend.ml.monitor import MLMonitor
 from backend.ml.pipeline import MLPipeline, PipelineRun, PipelineStep
@@ -54,4 +55,7 @@ __all__ = [
     "BenchmarkResult",
     "SuiteReport",
     "TurboQuantizer",
+    "LearningLab",
+    "LabHealthReport",
+    "DatasetStats",
 ]

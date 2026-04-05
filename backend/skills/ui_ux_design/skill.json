@@ -1,0 +1,10 @@
+{
+  "id": "ui_ux_design",
+  "name": "UI/UX Pro Max Design Intelligence",
+  "version": "2.0.0",
+  "description": "Design intelligence skill providing BM25-ranked search across 67 UI styles, 161 reasoning rules, color palettes, typography pairings, landing page patterns, chart selection, and UX guidelines. Supports 13 framework stacks (React, Next.js, Vue, Svelte, Flutter, SwiftUI, etc.). Generates complete design systems from project requirements. Based on UI UX Pro Max (MIT, uupm.cc).",
+  "allowed_agents": ["code_review_agent", "devops_agent", "knowledge_agent", "cs_agent"],
+  "required_tools": ["file_reader", "safe_shell", "doc_updater"],
+  "risk_level": "low",
+  "enabled": true
+}

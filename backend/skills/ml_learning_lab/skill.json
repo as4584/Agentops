@@ -1,0 +1,10 @@
+{
+  "id": "ml_learning_lab",
+  "name": "ML Learning Lab",
+  "version": "1.0.0",
+  "description": "Unified machine learning experimentation lab for Agentop. Ties together experiment tracking, A/B testing, 9-dimension eval framework, golden test set management, benchmark suites, data versioning, and TurboQuant embedding compression into a single self-service API. Provides guided workflows for training lex-v2 router, evaluating agent quality, and running regression suites.",
+  "allowed_agents": ["devops_agent", "data_agent", "knowledge_agent", "code_review_agent"],
+  "required_tools": ["file_reader", "safe_shell", "db_query", "system_info"],
+  "risk_level": "medium",
+  "enabled": true
+}
