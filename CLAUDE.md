@@ -1,7 +1,7 @@
 # Agentop — CLAUDE.md
 
 > Local-first multi-agent control center. Documentation-first governance model.
-> Last updated: 2026-03-30
+> Last updated: 2026-04-04
 
 ---
 
@@ -30,7 +30,8 @@ Agentop is a production-grade, **fully local** multi-agent system built for orch
 - Documentation precedes mutation (no silent architectural changes)
 - Agents never call each other directly — all communication routes through the orchestrator
 - Every agent has an isolated memory namespace
-- 38 tools (12 native + 26 MCP via Docker bridge)
+- 47 tools (13 native + 26 MCP via Docker bridge + 8 browser)
+- 22 manifest skills + 17 legacy domain knowledge packs
 - Drift Guard middleware intercepts all tool calls and enforces governance invariants
 
 ---
@@ -45,12 +46,20 @@ Next.js Dashboard (localhost:3007)
          │ REST polling (5s)
          ▼
 FastAPI Backend (localhost:8000)
+  ├── API Gateway (ACL, audit, auth, rate limiting)
+  ├── Security Middleware (injection detection)
   ├── Drift Guard Middleware
   ├── LangGraph Orchestrator (stateful routing, fan-out)
-  ├── Agent Registry (ALL_AGENT_DEFINITIONS)
+  │    ├── C Fast Router (< 1ms, compiled .so)
+  │    ├── lex-v2 LLM Router (3B model via Ollama)
+  │    └── Python Keyword Fallback
+  ├── Agent Registry (21 core agents)
   ├── Soul Agent (boot sequence, reflection, trust scoring)
-  ├── Tool Layer (12 native tools)
-  ├── MCP Gateway Bridge (26 tools via docker mcp CLI)
+  ├── Tool Layer (13 native + 26 MCP + 8 browser)
+  ├── Skill System (22 manifest + 17 legacy domain packs)
+  ├── ML Learning Lab (experiment tracker, eval framework, training pipeline)
+  ├── OpenClaw Bridge (Discord/Telegram/Slack → agent routing)
+  ├── GLM-OCR Sidecar (localhost:5002, document extraction)
   ├── Knowledge Vector DB (cosine search, local embeddings)
   ├── Memory Store (namespaced JSON, data/agents/)
   └── Central Logger (backend/logs/system.jsonl)
@@ -88,8 +97,15 @@ Agentop/
 │   ├── mcp/                      # MCP gateway bridge (docker mcp CLI)
 │   ├── memory/                   # MemoryStore class (namespaced JSON persistence)
 │   ├── middleware/                # Drift Guard middleware
-│   ├── models/                   # Pydantic models (agent, tool, drift, task)
-│   ├── orchestrator/             # LangGraph state machine (routing, fan-out)
+│   ├── ml/                        # ML experiment tracking, learning lab, training
+│   │   ├── learning_lab.py          # LearningLab class (health, golden eval, boundaries)
+│   │   ├── experiment_tracker.py    # MLflow / JSON fallback
+│   │   └── ...                      # eval_framework, scoring, benchmark, etc.
+│   ├── models/                    # Pydantic models (agent, tool, drift, task)
+│   ├── ocr/                       # GLM-OCR client (async httpx)
+│   ├── orchestrator/              # LangGraph state machine (routing, fan-out)
+│   │   ├── lex_router.py            # 3-tier routing (C → LLM → keyword)
+│   │   └── openclaw_bridge.py       # OpenClaw firewall + multi-channel bridge
 │   ├── routes/                   # FastAPI route handlers
 │   │   ├── skills.py             # Skill registry CRUD endpoints
 │   │   ├── agent_control.py      # Agent start/stop/status
@@ -99,11 +115,16 @@ Agentop/
 │   │   ├── memory_management.py  # Memory CRUD
 │   │   ├── webgen_builder.py     # Website generation API
 │   │   └── ...                   # (11 total route files)
-│   ├── skills/                   # Skill system
-│   │   ├── registry.py           # SkillRegistry — load, toggle, validate skills
-│   │   ├── loader.py             # Loads JSON or manifest-format skills
-│   │   ├── newsletter_weekly_tips/ # Only registered skill (JSON format)
-│   │   └── data/                 # Legacy skill data
+│   ├── skills/                    # Skill system (22 manifest + 17 legacy)
+│   │   ├── registry.py              # SkillRegistry — load, toggle, validate skills
+│   │   ├── loader.py                # Loads JSON or manifest-format skills
+│   │   ├── openscreen_demo/         # ffmpeg screen recording for demos
+│   │   ├── website_cloner/          # 5-phase website cloning pipeline
+│   │   ├── ui_ux_design/            # UI/UX Pro Max toolkit reference
+│   │   ├── openclaw_gateway/         # OpenClaw multi-channel bridge docs
+│   │   ├── ml_learning_lab/         # ML learning lab documentation
+│   │   ├── ...                      # 16 more manifest skills
+│   │   └── data/                    # 17 legacy JSON domain knowledge packs
 │   ├── tools/                    # 12 native tool implementations
 │   ├── utils/                    # Logger, tool ID registry, helpers
 │   ├── webgen/                   # Website generation pillar
@@ -117,9 +138,11 @@ Agentop/
 ├── frontend/                     # Next.js dashboard (localhost:3007)
 ├── animation_salvage_lab/        # Hailuo AI video animation agent + docs
 ├── pixel-agents/                 # Experimental pixel-level agent work
-├── sandbox/                      # Reference implementations
-│   ├── everything-claude-code/   # Claude Code skill library (30+ skills)
-│   └── ui-ux-pro-max-skill/      # UI/UX skill implementation
+├── sandbox/                      # Reference implementations + scratch
+│   ├── everything-claude-code/   # Claude Code skill library (119 skills)
+│   ├── ui-ux-pro-max-skill/      # UI/UX design intelligence toolkit
+│   ├── experimental/             # One-off test scripts (moved from root)
+│   └── scratch/                  # Temp files and debug artifacts
 ├── SigmaSimulator/               # Sigma simulation project
 └── scripts/                      # Port check, dev scripts
 ```
@@ -150,12 +173,13 @@ All agents are defined in `backend/agents/__init__.py → ALL_AGENT_DEFINITIONS`
 
 ---
 
-## Native Tools (12)
+## Native Tools (13)
 
 | Tool | Type | Description |
 |---|---|---|
 | `safe_shell` | STATE_MODIFY | Execute whitelisted shell commands |
-| `file_reader` | READ_ONLY | Read file contents safely |
+| `file_reader` | READ_ONLY | Read file contents safely (auto-routes PDFs/images through OCR) |
+| `document_ocr` | READ_ONLY | Extract structured text from documents via GLM-OCR |
 | `doc_updater` | ARCH_MODIFY | Update governance documentation |
 | `system_info` | READ_ONLY | Retrieve system information |
 | `webhook_send` | STATE_MODIFY | HTTP POST to external endpoints |
@@ -186,11 +210,21 @@ Skills are JSON-manifest packages that extend agent capabilities without modifyi
 **Registered skills:**
 | Skill ID | Name | Allowed Agents | Description |
 |---|---|---|---|
-| `newsletter_weekly_tips` | Newsletter Weekly Tips | GSDAgent, ContentAgent | Generates Damian's weekly email newsletter via local Ollama |
+| `newsletter_weekly_tips` | Newsletter Weekly Tips | GSDAgent, ContentAgent | Weekly email newsletter via local Ollama |
+| `openscreen_demo` | OpenScreen Demo Creator | devops, comms | ffmpeg screen recording for portfolio demos |
+| `website_cloner` | Website Cloner | devops, code_review | 5-phase website cloning pipeline |
+| `ui_ux_design` | UI/UX Design Intelligence | code_review, devops, knowledge, cs | 67 styles, 161 rules, 13 stacks from UI/UX Pro Max |
+| `openclaw_gateway` | OpenClaw Gateway | devops, comms, it, security | Multi-channel bridge (Discord/Telegram/Slack) |
+| `ml_learning_lab` | ML Learning Lab | devops, data, knowledge, code_review | Unified ML experiment runner and health reports |
+| `social_media_manager` | Social Media Manager | comms, cs | Platform-specific content scheduling |
+| `turbo_quant_rust` | TurboQuant (Rust) | devops, data | 8x embedding compression via PyO3 |
+| + 14 more | Engineering skills | Various | Python patterns, TDD, security review, Docker, etc. |
+
+See `ls backend/skills/*/skill.json` for complete manifest list (22 total).
 
 **Adding a new skill (manifest format):** Create `backend/skills/<skill_id>/skill.json` with fields: `id`, `name`, `version`, `description`, `allowed_agents`, `required_tools`, `risk_level`, `enabled`.
 
-**Legacy skills** (`backend/skills/data/` — 15 JSON domain knowledge packs injected into agent prompts):
+**Legacy skills** (`backend/skills/data/` — 17 JSON domain knowledge packs injected into agent prompts):
 
 | Skill File | Domain |
 |---|---|
@@ -284,16 +318,14 @@ cd frontend && npm install && npm run dev
 
 ## TODO / Gaps
 
-- [ ] **Only 1 manifest skill** (`newsletter_weekly_tips`) — 15 legacy JSON domain skills exist in `backend/skills/data/` but no manifest-format skills beyond newsletter. Wire the legacy skills into the registry or convert to manifest format
+- [x] **~~Only 1 manifest skill~~** → Now 22 manifest skills (newsletter, openscreen, website_cloner, ui_ux_design, openclaw_gateway, ml_learning_lab, + 16 engineering skills)
 - [ ] **WebGen pipeline** is implemented but not wired to a persistent project store — `SiteProject` state is in-memory only
-- [ ] **VoiceAgent and AvatarVideoAgent are stubs** — no real TTS (ElevenLabs key exists in `.env`) or video provider (Fal AI key exists) wired in yet
+- [ ] **VoiceAgent and AvatarVideoAgent are stubs** — no real TTS or video provider wired in yet
 - [ ] **PublisherAgent** — no social platform API integrations implemented
-- [ ] **Animation Salvage Lab** (`animation_salvage_lab/`) has docs and a Hailuo agent prompt guide but no Python agent implementation yet
-- [ ] **SigmaSimulator** (`SigmaSimulator/`) has `default.project.json` but no implementation — unclear purpose
-- [ ] **Pixel Agents** (`pixel-agents/`) appears to be experimental — no integration with main backend
-- [ ] **MCP Gateway** requires Docker CLI — no fallback tests documented; graceful degradation path needs integration test
-- [ ] **Knowledge Vector Store** — no scripts to seed the vector DB from project docs; embeddings pipeline is defined but setup is manual
-- [ ] **CORS** — `app.py` CORS origins are env-var-controlled (`AGENTOP_CORS_ORIGINS`) but not validated at startup
-- [ ] **Secrets** — `.env` is gitignored but `.env` itself exists in the repo root with real values — rotate and move to Doppler
-- [ ] **Dashboard** runs on port 3007 but README says 3000 — fix README
-- [ ] **Everything-Claude-Code sandbox** (`sandbox/everything-claude-code/`) has 30+ skills — none are imported into the Agentop skill registry yet
+- [ ] **OpenClaw Gateway** — 40% complete (firewall ✅, lex-v2 ✅, Discord 40%, Telegram/Slack ❌)
+- [ ] **Animation Salvage Lab** (`animation_salvage_lab/`) has docs but no Python agent
+- [ ] **MCP Gateway** requires Docker CLI — graceful degradation needs integration test
+- [ ] **Knowledge Vector Store** — no scripts to seed the vector DB from project docs
+- [ ] **Demo Videos** — OpenScreen skill is defined but no recorded demos exist yet in `output/demos/`
+- [ ] **ML Learning Lab** — golden eval set needs seeding with canonical test cases
+- [ ] **lex-v3** — larger training corpus (currently 5,624 examples across 186 files), boundary-specific hard negatives
