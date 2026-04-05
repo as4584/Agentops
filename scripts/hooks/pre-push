@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────────────────────
-# Git pre-push hook — CI gate via act
+# Git pre-push hook — Audit + CI gate
 #
-# Runs the full .github/workflows/ci.yml workflow locally inside a Docker-based
-# GitHub runner (via `act`) before every push.  If any job fails, the push is
-# blocked and the error is printed — nothing reaches GitHub.
+# Phase 1: Runs scripts/pre_push_audit.py (fast, ~20s) — orphaned routes,
+#           timing-safe auth, dev key fallback, injection patterns, secrets,
+#           ruff lint, pytest.  Catches pile-on issues before they reach remote.
 #
-# Requirements
+# Phase 2: Runs full .github/workflows/ci.yml via act (Docker-based runner).
+#           Only runs if Phase 1 passes AND Docker + act are available.
+#
+# Requirements (Phase 2 only)
 #   • Docker daemon running
 #   • act v0.2.x+  (https://github.com/nektos/act)
 #     Install: curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
@@ -34,30 +37,46 @@ echo -e "${CYAN}${BOLD}│        pre-push: CI gate  (act / GitHub runner)     �
 echo -e "${CYAN}${BOLD}└─────────────────────────────────────────────────────┘${RESET}"
 echo ""
 
-# ── Preflight: act must be installed ────────────────────────────────────────
+# ── Phase 1: Fast audit (pytest, ruff, secrets, architecture checks) ─────────
+echo -e "${CYAN}${BOLD}Phase 1: Pre-push audit${RESET}"
+echo ""
+
+if python3 "$REPO_ROOT/scripts/pre_push_audit.py"; then
+    echo -e "  ${GREEN}Phase 1 passed.${RESET}"
+else
+    echo ""
+    echo -e "${RED}${BOLD}  ✗ Phase 1 audit FAILED — push blocked.${RESET}"
+    echo ""
+    echo -e "  ${YELLOW}Fix the errors above, then:${RESET}"
+    echo "    git push"
+    echo ""
+    echo -e "  ${YELLOW}Emergency bypass (use sparingly):${RESET}"
+    echo "    git push --no-verify"
+    echo ""
+    exit 1
+fi
+
+echo ""
+
+# ── Phase 2: Preflight: act must be installed ───────────────────────────────
 if ! command -v act &>/dev/null; then
-    echo -e "${RED}${BOLD}ERROR:${RESET} 'act' is not installed."
+    echo -e "${YELLOW}${BOLD}SKIP:${RESET} 'act' is not installed — skipping Docker CI gate."
+    echo -e "  Phase 1 passed, push proceeding."
     echo ""
-    echo "  Install with:"
-    echo "    curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash"
-    echo ""
-    echo "  Then pull the runner image once:"
-    echo "    act push -W .github/workflows/ci.yml --pull"
-    echo ""
-    exit 1
+    exit 0
 fi
 
-# ── Preflight: Docker must be running ───────────────────────────────────────
+# ── Phase 2: Preflight: Docker must be running ──────────────────────────────
 if ! docker info &>/dev/null 2>&1; then
-    echo -e "${RED}${BOLD}ERROR:${RESET} Docker daemon is not running."
-    echo "  Start Docker and retry."
+    echo -e "${YELLOW}${BOLD}SKIP:${RESET} Docker daemon is not running — skipping Docker CI gate."
+    echo -e "  Phase 1 passed, push proceeding."
     echo ""
-    exit 1
+    exit 0
 fi
 
-# ── Run the CI gate ──────────────────────────────────────────────────────────
+# ── Phase 2: Run the CI gate ────────────────────────────────────────────────
+echo -e "${CYAN}${BOLD}Phase 2: CI gate (act / GitHub runner)${RESET}"
 echo -e "  Running: ${BOLD}act push -W .github/workflows/ci.yml${RESET}"
-echo -e "  Settings from: ${BOLD}.actrc${RESET}"
 echo ""
 
 if act push -W .github/workflows/ci.yml; then

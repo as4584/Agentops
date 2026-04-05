@@ -19,24 +19,34 @@ GATEWAY_ENABLED: bool = os.getenv("GATEWAY_ENABLED", "true").lower() == "true"
 
 # ---------------------------------------------------------------------------
 # Master Key — used to encrypt provider secrets at rest.
-# MUST be set in production. Falls back to a deterministic dev key only.
+# MUST be set via AGENTOP_GATEWAY_MASTER_KEY env var.  No fallback.
+# Generate: python -c "import secrets; print(secrets.token_hex(32))"
 # ---------------------------------------------------------------------------
-_DEV_KEY_WARNING = "AGENTOP_GATEWAY_MASTER_KEY is not set. Using insecure dev key — DO NOT use in production."
-
 _master_key_raw: str = os.getenv("AGENTOP_GATEWAY_MASTER_KEY", "")
 if not _master_key_raw:
     import warnings
 
-    warnings.warn(_DEV_KEY_WARNING, stacklevel=2)
-    # 32-byte hex dev fallback — never store real keys with this
-    _master_key_raw = "dev0000000000000000000000000000000000000000000000000000000000000"
+    warnings.warn(
+        "AGENTOP_GATEWAY_MASTER_KEY is not set. Gateway encryption disabled. "
+        "Generate one: python -c \"import secrets; print(secrets.token_hex(32))\"",
+        stacklevel=2,
+    )
 
 GATEWAY_MASTER_KEY: str = _master_key_raw
 
 # ---------------------------------------------------------------------------
 # Admin Secret — protects /admin/* endpoints.
+# MUST be set via AGENTOP_ADMIN_SECRET env var when gateway is enabled.
 # ---------------------------------------------------------------------------
 GATEWAY_ADMIN_SECRET: str = os.getenv("AGENTOP_ADMIN_SECRET", "")
+if GATEWAY_ENABLED and not GATEWAY_ADMIN_SECRET:
+    import warnings
+
+    warnings.warn(
+        "AGENTOP_ADMIN_SECRET is not set. Gateway admin endpoints are unprotected. "
+        "Set this env var before enabling the gateway in production.",
+        stacklevel=2,
+    )
 
 # ---------------------------------------------------------------------------
 # Rate Limiting Backend
