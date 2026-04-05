@@ -87,23 +87,37 @@ jobs:
         with:
           fetch-depth: 0          # full history — scan all commits in the push
 
-      - name: Detect secrets (detect-secrets)
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install scanning tools
+        run: pip install detect-secrets --quiet --root-user-action=ignore
+
+      - name: Detect secrets (detect-secrets baseline)
         run: |
-          python3 -m pip install --upgrade pip --quiet 2>/dev/null || true
-          pip install detect-secrets --quiet --root-user-action=ignore 2>/dev/null || pip install detect-secrets --quiet
           detect-secrets scan \
             --exclude-files '\.env\.example$' \
             --exclude-files '\.actrc$' \
-            --baseline .secrets.baseline 2>/dev/null || true
-          # Hard-fail if any NEW secrets found (not already in baseline)
-          detect-secrets audit .secrets.baseline --report \
-            --json | python3 -c "
+            --exclude-files '\.secrets\.baseline$' \
+            --exclude-files 'node_modules/' \
+            --exclude-files '\.next/' \
+            > /tmp/new-baseline.json
+          detect-secrets audit /tmp/new-baseline.json --report --json | python3 -c "
           import sys, json
           data = json.load(sys.stdin)
-          unaudited = [r for r in data.get('results', {}).values()
-                       if any(not s.get('is_verified', True) for s in r)]
-          if unaudited:
-              print(f'FAIL: {len(unaudited)} unaudited secret(s) found')
+          results = data.get('results', {})
+          total = sum(len(v) for v in results.values())
+          if total > 0:
+              for fpath, secrets in results.items():
+                  for s in secrets:
+                      print(f'  SECRET: {fpath}:{s.get(\"line_number\",\"?\")} [{s.get(\"type\",\"unknown\")}]')
+              print(f'FAIL: {total} potential secret(s) detected')
               sys.exit(1)
-          print('OK: no unaudited secrets')
-          " || true
+          print('OK: no secrets detected')
+          "
+
+      - name: Custom network credential scan
+        run: |
+          python3 scripts/scan_secrets.py
+          echo "OK: custom secret patterns clean"

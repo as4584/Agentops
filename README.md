@@ -128,33 +128,33 @@ This section documents the incremental engineering work that brought Agentop fro
 
 **What we built:**
 
-**VLAN segmentation (TP-Link Omada ER605):**
+**VLAN segmentation (enterprise VLAN router):**
 
-| VLAN | Name | Subnet | Purpose | Inter-VLAN |
-|------|------|--------|---------|------------|
-| 10 | Trusted (LexLab) | 192.168.10.0/24 | Dev machines, WSL2, Xbox, homelab | Full routing |
-| 20 | IoT (LexLab-IoT) | 192.168.20.0/24 | Smart TVs, cameras, Nest | **Isolated** — no routing |
-| 30 | Guest (LexLab-Guest) | 192.168.30.0/24 | Visitor devices | **Isolated** — rate-limited 25 Mbps |
-| 40 | Infra | 192.168.40.0/24 | K8s, Ollama, NAS | Routes to Trusted + Infra only |
+| VLAN | Role | Purpose | Inter-VLAN |
+|------|------|---------|------------|
+| 10 | Trusted | Dev machines, workstations, gaming | Full routing |
+| 20 | IoT | Smart home devices | **Isolated** — no routing |
+| 30 | Guest | Visitor devices | **Isolated** — rate-limited |
+| 40 | Infra | K8s, LLM inference, storage | Routes to Trusted + Infra only |
 
 **Firewall ACL rules (5 LAN policies):**
 
-| Rule | Source → Destination | Action | Why |
-|------|----------------------|--------|-----|
-| Block IoT→Trusted | VLAN 20 → VLAN 10 | DROP | Prevent IoT lateral movement |
-| Block Guest→All | VLAN 30 → ALL internal | DROP | Guest isolation |
-| Allow Infra↔Trusted | VLAN 40 ↔ VLAN 10 | ACCEPT | K8s + dev machine need each other |
-| DNS pinning | ALL VLANs | REDIRECT 53 → AdGuard | Force all DNS through filtering |
-| Ollama + K8s lockdown | WAN → 11434, 6443 | DROP | **Never** expose LLM or K8s API to internet |
+| Rule | Pattern | Action | Purpose |
+|------|---------|--------|--------|
+| Block IoT→Trusted | IoT VLAN → Trusted VLAN | DROP | Prevent IoT lateral movement |
+| Block Guest→All | Guest → all internal | DROP | Full guest isolation |
+| Allow Infra↔Trusted | Infra ↔ Trusted | ACCEPT | K8s + dev machines need each other |
+| DNS pinning | ALL VLANs | REDIRECT → AdGuard | Force all DNS through filtering |
+| LLM + K8s lockdown | WAN → LLM/K8s ports | DROP | **Never** expose LLM or K8s API to internet |
 
-**Physical port map (ER605):**
-- Port 1 (WAN): ISP modem uplink
-- Port 2 (LAN 1): AV1000 powerline adapter → dev machines (untagged VLAN 10)
-- Port 3 (LAN 2): A2300 WiFi AP (trunk — tagged VLANs 10, 20, 30, 40 for per-SSID segmentation)
-- Ports 4-5: Unassigned (future expansion)
+**Physical topology:**
+- WAN port → ISP uplink
+- LAN port 1 → powerline bridge to dev machines (untagged Trusted VLAN)
+- LAN port 2 → WiFi AP trunk (tagged all 4 VLANs — per-SSID segmentation)
+- 2 ports reserved for future expansion
 
 **DNS filtering (AdGuard Home on K8s):**
-- Deployed as K8s pod in `agent-ops` namespace with 4 blocklists (682K+ rules)
+- Deployed as K8s pod with 4 blocklists (682K+ rules)
 - Upstream: Cloudflare DoH + Google DoH — all DNS encrypted
 - Forces all VLANs through filtered DNS via firewall redirect
 
@@ -544,25 +544,24 @@ Agentop/
                     ┌──────────────┐
                     │   ISP Modem  │
                     └──────┬───────┘
-                           │ WAN (Port 1)
+                           │ WAN
                     ┌──────┴───────┐
-                    │  ER605 Router │
-                    │  (Omada SDN)  │
+                    │  VLAN Router  │
+                    │  (SDN-managed)│
                     └┬──────┬──────┘
            ┌─────────┤      │
-     Port 2│         │Port 3│
+     LAN 1 │         │LAN 2 │
     ┌──────┴──────┐  │  ┌───┴──────────┐
-    │  AV1000     │  │  │  A2300 WiFi  │
-    │  Powerline  │  │  │  Access Point│
-    │  (VLAN 10)  │  │  │  (Trunk:     │
-    └──────┬──────┘  │  │   10,20,30,40│)
-           │         │  └───┬──┬──┬────┘
-     ┌─────┴─────┐   │     │  │  │
-     │Dev Machine│   │   ┌─┘  │  └─────────┐
-     │WSL2+K8s   │   │   │    │            │
-     │RTX 4070   │   │ LexLab LexLab-IoT LexLab-Guest
-     └───────────┘   │ (VLAN10)(VLAN20)   (VLAN30)
-                     │
+    │  Powerline  │  │  │  WiFi AP     │
+    │  Bridge     │  │  │  (Trunk:     │
+    │  (Trusted)  │  │  │   4 VLANs)   │
+    └──────┬──────┘  │  └───┬──┬──┬────┘
+           │         │     │  │  │
+     ┌─────┴─────┐   │   ┌─┘  │  └─────────┐
+     │Dev Machine│   │   │    │            │
+     │WSL2+K8s   │   │ Trusted  IoT    Guest
+     │GPU Compute│   │ (VLAN10)(VLAN20)(VLAN30)
+     └───────────┘   │
               ┌──────┴───────┐
               │  K8s Cluster  │
               │  (VLAN 40)    │
@@ -575,16 +574,15 @@ Agentop/
 
 **Port Reservation Strategy:**
 
-| Port Range | Service | VLAN Access |
-|------------|---------|-------------|
-| 8000 | FastAPI Backend | Trusted + Infra |
-| 3007 | Next.js Dashboard | Trusted |
-| 11434 | Ollama LLM | Infra only — **blocked from WAN** |
-| 6443 | K8s API | Infra only — **blocked from WAN** |
-| 6080 | noVNC Browser | Trusted only |
-| 53 | AdGuard DNS | All VLANs (forced via firewall redirect) |
-| 22 | SSH | Trusted + Infra only |
-| 88,500,3074,3544,4500 | Xbox Live | VLAN 10 — **never block** |
+| Service | VLAN Access | Policy |
+|---------|-------------|--------|
+| FastAPI Backend | Trusted + Infra | Internal only |
+| Next.js Dashboard | Trusted | Internal only |
+| Ollama LLM | Infra only | **Blocked from WAN** |
+| K8s API | Infra only | **Blocked from WAN** |
+| noVNC Browser | Trusted only | Internal only |
+| DNS (AdGuard) | All VLANs | Forced via firewall redirect |
+| SSH | Trusted + Infra only | Key-based auth |
 
 See [docs/NETWORK.md](docs/NETWORK.md) for the full physical topology, and [docs/PORTS.md](docs/PORTS.md) for port allocation rules.
 
@@ -796,9 +794,9 @@ Software agents are useless if they can't see the network they run on. The syste
 
 **Solution — VLAN segmentation + agent-managed firewall:**
 
-The TP-Link ER605 router was configured with 4 VLANs (Trusted, IoT, Guest, Infra) using Omada SDN. The A2300 WiFi AP runs as a trunk — each SSID maps to a VLAN, so a phone connecting to "LexLab-Guest" is automatically isolated from the dev machines on "LexLab".
+An enterprise VLAN router was configured with 4 VLANs (Trusted, IoT, Guest, Infra) using SDN management. The WiFi AP runs as an 802.1Q trunk — each SSID maps to its own VLAN, so a guest device is automatically isolated from dev machines the moment it connects.
 
-5 firewall ACL rules enforce invariants: IoT can't reach Trusted, Guest can't reach anything internal, Ollama and K8s API are invisible from WAN. All DNS is forced through AdGuard Home (682K+ blocklist rules) running as a K8s pod.
+5 firewall ACL rules enforce invariants: IoT can't reach Trusted, Guest can't reach anything internal, the LLM and K8s APIs are invisible from WAN. All DNS is forced through AdGuard Home (682K+ blocklist rules) running as a K8s pod.
 
 The IT Agent has the entire topology baked into its system prompt via `network_vlan_strategy.json` — a domain skill that contains every VLAN, port, firewall rule, and physical port mapping. When you ask "why can't my smart TV reach the dev server?", it_agent knows the answer is VLAN 20 → VLAN 10 is DROP'd by ACL rule #1.
 
