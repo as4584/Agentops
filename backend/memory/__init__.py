@@ -171,6 +171,93 @@ class MemoryStore:
             return []
         return [d.name for d in MEMORY_DIR.iterdir() if d.is_dir() and d.name != "shared"]
 
+    # ----- Handoff Memory (temporary inter-agent context) -----
+
+    def write_handoff(
+        self,
+        from_agent: str,
+        to_agent: str,
+        payload: dict[str, Any],
+        ttl_seconds: int = 300,
+    ) -> str:
+        """
+        Write a temporary handoff message from one agent to another.
+
+        The handoff is stored in a shared handoff directory and auto-expires
+        after ``ttl_seconds`` (default 5 minutes). The receiving agent can
+        read it once with ``read_handoffs()``, which also prunes expired entries.
+
+        Returns the handoff ID.
+        """
+        import uuid
+
+        handoff_dir = MEMORY_DIR / "handoffs"
+        handoff_dir.mkdir(parents=True, exist_ok=True)
+        handoff_file = handoff_dir / "pending.json"
+
+        lock = self._get_lock("handoffs")
+        with lock:
+            try:
+                data = json.loads(handoff_file.read_text()) if handoff_file.exists() else {"handoffs": []}
+            except (json.JSONDecodeError, FileNotFoundError):
+                data = {"handoffs": []}
+
+            handoff_id = uuid.uuid4().hex[:12]
+            entry = {
+                "id": handoff_id,
+                "from_agent": from_agent,
+                "to_agent": to_agent,
+                "payload": payload,
+                "created": datetime.utcnow().isoformat(),
+                "ttl_seconds": ttl_seconds,
+            }
+            data["handoffs"].append(entry)
+            handoff_file.write_text(json.dumps(data, indent=2, default=str))
+            logger.info(f"Handoff WRITE: {from_agent} → {to_agent} (id={handoff_id}, ttl={ttl_seconds}s)")
+            return handoff_id
+
+    def read_handoffs(self, agent_id: str, consume: bool = True) -> list[dict[str, Any]]:
+        """
+        Read all pending handoff messages for an agent.
+
+        Prunes expired entries. If ``consume=True``, the read entries
+        are removed from the store (consume-once semantics).
+        """
+        handoff_dir = MEMORY_DIR / "handoffs"
+        handoff_file = handoff_dir / "pending.json"
+        if not handoff_file.exists():
+            return []
+
+        lock = self._get_lock("handoffs")
+        with lock:
+            try:
+                data = json.loads(handoff_file.read_text())
+            except (json.JSONDecodeError, FileNotFoundError):
+                return []
+
+            now = datetime.utcnow()
+            alive: list[dict[str, Any]] = []
+            matched: list[dict[str, Any]] = []
+
+            for entry in data.get("handoffs", []):
+                created = datetime.fromisoformat(entry["created"])
+                age = (now - created).total_seconds()
+                if age > entry.get("ttl_seconds", 300):
+                    continue  # expired — prune
+                if entry["to_agent"] == agent_id:
+                    matched.append(entry)
+                    if not consume:
+                        alive.append(entry)
+                else:
+                    alive.append(entry)
+
+            data["handoffs"] = alive
+            handoff_file.write_text(json.dumps(data, indent=2, default=str))
+
+            if matched:
+                logger.info(f"Handoff READ: {agent_id} consumed {len(matched)} handoff(s)")
+            return matched
+
     # ----- Internal -----
 
     def _load_store(self, namespace: str) -> dict[str, Any]:

@@ -15,7 +15,6 @@ from backend.orchestrator import INTAKE_QUESTIONS, AgentMessage
 
 
 # The canonical agent IDs from copilot-instructions.md
-# knowledge_agent is created dynamically by the orchestrator, not in ALL_AGENT_DEFINITIONS
 CANONICAL_AGENTS = {
     "soul_core",
     "devops_agent",
@@ -27,6 +26,7 @@ CANONICAL_AGENTS = {
     "comms_agent",
     "cs_agent",
     "it_agent",
+    "knowledge_agent",
 }
 
 

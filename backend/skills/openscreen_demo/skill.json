@@ -1,0 +1,10 @@
+{
+  "id": "openscreen_demo",
+  "name": "OpenScreen Demo Creator",
+  "version": "1.0.0",
+  "description": "Creates screen recording demos of Agentop's control center UI for showcases, career fairs, and portfolio presentations. Uses ffmpeg + browser automation to capture agent floor, dashboard interactions, and pipeline visualizations. Exports to MP4/GIF with annotations. Based on the OpenScreen project concept (MIT).",
+  "allowed_agents": ["devops_agent", "comms_agent"],
+  "required_tools": ["safe_shell", "browser_control", "file_reader"],
+  "risk_level": "low",
+  "enabled": true
+}

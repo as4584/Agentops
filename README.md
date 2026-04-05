@@ -1,8 +1,8 @@
 # Agentop — Local-First Multi-Agent Control Center
 
-> **1,140 tests. 65% coverage. 12 agents. 38 tools. Zero cloud dependency.**
+> **1,165+ tests. 63% coverage. 21 agents. 54 tools. 4 languages. Zero cloud dependency.**
 
-A production-grade, fully local multi-agent system for orchestrating AI agents over infrastructure, content creation, web generation, and customer support workflows. Built with FastAPI, LangGraph, Ollama, and Next.js. Runs entirely on your machine.
+A production-grade, fully local multi-agent system for orchestrating AI agents over infrastructure, content creation, web generation, and customer support workflows. Built with FastAPI, LangGraph, Ollama, and Next.js — with performance-critical paths in C, Go, and Rust. Runs entirely on your machine.
 
 [![CI Gate](https://github.com/as4584/Agentops/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/as4584/Agentops/actions/workflows/ci.yml)
 [![ML Pipeline](https://github.com/as4584/Agentops/actions/workflows/ml-pipeline.yml/badge.svg)](https://github.com/as4584/Agentops/actions/workflows/ml-pipeline.yml)
@@ -97,16 +97,62 @@ This section documents the incremental engineering work that brought Agentop fro
 - **Persistent project store** for webgen with `setup_deps.sh` for dependency management
 - **CLI tools** (`cli/content_cli.py`, `cli/webgen_cli.py`) for headless operation
 
+### Phase 8 — Agent Factory & Self-Training Loop
+
+**Problem:** Training data for lex-v2 was manually curated. No automated pipeline.
+
+**What we built:**
+- **AgentFactory** (`backend/ml/agent_factory.py`) — collects routing decisions, generates synthetic training data, exports JSONL for fine-tuning
+- **DecisionCollector** — hooks into orchestrator to log every routing choice with confidence and reasoning
+- **TrainingGenerator** — converts collected decisions into routing examples, trajectory data, and DPO preference pairs
+- **85+ JSONL training files** across `data/training/` and `data/dpo/` covering weak boundaries: knowledge↔soul, monitor↔it, review↔security
+- **Opus session extraction** — every coding session with Claude generates high-quality training data automatically
+
+**Result:** Self-improving routing loop. Each session makes lex-v2 better at the boundaries where it struggles most.
+
+### Phase 9 — Network & Infrastructure Expansion
+
+**Problem:** The system could manage agents but not the network they run on.
+
+**What we built:**
+- **IT Agent upgrade** — network expert with SSH node registry, VLAN topology, DNS diagnostics, ER605 firewall ACL rules
+- **Network routes** — 7 endpoints for node CRUD, health checks, remote dispatch, fleet topology
+- **K8s integration** — Kind cluster with metrics-server, browser-worker pod orchestration, `k8s_metrics` tool
+- **ER605 firewall rules** — 5 LAN ACLs for VLAN isolation, DNS pinning, IoT quarantine
+- **Agent handoff memory** — inter-agent context passing with TTL-based auto-expiry and consume-once semantics
+
+**Result:** Agents can manage real infrastructure. Network fleet visible. K8s metrics flowing.
+
+### Phase 10 — Browser Security & Skill System
+
+**Problem:** Browser agents surfing the web needed hardening. Skill system had only 1 manifest skill.
+
+**What we built:**
+- **Browser security audit** — 5 controls validated (SSRF, secret redaction, session isolation, timeouts, headless)
+- **Redirect-chain SSRF protection** — re-validates final URL after browser redirects to prevent SSRF via redirect
+- **17+ manifest skills** including OpenScreen Demo (ffmpeg-based UI recording), Website Cloner (5-phase pipeline), and domain knowledge packs
+- **Knowledge agent ghost fix** — referenced in 70+ files but never registered. Now defined as 21st agent with RAG-focused system prompt
+- **Tech news cron jobs** — 3 automated jobs: morning digest (HN, TechCrunch, GitHub Trending), evening security scan, weekly roundup
+- **Ollama model pruning** — 9 models → 4, freed ~13.5GB disk
+
+**Result:** 17+ skills, 21 agents, hardened browser, automated tech news pipeline, leaner model footprint.
+
 ### Cumulative Stats
 
 | Metric | Value |
 |--------|-------|
-| Tests | 1,140 passed, 5 skipped |
-| Coverage | 65% (97% on ML module) |
-| Agents | 12 core + 9 content + 6 webgen |
+| Tests | 1,165+ passed, 5 skipped |
+| Coverage | 63% overall (97% on ML module) |
+| Agents | 21 core + 9 content + 6 webgen |
 | Native tools | 13 (12 original + document_ocr) |
 | MCP tools | 26 (via Docker bridge) |
-| Files changed (dev cycle) | 331 files, +43,552 / -5,486 lines |
+| Browser tools | 8 |
+| Skills | 17+ manifest + 15 legacy domain packs |
+| HTTP endpoints | 190+ across 27 route files |
+| Languages | 4 (Python, C, Go, Rust) |
+| Cron jobs | 10+ automated |
+| Training data files | 85+ JSONL |
+| Files changed (dev cycle) | 475+ files, +54,000+ lines |
 | CI pipelines | 2 (CI Gate + ML Pipeline) |
 | CVEs | 0 |
 
@@ -129,7 +175,7 @@ FastAPI Backend (localhost:8000)
   │    ├── C Fast Router (< 1ms, compiled .so)
   │    ├── lex-v2 LLM Router (3B model via Ollama)
   │    └── Python Keyword Fallback
-  ├── Agent Registry (12 core agents)
+  ├── Agent Registry (21 core agents)
   │    ├── soul_core      — Reflection, trust, goal arbitration
   │    ├── devops_agent    — CI/CD, git, deployment
   │    ├── monitor_agent   — Health, logs, metrics
@@ -142,7 +188,7 @@ FastAPI Backend (localhost:8000)
   │    ├── it_agent        — Infrastructure diagnostics
   │    ├── knowledge_agent — Semantic Q&A over vectors
   │    └── ocr_agent       — Document extraction (GLM-OCR)
-  ├── Tool Layer (13 native + 26 MCP)
+  ├── Tool Layer (13 native + 26 MCP + 8 browser)
   ├── GLM-OCR Sidecar (localhost:5002, 0.9B model)
   ├── ML Experiment Tracker (MLflow / JSON fallback)
   ├── Knowledge Vector DB (cosine search, local embeddings)
@@ -213,7 +259,7 @@ Navigate to **http://localhost:3007**
 | Lint | ruff check | 0 errors |
 | Format | ruff format --check | 0 diffs |
 | Types | mypy --strict | 0 errors |
-| Tests | pytest | 1,140 pass, >= 58% coverage |
+| Tests | pytest | 1,165+ pass, >= 58% coverage |
 | CVEs | pip-audit | 0 vulnerabilities |
 | Secrets | detect-secrets | 0 leaked secrets |
 | Frontend lint | ESLint | 0 errors |
@@ -441,6 +487,228 @@ python -m backend.port_guard kill 8000 # Kill conflicting process
 | **GLM-OCR** (THUDM) | Document extraction, multi-modal pre-processing | [github.com/THUDM/GLM-OCR](https://github.com/THUDM/GLM-OCR) |
 
 See [docs/INSPIRATIONS.md](docs/INSPIRATIONS.md) for detailed breakdowns.
+
+---
+
+## The Journey — From AI Receptionist to Multi-Agent Control Center
+
+> This section tells the full story. Every phase built on the last. Every problem led to the next solution.
+
+### Table of Contents
+
+1. [Chapter 1: The AI Receptionist](#chapter-1-the-ai-receptionist-origin)
+2. [Chapter 2: From Chatbot to Agent](#chapter-2-from-chatbot-to-agent)
+3. [Chapter 3: Multi-Agent Architecture](#chapter-3-multi-agent-architecture)
+4. [Chapter 4: The Routing Problem](#chapter-4-the-routing-problem)
+5. [Chapter 5: Governance & Drift Guard](#chapter-5-governance--drift-guard)
+6. [Chapter 6: The Speed Problem](#chapter-6-the-speed-problem--4-languages)
+7. [Chapter 7: Self-Improvement Loop](#chapter-7-self-improvement-loop)
+8. [Chapter 8: Content & WebGen Pipelines](#chapter-8-content--webgen-pipelines)
+9. [Chapter 9: Security Hardening](#chapter-9-security-hardening)
+10. [Chapter 10: Where It Stands Now](#chapter-10-where-it-stands-now)
+
+---
+
+### Chapter 1: The AI Receptionist (Origin)
+
+It started as a simple idea: an AI receptionist that could answer questions about a business. A single LLM, a single prompt, a single purpose. But the questions kept getting harder. Users asked about infrastructure. About deployments. About security. One prompt couldn't handle it all.
+
+**Key insight**: A single agent with one prompt breaks down the moment scope exceeds a single domain. You need specialists.
+
+---
+
+### Chapter 2: From Chatbot to Agent
+
+The receptionist evolved: instead of just answering, it could *do things*. Read files. Run shell commands. Check system health. But with tools came danger — an unconstrained agent with `safe_shell` is a liability. The first tool whitelist was born, and with it the first tool safety rules.
+
+**Key insight**: Tools without boundaries are weapons. Every tool needs a whitelist, a blacklist, and an audit log.
+
+---
+
+### Chapter 3: Multi-Agent Architecture
+
+One agent became many. Each specialist got its own system prompt, its own tools, its own memory namespace. The orchestrator was born — a LangGraph state machine that routes messages to the right agent and prevents them from talking to each other directly.
+
+| Evolution Step | What Changed |
+|---------------|-------------|
+| 1 agent, 1 prompt | Single LLM call |
+| 1 agent, tools | File reader, shell, health check |
+| N agents, orchestrator | soul_core, devops, monitor, security, ... |
+| N agents, governance | INV-1 through INV-10, DriftGuard middleware |
+
+**Key insight**: Agents must NOT call each other directly (INV-2). All communication goes through the orchestrator. This prevents cascading failures and makes every decision auditable.
+
+---
+
+### Chapter 4: The Routing Problem
+
+With 11+ agents, the hardest problem became: *which agent should handle this message?* Keyword matching was fast but dumb. LLM inference was smart but slow. The answer was a 3-tier pipeline:
+
+```
+C pre-filter (0.01ms) → lex-v2 LLM (50-200ms) → Python fallback (0.2ms)
+```
+
+The `lex-v2` model is a custom 3B router fine-tuned on synthetic routing data. 60% hard/ambiguous cases, 20% red-line blocks, 20% easy. The C pre-filter catches the obvious ones and skips the LLM entirely for ~60-70% of requests.
+
+**Known weak boundaries** (where routing is hardest):
+- `knowledge_agent` ↔ `soul_core` — "what is our purpose" = soul, "what does SOURCE_OF_TRUTH say about our purpose" = knowledge
+- `monitor_agent` ↔ `it_agent` — "why is the server slow" = monitor, "configure the server's network" = IT
+- `code_review_agent` ↔ `security_agent` — "review this diff" = review, "scan this diff for secrets" = security
+
+**Key insight**: Routing is the bottleneck of any multi-agent system. Fast routing enables everything else.
+
+---
+
+### Chapter 5: Governance & Drift Guard
+
+As the system grew, changes started happening without documentation. An agent's tool list would change. A new route would appear. The architecture drifted from the docs. DriftGuard was built to prevent this.
+
+**The 10 invariants:**
+- Documentation must precede mutation (INV-5)
+- Agents can't modify their own registry (INV-6)
+- Memory namespaces can't overlap (INV-4)
+- Shared memory is append-only (INV-9)
+
+DriftGuard intercepts every tool call and checks if the proposed action would violate an invariant. Violations halt the system (RED status) until resolved.
+
+**Key insight**: In a multi-agent system, governance isn't a nice-to-have — it's the only thing preventing chaos. Without invariants, agents will eventually corrupt each other.
+
+---
+
+### Chapter 6: The Speed Problem — 4 Languages
+
+Python is great for orchestration. Terrible for hot loops. Three bottlenecks demanded different languages:
+
+| Bottleneck | Language | Speedup |
+|-----------|----------|---------|
+| Message routing (keyword match) | **C** (`fast_route.c`) | 200x over Python |
+| Router benchmarking | **Go** (`router_test.go`) | Goroutine-native harness |
+| Embedding compression | **Rust** (`turbo_quant`) | 8x memory reduction |
+| Everything else | **Python** | Ecosystem + speed of development |
+
+The C pre-filter compiles to a shared library (`gcc -O3 -shared -fPIC`) and is called via ctypes. The Rust quantizer exposes PyO3 bindings. Go is used for benchmark validation. Python runs the show.
+
+**Key insight**: Use the right language for the right job. Python orchestrates. C filters. Rust compresses. Go benchmarks. The interfaces are clean (ctypes, PyO3, subprocess).
+
+See [docs/LANGUAGE_BENCHMARKS.md](docs/LANGUAGE_BENCHMARKS.md) for full benchmark data.
+
+---
+
+### Chapter 7: Self-Improvement Loop
+
+The system trains itself. Every routing decision is collected as training data. Every conversation with Opus (Claude) generates routing examples, trajectory examples, and DPO preference pairs. These feed back into lex-v2 fine-tuning.
+
+**The loop:**
+```
+User message → lex-v2 routes → Agent processes → Decision logged
+  → TrainingGenerator extracts examples → DPO pairs generated
+  → lex-v2 fine-tuned on new data → Better routing next time
+```
+
+**Training data types:**
+- **Routing examples** — `{user_message, expected_agent, reasoning, confidence, difficulty}`
+- **Trajectory examples** — `{task, plan, actions, tools_used, validations, result}`
+- **DPO preference pairs** — `{good_response, bad_response, why_good_is_better}`
+
+**Key insight**: The system that collects its own training data can improve faster than one that depends on external annotation. But the quality bar must be high — bad training data makes routing worse, not better.
+
+---
+
+### Chapter 8: Content & WebGen Pipelines
+
+The agent system wasn't just for infrastructure anymore. Two production pipelines were built:
+
+**Content Pipeline** (9 agents):
+```
+IdeaIntake → ScriptWriter → Voice (4 TTS backends) → AvatarVideo → QA → Publisher → Analytics
+```
+
+**WebGen Pipeline** (6 agents):
+```
+SitePlanner → PageGenerator → SEO → AEO → QA → Deploy
+```
+
+Plus a **Website Cloner** skill that reverse-engineers live websites into clean Next.js projects through 5 phases: Reconnaissance → Foundation Build → Component Spec → Page Assembly → Visual QA Diff.
+
+**Key insight**: Multi-agent pipelines aren't just for DevOps. The same orchestration pattern works for content creation, web generation, and any sequential workflow where each step requires different expertise.
+
+---
+
+### Chapter 9: Security Hardening
+
+A system that runs shell commands and browses the web needs real security:
+
+- **SSRF protection** — 13-prefix blocklist + redirect-chain validation on browser navigation
+- **API Gateway** — AES-256-GCM secrets, circuit breakers, per-key rate limits, ACL enforcement
+- **Secret redaction** — Passwords, tokens, and keys are redacted in all browser logs
+- **Session isolation** — Each agent gets its own Playwright browser context (separate cookies, storage)
+- **Red-line blocking** — Destructive operations (rm -rf, DROP TABLE, chmod 777) blocked at the C pre-filter level before reaching any agent
+- **Browser security audit** — Documented in [docs/BROWSER_SECURITY_AUDIT.md](docs/BROWSER_SECURITY_AUDIT.md)
+
+**Key insight**: Security can't be bolted on. It must be woven into every layer — from the C pre-filter's red-line patterns to the browser's SSRF blocklist to the gateway's per-key encryption.
+
+---
+
+### Chapter 10: Where It Stands Now
+
+| Metric | Count |
+|--------|-------|
+| Core agents | 21 (11 core + 10 specialized) |
+| Pipeline agents | 15 (9 content + 6 webgen) |
+| Native tools | 13 |
+| MCP tools | 26 (via Docker bridge) |
+| Browser tools | 8 |
+| HTTP endpoints | 190+ across 27 route files |
+| Skills | 17+ manifest + 15 legacy domain packs |
+| Tests | 1,165+ passing |
+| Coverage | 63% (97% on ML module) |
+| Languages | 4 (Python, C, Go, Rust) |
+| Databases | 4 (SQLite ×3 + JSON stores) |
+| Cron jobs | 10+ automated (dep check, social media, tech news) |
+| CVEs | 0 |
+| Training data files | 85+ JSONL files |
+| Governance invariants | 10 (enforced by DriftGuard middleware) |
+
+**What's connected:**
+- VS Code extension (`@agentop` chat participant)
+- Discord bot (slash commands → agent routing)
+- K8s cluster (Kind, metrics-server, browser-worker pods)
+- Network fleet (SSH node registry, health checks, remote dispatch)
+- Scheduled automation (dependency audits, social media polling, tech news digests)
+
+**What's next:**
+- [ ] VoiceAgent + AvatarVideoAgent — wire real TTS/video providers
+- [ ] PublisherAgent — social platform API integrations
+- [ ] Knowledge vector store seeding from project docs
+- [ ] Agent handoff memory → full multi-agent chains
+- [ ] Proxy/VPN layer for anonymous agent web browsing
+- [ ] lex-v3 — larger training corpus, boundary-specific hard negatives
+
+---
+
+## Glossary
+
+| Term | Definition |
+|------|-----------|
+| **Agent** | An isolated LLM-backed specialist with its own system prompt, tool permissions, and memory namespace |
+| **Orchestrator** | LangGraph state machine that routes messages to agents and manages fan-out/fan-in |
+| **lex-v2** | Custom 3B parameter router model that classifies user intent to the correct agent |
+| **DriftGuard** | Governance middleware that enforces 10 architectural invariants on every tool call |
+| **Invariant (INV-N)** | A governance rule that cannot be violated without halting the system |
+| **Tool** | A function an agent can call — file_reader, safe_shell, etc. — with safety constraints |
+| **MCP** | Model Context Protocol — standard for tool integration; 26 tools via Docker bridge |
+| **Namespace** | Isolated memory partition — each agent gets one, cross-access is prohibited (INV-4) |
+| **Skill** | A JSON-manifest package that extends agent capabilities without modifying core code |
+| **Handoff** | Temporary inter-agent context with TTL-based auto-expiry for multi-agent chains |
+| **Red line** | A destructive or dangerous operation pattern that is blocked before reaching any agent |
+| **DPO** | Direct Preference Optimization — training method using good/bad response pairs |
+| **SSRF** | Server-Side Request Forgery — blocked by URL validation + private network prefix list |
+| **Tier** | Agent priority level: Tier 0 (soul) > Tier 1 (critical infra) > Tier 2 (analysis) > Tier 3 (support) |
+| **Fan-out** | Orchestrator pattern: send work to multiple agents in parallel, collect results |
+| **Pipeline** | Sequential chain of agents where each step's output feeds the next (content, webgen) |
+| **TurboQuant** | Rust-based embedding quantizer — 8x compression for knowledge vector store |
+| **fast_route** | C shared library for sub-millisecond keyword routing and red-line blocking |
+| **Soul** | The soul_core agent — persistent governing intelligence with autobiographical memory |
 
 ---
 
