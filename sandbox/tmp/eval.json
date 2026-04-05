@@ -1,0 +1,1 @@
+{"expression":"var d=document.querySelector('#policy .combobox-display-area'); d.click(); var labels=document.querySelectorAll('#policy label.combobox-label'); var found='none'; for(var i=0;i<labels.length;i++){var inp=labels[i].querySelector('input'); if(inp && inp.value==='DROP'){labels[i].click(); found=inp.value; break;}} found"}

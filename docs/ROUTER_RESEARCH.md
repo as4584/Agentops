@@ -15,18 +15,18 @@
 | CPU | Broadcom BCM4906 (ARM Cortex-A53, dual-core 64-bit) |
 | RAM | 512 MB |
 | Flash | NAND (UBI/UBIFS filesystem) |
-| LAN MAC | `REDACTED_LAN_MAC` |
-| WAN MAC | `REDACTED_WAN_MAC` |
-| 2.4GHz MAC | `REDACTED_24G_MAC` |
-| 5GHz MAC | `REDACTED_5G_MAC` |
+| LAN MAC | `[REDACTED]` |
+| WAN MAC | `[REDACTED]` |
+| 2.4GHz MAC | `[REDACTED]` |
+| 5GHz MAC | `[REDACTED]` |
 
 **Credentials:**
-- Router admin password: `REDACTED_ROUTER_PWD`
-- WiFi (LexLab_2G / LexLab_5G): `REDACTED_WIFI_PWD`
+- Router admin password: `[REDACTED — ROTATED]`
+- WiFi (LexLab_2G / LexLab_5G): `[REDACTED — ROTATED]`
 
 **Network:**
 - Router IP: `192.168.0.1`
-- WAN IP: `REDACTED_WAN_IP`
+- WAN IP: `[REDACTED]`
 - Upstream: Altice gateway in bridge mode
 
 **Open ports:** 22 (SSH/dropbear), 53 (DNS), 80 (HTTP), 1900 (UPnP, intermittent)

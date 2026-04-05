@@ -18,7 +18,7 @@ data:
       session_ttl: 720h
     users:
       - name: admin
-        password: "REDACTED_BCRYPT_HASH"
+        password: "$2b$10$o6kGfjlCIIpmgsGkEBjkFe0D70no8l90rDUDkj7VK5yxvm5ySUcjy"
     dns:
       bind_hosts:
         - 0.0.0.0
