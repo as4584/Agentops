@@ -1,0 +1,10 @@
+{
+  "id": "openclaw_gateway",
+  "name": "OpenClaw Multi-Channel Gateway",
+  "version": "1.0.0",
+  "description": "Bridges external messaging channels (Discord, Telegram, Slack) into Agentop's multi-agent orchestrator via OpenClaw gateway (port 18789). Includes firewall with 12 red-line patterns, 4 exfiltration domain blocks, rate limiting (30 req/min), and lex-v2 router integration. Based on GoClaw/OpenClaw (NetworkChuck-inspired, local-first Zapier alternative).",
+  "allowed_agents": ["devops_agent", "comms_agent", "it_agent", "security_agent"],
+  "required_tools": ["safe_shell", "webhook_send", "health_check", "file_reader"],
+  "risk_level": "medium",
+  "enabled": true
+}

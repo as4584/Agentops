@@ -6,6 +6,12 @@
 
 # Runtime
 .dashboard_port
+.discord_bot.pid
+.agent-sessions/
+
+# Scratch / temp outputs
+python_results.json
+chatlog.md
 
 # Python
 __pycache__/
