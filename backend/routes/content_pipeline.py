@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 
 from backend.content.job_store import job_store
@@ -245,3 +245,56 @@ async def check_upload_window() -> dict:
             "velocity_window_hours": velocity_window,
         },
     }
+
+
+# ── YouTube OAuth ──────────────────────────────────────────────────────────────
+
+
+@router.get("/auth/youtube")
+async def youtube_auth_status() -> dict:
+    """Check if YouTube OAuth tokens are saved and valid."""
+    from backend.content.publishers.youtube_auth import TOKEN_PATH, is_authenticated
+    return {
+        "authenticated": is_authenticated(),
+        "token_path": str(TOKEN_PATH),
+        "instructions": (
+            "Not authenticated. Set YOUTUBE_CLIENT_ID and YOUTUBE_CLIENT_SECRET in .env, "
+            "then POST /content/auth/youtube/start to open the login browser window."
+            if not is_authenticated()
+            else "YouTube tokens found. PublisherAgent can upload."
+        ),
+    }
+
+
+@router.post("/auth/youtube/start")
+async def youtube_auth_start(background_tasks: BackgroundTasks) -> dict:
+    """
+    Open a Playwright browser window for YouTube OAuth consent.
+    The user signs in manually — tokens are saved automatically on redirect.
+    Runs in the background so the request returns immediately.
+    """
+    from backend.content.publishers.youtube_auth import is_authenticated, run_auth_flow
+
+    if is_authenticated():
+        return {"status": "already_authenticated", "message": "Token already exists. No action needed."}
+
+    background_tasks.add_task(_run_oauth_flow)
+    return {
+        "status": "browser_opening",
+        "message": (
+            "A browser window is opening for Google OAuth. "
+            "Sign in with your YouTube account and grant access. "
+            "Tokens will be saved automatically. "
+            "Check GET /content/auth/youtube to confirm."
+        ),
+    }
+
+
+async def _run_oauth_flow() -> None:
+    from backend.content.publishers.youtube_auth import run_auth_flow
+    try:
+        await run_auth_flow()
+        logger.info("[YouTubeAuth] OAuth flow completed successfully")
+    except Exception as e:
+        logger.error(f"[YouTubeAuth] OAuth flow failed: {e}")
+

@@ -29,6 +29,32 @@ class VoiceAgent(ContentAgent):
     name = "VoiceAgent"
     trigger_status = JobStatus.GENERATED
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._log_available_backends()
+
+    def _log_available_backends(self) -> None:
+        backends = []
+        if self._has_cosyvoice():
+            backends.append("CosyVoice2")
+        if self._has_piper():
+            backends.append("Piper")
+        if self._has_coqui():
+            backends.append("Coqui")
+        if self._has_espeak():
+            backends.append("eSpeak-NG")
+
+        if backends:
+            logger.info(f"[{self.name}] TTS backends available: {', '.join(backends)}")
+        else:
+            logger.warning(
+                f"[{self.name}] NO TTS backend found. Install at least one:\n"
+                "  sudo apt install espeak-ng          # always-available fallback\n"
+                "  pip install piper-tts               # fast, fully local\n"
+                "  pip install TTS                     # Coqui, voice cloning\n"
+                "  pip install cosyvoice               # best quality (0.5B, Qwen)"
+            )
+
     async def process(self, job: VideoJob) -> VideoJob | None:
         logger.info(f"[{self.name}] Generating audio for {job.job_id}")
 
