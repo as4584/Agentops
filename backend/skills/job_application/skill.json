@@ -1,0 +1,45 @@
+{
+  "id": "job_application",
+  "name": "Job Application Engine",
+  "version": "1.0.0",
+  "description": "Searches job postings, tailors resumes and cover letters to job requirements, tracks applications, and manages the full job search pipeline. Supports job boards (LinkedIn, Indeed, Glassdoor), NJ/NYC proximity filtering, application status tracking in SQLite, and scholarship research.",
+  "allowed_agents": ["gsd_agent", "devops_agent", "knowledge_agent", "cs_agent"],
+  "required_tools": ["safe_shell", "file_reader", "doc_updater", "db_query", "webhook_send"],
+  "risk_level": "low",
+  "enabled": true,
+  "capabilities": [
+    "search_jobs",
+    "tailor_resume",
+    "generate_cover_letter",
+    "track_application",
+    "research_scholarships",
+    "export_applications"
+  ],
+  "config": {
+    "candidate": {
+      "name": "Alexander (Lex) Santiago",
+      "email": "as42519256@gmail.com",
+      "location": "Newark, NJ",
+      "github": "github.com/as4584",
+      "portfolio": "lexmakesit.com",
+      "school": "NJIT — Information Systems (2024–Present)",
+      "resume_path": "/mnt/c/Users/AlexS/Downloads/Alexander_Santiago_Resume_Updated.docx"
+    },
+    "job_search": {
+      "target_roles": ["Software Engineer", "Backend Developer", "Information Systems", "AI Engineer", "Systems Analyst", "Technical Consultant", "Associate Developer"],
+      "locations": ["Newark NJ", "Jersey City NJ", "Hoboken NJ", "New York NY", "Parsippany NJ", "Morristown NJ", "Edison NJ", "Princeton NJ"],
+      "relocation": true,
+      "max_commute_miles": 60,
+      "job_boards": ["linkedin", "indeed", "glassdoor", "builtin", "dice"],
+      "target_count": 100
+    },
+    "skills_verified": {
+      "languages": ["Python", "TypeScript", "JavaScript", "Kotlin", "Dart", "Lua", "Rust", "SQL", "HTML/CSS"],
+      "frameworks": ["FastAPI", "Flask", "Flutter", "LangGraph", "Docker", "Redis", "PostgreSQL", "Playwright", "Pydantic", "Next.js"],
+      "ai_ml": ["OpenAI GPT", "RAG pipelines", "Ollama", "LangGraph orchestration", "Twilio Voice"],
+      "integrations": ["SAP ARP", "Lightspeed POS", "Twilio", "Google Sheets API", "MCP Docker bridge"],
+      "practices": ["REST API design", "JWT auth", "Docker containerization", "E2E testing", "Git", "CI/CD", "Multi-agent orchestration"],
+      "projects": ["Agentop", "AI Receptionist (LexMakesIt)", "Vendora", "ReflectAI", "Restaurant App (Flutter)", "IS218 FastAPI Series"]
+    }
+  }
+}
