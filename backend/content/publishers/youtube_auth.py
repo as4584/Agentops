@@ -25,7 +25,6 @@ import json
 import os
 import urllib.parse
 import urllib.request
-from pathlib import Path
 
 from backend.config import MEMORY_DIR
 from backend.utils import logger
@@ -158,11 +157,13 @@ async def _open_browser(url: str) -> None:
             await page.goto(url)
             # Keep browser open until task is cancelled
             import asyncio
+
             await asyncio.sleep(360)
             await browser.close()
     except ImportError:
         # Playwright not installed — fallback to system browser
         import subprocess
+
         subprocess.Popen(["xdg-open", url])
         logger.info(f"[YouTubeAuth] Opened system browser: {url}")
     except Exception as e:
@@ -171,13 +172,15 @@ async def _open_browser(url: str) -> None:
 
 def _exchange_code(code: str, client_id: str, client_secret: str) -> dict:
     """Exchange OAuth authorization code for access + refresh tokens."""
-    data = urllib.parse.urlencode({
-        "code": code,
-        "client_id": client_id,
-        "client_secret": client_secret,
-        "redirect_uri": REDIRECT_URI,
-        "grant_type": "authorization_code",
-    }).encode()
+    data = urllib.parse.urlencode(
+        {
+            "code": code,
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "redirect_uri": REDIRECT_URI,
+            "grant_type": "authorization_code",
+        }
+    ).encode()
 
     req = urllib.request.Request(TOKEN_URL, data=data, method="POST")
     req.add_header("Content-Type", "application/x-www-form-urlencoded")

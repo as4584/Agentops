@@ -1,0 +1,1336 @@
+{
+  "id": "60432ba8985d",
+  "created_at": "2026-04-06T06:01:00.752927+00:00",
+  "updated_at": "2026-04-06T06:09:38.063366+00:00",
+  "status": "ready",
+  "brief": {
+    "business_name": "Apex Fitness Studio",
+    "business_type": "fitness",
+    "tagline": "Train Like a Champion",
+    "description": "Train Like a Champion",
+    "services": [],
+    "target_audience": "",
+    "tone": "professional",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": []
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - Apex Fitness Studio",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "2ef1f766",
+          "name": "hero",
+          "component_type": "hero-centered",
+          "content": {
+            "headline": "Train Like a Champion Today!",
+            "subtitle": "Join Apex Fitness Studio for the best workout experience."
+          },
+          "html": "<header class=\"bg-gray-900 text-white py-12\">\n  <div class=\"container mx-auto flex flex-col items-center justify-center space-y-4\">\n    <h1 class=\"text-4xl font-bold\" aria-label=\"Apex Fitness Studio\">Train Like a Champion Today!</h1>\n    <p class=\"text-xl\" aria-label=\"Join Apex Fitness Studio for the best workout experience.\">Join Apex Fitness Studio for the best workout experience.</p>\n    <nav class=\"mt-8\">\n      <ul class=\"flex space-x-4\">\n        <li><a href=\"index.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Home\">Home</a></li>\n        <li><a href=\"personal-training.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Personal Training\">Personal Training</a></li>\n        <li><a href=\"group-classes.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Group Classes\">Group Classes</a></li>\n        <li><a href=\"nutrition.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Nutrition\">Nutrition</a></li>\n        <li><a href=\"rehabilitation.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Rehabilitation\">Rehabilitation</a></li>\n        <li><a href=\"blog.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Blog\">Blog</a></li>\n        <li><a href=\"faq.html\" class=\"text-white hover:text-gray-300\" aria-label=\"FAQ\">FAQ</a></li>\n        <li><a href=\"contact.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Contact Us\">Contact Us</a></li>\n      </ul>\n    </nav>\n  </div>\n</header>",
+          "order": 0
+        },
+        {
+          "id": "e8c01990",
+          "name": "about-us",
+          "component_type": "text-block",
+          "content": {
+            "title": "About Us",
+            "paragraphs": [
+              "At Apex Fitness Studio, we believe in pushing boundaries and achieving greatness. Our mission is to provide a high-quality fitness environment where individuals can train like champions."
+            ]
+          },
+          "html": "<section id=\"about-us\" class=\"bg-white py-16\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">About Us</h2>\n    <p class=\"text-lg leading-relaxed text-gray-700 text-center mb-8\">\n      At Apex Fitness Studio, we believe in pushing boundaries and achieving greatness. Our mission is to provide a high-quality fitness environment where individuals can train like champions.\n    </p>\n  </div>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "8568b56f",
+          "name": "services",
+          "component_type": "service-list",
+          "content": {
+            "title": "Our Services",
+            "services": [
+              "Personal Training",
+              "Group Fitness Classes",
+              "Nutrition Counseling",
+              "Rehabilitation"
+            ]
+          },
+          "html": "<section id=\"services\" class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-center text-3xl font-bold mb-12\">Our Services</h2>\n    <ul class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8\">\n      <li class=\"bg-white rounded-lg shadow-md p-6\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Personal Training\">Personal Training</h3>\n        <p class=\"text-gray-700\">Get personalized training tailored to your fitness goals.</p>\n      </li>\n      <li class=\"bg-white rounded-lg shadow-md p-6\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Group Fitness Classes\">Group Fitness Classes</h3>\n        <p class=\"text-gray-700\">Join our dynamic and motivating group classes.</p>\n      </li>\n      <li class=\"bg-white rounded-lg shadow-md p-6\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Nutrition Counseling\">Nutrition Counseling</h3>\n        <p class=\"text-gray-700\">Achieve your fitness goals with expert nutrition guidance.</p>\n      </li>\n      <li class=\"bg-white rounded-lg shadow-md p-6\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Rehabilitation\">Rehabilitation</h3>\n        <p class=\"text-gray-700\">Get back to your fitness routine with our rehabilitation services.</p>\n      </li>\n    </ul>\n  </div>\n</section>",
+          "order": 2
+        },
+        {
+          "id": "2ba5a5dd",
+          "name": "testimonials",
+          "component_type": "testimonial-slider",
+          "content": {
+            "title": "What Our Members Say",
+            "testimonials": [
+              {
+                "quote": "Apex Fitness Studio has been a game-changer for my fitness journey. The trainers are knowledgeable and supportive.",
+                "author": "John Doe"
+              },
+              {
+                "quote": "The variety of classes and services makes it easy to find what I need to reach my goals.",
+                "author": "Jane Smith"
+              }
+            ]
+          },
+          "html": "<div class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\" id=\"testimonials-title\">What Our Members Say</h2>\n    <div class=\"testimonial-slider\">\n      <div role=\"listbox\" aria-label=\"Testimonials Slider\" class=\"flex overflow-hidden space-x-4\">\n        <blockquote role=\"option\" tabindex=\"0\" class=\"bg-white p-6 rounded-lg shadow-md w-full max-w-sm\">\n          <p class=\"text-gray-700\">Apex Fitness Studio has been a game-changer for my fitness journey. The trainers are knowledgeable and supportive.</p>\n          <footer class=\"mt-4 text-right\">\n            <cite>- John Doe</cite>\n          </footer>\n        </blockquote>\n        <blockquote role=\"option\" tabindex=\"1\" class=\"bg-white p-6 rounded-lg shadow-md w-full max-w-sm\">\n          <p class=\"text-gray-700\">The variety of classes and services makes it easy to find what I need to reach my goals.</p>\n          <footer class=\"mt-4 text-right\">\n            <cite>- Jane Smith</cite>\n          </footer>\n        </blockquote>\n      </div>\n    </div>\n  </div>\n</div>",
+          "order": 3
+        },
+        {
+          "id": "bc29ef65",
+          "name": "gallery",
+          "component_type": "photo-gallery",
+          "content": {
+            "title": "Our Studio",
+            "images": [
+              "path/to/image1.jpg",
+              "path/to/image2.jpg",
+              "path/to/image3.jpg"
+            ]
+          },
+          "html": "<section class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\" aria-label=\"Our Studio\">Our Studio</h2>\n    <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n      <img src=\"path/to/image1.jpg\" alt=\"Studio Image 1\" class=\"w-full h-auto rounded-lg shadow-md\" aria-label=\"Studio Image 1\">\n      <img src=\"path/to/image2.jpg\" alt=\"Studio Image 2\" class=\"w-full h-auto rounded-lg shadow-md\" aria-label=\"Studio Image 2\">\n      <img src=\"path/to/image3.jpg\" alt=\"Studio Image 3\" class=\"w-full h-auto rounded-lg shadow-md\" aria-label=\"Studio Image 3\">\n    </div>\n  </div>\n</section>",
+          "order": 4
+        },
+        {
+          "id": "4f29ce11",
+          "name": "contact",
+          "component_type": "form",
+          "content": {
+            "title": "Get in Touch",
+            "fields": [
+              {
+                "type": "text",
+                "label": "Name"
+              },
+              {
+                "type": "email",
+                "label": "Email"
+              },
+              {
+                "type": "tel",
+                "label": "Phone"
+              },
+              {
+                "type": "textarea",
+                "label": "Message"
+              }
+            ],
+            "submit_label": "Send Message"
+          },
+          "html": "<div class=\"bg-gray-100 py-20\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Get in Touch</h2>\n    <form action=\"#\" method=\"POST\" class=\"max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg space-y-6\">\n      <div>\n        <label for=\"name\" class=\"block text-sm font-medium text-gray-700 mb-1\">Name</label>\n        <input type=\"text\" id=\"name\" name=\"name\" required class=\"w-full px-4 py-2 border rounded focus:ring-blue-500 focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"email\" class=\"block text-sm font-medium text-gray-700 mb-1\">Email</label>\n        <input type=\"email\" id=\"email\" name=\"email\" required class=\"w-full px-4 py-2 border rounded focus:ring-blue-500 focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"phone\" class=\"block text-sm font-medium text-gray-700 mb-1\">Phone</label>\n        <input type=\"tel\" id=\"phone\" name=\"phone\" required class=\"w-full px-4 py-2 border rounded focus:ring-blue-500 focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"message\" class=\"block text-sm font-medium text-gray-700 mb-1\">Message</label>\n        <textarea id=\"message\" name=\"message\" rows=\"4\" required class=\"w-full px-4 py-2 border rounded focus:ring-blue-500 focus:border-blue-500\"></textarea>\n      </div>\n      <button type=\"submit\" class=\"w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700\">Send Message</button>\n    </form>\n  </div>\n</div>",
+          "order": 5
+        }
+      ],
+      "seo": {
+        "title": "Apex Fitness Studio - Your Ultimate Fitness Destination",
+        "meta_description": "Welcome to Apex Fitness Studio. Discover a variety of fitness services tailored for your needs. Join us today!",
+        "keywords": [
+          "fitness",
+          "gym",
+          "workout",
+          "personal training",
+          "classes"
+        ],
+        "og_title": "Apex Fitness Studio - Your Ultimate Fitness Destination",
+        "og_description": "Welcome to Apex Fitness Studio. Discover a variety of fitness services tailored for your needs. Join us today!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Fitness Studio",
+          "url": "https://www.apexfitnessstudio.com",
+          "logo": "https://www.apexfitnessstudio.com/logo.png",
+          "image": "https://www.apexfitnessstudio.com/hero-image.jpg",
+          "description": "Welcome to Apex Fitness Studio. Discover a variety of fitness services tailored for your needs. Join us today!",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "1234 Fitness St",
+            "addressLocality": "City",
+            "addressRegion": "State",
+            "postalCode": "Zip Code"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "21:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday",
+                "Sunday"
+              ],
+              "opens": "10:00",
+              "closes": "17:00"
+            }
+          ],
+          "telephone": "+1-555-123-4567",
+          "sameAs": [
+            "https://www.facebook.com/apexfitnessstudio",
+            "https://twitter.com/apexfitnessstudio",
+            "https://www.instagram.com/apexfitnessstudio"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Apex Fitness Studio offer?",
+            "a": "Apex Fitness Studio provides a variety of fitness services including personal training, group classes, and wellness programs."
+          },
+          {
+            "q": "How can I book a session at Apex Fitness Studio?",
+            "a": "You can book a session by visiting our website or calling our customer service team."
+          },
+          {
+            "q": "What makes Apex Fitness Studio different from other gyms?",
+            "a": "Apex Fitness Studio offers personalized training programs and a focus on helping members achieve their fitness goals."
+          },
+          {
+            "q": "Where is Apex Fitness Studio located?",
+            "a": "Apex Fitness Studio is located at [Address]."
+          },
+          {
+            "q": "What are the hours of operation for Apex Fitness Studio?",
+            "a": "Our studio operates from [Opening Hours] to [Closing Hours], Monday through Friday."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Fitness Studio",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Fitness Studio is a premier fitness center dedicated to helping individuals achieve their health and wellness goals. Our team of certified trainers offers personalized training programs, group classes, and various wellness services in a welcoming and supportive environment.",
+        "topic_cluster": "Fitness Services",
+        "related_topics": [
+          "Personal Training",
+          "Group Classes",
+          "Wellness Programs",
+          "Nutrition Consultations",
+          "Equipment"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - Apex Fitness Studio</title>\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Welcome to Apex Fitness Studio. Discover a variety of fitness services tailored for your needs. Join us today!\">\n  <meta name=\"keywords\" content=\"fitness, gym, workout, personal training, classes\">\n  <meta property=\"og:title\" content=\"Apex Fitness Studio - Your Ultimate Fitness Destination\">\n  <meta property=\"og:description\" content=\"Welcome to Apex Fitness Studio. Discover a variety of fitness services tailored for your needs. Join us today!\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Apex Fitness Studio\",\n  \"url\": \"https://www.apexfitnessstudio.com\",\n  \"logo\": \"https://www.apexfitnessstudio.com/logo.png\",\n  \"image\": \"https://www.apexfitnessstudio.com/hero-image.jpg\",\n  \"description\": \"Welcome to Apex Fitness Studio. Discover a variety of fitness services tailored for your needs. Join us today!\",\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"1234 Fitness St\",\n    \"addressLocality\": \"City\",\n    \"addressRegion\": \"State\",\n    \"postalCode\": \"Zip Code\"\n  },\n  \"openingHoursSpecification\": [\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Monday\",\n        \"Tuesday\",\n        \"Wednesday\",\n        \"Thursday\",\n        \"Friday\"\n      ],\n      \"opens\": \"09:00\",\n      \"closes\": \"21:00\"\n    },\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Saturday\",\n        \"Sunday\"\n      ],\n      \"opens\": \"10:00\",\n      \"closes\": \"17:00\"\n    }\n  ],\n  \"telephone\": \"+1-555-123-4567\",\n  \"sameAs\": [\n    \"https://www.facebook.com/apexfitnessstudio\",\n    \"https://twitter.com/apexfitnessstudio\",\n    \"https://www.instagram.com/apexfitnessstudio\"\n  ]\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What services does Apex Fitness Studio offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio provides a variety of fitness services including personal training, group classes, and wellness programs.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I book a session at Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"You can book a session by visiting our website or calling our customer service team.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What makes Apex Fitness Studio different from other gyms?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio offers personalized training programs and a focus on helping members achieve their fitness goals.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Where is Apex Fitness Studio located?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio is located at [Address].\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What are the hours of operation for Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Our studio operates from [Opening Hours] to [Closing Hours], Monday through Friday.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<header class=\"bg-gray-900 text-white py-12\">\n  <div class=\"container mx-auto flex flex-col items-center justify-center space-y-4\">\n    <h1 class=\"text-4xl font-bold\" aria-label=\"Apex Fitness Studio\">Train Like a Champion Today!</h1>\n    <p class=\"text-xl\" aria-label=\"Join Apex Fitness Studio for the best workout experience.\">Join Apex Fitness Studio for the best workout experience.</p>\n    <nav class=\"mt-8\">\n      <ul class=\"flex space-x-4\">\n        <li><a href=\"index.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Home\">Home</a></li>\n        <li><a href=\"personal-training.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Personal Training\">Personal Training</a></li>\n        <li><a href=\"group-classes.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Group Classes\">Group Classes</a></li>\n        <li><a href=\"nutrition.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Nutrition\">Nutrition</a></li>\n        <li><a href=\"rehabilitation.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Rehabilitation\">Rehabilitation</a></li>\n        <li><a href=\"blog.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Blog\">Blog</a></li>\n        <li><a href=\"faq.html\" class=\"text-white hover:text-gray-300\" aria-label=\"FAQ\">FAQ</a></li>\n        <li><a href=\"contact.html\" class=\"text-white hover:text-gray-300\" aria-label=\"Contact Us\">Contact Us</a></li>\n      </ul>\n    </nav>\n  </div>\n</header>\n\n<section id=\"about-us\" class=\"bg-white py-16\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">About Us</h2>\n    <p class=\"text-lg leading-relaxed text-gray-700 text-center mb-8\">\n      At Apex Fitness Studio, we believe in pushing boundaries and achieving greatness. Our mission is to provide a high-quality fitness environment where individuals can train like champions.\n    </p>\n  </div>\n</section>\n\n<section id=\"services\" class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-center text-3xl font-bold mb-12\">Our Services</h2>\n    <ul class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8\">\n      <li class=\"bg-white rounded-lg shadow-md p-6\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Personal Training\">Personal Training</h3>\n        <p class=\"text-gray-700\">Get personalized training tailored to your fitness goals.</p>\n      </li>\n      <li class=\"bg-white rounded-lg shadow-md p-6\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Group Fitness Classes\">Group Fitness Classes</h3>\n        <p class=\"text-gray-700\">Join our dynamic and motivating group classes.</p>\n      </li>\n      <li class=\"bg-white rounded-lg shadow-md p-6\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Nutrition Counseling\">Nutrition Counseling</h3>\n        <p class=\"text-gray-700\">Achieve your fitness goals with expert nutrition guidance.</p>\n      </li>\n      <li class=\"bg-white rounded-lg shadow-md p-6\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Rehabilitation\">Rehabilitation</h3>\n        <p class=\"text-gray-700\">Get back to your fitness routine with our rehabilitation services.</p>\n      </li>\n    </ul>\n  </div>\n</section>\n\n<div class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\" id=\"testimonials-title\">What Our Members Say</h2>\n    <div class=\"testimonial-slider\">\n      <div role=\"listbox\" aria-label=\"Testimonials Slider\" class=\"flex overflow-hidden space-x-4\">\n        <blockquote role=\"option\" tabindex=\"0\" class=\"bg-white p-6 rounded-lg shadow-md w-full max-w-sm\">\n          <p class=\"text-gray-700\">Apex Fitness Studio has been a game-changer for my fitness journey. The trainers are knowledgeable and supportive.</p>\n          <footer class=\"mt-4 text-right\">\n            <cite>- John Doe</cite>\n          </footer>\n        </blockquote>\n        <blockquote role=\"option\" tabindex=\"1\" class=\"bg-white p-6 rounded-lg shadow-md w-full max-w-sm\">\n          <p class=\"text-gray-700\">The variety of classes and services makes it easy to find what I need to reach my goals.</p>\n          <footer class=\"mt-4 text-right\">\n            <cite>- Jane Smith</cite>\n          </footer>\n        </blockquote>\n      </div>\n    </div>\n  </div>\n</div>\n\n<section class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\" aria-label=\"Our Studio\">Our Studio</h2>\n    <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n      <img src=\"path/to/image1.jpg\" alt=\"Studio Image 1\" class=\"w-full h-auto rounded-lg shadow-md\" aria-label=\"Studio Image 1\">\n      <img src=\"path/to/image2.jpg\" alt=\"Studio Image 2\" class=\"w-full h-auto rounded-lg shadow-md\" aria-label=\"Studio Image 2\">\n      <img src=\"path/to/image3.jpg\" alt=\"Studio Image 3\" class=\"w-full h-auto rounded-lg shadow-md\" aria-label=\"Studio Image 3\">\n    </div>\n  </div>\n</section>\n\n<div class=\"bg-gray-100 py-20\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Get in Touch</h2>\n    <form action=\"#\" method=\"POST\" class=\"max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg space-y-6\">\n      <div>\n        <label for=\"name\" class=\"block text-sm font-medium text-gray-700 mb-1\">Name</label>\n        <input type=\"text\" id=\"name\" name=\"name\" required class=\"w-full px-4 py-2 border rounded focus:ring-blue-500 focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"email\" class=\"block text-sm font-medium text-gray-700 mb-1\">Email</label>\n        <input type=\"email\" id=\"email\" name=\"email\" required class=\"w-full px-4 py-2 border rounded focus:ring-blue-500 focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"phone\" class=\"block text-sm font-medium text-gray-700 mb-1\">Phone</label>\n        <input type=\"tel\" id=\"phone\" name=\"phone\" required class=\"w-full px-4 py-2 border rounded focus:ring-blue-500 focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"message\" class=\"block text-sm font-medium text-gray-700 mb-1\">Message</label>\n        <textarea id=\"message\" name=\"message\" rows=\"4\" required class=\"w-full px-4 py-2 border rounded focus:ring-blue-500 focus:border-blue-500\"></textarea>\n      </div>\n      <button type=\"submit\" class=\"w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700\">Send Message</button>\n    </form>\n  </div>\n</div>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What services does Apex Fitness Studio offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio provides a variety of fitness services including personal training, group classes, and wellness programs.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I book a session at Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">You can book a session by visiting our website or calling our customer service team.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What makes Apex Fitness Studio different from other gyms?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio offers personalized training programs and a focus on helping members achieve their fitness goals.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Where is Apex Fitness Studio located?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio is located at [Address].</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What are the hours of operation for Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Our studio operates from [Opening Hours] to [Closing Hours], Monday through Friday.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    },
+    {
+      "slug": "personal-training",
+      "title": "Personal Training - Apex Fitness Studio",
+      "purpose": "Page for personal training services",
+      "sections": [
+        {
+          "id": "1038e84f",
+          "name": "intro",
+          "component_type": "text-block",
+          "content": {
+            "title": "Why Personal Training?",
+            "paragraphs": [
+              "Our personal trainers are certified and experienced, providing tailored workout plans to help you reach your fitness goals."
+            ]
+          },
+          "html": "<header class=\"bg-gray-800 text-white py-4\">\n  <nav class=\"container mx-auto flex justify-between items-center px-4\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Apex Fitness Studio</a>\n    <div class=\"md:flex space-x-4 hidden\">\n      <a href=\"personal-training.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"Personal Training\">Personal Training</a>\n      <a href=\"group-classes.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"Group Classes\">Group Classes</a>\n      <a href=\"nutrition.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"Nutrition\">Nutrition</a>\n      <a href=\"rehabilitation.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"Rehabilitation\">Rehabilitation</a>\n      <a href=\"blog.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"Blog\">Blog</a>\n      <a href=\"faq.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"FAQ\">FAQ</a>\n      <a href=\"contact.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"Contact Us\">Contact Us</a>\n    </div>\n  </nav>\n</header>\n\n<section class=\"bg-gradient-to-r from-blue-500 to-purple-600 text-white py-24\">\n  <div class=\"container mx-auto flex flex-col items-center justify-center\">\n    <h1 class=\"text-4xl font-bold mb-4\" aria-label=\"Why Personal Training?\">Why Personal Training?</h1>\n    <p class=\"max-w-md text-lg mb-8\" aria-label=\"Our personal trainers are certified and experienced, providing tailored workout plans to help you reach your fitness goals.\">Our personal trainers are certified and experienced, providing tailored workout plans to help you reach your fitness goals.</p>\n  </div>\n</section>\n\n<div class=\"bg-white py-12\">\n  <div class=\"container mx-auto flex justify-center\">\n    <nav class=\"flex space-x-4\">\n      <a href=\"personal-training.html\" class=\"text-gray-500 hover:text-blue-600\">Personal Training</a>\n      <a href=\"group-classes.html\" class=\"text-gray-500 hover:text-blue-600\">Group Classes</a>\n      <a href=\"nutrition.html\" class=\"text-gray-500 hover:text-blue-600\">Nutrition</a>\n      <a href=\"rehabilitation.html\" class=\"text-gray-500 hover:text-blue-600\">Rehabilitation</a>\n      <a href=\"blog.html\" class=\"text-gray-500 hover:text-blue-600\">Blog</a>\n      <a href=\"faq.html\" class=\"text-gray-500 hover:text-blue-600\">FAQ</a>\n      <a href=\"contact.html\" class=\"text-gray-500 hover:text-blue-600\">Contact Us</a>\n    </nav>\n  </div>\n</div>",
+          "order": 0
+        },
+        {
+          "id": "db024f9d",
+          "name": "trainer-bios",
+          "component_type": "trainer-profiles",
+          "content": {
+            "title": "Meet Our Trainers",
+            "trainers": [
+              {
+                "name": "John Doe",
+                "bio": "Certified personal trainer with over 10 years of experience.",
+                "image": "path/to/john.jpg"
+              },
+              {
+                "name": "Jane Smith",
+                "bio": "Specializes in functional training and injury prevention.",
+                "image": "path/to/jane.jpg"
+              }
+            ]
+          },
+          "html": "<section class=\"trainer-bios bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Meet Our Trainers</h2>\n    <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8\">\n      <article class=\"trainer-profile p-6 bg-white shadow-md rounded-lg\" role=\"region\" aria-label=\"John Doe Trainer Profile\">\n        <img src=\"path/to/john.jpg\" alt=\"John Doe\" class=\"w-full h-auto rounded-lg mb-4\">\n        <h3 class=\"text-xl font-bold\">John Doe</h3>\n        <p class=\"text-gray-700\">Certified personal trainer with over 10 years of experience.</p>\n      </article>\n      <article class=\"trainer-profile p-6 bg-white shadow-md rounded-lg\" role=\"region\" aria-label=\"Jane Smith Trainer Profile\">\n        <img src=\"path/to/jane.jpg\" alt=\"Jane Smith\" class=\"w-full h-auto rounded-lg mb-4\">\n        <h3 class=\"text-xl font-bold\">Jane Smith</h3>\n        <p class=\"text-gray-700\">Specializes in functional training and injury prevention.</p>\n      </article>\n    </div>\n  </div>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "87aae0a0",
+          "name": "booking-form",
+          "component_type": "form",
+          "content": {
+            "title": "Book Your Personal Training Session",
+            "fields": [
+              {
+                "type": "text",
+                "label": "Name"
+              },
+              {
+                "type": "email",
+                "label": "Email"
+              },
+              {
+                "type": "tel",
+                "label": "Phone"
+              },
+              {
+                "type": "date",
+                "label": "Preferred Date"
+              },
+              {
+                "type": "time",
+                "label": "Preferred Time"
+              }
+            ],
+            "submit_label": "Book Now"
+          },
+          "html": "<nav class=\"bg-gray-800\">\n  <div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8\">\n    <div class=\"flex justify-between h-16\">\n      <div class=\"flex-shrink-0 flex items-center\">\n        <a href=\"index.html\" class=\"text-white text-lg font-bold\">Apex Fitness Studio</a>\n      </div>\n      <div class=\"-mr-2 flex md:hidden\">\n        <button type=\"button\" class=\"bg-gray-900 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white\">\n          <svg class=\"block h-6 w-6\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" aria-hidden=\"true\">\n            <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h16m-7 6h7\"></path>\n          </svg>\n        </button>\n      </div>\n      <div class=\"hidden md:flex md:space-x-8\">\n        <a href=\"index.html\" class=\"text-white text-base font-medium\">Home</a>\n        <a href=\"personal-training.html\" class=\"text-white text-base font-medium\">Personal Training</a>\n        <a href=\"group-classes.html\" class=\"text-white text-base font-medium\">Group Classes</a>\n        <a href=\"nutrition.html\" class=\"text-white text-base font-medium\">Nutrition</a>\n        <a href=\"rehabilitation.html\" class=\"text-white text-base font-medium\">Rehabilitation</a>\n        <a href=\"blog.html\" class=\"text-white text-base font-medium\">Blog</a>\n        <a href=\"faq.html\" class=\"text-white text-base font-medium\">FAQ</a>\n        <a href=\"contact.html\" class=\"text-white text-base font-medium\">Contact Us</a>\n      </div>\n    </div>\n  </div>\n\n  <div class=\"md:hidden\">\n    <div class=\"px-2 pt-2 pb-3 space-y-1 sm:px-3\">\n      <a href=\"index.html\" class=\"bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium\">Home</a>\n      <a href=\"personal-training.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">Personal Training</a>\n      <a href=\"group-classes.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">Group Classes</a>\n      <a href=\"nutrition.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">Nutrition</a>\n      <a href=\"rehabilitation.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">Rehabilitation</a>\n      <a href=\"blog.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">Blog</a>\n      <a href=\"faq.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">FAQ</a>\n      <a href=\"contact.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">Contact Us</a>\n    </div>\n  </div>\n</nav>\n\n<section id=\"booking-form\" class=\"bg-gray-100 py-24\">\n  <div class=\"max-w-lg mx-auto px-4 sm:px-6 lg:px-8\">\n    <h2 class=\"text-3xl font-bold text-center mb-6\">Book Your Personal Training Session</h2>\n    <form action=\"#\" method=\"POST\" class=\"space-y-6\">\n      <div>\n        <label for=\"name\" class=\"block text-sm font-medium text-gray-700\">Name</label>\n        <input type=\"text\" id=\"name\" name=\"name\" required class=\"mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email</label>\n        <input type=\"email\" id=\"email\" name=\"email\" required class=\"mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"phone\" class=\"block text-sm font-medium text-gray-700\">Phone</label>\n        <input type=\"tel\" id=\"phone\" name=\"phone\" required class=\"mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"preferred-date\" class=\"block text-sm font-medium text-gray-700\">Preferred Date</label>\n        <input type=\"date\" id=\"preferred-date\" name=\"preferred-date\" required class=\"mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"preferred-time\" class=\"block text-sm font-medium text-gray-700\">Preferred Time</label>\n        <input type=\"time\" id=\"preferred-time\" name=\"preferred-time\" required class=\"mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <button type=\"submit\" class=\"w-full bg-indigo-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500\">Book Now</button>\n    </form>\n  </div>\n</section>",
+          "order": 2
+        }
+      ],
+      "seo": {
+        "title": "Apex Fitness Studio - Personal Training Services Near You",
+        "meta_description": "Get personalized fitness training at Apex Fitness Studio. Start your journey to a healthier lifestyle today!",
+        "keywords": [
+          "personal training",
+          "fitness studio",
+          "health and wellness",
+          "exercise classes",
+          "weight loss"
+        ],
+        "og_title": "Apex Fitness Studio - Personal Training Services Near You",
+        "og_description": "Get personalized fitness training at Apex Fitness Studio. Start your journey to a healthier lifestyle today!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Fitness Studio",
+          "description": "Get personalized fitness training at Apex Fitness Studio. Start your journey to a healthier lifestyle today!",
+          "url": "https://www.apexfitnessstudio.com/personal-training",
+          "logo": "https://www.apexfitnessstudio.com/images/logo.png",
+          "image": "https://www.apexfitnessstudio.com/images/hero.jpg",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "1234 Fitness Ave",
+            "addressLocality": "City",
+            "addressRegion": "State",
+            "postalCode": "Zip Code"
+          },
+          "telephone": "+1-555-123-4567",
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "18:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "10:00",
+              "closes": "16:00"
+            }
+          ],
+          "sameAs": [
+            "https://www.facebook.com/apexfitnessstudio",
+            "https://twitter.com/ApexFitnessStu",
+            "https://www.instagram.com/apexfitnessstudio/"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What types of personal training services does Apex Fitness Studio offer?",
+            "a": "Apex Fitness Studio provides a variety of personal training services tailored to individual fitness goals."
+          },
+          {
+            "q": "How can I book a personal training session at Apex Fitness Studio?",
+            "a": "You can book a session by visiting our website or calling us directly."
+          },
+          {
+            "q": "What is the cancellation policy for personal training sessions?",
+            "a": "Our cancellation policy allows for flexibility, with details available on our website."
+          },
+          {
+            "q": "Does Apex Fitness Studio offer nutrition and diet plans along with personal training?",
+            "a": "Yes, we provide personalized nutrition and diet plans in addition to our fitness services."
+          },
+          {
+            "q": "What certifications do the trainers at Apex Fitness Studio have?",
+            "a": "Our trainers are certified professionals with expertise in various fitness disciplines."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Fitness Studio",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Fitness Studio is a premier personal training facility dedicated to helping individuals achieve their fitness goals through expert coaching and personalized programs.",
+        "topic_cluster": "Personal Training Services",
+        "related_topics": [
+          "Fitness Coaching",
+          "Nutrition Plans",
+          "Workout Programs",
+          "Cardio Training",
+          "Strength Training"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Personal Training - Apex Fitness Studio</title>\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Get personalized fitness training at Apex Fitness Studio. Start your journey to a healthier lifestyle today!\">\n  <meta name=\"keywords\" content=\"personal training, fitness studio, health and wellness, exercise classes, weight loss\">\n  <meta property=\"og:title\" content=\"Apex Fitness Studio - Personal Training Services Near You\">\n  <meta property=\"og:description\" content=\"Get personalized fitness training at Apex Fitness Studio. Start your journey to a healthier lifestyle today!\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Apex Fitness Studio\",\n  \"description\": \"Get personalized fitness training at Apex Fitness Studio. Start your journey to a healthier lifestyle today!\",\n  \"url\": \"https://www.apexfitnessstudio.com/personal-training\",\n  \"logo\": \"https://www.apexfitnessstudio.com/images/logo.png\",\n  \"image\": \"https://www.apexfitnessstudio.com/images/hero.jpg\",\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"1234 Fitness Ave\",\n    \"addressLocality\": \"City\",\n    \"addressRegion\": \"State\",\n    \"postalCode\": \"Zip Code\"\n  },\n  \"telephone\": \"+1-555-123-4567\",\n  \"openingHoursSpecification\": [\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Monday\",\n        \"Tuesday\",\n        \"Wednesday\",\n        \"Thursday\",\n        \"Friday\"\n      ],\n      \"opens\": \"09:00\",\n      \"closes\": \"18:00\"\n    },\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Saturday\"\n      ],\n      \"opens\": \"10:00\",\n      \"closes\": \"16:00\"\n    }\n  ],\n  \"sameAs\": [\n    \"https://www.facebook.com/apexfitnessstudio\",\n    \"https://twitter.com/ApexFitnessStu\",\n    \"https://www.instagram.com/apexfitnessstudio/\"\n  ]\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What types of personal training services does Apex Fitness Studio offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio provides a variety of personal training services tailored to individual fitness goals.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I book a personal training session at Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"You can book a session by visiting our website or calling us directly.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What is the cancellation policy for personal training sessions?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Our cancellation policy allows for flexibility, with details available on our website.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Does Apex Fitness Studio offer nutrition and diet plans along with personal training?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, we provide personalized nutrition and diet plans in addition to our fitness services.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What certifications do the trainers at Apex Fitness Studio have?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Our trainers are certified professionals with expertise in various fitness disciplines.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<header class=\"bg-gray-800 text-white py-4\">\n  <nav class=\"container mx-auto flex justify-between items-center px-4\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Apex Fitness Studio</a>\n    <div class=\"md:flex space-x-4 hidden\">\n      <a href=\"personal-training.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"Personal Training\">Personal Training</a>\n      <a href=\"group-classes.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"Group Classes\">Group Classes</a>\n      <a href=\"nutrition.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"Nutrition\">Nutrition</a>\n      <a href=\"rehabilitation.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"Rehabilitation\">Rehabilitation</a>\n      <a href=\"blog.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"Blog\">Blog</a>\n      <a href=\"faq.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"FAQ\">FAQ</a>\n      <a href=\"contact.html\" class=\"text-gray-300 hover:text-white\" aria-label=\"Contact Us\">Contact Us</a>\n    </div>\n  </nav>\n</header>\n\n<section class=\"bg-gradient-to-r from-blue-500 to-purple-600 text-white py-24\">\n  <div class=\"container mx-auto flex flex-col items-center justify-center\">\n    <h1 class=\"text-4xl font-bold mb-4\" aria-label=\"Why Personal Training?\">Why Personal Training?</h1>\n    <p class=\"max-w-md text-lg mb-8\" aria-label=\"Our personal trainers are certified and experienced, providing tailored workout plans to help you reach your fitness goals.\">Our personal trainers are certified and experienced, providing tailored workout plans to help you reach your fitness goals.</p>\n  </div>\n</section>\n\n<div class=\"bg-white py-12\">\n  <div class=\"container mx-auto flex justify-center\">\n    <nav class=\"flex space-x-4\">\n      <a href=\"personal-training.html\" class=\"text-gray-500 hover:text-blue-600\">Personal Training</a>\n      <a href=\"group-classes.html\" class=\"text-gray-500 hover:text-blue-600\">Group Classes</a>\n      <a href=\"nutrition.html\" class=\"text-gray-500 hover:text-blue-600\">Nutrition</a>\n      <a href=\"rehabilitation.html\" class=\"text-gray-500 hover:text-blue-600\">Rehabilitation</a>\n      <a href=\"blog.html\" class=\"text-gray-500 hover:text-blue-600\">Blog</a>\n      <a href=\"faq.html\" class=\"text-gray-500 hover:text-blue-600\">FAQ</a>\n      <a href=\"contact.html\" class=\"text-gray-500 hover:text-blue-600\">Contact Us</a>\n    </nav>\n  </div>\n</div>\n\n<section class=\"trainer-bios bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Meet Our Trainers</h2>\n    <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8\">\n      <article class=\"trainer-profile p-6 bg-white shadow-md rounded-lg\" role=\"region\" aria-label=\"John Doe Trainer Profile\">\n        <img src=\"path/to/john.jpg\" alt=\"John Doe\" class=\"w-full h-auto rounded-lg mb-4\">\n        <h3 class=\"text-xl font-bold\">John Doe</h3>\n        <p class=\"text-gray-700\">Certified personal trainer with over 10 years of experience.</p>\n      </article>\n      <article class=\"trainer-profile p-6 bg-white shadow-md rounded-lg\" role=\"region\" aria-label=\"Jane Smith Trainer Profile\">\n        <img src=\"path/to/jane.jpg\" alt=\"Jane Smith\" class=\"w-full h-auto rounded-lg mb-4\">\n        <h3 class=\"text-xl font-bold\">Jane Smith</h3>\n        <p class=\"text-gray-700\">Specializes in functional training and injury prevention.</p>\n      </article>\n    </div>\n  </div>\n</section>\n\n<nav class=\"bg-gray-800\">\n  <div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8\">\n    <div class=\"flex justify-between h-16\">\n      <div class=\"flex-shrink-0 flex items-center\">\n        <a href=\"index.html\" class=\"text-white text-lg font-bold\">Apex Fitness Studio</a>\n      </div>\n      <div class=\"-mr-2 flex md:hidden\">\n        <button type=\"button\" class=\"bg-gray-900 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white\">\n          <svg class=\"block h-6 w-6\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\" aria-hidden=\"true\">\n            <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h16m-7 6h7\"></path>\n          </svg>\n        </button>\n      </div>\n      <div class=\"hidden md:flex md:space-x-8\">\n        <a href=\"index.html\" class=\"text-white text-base font-medium\">Home</a>\n        <a href=\"personal-training.html\" class=\"text-white text-base font-medium\">Personal Training</a>\n        <a href=\"group-classes.html\" class=\"text-white text-base font-medium\">Group Classes</a>\n        <a href=\"nutrition.html\" class=\"text-white text-base font-medium\">Nutrition</a>\n        <a href=\"rehabilitation.html\" class=\"text-white text-base font-medium\">Rehabilitation</a>\n        <a href=\"blog.html\" class=\"text-white text-base font-medium\">Blog</a>\n        <a href=\"faq.html\" class=\"text-white text-base font-medium\">FAQ</a>\n        <a href=\"contact.html\" class=\"text-white text-base font-medium\">Contact Us</a>\n      </div>\n    </div>\n  </div>\n\n  <div class=\"md:hidden\">\n    <div class=\"px-2 pt-2 pb-3 space-y-1 sm:px-3\">\n      <a href=\"index.html\" class=\"bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium\">Home</a>\n      <a href=\"personal-training.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">Personal Training</a>\n      <a href=\"group-classes.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">Group Classes</a>\n      <a href=\"nutrition.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">Nutrition</a>\n      <a href=\"rehabilitation.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">Rehabilitation</a>\n      <a href=\"blog.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">Blog</a>\n      <a href=\"faq.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">FAQ</a>\n      <a href=\"contact.html\" class=\"text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium\">Contact Us</a>\n    </div>\n  </div>\n</nav>\n\n<section id=\"booking-form\" class=\"bg-gray-100 py-24\">\n  <div class=\"max-w-lg mx-auto px-4 sm:px-6 lg:px-8\">\n    <h2 class=\"text-3xl font-bold text-center mb-6\">Book Your Personal Training Session</h2>\n    <form action=\"#\" method=\"POST\" class=\"space-y-6\">\n      <div>\n        <label for=\"name\" class=\"block text-sm font-medium text-gray-700\">Name</label>\n        <input type=\"text\" id=\"name\" name=\"name\" required class=\"mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email</label>\n        <input type=\"email\" id=\"email\" name=\"email\" required class=\"mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"phone\" class=\"block text-sm font-medium text-gray-700\">Phone</label>\n        <input type=\"tel\" id=\"phone\" name=\"phone\" required class=\"mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"preferred-date\" class=\"block text-sm font-medium text-gray-700\">Preferred Date</label>\n        <input type=\"date\" id=\"preferred-date\" name=\"preferred-date\" required class=\"mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"preferred-time\" class=\"block text-sm font-medium text-gray-700\">Preferred Time</label>\n        <input type=\"time\" id=\"preferred-time\" name=\"preferred-time\" required class=\"mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <button type=\"submit\" class=\"w-full bg-indigo-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500\">Book Now</button>\n    </form>\n  </div>\n</section>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What types of personal training services does Apex Fitness Studio offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio provides a variety of personal training services tailored to individual fitness goals.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I book a personal training session at Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">You can book a session by visiting our website or calling us directly.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What is the cancellation policy for personal training sessions?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Our cancellation policy allows for flexibility, with details available on our website.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Does Apex Fitness Studio offer nutrition and diet plans along with personal training?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, we provide personalized nutrition and diet plans in addition to our fitness services.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What certifications do the trainers at Apex Fitness Studio have?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Our trainers are certified professionals with expertise in various fitness disciplines.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Personal Training",
+      "nav_order": 2
+    },
+    {
+      "slug": "group-classes",
+      "title": "Group Classes - Apex Fitness Studio",
+      "purpose": "Page for group fitness classes",
+      "sections": [
+        {
+          "id": "c812e772",
+          "name": "intro",
+          "component_type": "text-block",
+          "content": {
+            "title": "Join Our Group Classes!",
+            "paragraphs": [
+              "Our group classes are designed to keep you engaged and motivated. Whether you're looking for a high-intensity interval training (HIIT) session or a yoga class, we've got you covered."
+            ]
+          },
+          "html": "<section id=\"intro\" class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6 flex flex-col items-center justify-center text-center\">\n    <h1 class=\"text-3xl font-bold mb-8\">Join Our Group Classes!</h1>\n    <p class=\"max-w-md mx-auto text-lg mb-12\">Our group classes are designed to keep you engaged and motivated. Whether you're looking for a high-intensity interval training (HIIT) session or a yoga class, we've got you covered.</p>\n    <a href=\"#services\" class=\"bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600\">Explore Our Services</a>\n  </div>\n</section>",
+          "order": 0
+        },
+        {
+          "id": "f3161105",
+          "name": "class-schedule",
+          "component_type": "schedule-table",
+          "content": {
+            "title": "Class Schedule",
+            "classes": [
+              {
+                "name": "HIIT",
+                "time": "10:00 AM - 11:30 AM"
+              },
+              {
+                "name": "Yoga",
+                "time": "2:00 PM - 3:30 PM"
+              },
+              {
+                "name": "Zumba",
+                "time": "4:00 PM - 5:30 PM"
+              }
+            ]
+          },
+          "html": "<section class=\"bg-gray-100 py-8\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-6\">Class Schedule</h2>\n    <table class=\"w-full border-collapse table-fixed\">\n      <thead>\n        <tr>\n          <th class=\"border p-3 text-left text-lg font-semibold\" scope=\"col\">Class Name</th>\n          <th class=\"border p-3 text-left text-lg font-semibold\" scope=\"col\">Time</th>\n        </tr>\n      </thead>\n      <tbody>\n        <tr>\n          <td class=\"border p-3\" aria-label=\"HIIT Class Time\">HIIT</td>\n          <td class=\"border p-3\" aria-label=\"HIIT Class Duration\">10:00 AM - 11:30 AM</td>\n        </tr>\n        <tr>\n          <td class=\"border p-3\" aria-label=\"Yoga Class Time\">Yoga</td>\n          <td class=\"border p-3\" aria-label=\"Yoga Class Duration\">2:00 PM - 3:30 PM</td>\n        </tr>\n        <tr>\n          <td class=\"border p-3\" aria-label=\"Zumba Class Time\">Zumba</td>\n          <td class=\"border p-3\" aria-label=\"Zumba Class Duration\">4:00 PM - 5:30 PM</td>\n        </tr>\n      </tbody>\n    </table>\n  </div>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "6a79e32f",
+          "name": "booking-form",
+          "component_type": "form",
+          "content": {
+            "title": "Book Your Class Slot",
+            "fields": [
+              {
+                "type": "text",
+                "label": "Name"
+              },
+              {
+                "type": "email",
+                "label": "Email"
+              },
+              {
+                "type": "tel",
+                "label": "Phone"
+              },
+              {
+                "type": "date",
+                "label": "Preferred Date"
+              },
+              {
+                "type": "time",
+                "label": "Preferred Time"
+              }
+            ],
+            "submit_label": "Book Now"
+          },
+          "html": "<header class=\"bg-gray-800 text-white p-4\">\n  <nav class=\"container mx-auto flex justify-between items-center\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Apex Fitness Studio</a>\n    <ul class=\"flex space-x-4\">\n      <li><a href=\"personal-training.html\" class=\"hover:text-gray-300\">Personal Training</a></li>\n      <li><a href=\"group-classes.html\" class=\"hover:text-gray-300\">Group Classes</a></li>\n      <li><a href=\"nutrition.html\" class=\"hover:text-gray-300\">Nutrition</a></li>\n      <li><a href=\"rehabilitation.html\" class=\"hover:text-gray-300\">Rehabilitation</a></li>\n      <li><a href=\"blog.html\" class=\"hover:text-gray-300\">Blog</a></li>\n      <li><a href=\"faq.html\" class=\"hover:text-gray-300\">FAQ</a></li>\n      <li><a href=\"contact.html\" class=\"hover:text-gray-300\">Contact Us</a></li>\n    </ul>\n  </nav>\n</header>\n\n<section class=\"bg-white py-16\">\n  <div class=\"container mx-auto text-center\">\n    <h2 class=\"text-4xl font-bold mb-8\">Book Your Class Slot</h2>\n    <form action=\"#\" method=\"POST\" class=\"flex flex-col space-y-4 max-w-md mx-auto\">\n      <label for=\"name\" class=\"block text-gray-700 font-semibold\">Name</label>\n      <input type=\"text\" id=\"name\" name=\"name\" required class=\"border rounded p-2 focus:outline-none\">\n\n      <label for=\"email\" class=\"block text-gray-700 font-semibold\">Email</label>\n      <input type=\"email\" id=\"email\" name=\"email\" required class=\"border rounded p-2 focus:outline-none\">\n\n      <label for=\"phone\" class=\"block text-gray-700 font-semibold\">Phone</label>\n      <input type=\"tel\" id=\"phone\" name=\"phone\" required class=\"border rounded p-2 focus:outline-none\">\n\n      <label for=\"date\" class=\"block text-gray-700 font-semibold\">Preferred Date</label>\n      <input type=\"date\" id=\"date\" name=\"date\" required class=\"border rounded p-2 focus:outline-none\">\n\n      <label for=\"time\" class=\"block text-gray-700 font-semibold\">Preferred Time</label>\n      <input type=\"time\" id=\"time\" name=\"time\" required class=\"border rounded p-2 focus:outline-none\">\n\n      <button type=\"submit\" class=\"bg-blue-500 text-white py-3 rounded hover:bg-blue-600\">Book Now</button>\n    </form>\n  </div>\n</section>\n\n<footer class=\"bg-gray-800 text-white py-4\">\n  <div class=\"container mx-auto flex justify-center items-center space-x-4\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Apex Fitness Studio</a>\n    <p>\u00a9 2023 Apex Fitness Studio. All rights reserved.</p>\n  </div>\n</footer>",
+          "order": 2
+        }
+      ],
+      "seo": {
+        "title": "Apex Fitness Studio: Group Classes for All Levels",
+        "meta_description": "Join Apex Fitness Studio's dynamic group classes today! Get fit with us.",
+        "keywords": [
+          "group fitness",
+          "apex fitness studio",
+          "fitness classes",
+          "workout groups",
+          "exercise classes"
+        ],
+        "og_title": "Apex Fitness Studio: Group Classes for All Levels",
+        "og_description": "Join Apex Fitness Studio's dynamic group classes today! Get fit with us.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Fitness Studio",
+          "description": "Apex Fitness Studio offers a variety of group fitness classes for all levels. Join us today!",
+          "url": "https://www.apexfitnessstudio.com/group-classes",
+          "logo": "https://www.apexfitnessstudio.com/images/logo.png",
+          "image": "https://www.apexfitnessstudio.com/images/hero.jpg",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "1234 Fitness St",
+            "addressLocality": "City",
+            "addressRegion": "State",
+            "postalCode": "12345"
+          },
+          "telephone": "+1-555-123-4567",
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "21:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "10:00",
+              "closes": "18:00"
+            }
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What types of group classes does Apex Fitness Studio offer?",
+            "a": "Apex Fitness Studio offers a variety of group fitness classes designed to help you train like a champion."
+          },
+          {
+            "q": "How can I sign up for a class at Apex Fitness Studio?",
+            "a": "To sign up for a class, simply visit our website or call us directly. Our staff will assist you in finding the perfect class for your fitness level."
+          },
+          {
+            "q": "What are the benefits of attending group classes at Apex Fitness Studio?",
+            "a": "Group classes at Apex Fitness Studio provide numerous benefits, including motivation from others, professional guidance, and a fun environment to achieve your fitness goals."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Fitness Studio",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Fitness Studio is a premier local fitness center dedicated to helping individuals of all ages and fitness levels train like champions through a wide range of group classes.",
+        "topic_cluster": "Group Fitness Classes",
+        "related_topics": [
+          "Personal Training",
+          "Cardio Workouts",
+          "Strength Training",
+          "Flexibility Exercises",
+          "Nutrition Tips"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Group Classes - Apex Fitness Studio</title>\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Join Apex Fitness Studio's dynamic group classes today! Get fit with us.\">\n  <meta name=\"keywords\" content=\"group fitness, apex fitness studio, fitness classes, workout groups, exercise classes\">\n  <meta property=\"og:title\" content=\"Apex Fitness Studio: Group Classes for All Levels\">\n  <meta property=\"og:description\" content=\"Join Apex Fitness Studio's dynamic group classes today! Get fit with us.\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Apex Fitness Studio\",\n  \"description\": \"Apex Fitness Studio offers a variety of group fitness classes for all levels. Join us today!\",\n  \"url\": \"https://www.apexfitnessstudio.com/group-classes\",\n  \"logo\": \"https://www.apexfitnessstudio.com/images/logo.png\",\n  \"image\": \"https://www.apexfitnessstudio.com/images/hero.jpg\",\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"1234 Fitness St\",\n    \"addressLocality\": \"City\",\n    \"addressRegion\": \"State\",\n    \"postalCode\": \"12345\"\n  },\n  \"telephone\": \"+1-555-123-4567\",\n  \"openingHoursSpecification\": [\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Monday\",\n        \"Tuesday\",\n        \"Wednesday\",\n        \"Thursday\",\n        \"Friday\"\n      ],\n      \"opens\": \"09:00\",\n      \"closes\": \"21:00\"\n    },\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Saturday\"\n      ],\n      \"opens\": \"10:00\",\n      \"closes\": \"18:00\"\n    }\n  ]\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What types of group classes does Apex Fitness Studio offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio offers a variety of group fitness classes designed to help you train like a champion.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I sign up for a class at Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"To sign up for a class, simply visit our website or call us directly. Our staff will assist you in finding the perfect class for your fitness level.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What are the benefits of attending group classes at Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Group classes at Apex Fitness Studio provide numerous benefits, including motivation from others, professional guidance, and a fun environment to achieve your fitness goals.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<section id=\"intro\" class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6 flex flex-col items-center justify-center text-center\">\n    <h1 class=\"text-3xl font-bold mb-8\">Join Our Group Classes!</h1>\n    <p class=\"max-w-md mx-auto text-lg mb-12\">Our group classes are designed to keep you engaged and motivated. Whether you're looking for a high-intensity interval training (HIIT) session or a yoga class, we've got you covered.</p>\n    <a href=\"#services\" class=\"bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600\">Explore Our Services</a>\n  </div>\n</section>\n\n<section class=\"bg-gray-100 py-8\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-6\">Class Schedule</h2>\n    <table class=\"w-full border-collapse table-fixed\">\n      <thead>\n        <tr>\n          <th class=\"border p-3 text-left text-lg font-semibold\" scope=\"col\">Class Name</th>\n          <th class=\"border p-3 text-left text-lg font-semibold\" scope=\"col\">Time</th>\n        </tr>\n      </thead>\n      <tbody>\n        <tr>\n          <td class=\"border p-3\" aria-label=\"HIIT Class Time\">HIIT</td>\n          <td class=\"border p-3\" aria-label=\"HIIT Class Duration\">10:00 AM - 11:30 AM</td>\n        </tr>\n        <tr>\n          <td class=\"border p-3\" aria-label=\"Yoga Class Time\">Yoga</td>\n          <td class=\"border p-3\" aria-label=\"Yoga Class Duration\">2:00 PM - 3:30 PM</td>\n        </tr>\n        <tr>\n          <td class=\"border p-3\" aria-label=\"Zumba Class Time\">Zumba</td>\n          <td class=\"border p-3\" aria-label=\"Zumba Class Duration\">4:00 PM - 5:30 PM</td>\n        </tr>\n      </tbody>\n    </table>\n  </div>\n</section>\n\n<header class=\"bg-gray-800 text-white p-4\">\n  <nav class=\"container mx-auto flex justify-between items-center\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Apex Fitness Studio</a>\n    <ul class=\"flex space-x-4\">\n      <li><a href=\"personal-training.html\" class=\"hover:text-gray-300\">Personal Training</a></li>\n      <li><a href=\"group-classes.html\" class=\"hover:text-gray-300\">Group Classes</a></li>\n      <li><a href=\"nutrition.html\" class=\"hover:text-gray-300\">Nutrition</a></li>\n      <li><a href=\"rehabilitation.html\" class=\"hover:text-gray-300\">Rehabilitation</a></li>\n      <li><a href=\"blog.html\" class=\"hover:text-gray-300\">Blog</a></li>\n      <li><a href=\"faq.html\" class=\"hover:text-gray-300\">FAQ</a></li>\n      <li><a href=\"contact.html\" class=\"hover:text-gray-300\">Contact Us</a></li>\n    </ul>\n  </nav>\n</header>\n\n<section class=\"bg-white py-16\">\n  <div class=\"container mx-auto text-center\">\n    <h2 class=\"text-4xl font-bold mb-8\">Book Your Class Slot</h2>\n    <form action=\"#\" method=\"POST\" class=\"flex flex-col space-y-4 max-w-md mx-auto\">\n      <label for=\"name\" class=\"block text-gray-700 font-semibold\">Name</label>\n      <input type=\"text\" id=\"name\" name=\"name\" required class=\"border rounded p-2 focus:outline-none\">\n\n      <label for=\"email\" class=\"block text-gray-700 font-semibold\">Email</label>\n      <input type=\"email\" id=\"email\" name=\"email\" required class=\"border rounded p-2 focus:outline-none\">\n\n      <label for=\"phone\" class=\"block text-gray-700 font-semibold\">Phone</label>\n      <input type=\"tel\" id=\"phone\" name=\"phone\" required class=\"border rounded p-2 focus:outline-none\">\n\n      <label for=\"date\" class=\"block text-gray-700 font-semibold\">Preferred Date</label>\n      <input type=\"date\" id=\"date\" name=\"date\" required class=\"border rounded p-2 focus:outline-none\">\n\n      <label for=\"time\" class=\"block text-gray-700 font-semibold\">Preferred Time</label>\n      <input type=\"time\" id=\"time\" name=\"time\" required class=\"border rounded p-2 focus:outline-none\">\n\n      <button type=\"submit\" class=\"bg-blue-500 text-white py-3 rounded hover:bg-blue-600\">Book Now</button>\n    </form>\n  </div>\n</section>\n\n<footer class=\"bg-gray-800 text-white py-4\">\n  <div class=\"container mx-auto flex justify-center items-center space-x-4\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Apex Fitness Studio</a>\n    <p>\u00a9 2023 Apex Fitness Studio. All rights reserved.</p>\n  </div>\n</footer>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What types of group classes does Apex Fitness Studio offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio offers a variety of group fitness classes designed to help you train like a champion.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I sign up for a class at Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">To sign up for a class, simply visit our website or call us directly. Our staff will assist you in finding the perfect class for your fitness level.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What are the benefits of attending group classes at Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Group classes at Apex Fitness Studio provide numerous benefits, including motivation from others, professional guidance, and a fun environment to achieve your fitness goals.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Group Classes",
+      "nav_order": 3
+    },
+    {
+      "slug": "nutrition",
+      "title": "Nutrition - Apex Fitness Studio",
+      "purpose": "Page for nutrition services",
+      "sections": [
+        {
+          "id": "394126fc",
+          "name": "intro",
+          "component_type": "text-block",
+          "content": {
+            "title": "Balanced Nutrition Matters!",
+            "paragraphs": [
+              "Eating the right foods is just as important as your workout routine. Our nutritionists can help you design a meal plan that supports your fitness goals."
+            ]
+          },
+          "html": "<section class=\"bg-white py-16\" aria-label=\"Intro Section\">\n  <div class=\"container mx-auto px-4\">\n    <nav class=\"flex justify-between items-center mb-8\">\n      <a href=\"index.html\" class=\"text-blue-500 hover:text-blue-700\">Home</a>\n      <a href=\"personal-training.html\" class=\"text-gray-600 hover:text-gray-800\">Personal Training</a>\n      <a href=\"group-classes.html\" class=\"text-gray-600 hover:text-gray-800\">Group Classes</a>\n      <a href=\"nutrition.html\" class=\"text-blue-500 hover:text-blue-700\">Nutrition</a>\n      <a href=\"rehabilitation.html\" class=\"text-gray-600 hover:text-gray-800\">Rehabilitation</a>\n      <a href=\"blog.html\" class=\"text-gray-600 hover:text-gray-800\">Blog</a>\n      <a href=\"faq.html\" class=\"text-gray-600 hover:text-gray-800\">FAQ</a>\n      <a href=\"contact.html\" class=\"text-blue-500 hover:text-blue-700\">Contact Us</a>\n    </nav>\n    <h1 class=\"text-4xl font-bold mb-4\">Balanced Nutrition Matters!</h1>\n    <p>Eating the right foods is just as important as your workout routine. Our nutritionists can help you design a meal plan that supports your fitness goals.</p>\n  </div>\n</section>",
+          "order": 0
+        },
+        {
+          "id": "5bce1c07",
+          "name": "nutrition-services",
+          "component_type": "service-list",
+          "content": {
+            "title": "Our Nutrition Services",
+            "services": [
+              "Individual Meal Plans",
+              "Group Fitness Challenges",
+              "Nutrition Workshops"
+            ]
+          },
+          "html": "<section class=\"bg-gray-100 py-20\" id=\"nutrition-services\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Our Nutrition Services</h2>\n    <ul role=\"list\" aria-label=\"Nutrition Services List\" class=\"grid grid-cols-1 md:grid-cols-3 gap-6\">\n      <li class=\"bg-white shadow-md rounded-lg p-6 text-center\">\n        <h3 class=\"text-xl font-semibold mb-4\">Individual Meal Plans</h3>\n        <p>Customized meal plans tailored to your fitness goals.</p>\n      </li>\n      <li class=\"bg-white shadow-md rounded-lg p-6 text-center\">\n        <h3 class=\"text-xl font-semibold mb-4\">Group Fitness Challenges</h3>\n        <p>Join our challenges and compete with friends.</p>\n      </li>\n      <li class=\"bg-white shadow-md rounded-lg p-6 text-center\">\n        <h3 class=\"text-xl font-semibold mb-4\">Nutrition Workshops</h3>\n        <p>Learn about nutrition from our expert trainers.</p>\n      </li>\n    </ul>\n  </div>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "0281d510",
+          "name": "nutrition-consultation",
+          "component_type": "form",
+          "content": {
+            "title": "Book a Nutrition Consultation",
+            "fields": [
+              {
+                "type": "text",
+                "label": "Name"
+              },
+              {
+                "type": "email",
+                "label": "Email"
+              },
+              {
+                "type": "tel",
+                "label": "Phone"
+              },
+              {
+                "type": "date",
+                "label": "Preferred Date"
+              },
+              {
+                "type": "time",
+                "label": "Preferred Time"
+              }
+            ],
+            "submit_label": "Book Now"
+          },
+          "html": "<section class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Book a Nutrition Consultation</h2>\n    <form action=\"#\" method=\"POST\" class=\"max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg space-y-4\">\n      <div>\n        <label for=\"name\" class=\"block text-gray-700 font-bold mb-1\">Name</label>\n        <input type=\"text\" id=\"name\" name=\"name\" required aria-label=\"Your Name\" class=\"w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"email\" class=\"block text-gray-700 font-bold mb-1\">Email</label>\n        <input type=\"email\" id=\"email\" name=\"email\" required aria-label=\"Your Email\" class=\"w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"phone\" class=\"block text-gray-700 font-bold mb-1\">Phone</label>\n        <input type=\"tel\" id=\"phone\" name=\"phone\" required aria-label=\"Your Phone Number\" class=\"w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"preferred-date\" class=\"block text-gray-700 font-bold mb-1\">Preferred Date</label>\n        <input type=\"date\" id=\"preferred-date\" name=\"preferred-date\" required aria-label=\"Preferred Consultation Date\" class=\"w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"preferred-time\" class=\"block text-gray-700 font-bold mb-1\">Preferred Time</label>\n        <input type=\"time\" id=\"preferred-time\" name=\"preferred-time\" required aria-label=\"Preferred Consultation Time\" class=\"w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500\">\n      </div>\n      <button type=\"submit\" class=\"w-full bg-blue-500 text-white font-bold py-2 rounded hover:bg-blue-600\">Book Now</button>\n    </form>\n  </div>\n</section>",
+          "order": 2
+        }
+      ],
+      "seo": {
+        "title": "Nutrition Services | Apex Fitness Studio",
+        "meta_description": "Get personalized nutrition services at Apex Fitness Studio. Enhance your fitness journey with expert guidance.",
+        "keywords": [
+          "nutrition",
+          "fitness",
+          "personalized training",
+          "weight loss",
+          "health coaching"
+        ],
+        "og_title": "Nutrition - Apex Fitness Studio",
+        "og_description": "Enhance your fitness journey with personalized nutrition services at Apex Fitness Studio. Get started today!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Fitness Studio",
+          "url": "https://www.apexfitnessstudio.com/nutrition",
+          "logo": "https://www.apexfitnessstudio.com/logo.png",
+          "image": "https://www.apexfitnessstudio.com/nutrition-banner.jpg",
+          "description": "Get personalized nutrition services at Apex Fitness Studio. Enhance your fitness journey with expert guidance.",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "1234 Fitness Ave",
+            "addressLocality": "City",
+            "addressRegion": "State",
+            "postalCode": "Zip",
+            "addressCountry": "US"
+          },
+          "telephone": "+1-555-123-4567",
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "18:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "10:00",
+              "closes": "17:00"
+            }
+          ],
+          "sameAs": [
+            "https://www.facebook.com/apexfitnessstudio",
+            "https://twitter.com/apexfitnesstw",
+            "https://www.instagram.com/apexfitnessstudio"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Apex Fitness Studio offer?",
+            "a": "Apex Fitness Studio provides a variety of fitness services to help you train like a champion."
+          },
+          {
+            "q": "Who is Apex Fitness Studio?",
+            "a": "Apex Fitness Studio is a local business that specializes in providing fitness services."
+          },
+          {
+            "q": "How can I get started with training at Apex Fitness Studio?",
+            "a": "You can start by contacting Apex Fitness Studio to schedule an initial consultation and begin your training program."
+          },
+          {
+            "q": "What types of training programs does Apex Fitness Studio offer?",
+            "a": "Apex Fitness Studio offers various training programs tailored to help you achieve your fitness goals."
+          },
+          {
+            "q": "Is Apex Fitness Studio open to all age groups?",
+            "a": "Yes, Apex Fitness Studio welcomes members of all ages and fitness levels."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Fitness Studio",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Fitness Studio is a local fitness center that offers various services to help its members train like champions.",
+        "topic_cluster": "Nutrition Services",
+        "related_topics": [
+          "Fitness Training",
+          "Personal Training",
+          "Healthy Eating Habits",
+          "Workout Routines",
+          "Fitness Goals"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Nutrition - Apex Fitness Studio</title>\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Get personalized nutrition services at Apex Fitness Studio. Enhance your fitness journey with expert guidance.\">\n  <meta name=\"keywords\" content=\"nutrition, fitness, personalized training, weight loss, health coaching\">\n  <meta property=\"og:title\" content=\"Nutrition - Apex Fitness Studio\">\n  <meta property=\"og:description\" content=\"Enhance your fitness journey with personalized nutrition services at Apex Fitness Studio. Get started today!\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Apex Fitness Studio\",\n  \"url\": \"https://www.apexfitnessstudio.com/nutrition\",\n  \"logo\": \"https://www.apexfitnessstudio.com/logo.png\",\n  \"image\": \"https://www.apexfitnessstudio.com/nutrition-banner.jpg\",\n  \"description\": \"Get personalized nutrition services at Apex Fitness Studio. Enhance your fitness journey with expert guidance.\",\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"1234 Fitness Ave\",\n    \"addressLocality\": \"City\",\n    \"addressRegion\": \"State\",\n    \"postalCode\": \"Zip\",\n    \"addressCountry\": \"US\"\n  },\n  \"telephone\": \"+1-555-123-4567\",\n  \"openingHoursSpecification\": [\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Monday\",\n        \"Tuesday\",\n        \"Wednesday\",\n        \"Thursday\",\n        \"Friday\"\n      ],\n      \"opens\": \"09:00\",\n      \"closes\": \"18:00\"\n    },\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Saturday\"\n      ],\n      \"opens\": \"10:00\",\n      \"closes\": \"17:00\"\n    }\n  ],\n  \"sameAs\": [\n    \"https://www.facebook.com/apexfitnessstudio\",\n    \"https://twitter.com/apexfitnesstw\",\n    \"https://www.instagram.com/apexfitnessstudio\"\n  ]\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What services does Apex Fitness Studio offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio provides a variety of fitness services to help you train like a champion.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Who is Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio is a local business that specializes in providing fitness services.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I get started with training at Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"You can start by contacting Apex Fitness Studio to schedule an initial consultation and begin your training program.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What types of training programs does Apex Fitness Studio offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio offers various training programs tailored to help you achieve your fitness goals.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Is Apex Fitness Studio open to all age groups?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, Apex Fitness Studio welcomes members of all ages and fitness levels.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<section class=\"bg-white py-16\" aria-label=\"Intro Section\">\n  <div class=\"container mx-auto px-4\">\n    <nav class=\"flex justify-between items-center mb-8\">\n      <a href=\"index.html\" class=\"text-blue-500 hover:text-blue-700\">Home</a>\n      <a href=\"personal-training.html\" class=\"text-gray-600 hover:text-gray-800\">Personal Training</a>\n      <a href=\"group-classes.html\" class=\"text-gray-600 hover:text-gray-800\">Group Classes</a>\n      <a href=\"nutrition.html\" class=\"text-blue-500 hover:text-blue-700\">Nutrition</a>\n      <a href=\"rehabilitation.html\" class=\"text-gray-600 hover:text-gray-800\">Rehabilitation</a>\n      <a href=\"blog.html\" class=\"text-gray-600 hover:text-gray-800\">Blog</a>\n      <a href=\"faq.html\" class=\"text-gray-600 hover:text-gray-800\">FAQ</a>\n      <a href=\"contact.html\" class=\"text-blue-500 hover:text-blue-700\">Contact Us</a>\n    </nav>\n    <h1 class=\"text-4xl font-bold mb-4\">Balanced Nutrition Matters!</h1>\n    <p>Eating the right foods is just as important as your workout routine. Our nutritionists can help you design a meal plan that supports your fitness goals.</p>\n  </div>\n</section>\n\n<section class=\"bg-gray-100 py-20\" id=\"nutrition-services\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Our Nutrition Services</h2>\n    <ul role=\"list\" aria-label=\"Nutrition Services List\" class=\"grid grid-cols-1 md:grid-cols-3 gap-6\">\n      <li class=\"bg-white shadow-md rounded-lg p-6 text-center\">\n        <h3 class=\"text-xl font-semibold mb-4\">Individual Meal Plans</h3>\n        <p>Customized meal plans tailored to your fitness goals.</p>\n      </li>\n      <li class=\"bg-white shadow-md rounded-lg p-6 text-center\">\n        <h3 class=\"text-xl font-semibold mb-4\">Group Fitness Challenges</h3>\n        <p>Join our challenges and compete with friends.</p>\n      </li>\n      <li class=\"bg-white shadow-md rounded-lg p-6 text-center\">\n        <h3 class=\"text-xl font-semibold mb-4\">Nutrition Workshops</h3>\n        <p>Learn about nutrition from our expert trainers.</p>\n      </li>\n    </ul>\n  </div>\n</section>\n\n<section class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Book a Nutrition Consultation</h2>\n    <form action=\"#\" method=\"POST\" class=\"max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg space-y-4\">\n      <div>\n        <label for=\"name\" class=\"block text-gray-700 font-bold mb-1\">Name</label>\n        <input type=\"text\" id=\"name\" name=\"name\" required aria-label=\"Your Name\" class=\"w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"email\" class=\"block text-gray-700 font-bold mb-1\">Email</label>\n        <input type=\"email\" id=\"email\" name=\"email\" required aria-label=\"Your Email\" class=\"w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"phone\" class=\"block text-gray-700 font-bold mb-1\">Phone</label>\n        <input type=\"tel\" id=\"phone\" name=\"phone\" required aria-label=\"Your Phone Number\" class=\"w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"preferred-date\" class=\"block text-gray-700 font-bold mb-1\">Preferred Date</label>\n        <input type=\"date\" id=\"preferred-date\" name=\"preferred-date\" required aria-label=\"Preferred Consultation Date\" class=\"w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500\">\n      </div>\n      <div>\n        <label for=\"preferred-time\" class=\"block text-gray-700 font-bold mb-1\">Preferred Time</label>\n        <input type=\"time\" id=\"preferred-time\" name=\"preferred-time\" required aria-label=\"Preferred Consultation Time\" class=\"w-full px-3 py-2 border rounded focus:outline-none focus:border-blue-500\">\n      </div>\n      <button type=\"submit\" class=\"w-full bg-blue-500 text-white font-bold py-2 rounded hover:bg-blue-600\">Book Now</button>\n    </form>\n  </div>\n</section>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What services does Apex Fitness Studio offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio provides a variety of fitness services to help you train like a champion.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Who is Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio is a local business that specializes in providing fitness services.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I get started with training at Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">You can start by contacting Apex Fitness Studio to schedule an initial consultation and begin your training program.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What types of training programs does Apex Fitness Studio offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio offers various training programs tailored to help you achieve your fitness goals.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Is Apex Fitness Studio open to all age groups?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, Apex Fitness Studio welcomes members of all ages and fitness levels.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Nutrition",
+      "nav_order": 4
+    },
+    {
+      "slug": "rehabilitation",
+      "title": "Rehabilitation - Apex Fitness Studio",
+      "purpose": "Page for rehabilitation services",
+      "sections": [
+        {
+          "id": "37e55b4c",
+          "name": "intro",
+          "component_type": "text-block",
+          "content": {
+            "title": "Get Back to Your Best with Rehabilitation",
+            "paragraphs": [
+              "Our rehabilitation program is designed to help individuals recover from injuries and improve their overall fitness."
+            ]
+          },
+          "html": "<section class=\"bg-gray-100 py-24 text-center\">\n  <div class=\"container mx-auto px-6\">\n    <nav aria-label=\"Main navigation\" class=\"flex justify-between items-center mb-8\">\n      <a href=\"index.html\" class=\"text-xl font-bold\">Apex Fitness Studio</a>\n      <ul class=\"flex space-x-4\">\n        <li><a href=\"personal-training.html\" class=\"hover:text-gray-700\">Personal Training</a></li>\n        <li><a href=\"group-classes.html\" class=\"hover:text-gray-700\">Group Classes</a></li>\n        <li><a href=\"nutrition.html\" class=\"hover:text-gray-700\">Nutrition</a></li>\n        <li><a href=\"rehabilitation.html\" class=\"hover:text-gray-700\">Rehabilitation</a></li>\n        <li><a href=\"blog.html\" class=\"hover:text-gray-700\">Blog</a></li>\n        <li><a href=\"faq.html\" class=\"hover:text-gray-700\">FAQ</a></li>\n        <li><a href=\"contact.html\" class=\"hover:text-gray-700\">Contact Us</a></li>\n      </ul>\n    </nav>\n    <h1 class=\"text-4xl font-bold mb-6\" aria-label=\"Get Back to Your Best with Rehabilitation\">Get Back to Your Best with Rehabilitation</h1>\n    <p class=\"text-lg text-gray-700 mb-8\" aria-label=\"Our rehabilitation program is designed to help individuals recover from injuries and improve their overall fitness.\">Our rehabilitation program is designed to help individuals recover from injuries and improve their overall fitness.</p>\n    <a href=\"rehabilitation.html\" class=\"bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-700\">Learn More</a>\n  </div>\n</section>",
+          "order": 0
+        },
+        {
+          "id": "5030aed0",
+          "name": "rehab-services",
+          "component_type": "service-list",
+          "content": {
+            "title": "Our Rehabilitation Services",
+            "services": [
+              "Physical Therapy",
+              "Sports Injury Recovery",
+              "Posture Correction"
+            ]
+          },
+          "html": "<section id=\"rehab-services\" class=\"bg-white py-16\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Our Rehabilitation Services</h2>\n    <ul class=\"grid grid-cols-1 md:grid-cols-3 gap-8\">\n      <li class=\"bg-gray-50 p-6 rounded-lg shadow-md\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Physical Therapy\">Physical Therapy</h3>\n        <p class=\"text-gray-700 mb-2\">Restore your strength and mobility with our expert physical therapy services.</p>\n      </li>\n      <li class=\"bg-gray-50 p-6 rounded-lg shadow-md\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Sports Injury Recovery\">Sports Injury Recovery</h3>\n        <p class=\"text-gray-700 mb-2\">Quickly recover from sports injuries with our specialized rehabilitation programs.</p>\n      </li>\n      <li class=\"bg-gray-50 p-6 rounded-lg shadow-md\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Posture Correction\">Posture Correction</h3>\n        <p class=\"text-gray-700 mb-2\">Improve your posture and alleviate back pain with our corrective exercises.</p>\n      </li>\n    </ul>\n  </div>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "f17830a2",
+          "name": "rehab-consultation",
+          "component_type": "form",
+          "content": {
+            "title": "Book a Rehabilitation Consultation",
+            "fields": [
+              {
+                "type": "text",
+                "label": "Name"
+              },
+              {
+                "type": "email",
+                "label": "Email"
+              },
+              {
+                "type": "tel",
+                "label": "Phone"
+              },
+              {
+                "type": "date",
+                "label": "Preferred Date"
+              },
+              {
+                "type": "time",
+                "label": "Preferred Time"
+              }
+            ],
+            "submit_label": "Book Now"
+          },
+          "html": "<section class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Book a Rehabilitation Consultation</h2>\n    <form action=\"#\" method=\"post\" class=\"max-w-md mx-auto space-y-6\">\n      <div>\n        <label for=\"name\" class=\"block text-sm font-medium text-gray-700\">Name</label>\n        <input type=\"text\" id=\"name\" name=\"name\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email</label>\n        <input type=\"email\" id=\"email\" name=\"email\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"phone\" class=\"block text-sm font-medium text-gray-700\">Phone</label>\n        <input type=\"tel\" id=\"phone\" name=\"phone\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"preferred-date\" class=\"block text-sm font-medium text-gray-700\">Preferred Date</label>\n        <input type=\"date\" id=\"preferred-date\" name=\"preferred-date\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"preferred-time\" class=\"block text-sm font-medium text-gray-700\">Preferred Time</label>\n        <input type=\"time\" id=\"preferred-time\" name=\"preferred-time\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <button type=\"submit\" class=\"w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500\">Book Now</button>\n    </form>\n  </div>\n</section>",
+          "order": 2
+        }
+      ],
+      "seo": {
+        "title": "Rehabilitation Services | Apex Fitness Studio",
+        "meta_description": "Get back on track with our rehabilitation services at Apex Fitness Studio. Contact us today!",
+        "keywords": [
+          "rehabilitation",
+          "fitness",
+          "apex fitness studio",
+          "exercise",
+          "wellness"
+        ],
+        "og_title": "Rehabilitation - Apex Fitness Studio",
+        "og_description": "Experience personalized rehabilitation services to enhance your fitness and wellness.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Fitness Studio",
+          "url": "https://www.apexfitnessstudio.com/rehabilitation",
+          "logo": "https://www.apexfitnessstudio.com/images/logo.png",
+          "image": "https://www.apexfitnessstudio.com/images/rehabilitation.jpg",
+          "description": "Get back on track with our rehabilitation services at Apex Fitness Studio.",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "1234 Fitness Ave",
+            "addressLocality": "City",
+            "addressRegion": "State",
+            "postalCode": "Zip"
+          },
+          "telephone": "+1-555-123-4567",
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "18:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "10:00",
+              "closes": "16:00"
+            }
+          ],
+          "sameAs": [
+            "https://www.facebook.com/apexfitnessstudio",
+            "https://twitter.com/apexfitnesstx",
+            "https://www.instagram.com/apex_fitness_studio/"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What kind of rehabilitation services does Apex Fitness Studio offer?",
+            "a": "Apex Fitness Studio provides a variety of rehabilitation services to help clients achieve their fitness goals."
+          },
+          {
+            "q": "How can I book an appointment at Apex Fitness Studio for rehabilitation?",
+            "a": "You can book an appointment by visiting our website and selecting the 'Rehabilitation' service, or by calling us directly."
+          },
+          {
+            "q": "What qualifications do the trainers at Apex Fitness Studio have?",
+            "a": "All trainers at Apex Fitness Studio are certified professionals with expertise in fitness and rehabilitation."
+          },
+          {
+            "q": "Does Apex Fitness Studio offer personal training for rehabilitation?",
+            "a": "Yes, we offer personalized training sessions tailored to individual needs and goals."
+          },
+          {
+            "q": "What is the location of Apex Fitness Studio?",
+            "a": "Apex Fitness Studio is located at [Address], [City, State]."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Fitness Studio",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Fitness Studio is a local fitness center specializing in rehabilitation services. Our team of certified trainers helps clients achieve their fitness goals through personalized training programs.",
+        "topic_cluster": "Rehabilitation Services",
+        "related_topics": [
+          "Personal Training",
+          "Fitness Programs",
+          "Certified Trainers",
+          "Local Gym",
+          "Health and Wellness"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Rehabilitation - Apex Fitness Studio</title>\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Get back on track with our rehabilitation services at Apex Fitness Studio. Contact us today!\">\n  <meta name=\"keywords\" content=\"rehabilitation, fitness, apex fitness studio, exercise, wellness\">\n  <meta property=\"og:title\" content=\"Rehabilitation - Apex Fitness Studio\">\n  <meta property=\"og:description\" content=\"Experience personalized rehabilitation services to enhance your fitness and wellness.\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Apex Fitness Studio\",\n  \"url\": \"https://www.apexfitnessstudio.com/rehabilitation\",\n  \"logo\": \"https://www.apexfitnessstudio.com/images/logo.png\",\n  \"image\": \"https://www.apexfitnessstudio.com/images/rehabilitation.jpg\",\n  \"description\": \"Get back on track with our rehabilitation services at Apex Fitness Studio.\",\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"1234 Fitness Ave\",\n    \"addressLocality\": \"City\",\n    \"addressRegion\": \"State\",\n    \"postalCode\": \"Zip\"\n  },\n  \"telephone\": \"+1-555-123-4567\",\n  \"openingHoursSpecification\": [\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Monday\",\n        \"Tuesday\",\n        \"Wednesday\",\n        \"Thursday\",\n        \"Friday\"\n      ],\n      \"opens\": \"09:00\",\n      \"closes\": \"18:00\"\n    },\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Saturday\"\n      ],\n      \"opens\": \"10:00\",\n      \"closes\": \"16:00\"\n    }\n  ],\n  \"sameAs\": [\n    \"https://www.facebook.com/apexfitnessstudio\",\n    \"https://twitter.com/apexfitnesstx\",\n    \"https://www.instagram.com/apex_fitness_studio/\"\n  ]\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What kind of rehabilitation services does Apex Fitness Studio offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio provides a variety of rehabilitation services to help clients achieve their fitness goals.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I book an appointment at Apex Fitness Studio for rehabilitation?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"You can book an appointment by visiting our website and selecting the 'Rehabilitation' service, or by calling us directly.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What qualifications do the trainers at Apex Fitness Studio have?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"All trainers at Apex Fitness Studio are certified professionals with expertise in fitness and rehabilitation.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Does Apex Fitness Studio offer personal training for rehabilitation?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, we offer personalized training sessions tailored to individual needs and goals.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What is the location of Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio is located at [Address], [City, State].\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<section class=\"bg-gray-100 py-24 text-center\">\n  <div class=\"container mx-auto px-6\">\n    <nav aria-label=\"Main navigation\" class=\"flex justify-between items-center mb-8\">\n      <a href=\"index.html\" class=\"text-xl font-bold\">Apex Fitness Studio</a>\n      <ul class=\"flex space-x-4\">\n        <li><a href=\"personal-training.html\" class=\"hover:text-gray-700\">Personal Training</a></li>\n        <li><a href=\"group-classes.html\" class=\"hover:text-gray-700\">Group Classes</a></li>\n        <li><a href=\"nutrition.html\" class=\"hover:text-gray-700\">Nutrition</a></li>\n        <li><a href=\"rehabilitation.html\" class=\"hover:text-gray-700\">Rehabilitation</a></li>\n        <li><a href=\"blog.html\" class=\"hover:text-gray-700\">Blog</a></li>\n        <li><a href=\"faq.html\" class=\"hover:text-gray-700\">FAQ</a></li>\n        <li><a href=\"contact.html\" class=\"hover:text-gray-700\">Contact Us</a></li>\n      </ul>\n    </nav>\n    <h1 class=\"text-4xl font-bold mb-6\" aria-label=\"Get Back to Your Best with Rehabilitation\">Get Back to Your Best with Rehabilitation</h1>\n    <p class=\"text-lg text-gray-700 mb-8\" aria-label=\"Our rehabilitation program is designed to help individuals recover from injuries and improve their overall fitness.\">Our rehabilitation program is designed to help individuals recover from injuries and improve their overall fitness.</p>\n    <a href=\"rehabilitation.html\" class=\"bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-700\">Learn More</a>\n  </div>\n</section>\n\n<section id=\"rehab-services\" class=\"bg-white py-16\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Our Rehabilitation Services</h2>\n    <ul class=\"grid grid-cols-1 md:grid-cols-3 gap-8\">\n      <li class=\"bg-gray-50 p-6 rounded-lg shadow-md\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Physical Therapy\">Physical Therapy</h3>\n        <p class=\"text-gray-700 mb-2\">Restore your strength and mobility with our expert physical therapy services.</p>\n      </li>\n      <li class=\"bg-gray-50 p-6 rounded-lg shadow-md\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Sports Injury Recovery\">Sports Injury Recovery</h3>\n        <p class=\"text-gray-700 mb-2\">Quickly recover from sports injuries with our specialized rehabilitation programs.</p>\n      </li>\n      <li class=\"bg-gray-50 p-6 rounded-lg shadow-md\">\n        <h3 class=\"text-xl font-semibold mb-4\" aria-label=\"Posture Correction\">Posture Correction</h3>\n        <p class=\"text-gray-700 mb-2\">Improve your posture and alleviate back pain with our corrective exercises.</p>\n      </li>\n    </ul>\n  </div>\n</section>\n\n<section class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Book a Rehabilitation Consultation</h2>\n    <form action=\"#\" method=\"post\" class=\"max-w-md mx-auto space-y-6\">\n      <div>\n        <label for=\"name\" class=\"block text-sm font-medium text-gray-700\">Name</label>\n        <input type=\"text\" id=\"name\" name=\"name\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email</label>\n        <input type=\"email\" id=\"email\" name=\"email\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"phone\" class=\"block text-sm font-medium text-gray-700\">Phone</label>\n        <input type=\"tel\" id=\"phone\" name=\"phone\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"preferred-date\" class=\"block text-sm font-medium text-gray-700\">Preferred Date</label>\n        <input type=\"date\" id=\"preferred-date\" name=\"preferred-date\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"preferred-time\" class=\"block text-sm font-medium text-gray-700\">Preferred Time</label>\n        <input type=\"time\" id=\"preferred-time\" name=\"preferred-time\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <button type=\"submit\" class=\"w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500\">Book Now</button>\n    </form>\n  </div>\n</section>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What kind of rehabilitation services does Apex Fitness Studio offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio provides a variety of rehabilitation services to help clients achieve their fitness goals.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I book an appointment at Apex Fitness Studio for rehabilitation?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">You can book an appointment by visiting our website and selecting the 'Rehabilitation' service, or by calling us directly.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What qualifications do the trainers at Apex Fitness Studio have?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">All trainers at Apex Fitness Studio are certified professionals with expertise in fitness and rehabilitation.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Does Apex Fitness Studio offer personal training for rehabilitation?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, we offer personalized training sessions tailored to individual needs and goals.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What is the location of Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio is located at [Address], [City, State].</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Rehabilitation",
+      "nav_order": 5
+    },
+    {
+      "slug": "blog",
+      "title": "Blog - Apex Fitness Studio",
+      "purpose": "Page for fitness-related blog posts",
+      "sections": [
+        {
+          "id": "0403f53a",
+          "name": "intro",
+          "component_type": "text-block",
+          "content": {
+            "title": "Stay Informed with Our Fitness Tips and Insights",
+            "paragraphs": [
+              "Read our latest blog posts for fitness tips, workout routines, and motivational stories."
+            ]
+          },
+          "html": "<section class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\" aria-label=\"Stay Informed with Our Fitness Tips and Insights\">Stay Informed with Our Fitness Tips and Insights</h2>\n    <p class=\"text-lg text-gray-700 text-center max-w-prose mx-auto\" aria-label=\"Read our latest blog posts for fitness tips, workout routines, and motivational stories.\">Read our latest blog posts for fitness tips, workout routines, and motivational stories.</p>\n  </div>\n</section>",
+          "order": 0
+        },
+        {
+          "id": "a2dd9817",
+          "name": "blog-posts",
+          "component_type": "post-list",
+          "content": {
+            "title": "Latest Posts",
+            "posts": [
+              {
+                "title": "5 Tips for Staying Motivated",
+                "date": "2023-04-01"
+              },
+              {
+                "title": "How to Create a Home Workout Routine",
+                "date": "2023-03-28"
+              },
+              {
+                "title": "The Benefits of Regular Exercise",
+                "date": "2023-03-25"
+              }
+            ]
+          },
+          "html": "<section class=\"bg-white py-16\" id=\"blog-posts\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Latest Posts</h2>\n    <ul role=\"list\" aria-label=\"Blog Posts\">\n      <li class=\"mb-6\">\n        <a href=\"#\" class=\"block hover:text-gray-900\">\n          <p class=\"text-xl font-semibold\">5 Tips for Staying Motivated</p>\n          <time datetime=\"2023-04-01\" class=\"text-gray-500 text-sm\">April 1, 2023</time>\n        </a>\n      </li>\n      <li class=\"mb-6\">\n        <a href=\"#\" class=\"block hover:text-gray-900\">\n          <p class=\"text-xl font-semibold\">How to Create a Home Workout Routine</p>\n          <time datetime=\"2023-03-28\" class=\"text-gray-500 text-sm\">March 28, 2023</time>\n        </a>\n      </li>\n      <li class=\"mb-6\">\n        <a href=\"#\" class=\"block hover:text-gray-900\">\n          <p class=\"text-xl font-semibold\">The Benefits of Regular Exercise</p>\n          <time datetime=\"2023-03-25\" class=\"text-gray-500 text-sm\">March 25, 2023</time>\n        </a>\n      </li>\n    </ul>\n  </div>\n</section>",
+          "order": 1
+        }
+      ],
+      "seo": {
+        "title": "Apex Fitness Studio Blog - Get Fit Today!",
+        "meta_description": "Read our fitness-related blog posts for tips, motivation, and workout ideas. Join Apex Fitness Studio now!",
+        "keywords": [
+          "fitness",
+          "workout",
+          "tips",
+          "motivation",
+          "exercise"
+        ],
+        "og_title": "Apex Fitness Studio Blog",
+        "og_description": "Stay fit with the latest fitness news and expert advice from Apex Fitness Studio.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Fitness Studio",
+          "description": "Apex Fitness Studio offers a variety of fitness services to help you achieve your health and wellness goals.",
+          "url": "https://www.apexfitnessstudio.com/blog",
+          "logo": "https://www.apexfitnessstudio.com/logo.png",
+          "image": "https://www.apexfitnessstudio.com/hero-image.jpg",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Fitness Road",
+            "addressLocality": "Anytown",
+            "addressRegion": "CA",
+            "postalCode": "12345"
+          },
+          "telephone": "(123) 456-7890",
+          "email": "info@apexfitnessstudio.com",
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "18:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "10:00",
+              "closes": "16:00"
+            }
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Apex Fitness Studio offer?",
+            "a": "Apex Fitness Studio provides a variety of fitness services to help you train like a champion."
+          },
+          {
+            "q": "How can I book a session at Apex Fitness Studio?",
+            "a": "You can book a session by visiting our website or calling us directly."
+          },
+          {
+            "q": "What makes Apex Fitness Studio different from other gyms?",
+            "a": "Apex Fitness Studio is known for its personalized training programs and focus on helping members train like champions."
+          },
+          {
+            "q": "Is there a trial period at Apex Fitness Studio?",
+            "a": "Yes, Apex Fitness Studio offers a free trial period to help you decide if the service is right for you."
+          },
+          {
+            "q": "What are the hours of operation at Apex Fitness Studio?",
+            "a": "Apex Fitness Studio operates from Monday to Friday, with extended hours on weekends."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Fitness Studio",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Fitness Studio is a local gym that offers personalized fitness programs and services to help members train like champions.",
+        "topic_cluster": "Fitness Training",
+        "related_topics": [
+          "Personalized Training",
+          "Workout Programs",
+          "Fitness Goals",
+          "Gym Membership",
+          "Health and Wellness"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Blog - Apex Fitness Studio</title>\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Read our fitness-related blog posts for tips, motivation, and workout ideas. Join Apex Fitness Studio now!\">\n  <meta name=\"keywords\" content=\"fitness, workout, tips, motivation, exercise\">\n  <meta property=\"og:title\" content=\"Apex Fitness Studio Blog\">\n  <meta property=\"og:description\" content=\"Stay fit with the latest fitness news and expert advice from Apex Fitness Studio.\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Apex Fitness Studio\",\n  \"description\": \"Apex Fitness Studio offers a variety of fitness services to help you achieve your health and wellness goals.\",\n  \"url\": \"https://www.apexfitnessstudio.com/blog\",\n  \"logo\": \"https://www.apexfitnessstudio.com/logo.png\",\n  \"image\": \"https://www.apexfitnessstudio.com/hero-image.jpg\",\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"123 Fitness Road\",\n    \"addressLocality\": \"Anytown\",\n    \"addressRegion\": \"CA\",\n    \"postalCode\": \"12345\"\n  },\n  \"telephone\": \"(123) 456-7890\",\n  \"email\": \"info@apexfitnessstudio.com\",\n  \"openingHoursSpecification\": [\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Monday\",\n        \"Tuesday\",\n        \"Wednesday\",\n        \"Thursday\",\n        \"Friday\"\n      ],\n      \"opens\": \"09:00\",\n      \"closes\": \"18:00\"\n    },\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Saturday\"\n      ],\n      \"opens\": \"10:00\",\n      \"closes\": \"16:00\"\n    }\n  ]\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What services does Apex Fitness Studio offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio provides a variety of fitness services to help you train like a champion.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I book a session at Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"You can book a session by visiting our website or calling us directly.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What makes Apex Fitness Studio different from other gyms?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio is known for its personalized training programs and focus on helping members train like champions.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Is there a trial period at Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, Apex Fitness Studio offers a free trial period to help you decide if the service is right for you.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What are the hours of operation at Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio operates from Monday to Friday, with extended hours on weekends.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<section class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\" aria-label=\"Stay Informed with Our Fitness Tips and Insights\">Stay Informed with Our Fitness Tips and Insights</h2>\n    <p class=\"text-lg text-gray-700 text-center max-w-prose mx-auto\" aria-label=\"Read our latest blog posts for fitness tips, workout routines, and motivational stories.\">Read our latest blog posts for fitness tips, workout routines, and motivational stories.</p>\n  </div>\n</section>\n\n<section class=\"bg-white py-16\" id=\"blog-posts\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Latest Posts</h2>\n    <ul role=\"list\" aria-label=\"Blog Posts\">\n      <li class=\"mb-6\">\n        <a href=\"#\" class=\"block hover:text-gray-900\">\n          <p class=\"text-xl font-semibold\">5 Tips for Staying Motivated</p>\n          <time datetime=\"2023-04-01\" class=\"text-gray-500 text-sm\">April 1, 2023</time>\n        </a>\n      </li>\n      <li class=\"mb-6\">\n        <a href=\"#\" class=\"block hover:text-gray-900\">\n          <p class=\"text-xl font-semibold\">How to Create a Home Workout Routine</p>\n          <time datetime=\"2023-03-28\" class=\"text-gray-500 text-sm\">March 28, 2023</time>\n        </a>\n      </li>\n      <li class=\"mb-6\">\n        <a href=\"#\" class=\"block hover:text-gray-900\">\n          <p class=\"text-xl font-semibold\">The Benefits of Regular Exercise</p>\n          <time datetime=\"2023-03-25\" class=\"text-gray-500 text-sm\">March 25, 2023</time>\n        </a>\n      </li>\n    </ul>\n  </div>\n</section>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What services does Apex Fitness Studio offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio provides a variety of fitness services to help you train like a champion.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I book a session at Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">You can book a session by visiting our website or calling us directly.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What makes Apex Fitness Studio different from other gyms?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio is known for its personalized training programs and focus on helping members train like champions.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Is there a trial period at Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, Apex Fitness Studio offers a free trial period to help you decide if the service is right for you.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What are the hours of operation at Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio operates from Monday to Friday, with extended hours on weekends.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Blog",
+      "nav_order": 6
+    },
+    {
+      "slug": "faq",
+      "title": "FAQ - Apex Fitness Studio",
+      "purpose": "Page for frequently asked questions",
+      "sections": [
+        {
+          "id": "5336511f",
+          "name": "intro",
+          "component_type": "text-block",
+          "content": {
+            "title": "Frequently Asked Questions",
+            "paragraphs": [
+              "Find answers to common questions about our services and how we can help you achieve your fitness goals."
+            ]
+          },
+          "html": "<section id=\"intro\" class=\"bg-white py-16 sm:py-24\">\n  <div class=\"container mx-auto px-4\">\n    <h1 class=\"text-3xl font-bold text-center mb-8\">Train Like a Champion</h1>\n    <p class=\"text-lg text-gray-700 text-center mb-12\">Find answers to common questions about our services and how we can help you achieve your fitness goals.</p>\n    <nav aria-label=\"Main navigation\">\n      <ul class=\"flex justify-center space-x-4\">\n        <li><a href=\"index.html\" class=\"text-gray-600 hover:text-primary\">Home</a></li>\n        <li><a href=\"personal-training.html\" class=\"text-gray-600 hover:text-primary\">Personal Training</a></li>\n        <li><a href=\"group-classes.html\" class=\"text-gray-600 hover:text-primary\">Group Classes</a></li>\n        <li><a href=\"nutrition.html\" class=\"text-gray-600 hover:text-primary\">Nutrition</a></li>\n        <li><a href=\"rehabilitation.html\" class=\"text-gray-600 hover:text-primary\">Rehabilitation</a></li>\n        <li><a href=\"blog.html\" class=\"text-gray-600 hover:text-primary\">Blog</a></li>\n        <li><a href=\"faq.html\" class=\"text-gray-600 hover:text-primary\">FAQ</a></li>\n        <li><a href=\"contact.html\" class=\"text-gray-600 hover:text-primary\">Contact Us</a></li>\n      </ul>\n    </nav>\n  </div>\n</section>",
+          "order": 0
+        },
+        {
+          "id": "ec26a9a4",
+          "name": "faq-list",
+          "component_type": "faq-section",
+          "content": {
+            "title": "Questions & Answers",
+            "faqs": [
+              {
+                "question": "What types of services do you offer?",
+                "answer": "We provide personal training, group fitness classes, nutrition counseling, and rehabilitation."
+              },
+              {
+                "question": "How do I book a session?",
+                "answer": "You can book a session by filling out the booking form on our website or contacting us directly."
+              },
+              {
+                "question": "What is your refund policy?",
+                "answer": "Our refund policy varies depending on the service and circumstances. Please refer to the specific terms and conditions for each service."
+              }
+            ]
+          },
+          "html": "<section id=\"faq-list\" class=\"bg-white py-10\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Questions & Answers</h2>\n    <div class=\"accordion\" id=\"faqAccordion\">\n      <div class=\"accordion-item border-b border-gray-200\">\n        <h2 class=\"accordion-header\" id=\"headingOne\">\n          <button class=\"accordion-button flex items-center justify-between w-full py-4 text-base font-bold text-left bg-white rounded-lg hover:bg-gray-100\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseOne\" aria-expanded=\"true\" aria-controls=\"collapseOne\">\n            What types of services do you offer?\n          </button>\n        </h2>\n        <div id=\"collapseOne\" class=\"accordion-collapse collapse show\" aria-labelledby=\"headingOne\" data-bs-parent=\"#faqAccordion\">\n          <div class=\"accordion-body text-gray-600\">\n            We provide personal training, group fitness classes, nutrition counseling, and rehabilitation.\n          </div>\n        </div>\n      </div>\n      <div class=\"accordion-item border-b border-gray-200\">\n        <h2 class=\"accordion-header\" id=\"headingTwo\">\n          <button class=\"accordion-button flex items-center justify-between w-full py-4 text-base font-bold text-left bg-white rounded-lg hover:bg-gray-100 collapsed\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseTwo\" aria-expanded=\"false\" aria-controls=\"collapseTwo\">\n            How do I book a session?\n          </button>\n        </h2>\n        <div id=\"collapseTwo\" class=\"accordion-collapse collapse\" aria-labelledby=\"headingTwo\" data-bs-parent=\"#faqAccordion\">\n          <div class=\"accordion-body text-gray-600\">\n            You can book a session by filling out the booking form on our website or contacting us directly.\n          </div>\n        </div>\n      </div>\n      <div class=\"accordion-item border-b border-gray-200\">\n        <h2 class=\"accordion-header\" id=\"headingThree\">\n          <button class=\"accordion-button flex items-center justify-between w-full py-4 text-base font-bold text-left bg-white rounded-lg hover:bg-gray-100 collapsed\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseThree\" aria-expanded=\"false\" aria-controls=\"collapseThree\">\n            What is your refund policy?\n          </button>\n        </h2>\n        <div id=\"collapseThree\" class=\"accordion-collapse collapse\" aria-labelledby=\"headingThree\" data-bs-parent=\"#faqAccordion\">\n          <div class=\"accordion-body text-gray-600\">\n            Our refund policy varies depending on the service and circumstances. Please refer to the specific terms and conditions for each service.\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</section>",
+          "order": 1
+        }
+      ],
+      "seo": {
+        "title": "Apex Fitness Studio: Your Ultimate Fitness Companion",
+        "meta_description": "Get answers to all your fitness questions at Apex Fitness Studio. Contact us today!",
+        "keywords": [
+          "fitness",
+          "FAQ",
+          "gym",
+          "workout"
+        ],
+        "og_title": "Apex Fitness Studio - Frequently Asked Questions",
+        "og_description": "Find the answers to all your fitness queries at Apex Fitness Studio. Get in touch now!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "WebPage",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Apex Fitness Studio: Your Ultimate Fitness Companion",
+          "description": "Get answers to all your fitness questions at Apex Fitness Studio. Contact us today!",
+          "url": "https://www.apexfitnessstudio.com/faq"
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Apex Fitness Studio offer?",
+            "a": "Apex Fitness Studio provides a variety of fitness services, including personal training, group classes, and wellness programs."
+          },
+          {
+            "q": "How can I book a session at Apex Fitness Studio?",
+            "a": "You can book a session by visiting our website or calling our customer service team."
+          },
+          {
+            "q": "What are the hours of operation for Apex Fitness Studio?",
+            "a": "Apex Fitness Studio operates from Monday to Friday, with hours from 8 AM to 6 PM."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Fitness Studio",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Fitness Studio is a premier fitness center offering personalized training and group classes to help you achieve your fitness goals.",
+        "topic_cluster": "Fitness Services",
+        "related_topics": [
+          "Personal Training",
+          "Group Classes",
+          "Wellness Programs",
+          "Hours of Operation",
+          "Bookings"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>FAQ - Apex Fitness Studio</title>\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Get answers to all your fitness questions at Apex Fitness Studio. Contact us today!\">\n  <meta name=\"keywords\" content=\"fitness, FAQ, gym, workout\">\n  <meta property=\"og:title\" content=\"Apex Fitness Studio - Frequently Asked Questions\">\n  <meta property=\"og:description\" content=\"Find the answers to all your fitness queries at Apex Fitness Studio. Get in touch now!\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"name\": \"Apex Fitness Studio: Your Ultimate Fitness Companion\",\n  \"description\": \"Get answers to all your fitness questions at Apex Fitness Studio. Contact us today!\",\n  \"url\": \"https://www.apexfitnessstudio.com/faq\"\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What services does Apex Fitness Studio offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio provides a variety of fitness services, including personal training, group classes, and wellness programs.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I book a session at Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"You can book a session by visiting our website or calling our customer service team.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What are the hours of operation for Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio operates from Monday to Friday, with hours from 8 AM to 6 PM.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<section id=\"intro\" class=\"bg-white py-16 sm:py-24\">\n  <div class=\"container mx-auto px-4\">\n    <h1 class=\"text-3xl font-bold text-center mb-8\">Train Like a Champion</h1>\n    <p class=\"text-lg text-gray-700 text-center mb-12\">Find answers to common questions about our services and how we can help you achieve your fitness goals.</p>\n    <nav aria-label=\"Main navigation\">\n      <ul class=\"flex justify-center space-x-4\">\n        <li><a href=\"index.html\" class=\"text-gray-600 hover:text-primary\">Home</a></li>\n        <li><a href=\"personal-training.html\" class=\"text-gray-600 hover:text-primary\">Personal Training</a></li>\n        <li><a href=\"group-classes.html\" class=\"text-gray-600 hover:text-primary\">Group Classes</a></li>\n        <li><a href=\"nutrition.html\" class=\"text-gray-600 hover:text-primary\">Nutrition</a></li>\n        <li><a href=\"rehabilitation.html\" class=\"text-gray-600 hover:text-primary\">Rehabilitation</a></li>\n        <li><a href=\"blog.html\" class=\"text-gray-600 hover:text-primary\">Blog</a></li>\n        <li><a href=\"faq.html\" class=\"text-gray-600 hover:text-primary\">FAQ</a></li>\n        <li><a href=\"contact.html\" class=\"text-gray-600 hover:text-primary\">Contact Us</a></li>\n      </ul>\n    </nav>\n  </div>\n</section>\n\n<section id=\"faq-list\" class=\"bg-white py-10\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Questions & Answers</h2>\n    <div class=\"accordion\" id=\"faqAccordion\">\n      <div class=\"accordion-item border-b border-gray-200\">\n        <h2 class=\"accordion-header\" id=\"headingOne\">\n          <button class=\"accordion-button flex items-center justify-between w-full py-4 text-base font-bold text-left bg-white rounded-lg hover:bg-gray-100\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseOne\" aria-expanded=\"true\" aria-controls=\"collapseOne\">\n            What types of services do you offer?\n          </button>\n        </h2>\n        <div id=\"collapseOne\" class=\"accordion-collapse collapse show\" aria-labelledby=\"headingOne\" data-bs-parent=\"#faqAccordion\">\n          <div class=\"accordion-body text-gray-600\">\n            We provide personal training, group fitness classes, nutrition counseling, and rehabilitation.\n          </div>\n        </div>\n      </div>\n      <div class=\"accordion-item border-b border-gray-200\">\n        <h2 class=\"accordion-header\" id=\"headingTwo\">\n          <button class=\"accordion-button flex items-center justify-between w-full py-4 text-base font-bold text-left bg-white rounded-lg hover:bg-gray-100 collapsed\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseTwo\" aria-expanded=\"false\" aria-controls=\"collapseTwo\">\n            How do I book a session?\n          </button>\n        </h2>\n        <div id=\"collapseTwo\" class=\"accordion-collapse collapse\" aria-labelledby=\"headingTwo\" data-bs-parent=\"#faqAccordion\">\n          <div class=\"accordion-body text-gray-600\">\n            You can book a session by filling out the booking form on our website or contacting us directly.\n          </div>\n        </div>\n      </div>\n      <div class=\"accordion-item border-b border-gray-200\">\n        <h2 class=\"accordion-header\" id=\"headingThree\">\n          <button class=\"accordion-button flex items-center justify-between w-full py-4 text-base font-bold text-left bg-white rounded-lg hover:bg-gray-100 collapsed\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#collapseThree\" aria-expanded=\"false\" aria-controls=\"collapseThree\">\n            What is your refund policy?\n          </button>\n        </h2>\n        <div id=\"collapseThree\" class=\"accordion-collapse collapse\" aria-labelledby=\"headingThree\" data-bs-parent=\"#faqAccordion\">\n          <div class=\"accordion-body text-gray-600\">\n            Our refund policy varies depending on the service and circumstances. Please refer to the specific terms and conditions for each service.\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</section>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What services does Apex Fitness Studio offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio provides a variety of fitness services, including personal training, group classes, and wellness programs.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I book a session at Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">You can book a session by visiting our website or calling our customer service team.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What are the hours of operation for Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio operates from Monday to Friday, with hours from 8 AM to 6 PM.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "FAQ",
+      "nav_order": 7
+    },
+    {
+      "slug": "contact",
+      "title": "Contact - Apex Fitness Studio",
+      "purpose": "Page for contacting the studio",
+      "sections": [
+        {
+          "id": "77734c35",
+          "name": "intro",
+          "component_type": "text-block",
+          "content": {
+            "title": "Get in Touch with Apex Fitness Studio",
+            "paragraphs": [
+              "Have any questions or want to book a session? Don't hesitate to contact us."
+            ]
+          },
+          "html": "<section class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h1 class=\"text-3xl font-bold mb-8 text-center\">Get in Touch with Apex Fitness Studio</h1>\n    <p class=\"text-lg text-center max-w-prose mx-auto\">\n      Have any questions or want to book a session? Don't hesitate to contact us.\n    </p>\n  </div>\n</section>",
+          "order": 0
+        },
+        {
+          "id": "db4e0697",
+          "name": "contact-form",
+          "component_type": "form",
+          "content": {
+            "title": "Send Us a Message",
+            "fields": [
+              {
+                "type": "text",
+                "label": "Name"
+              },
+              {
+                "type": "email",
+                "label": "Email"
+              },
+              {
+                "type": "tel",
+                "label": "Phone"
+              },
+              {
+                "type": "textarea",
+                "label": "Message"
+              }
+            ],
+            "submit_label": "Send Message"
+          },
+          "html": "<section class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Send Us a Message</h2>\n    <form action=\"#\" method=\"POST\" class=\"max-w-md mx-auto bg-white p-6 shadow-lg rounded-lg\">\n      <div class=\"mb-4\">\n        <label for=\"name\" class=\"block text-gray-700 text-sm font-bold mb-1\">Name</label>\n        <input type=\"text\" id=\"name\" name=\"name\" required aria-label=\"Your Name\" class=\"w-full px-3 py-2 border rounded-lg focus:outline-none\">\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"email\" class=\"block text-gray-700 text-sm font-bold mb-1\">Email</label>\n        <input type=\"email\" id=\"email\" name=\"email\" required aria-label=\"Your Email\" class=\"w-full px-3 py-2 border rounded-lg focus:outline-none\">\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"phone\" class=\"block text-gray-700 text-sm font-bold mb-1\">Phone</label>\n        <input type=\"tel\" id=\"phone\" name=\"phone\" required aria-label=\"Your Phone Number\" class=\"w-full px-3 py-2 border rounded-lg focus:outline-none\">\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"message\" class=\"block text-gray-700 text-sm font-bold mb-1\">Message</label>\n        <textarea id=\"message\" name=\"message\" required rows=\"4\" aria-label=\"Your Message\" class=\"w-full px-3 py-2 border rounded-lg focus:outline-none\"></textarea>\n      </div>\n      <button type=\"submit\" class=\"w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600\">Send Message</button>\n    </form>\n  </div>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "808bc976",
+          "name": "location",
+          "component_type": "map",
+          "content": {
+            "title": "Location",
+            "address": "1234 Fitness Drive, City, State, ZIP",
+            "coordinates": {
+              "latitude": 40.7128,
+              "longitude": -74.006
+            }
+          },
+          "html": "<section id=\"location\" class=\"bg-gray-100 py-16\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Location</h2>\n    <address class=\"text-center\">\n      1234 Fitness Drive, City, State, ZIP\n    </address>\n    <iframe src=\"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3097.1653669791755!2d-74.00625688419374!3d40.71281803982944!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1633072800000!5m2!1sen!2sus\" width=\"100%\" height=\"450\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\" aria-label=\"Apex Fitness Studio Location\"></iframe>\n  </div>\n</section>",
+          "order": 2
+        }
+      ],
+      "seo": {
+        "title": "Apex Fitness Studio - Contact Us Today!",
+        "meta_description": "Get in touch with Apex Fitness Studio for inquiries about our various fitness services. Contact us now!",
+        "keywords": [
+          "Apex Fitness Studio",
+          "contact",
+          "fitness studio",
+          "services"
+        ],
+        "og_title": "Contact Apex Fitness Studio",
+        "og_description": "Reach out to Apex Fitness Studio for more information on our fitness services. Get in touch today!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "http://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Fitness Studio",
+          "url": "https://www.apexfitnessstudio.com/contact",
+          "sameAs": [
+            "https://www.facebook.com/ApexFitnessStudio",
+            "https://twitter.com/ApexFitnessStu"
+          ],
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Fitness Ave",
+            "addressLocality": "City",
+            "addressRegion": "State",
+            "postalCode": "12345"
+          },
+          "telephone": "+1-555-123-4567",
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "18:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "10:00",
+              "closes": "17:00"
+            }
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "How can I contact Apex Fitness Studio?",
+            "a": "You can call us at (555) 123-4567 or email us at info@apexfitnessstudio.com."
+          },
+          {
+            "q": "What services does Apex Fitness Studio offer?",
+            "a": "Apex Fitness Studio offers a variety of fitness services, including personal training, group classes, and wellness programs."
+          },
+          {
+            "q": "Where is Apex Fitness Studio located?",
+            "a": "Apex Fitness Studio is located at 1234 Elm Street, City, State."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Fitness Studio",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Fitness Studio is a premier fitness center that helps individuals train like champions through personalized training programs and group classes.",
+        "topic_cluster": "Fitness Services",
+        "related_topics": [
+          "Personal Training",
+          "Group Classes",
+          "Wellness Programs",
+          "Fitness Equipment",
+          "Membership Options"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Contact - Apex Fitness Studio</title>\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Get in touch with Apex Fitness Studio for inquiries about our various fitness services. Contact us now!\">\n  <meta name=\"keywords\" content=\"Apex Fitness Studio, contact, fitness studio, services\">\n  <meta property=\"og:title\" content=\"Contact Apex Fitness Studio\">\n  <meta property=\"og:description\" content=\"Reach out to Apex Fitness Studio for more information on our fitness services. Get in touch today!\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"http://schema.org\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Apex Fitness Studio\",\n  \"url\": \"https://www.apexfitnessstudio.com/contact\",\n  \"sameAs\": [\n    \"https://www.facebook.com/ApexFitnessStudio\",\n    \"https://twitter.com/ApexFitnessStu\"\n  ],\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"123 Fitness Ave\",\n    \"addressLocality\": \"City\",\n    \"addressRegion\": \"State\",\n    \"postalCode\": \"12345\"\n  },\n  \"telephone\": \"+1-555-123-4567\",\n  \"openingHoursSpecification\": [\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Monday\",\n        \"Tuesday\",\n        \"Wednesday\",\n        \"Thursday\",\n        \"Friday\"\n      ],\n      \"opens\": \"09:00\",\n      \"closes\": \"18:00\"\n    },\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Saturday\"\n      ],\n      \"opens\": \"10:00\",\n      \"closes\": \"17:00\"\n    }\n  ]\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I contact Apex Fitness Studio?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"You can call us at (555) 123-4567 or email us at info@apexfitnessstudio.com.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What services does Apex Fitness Studio offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio offers a variety of fitness services, including personal training, group classes, and wellness programs.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Where is Apex Fitness Studio located?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Fitness Studio is located at 1234 Elm Street, City, State.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<section class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h1 class=\"text-3xl font-bold mb-8 text-center\">Get in Touch with Apex Fitness Studio</h1>\n    <p class=\"text-lg text-center max-w-prose mx-auto\">\n      Have any questions or want to book a session? Don't hesitate to contact us.\n    </p>\n  </div>\n</section>\n\n<section class=\"bg-gray-100 py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Send Us a Message</h2>\n    <form action=\"#\" method=\"POST\" class=\"max-w-md mx-auto bg-white p-6 shadow-lg rounded-lg\">\n      <div class=\"mb-4\">\n        <label for=\"name\" class=\"block text-gray-700 text-sm font-bold mb-1\">Name</label>\n        <input type=\"text\" id=\"name\" name=\"name\" required aria-label=\"Your Name\" class=\"w-full px-3 py-2 border rounded-lg focus:outline-none\">\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"email\" class=\"block text-gray-700 text-sm font-bold mb-1\">Email</label>\n        <input type=\"email\" id=\"email\" name=\"email\" required aria-label=\"Your Email\" class=\"w-full px-3 py-2 border rounded-lg focus:outline-none\">\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"phone\" class=\"block text-gray-700 text-sm font-bold mb-1\">Phone</label>\n        <input type=\"tel\" id=\"phone\" name=\"phone\" required aria-label=\"Your Phone Number\" class=\"w-full px-3 py-2 border rounded-lg focus:outline-none\">\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"message\" class=\"block text-gray-700 text-sm font-bold mb-1\">Message</label>\n        <textarea id=\"message\" name=\"message\" required rows=\"4\" aria-label=\"Your Message\" class=\"w-full px-3 py-2 border rounded-lg focus:outline-none\"></textarea>\n      </div>\n      <button type=\"submit\" class=\"w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600\">Send Message</button>\n    </form>\n  </div>\n</section>\n\n<section id=\"location\" class=\"bg-gray-100 py-16\">\n  <div class=\"container mx-auto px-4\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Location</h2>\n    <address class=\"text-center\">\n      1234 Fitness Drive, City, State, ZIP\n    </address>\n    <iframe src=\"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3097.1653669791755!2d-74.00625688419374!3d40.71281803982944!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1633072800000!5m2!1sen!2sus\" width=\"100%\" height=\"450\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\" aria-label=\"Apex Fitness Studio Location\"></iframe>\n  </div>\n</section>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I contact Apex Fitness Studio?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">You can call us at (555) 123-4567 or email us at info@apexfitnessstudio.com.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What services does Apex Fitness Studio offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio offers a variety of fitness services, including personal training, group classes, and wellness programs.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Where is Apex Fitness Studio located?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Fitness Studio is located at 1234 Elm Street, City, State.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Contact Us",
+      "nav_order": 8
+    }
+  ],
+  "template_ids": [],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/apex-fitness-studio",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n",
+  "sitemap_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://apexfitnessstudio.com/index.html</loc>\n    <priority>1.0</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexfitnessstudio.com/personal-training.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexfitnessstudio.com/group-classes.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexfitnessstudio.com/nutrition.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexfitnessstudio.com/rehabilitation.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexfitnessstudio.com/blog.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexfitnessstudio.com/faq.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexfitnessstudio.com/contact.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>",
+  "robots_txt": "User-agent: *\nAllow: /\nSitemap: https://apexfitnessstudio.com/sitemap.xml\n",
+  "errors": [
+    "[blog] Missing <h1> tag"
+  ],
+  "metadata": {}
+}

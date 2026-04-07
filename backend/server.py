@@ -148,13 +148,21 @@ async def _verify_auth(request: Request) -> None:
     Verify Bearer token when API_SECRET is configured.
     If API_SECRET is empty, authentication is disabled (dev mode).
     Uses hmac.compare_digest for timing-safe comparison.
+    EventSource clients (SSE) cannot send custom headers, so a ?token= query
+    parameter is accepted as a fallback for streaming endpoints only.
     """
     if not API_SECRET:
         return  # auth disabled
     auth = request.headers.get("Authorization", "")
-    if not auth.startswith("Bearer "):
+    raw_key: str | None = None
+    if auth.startswith("Bearer ") and len(auth) > 7:
+        raw_key = auth[7:].strip()
+    elif request.url.path in ("/stream/activity",):
+        # Fallback: browsers cannot send headers via EventSource
+        raw_key = request.query_params.get("token")
+    if not raw_key:
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
-    if not hmac.compare_digest(auth[7:], API_SECRET):
+    if not hmac.compare_digest(raw_key, API_SECRET):
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 
@@ -588,6 +596,11 @@ async def security_middleware(request: Request, call_next):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Cache-Control"] = "no-store"
         return response
+    # Pass OPTIONS preflight requests to CORSMiddleware without auth checks.
+    # Browsers send OPTIONS without credentials; auth enforcement happens on
+    # the actual request that follows.
+    if request.method == "OPTIONS":
+        return await call_next(request)
     if path not in skip_auth_paths:
         # Only rate-limit non-local traffic
         if not is_local:

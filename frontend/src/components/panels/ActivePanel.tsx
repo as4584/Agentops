@@ -1,5 +1,5 @@
-import { API_BASE } from '@/lib/api';
-import React, { useEffect, useRef, useState } from 'react';
+import { API_BASE, API_SECRET } from '@/lib/api';
+import React, { useEffect, useState } from 'react';
 import { Stack, Group, Text, Badge, ScrollArea, Box, ActionIcon } from '@mantine/core';
 import { IconRefresh, IconPlayerPlay, IconPlayerStop } from '@tabler/icons-react';
 
@@ -32,13 +32,24 @@ export default function ActivePanel() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [events, setEvents] = useState<StreamEvent[]>([]);
 
+  const authHeader: Record<string, string> = API_SECRET ? { Authorization: `Bearer ${API_SECRET}` } : {};
+
   const fetchAll = async () => {
     try {
       const [sr, ar] = await Promise.all([
-        fetch(`${API_BASE}/system/status`),
-        fetch(`${API_BASE}/agents`),
+        fetch(`${API_BASE}/status`, { headers: authHeader }),
+        fetch(`${API_BASE}/agents`, { headers: authHeader }),
       ]);
-      if (sr.ok) setStatus(await sr.json());
+      if (sr.ok) {
+        const data = await sr.json();
+        // /status returns {uptime_seconds, drift_report, agents, ...}
+        setStatus({
+          connected: true,
+          uptime: `${Math.floor((data.uptime_seconds ?? 0) / 60)}m uptime`,
+          llm: 'ollama',
+          drift: data.drift_report?.status?.toLowerCase() ?? 'unknown',
+        });
+      }
       if (ar.ok) setAgents(await ar.json());
     } catch {}
   };
@@ -46,7 +57,8 @@ export default function ActivePanel() {
   useEffect(() => {
     fetchAll();
     const iv = setInterval(fetchAll, 5000);
-    const es = new EventSource('/api/events/stream');
+    const tokenParam = API_SECRET ? `?token=${encodeURIComponent(API_SECRET)}` : '';
+    const es = new EventSource(`${API_BASE}/stream/activity${tokenParam}`);
     es.onmessage = (e) => {
       try {
         const ev: StreamEvent = JSON.parse(e.data);

@@ -1,0 +1,84 @@
+---
+# discord-bot Deployment
+# Runs backend.discord_bot as a standalone pod in the cluster.
+# The bot connects to the Agentop backend via AGENTOP_API_URL (in-cluster service).
+#
+# Setup:
+#   1. Create the secret:
+#      kubectl create secret generic discord-bot-secret -n agent-ops \
+#        --from-literal=DISCORD_BOT_TOKEN=your_token_here \
+#        --from-literal=DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+#   2. Apply: kubectl apply -f k8s/discord-bot/deployment.yaml
+#   3. View logs: kubectl logs -n agent-ops -l app=discord-bot -f
+#
+# The bot command prefix is ! by default.
+# Usage in Discord: !security scan, !devops status, !help
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discord-bot
+  namespace: agent-ops
+  labels:
+    app: discord-bot
+    tier: comms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discord-bot
+  template:
+    metadata:
+      labels:
+        app: discord-bot
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: discord-bot
+          image: agentop/backend:latest
+          imagePullPolicy: Never
+          command: ["python", "-m", "backend.discord_bot"]
+          env:
+            - name: DISCORD_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: discord-bot-secret
+                  key: DISCORD_BOT_TOKEN
+            - name: DISCORD_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: discord-bot-secret
+                  key: DISCORD_WEBHOOK_URL
+            - name: AGENTOP_API_URL
+              value: "http://agentop-backend.agent-ops:8000"
+            - name: DISCORD_BOT_PREFIX
+              value: "!"
+            # Optional: restrict to specific channel IDs
+            # - name: DISCORD_CHANNEL_IDS
+            #   value: "123456789,987654321"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            exec:
+              # Bot is alive if its PID file exists
+              command: ["test", "-f", "/.discord_bot.pid"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+---
+# Keeps exactly one bot running — prevents duplicate instances across restarts
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: discord-bot-pdb
+  namespace: agent-ops
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      app: discord-bot

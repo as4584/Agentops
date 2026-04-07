@@ -234,7 +234,7 @@ class PublisherAgent(ContentAgent):
 
     def _check_platform_auth(self) -> dict[str, bool]:
         """Return which platforms have valid credentials available."""
-        from backend.content.publishers.youtube_auth import TOKEN_PATH, is_authenticated
+        from backend.content.publishers.youtube_auth import is_authenticated
 
         statuses = {"youtube": is_authenticated()}
         missing = [p for p, ok in statuses.items() if not ok]
@@ -244,4 +244,3 @@ class PublisherAgent(ContentAgent):
                 "Upload will be skipped. Run POST /content/auth/youtube/start to authenticate."
             )
         return statuses
-

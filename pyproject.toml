@@ -99,7 +99,7 @@ check_untyped_defs = false
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-addopts = "-x --tb=short -q --cov=backend --cov=deerflow --cov-report=term-missing"
+addopts = "--tb=short -q --cov=backend --cov=deerflow --cov-report=term-missing --cov-report=html:htmlcov"
 testpaths = ["backend/tests", "deerflow/tests"]
 markers = [
     "ml: ML subsystem — eval framework, scoring, pipeline, experiments",

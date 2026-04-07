@@ -149,6 +149,9 @@ class TestChatValidation:
         all httpx.Client instances, including the one TestClient uses
         internally to talk to the ASGI app. Instead, create the mock
         transport directly and inject it into the OllamaClient only.
+
+        Also patch API_SECRET to empty so auth is in dev-mode and these
+        input-validation tests don't need a Bearer token.
         """
         import backend.server as srv
         from backend.llm import OllamaClient
@@ -158,8 +161,12 @@ class TestChatValidation:
         client = OllamaClient(base_url="http://mock:11434", model="lex-v2")
         client._client = httpx.AsyncClient(transport=transport)
         srv._orchestrator = AgentOrchestrator(llm_client=client)
+
+        _orig_secret = srv.API_SECRET
+        srv.API_SECRET = ""
         yield
         srv._orchestrator = None
+        srv.API_SECRET = _orig_secret
 
     def test_empty_message_rejected(self):
         from fastapi.testclient import TestClient

@@ -1,0 +1,1217 @@
+{
+  "id": "d50def3b91e0",
+  "created_at": "2026-04-06T22:13:42.718436+00:00",
+  "updated_at": "2026-04-06T22:25:41.816363+00:00",
+  "status": "ready",
+  "brief": {
+    "business_name": "Apex Auto Detailing",
+    "business_type": "custom",
+    "tagline": "Premium detailing, flawless results",
+    "description": "Mobile auto detailing serving Austin TX. Interior and exterior packages.",
+    "services": [
+      "Full Detail",
+      "Interior Only",
+      "Exterior Wash",
+      "Paint Correction"
+    ],
+    "target_audience": "",
+    "tone": "professional",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": []
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - Apex Auto Detailing",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "685a8f5b",
+          "name": "hero",
+          "component_type": "hero-centered",
+          "content": {
+            "headline": "Welcome to Apex Auto Detailing",
+            "subtitle": "Premium detailing, flawless results for your car in Austin TX"
+          },
+          "html": "<header class=\"bg-linear-gradient(135deg,#2563EB 0%,#3B82F6 60%,#EA580C 100%) p-4\">\n  <nav aria-label=\"Main Navigation\" role=\"navigation\">\n    <ul class=\"flex justify-between items-center gap-4\">\n      <a href=\"index.html\" class=\"text-lg font-bold text-white hover:text-[var(--color-accent)] transition-colors duration-200\">Home</a>\n      <a href=\"services.html\" class=\"text-lg font-bold text-white hover:text-[var(--color-accent)] transition-colors duration-200\">Services</a>\n      <a href=\"about.html\" class=\"text-lg font-bold text-white hover:text-[var(--color-accent)] transition-colors duration-200\">About</a>\n      <a href=\"contact.html\" class=\"text-lg font-bold text-white hover:text-[var(--color-accent)] transition-colors duration-200\">Contact</a>\n      <a href=\"blog.html\" class=\"text-lg font-bold text-white hover:text-[var(--color-accent)] transition-colors duration-200\">Blog</a>\n    </ul>\n  </nav>\n  <div class=\"flex flex-col items-center pt-4\">\n    <h1 class=\"bg-linear-gradient(90deg,var(--color-primary),var(--color-accent)) -webkit-background-clip:text; -webkit-text-fill-color:transparent text-lg font-bold leading-tight mb-2 transition-all duration-300 ease-in-out\" style=\"animation: fadeInUp 0.8s ease-out both\">\n      <span class=\"text-white\">Welcome to Apex Auto Detailing</span>\n    </h1>\n    <p class=\"text-lg font-body text-[var(--color-secondary)] mb-4\">Premium detailing, flawless results for your car in Austin TX</p>\n  </div>\n</header>\n\n<main class=\"mt-8\">\n  <section class=\"py-12 bg-white shadow-md rounded-lg glass-card w-full max-w-sm mx-auto p-6\">\n    <h2 class=\"text-lg font-bold mb-4\">Services</h2>\n    <ul class=\"flex flex-col items-center space-y-4\">\n      <li class=\"w-1/3 p-4\">\n        <div class=\"bg-linear-gradient(135deg,#2563EB 0%,#3B82F6 60%,#EA580C 100%) rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\"></div>\n        <a href=\"#\" class=\"text-white hover:text-[var(--color-accent)] transition-colors duration-200 w-full p-4\">Full Detail</a>\n      </li>\n      <li class=\"w-1/3 p-4\">\n        <div class=\"bg-linear-gradient(135deg,#2563EB 0%,#3B82F6 60%,#EA580C 100%) rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\"></div>\n        <a href=\"#\" class=\"text-white hover:text-[var(--color-accent)] transition-colors duration-200 w-full p-4\">Interior Only</a>\n      </li>\n      <li class=\"w-1/3 p-4\">\n        <div class=\"bg-linear-gradient(135deg,#2563EB 0%,#3B82F6 60%,#EA580C 100%) rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\"></div>\n        <a href=\"#\" class=\"text-white hover:text-[var(--color-accent)] transition-colors duration-200 w-full p-4\">Exterior Wash</a>\n      </li>\n    </ul>\n  </section>\n\n  <article class=\"py-12 bg-white shadow-md rounded-lg glass-card w-full max-w-sm mx-auto p-6\">\n    <h2 class=\"text-lg font-bold mb-4\">Book Your Appointment</h2>\n    <p class=\"text-lg font-body text-[var(--color-secondary)] mb-4\">Don't miss out on our limited time offer. Book your appointment today.</p>\n    <div class=\"flex justify-between\">\n      <a href=\"#\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl mx-auto p-2\">Book Now</a>\n      <a href=\"#\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl ml-4 p-2\">Learn More</a>\n    </div>\n  </article>\n\n  <section class=\"py-12 bg-white shadow-md rounded-lg glass-card w-full max-w-sm mx-auto p-6\">\n    <h2 class=\"text-lg font-bold mb-4\">Testimonials</h2>\n    <p class=\"text-lg font-body text-[var(--color-secondary)] mb-4\">Don't just take our word for it. Hear from our satisfied customers.</p>\n    <div class=\"flex flex-col items-center space-y-4\">\n      <li class=\"w-1/3 p-4\">\n        <img src=\"#\" alt=\"Customer Image\" class=\"h-20 w-full rounded-md shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <p>\"Great service and excellent detailing!\" - John Doe</p>\n      </li>\n      <li class=\"w-1/3 p-4\">\n        <img src=\"#\" alt=\"Customer Image\" class=\"h-20 w-full rounded-md shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <p>\"Impressed with the quality of work!\" - Jane Doe</p>\n      </li>\n    </div>\n  </section>\n\n  <footer class=\"bg-white py-4 text-center\">\n    <span class=\"text-lg font-bold\">Apex Auto Detailing | Austin, TX | (123) 456-7890 | info@apexautodetailing.com</span>\n  </footer>\n</main>",
+          "order": 0
+        },
+        {
+          "id": "9af3e640",
+          "name": "services",
+          "component_type": "service-list",
+          "content": {
+            "items": [
+              {
+                "title": "Full Detail",
+                "description": "Comprehensive interior and exterior cleaning"
+              },
+              {
+                "title": "Interior Only",
+                "description": "Clean, polished, and refreshed interiors"
+              },
+              {
+                "title": "Exterior Wash",
+                "description": "Shiny, streak-free exteriors for your car"
+              },
+              {
+                "title": "Paint Correction",
+                "description": "Restore your car's original shine and color"
+              }
+            ]
+          },
+          "html": "<nav class=\"bg-white py-4 px-6 md:py-6\">\n  <div class=\"container mx-auto flex justify-between items-center\">\n    <a href=\"index.html\" class=\"text-lg font-Poppins text-gray-900 hover:text-blue-500\">Apex Auto Detailing</a>\n    <nav class=\"flex space-x-4 md:space-x-8\">\n      <a href=\"services.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Services</a>\n      <a href=\"about.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">About</a>\n      <a href=\"contact.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Contact</a>\n      <a href=\"blog.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Blog</a>\n      <a href=\"faq.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">FAQ</a>\n      <a href=\"testimonials.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Testimonials</a>\n      <a href=\"map.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Location</a>\n    </nav>\n  </div>\n</nav>\n\n<section class=\"bg-white py-16 md:py-24\">\n  <header class=\"text-lg font-Poppins text-gray-900 text-center mb-8 md:mb-12\">\n    <h1 style=\"animation: fadeInUp 0.8s ease-out both\">Our Services</h1>\n  </header>\n\n  <div class=\"container mx-auto max-w-7xl px-4 md:px-6 lg:px-8 mt-16 md:mt-20\">\n    <article>\n      <h2 class=\"text-lg font-Poppins text-gray-700 mb-4\">Our Services</h2>\n      <p class=\"mb-10 text-gray-600\">At Apex Auto Detailing, we offer a range of premium detailing services to restore your vehicle's original shine and color.</p>\n\n      <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n        <div class=\"glass-card bg-white shadow-md hover:-translate-y-2 transition-transform duration-300\">\n          <h3 class=\"text-lg font-Poppins text-gray-700 mb-4\">Full Detail</h3>\n          <p class=\"mb-8 text-gray-600\">Comprehensive interior and exterior cleaning.</p>\n          <button class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Book Now</button>\n        </div>\n\n        <div class=\"glass-card bg-white shadow-md hover:-translate-y-2 transition-transform duration-300\">\n          <h3 class=\"text-lg font-Poppins text-gray-700 mb-4\">Interior Only</h3>\n          <p class=\"mb-8 text-gray-600\">Clean, polished, and refreshed interiors.</p>\n          <button class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Book Now</button>\n        </div>\n\n        <div class=\"glass-card bg-white shadow-md hover:-translate-y-2 transition-transform duration-300\">\n          <h3 class=\"text-lg font-Poppins text-gray-700 mb-4\">Exterior Wash</h3>\n          <p class=\"mb-8 text-gray-600\">Shiny, streak-free exteriors for your car.</p>\n          <button class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Book Now</button>\n        </div>\n\n        <div class=\"glass-card bg-white shadow-md hover:-translate-y-2 transition-transform duration-300\">\n          <h3 class=\"text-lg font-Poppins text-gray-700 mb-4\">Paint Correction</h3>\n          <p class=\"mb-8 text-gray-600\">Restore your car's original shine and color.</p>\n          <button class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Book Now</button>\n        </div>\n      </div>\n    </article>\n  </div>\n\n  <footer class=\"bg-white py-4 px-6 md:py-6\">\n    <div class=\"container mx-auto flex justify-between items-center\">\n      <p class=\"text-gray-600 text-sm\">Phone: 555-555-5555 | Email: <a href=\"mailto:info@apexautodetailing.com\">info@apexautodetailing.com</a></p>\n      <div class=\"flex space-x-4 md:space-x-8\">\n        <a href=\"index.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Home</a>\n        <a href=\"services.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200 active:bg-white\">Services</a>\n        <a href=\"about.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">About</a>\n        <a href=\"contact.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Contact</a>\n        <a href=\"blog.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Blog</a>\n        <a href=\"faq.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">FAQ</a>\n        <a href=\"testimonials.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Testimonials</a>\n        <a href=\"map.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Location</a>\n      </div>\n    </div>\n  </footer>\n\n  <style>\n    @import url(\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\");\n\n    .glass-card {\n      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);\n      border-radius: 10px;\n    }\n\n    @keyframes fadeInUp {\n      0% {\n        opacity: 0;\n        transform: translateY(-20%);\n      }\n      100% {\n        opacity: 1;\n        transform: translateY(0);\n      }\n    }\n  </style>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "cdfe2dea",
+          "name": "about",
+          "component_type": "text-block",
+          "content": {
+            "headline": "About Us",
+            "paragraphs": [
+              "At Apex Auto Detailing, we understand that your car is more than just a mode of transportation. It's an extension of your personal style and comfort. That's why we offer premium detailing services to ensure your vehicle looks its best."
+            ]
+          },
+          "html": "<nav>\n    <header class=\"text-2xl font-bold text-primary relative py-4\">\n        <h1 style=\"animation: fadeInUp 0.8s ease-out both\">About Us</h1>\n    </header>\n    \n    <div class=\"mt-6 max-w-3xl mx-auto text-lg text-gray-600\">\n        <p class=\"text-xl font-bold mb-4\">At Apex Auto Detailing, we understand that your car is more than just a mode of transportation. It's an extension of your personal style and comfort.</p>\n        \n        <article>\n            <h2 class=\"font-bold mb-2\">Our Story</h2>\n            <p class=\"text-lg\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet nulla auctor, vestibulum magna sed, convallis ex.</p>\n            <button type=\"button\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Learn More</button>\n        </article>\n        \n        <section>\n            <h2 class=\"font-bold mb-4\">Our Services</h2>\n            <ul>\n                <li class=\"mb-2\">\n                    <a href=\"#\" aria-label=\"Full Detail\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Full Detail</a>\n                </li>\n                <li class=\"mb-4\">\n                    <a href=\"#\" aria-label=\"Interior Only\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Interior Only</a>\n                </li>\n                <li>\n                    <a href=\"#\" aria-label=\"Exterior Wash\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Exterior Wash</a>\n                </li>\n            </ul>\n        </section>\n        \n        <footer>\n            <p>&copy; 2023 Apex Auto Detailing. All rights reserved.</p>\n        </footer>\n    </div>\n\n    <nav aria-label=\"Main Navigation\" role=\"navigation\">\n        <ul>\n            <li><a href=\"#\" aria-label=\"Home\">Home</a></li>\n            <li><a href=\"services.html\" aria-label=\"Services\">Services</a></li>\n            <li class=\"glass-card\">\n                <h3>Testimonials</h3>\n                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n            </li>\n            <li><a href=\"contact.html\" aria-label=\"Contact\">Contact</a></li>\n            <li><a href=\"blog.html\" aria-label=\"Blog\">Blog</a></li>\n        </ul>\n    </nav>\n\n    <footer>\n        <address>\n            Apex Auto Detailing<br>\n            123 Main St, Anytown USA 12345<br>\n            Phone: 555-555-5555<br>\n            Email: <a href=\"#\" aria-label=\"Email\">info@apexautodetailing.com</a>\n        </address>\n    </footer>\n</nav>",
+          "order": 2
+        },
+        {
+          "id": "3692e85f",
+          "name": "contact",
+          "component_type": "form",
+          "content": {
+            "headline": "Get in Touch",
+            "fields": [
+              {
+                "label": "Name",
+                "type": "text"
+              },
+              {
+                "label": "Email",
+                "type": "email"
+              },
+              {
+                "label": "Phone",
+                "type": "tel"
+              },
+              {
+                "label": "Message",
+                "type": "textarea"
+              }
+            ]
+          },
+          "html": "<nav>\n    <header class=\"flex justify-between items-center py-4\">\n        <h1 class=\"text-3xl text-primary font-Poppins animate-fadeInUp\">Apex Auto Detailing</h1>\n    </header>\n    <div class=\"nav-container flex justify-between items-center space-x-6\">\n        <a href=\"index.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Home</a>\n        <a href=\"services.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Services</a>\n        <a href=\"about.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">About</a>\n        <a href=\"contact.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl active:bg-primary text-white\">Contact</a>\n        <a href=\"blog.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Blog</a>\n    </div>\n</nav>\n\n<main>\n    <section class=\"glass-card p-8 bg-gradient-to-r from-primary to-secondary\">\n        <header class=\"text-lg text-gray-900 font-Poppins animate-fadeInUp\" style=\"animation-delay: 0.2s;\">Get in Touch</header>\n        <form action=\"\" method=\"post\" id=\"contact-form\">\n            <div class=\"grid grid-cols-1 gap-y-4\">\n                <label for=\"name\">Name:</label>\n                <input type=\"text\" name=\"name\" id=\"name\" required aria-label=\"Name\">\n            </div>\n            <div class=\"grid grid-cols-1 gap-y-4\">\n                <label for=\"email\">Email:</label>\n                <input type=\"email\" name=\"email\" id=\"email\" required aria-label=\"Email\">\n            </div>\n            <div class=\"grid grid-cols-1 gap-y-4\">\n                <label for=\"phone\">Phone:</label>\n                <input type=\"tel\" name=\"phone\" id=\"phone\" required aria-label=\"Phone\">\n            </div>\n            <div class=\"grid grid-cols-1 gap-y-4\">\n                <label for=\"message\">Message:</label>\n                <textarea name=\"message\" id=\"message\" rows=\"10\" cols=\"50\" required aria-label=\"Message\"></textarea>\n            </div>\n            <button type=\"submit\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Send</button>\n        </form>\n    </section>\n</main>\n\n<footer>\n    <nav>\n        <a href=\"map.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl active:bg-primary text-white\">Location</a>\n    </nav>\n    <p>&copy; 2023 Apex Auto Detailing. All rights reserved.</p>\n</footer>",
+          "order": 3
+        },
+        {
+          "id": "390c8da9",
+          "name": "blog",
+          "component_type": "blog-list",
+          "content": {
+            "items": [
+              {
+                "title": "Blog Post Title 1",
+                "date": "2023-04-01",
+                "summary": "Summary of blog post"
+              },
+              {
+                "title": "Blog Post Title 2",
+                "date": "2023-04-02",
+                "summary": "Summary of blog post"
+              }
+            ]
+          },
+          "html": "<nav class=\"flex justify-between items-center py-4 bg-color-primary text-white\">\n  <h1 class=\"text-3xl font-heading\">Blog</h1>\n  <ul class=\"space-x-6 md:space-x-12\">\n    <li><a href=\"#\" aria-label=\"Home\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Home</a></li>\n    <li><a href=\"#\" aria-label=\"Services\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Services</a></li>\n    <li><a href=\"#\" aria-label=\"About\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">About</a></li>\n    <li><a href=\"#\" aria-label=\"Contact\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Contact</a></li>\n    <li><a href=\"#\" aria-label=\"Blog\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Blog</a></li>\n    <li><a href=\"#\" aria-label=\"FAQ\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">FAQ</a></li>\n    <li><a href=\"#\" aria-label=\"Testimonials\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Testimonials</a></li>\n    <li><a href=\"#\" aria-label=\"Location\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Location</a></li>\n  </ul>\n</nav>\n\n<section class=\"mt-12\">\n  <header class=\"text-3xl font-heading mb-6\" style=\"animation: fadeInUp 0.8s ease-out both;\">\n    Blog\n  </header>\n  <article class=\"bg-color-secondary p-4 rounded-md shadow-md glass-card hover:-translate-y-2 transition-transform duration-300\">\n    <h2 class=\"text-lg font-heading mb-2\">Latest Posts</h2>\n    <ul>\n      {% for post in content.hints.items %}\n        <li>\n          <a href=\"#\" aria-label=\"{{ post.title }}\" class=\"btn btn-link transition-all duration-300 hover:scale-105 hover:shadow-xl\">{{ post.title }}</a>\n          <p class=\"text-gray-500 text-xs mt-2\">{{ post.date }} | {{ post.summary }}</p>\n        </li>\n      {% endfor %}\n    </ul>\n  </article>\n</section>\n\n<footer class=\"bg-color-secondary p-4 text-white\">\n  <div class=\"flex justify-between items-center py-2\">\n    <a href=\"#\" aria-label=\"Phone\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Phone: {{ phone }}</a>\n    <p>Apex Auto Detailing | Premium detailing, flawless results</p>\n  </div>\n</footer>",
+          "order": 4
+        },
+        {
+          "id": "2d6c6c42",
+          "name": "faq",
+          "component_type": "faq-list",
+          "content": {
+            "items": [
+              {
+                "question": "What services do you offer?",
+                "answer": "We provide full detail, interior only, exterior wash, and paint correction."
+              },
+              {
+                "question": "How long does it take to get my car detailed?",
+                "answer": "The time varies based on the service selected. Contact us for an estimate."
+              }
+            ]
+          },
+          "html": "<nav aria-label=\"Main Navigation\">\n  <div class=\"flex justify-between mb-4\">\n    <a href=\"#\" class=\"text-lg font-bold text-[#2563EB]\">Apex Auto Detailing</a>\n    <button class=\"lg:hidden\" id=\"mobile-menu-btn\">\n      <svg fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\">\n        <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h8m-8 6h16\"></path>\n      </svg>\n    </button>\n  </div>\n  <ul class=\"hidden lg:flex lg:items-center\">\n    <li><a href=\"#\" class=\"block lg:inline-block px-2 py-2 text-[#3B82F6] hover:bg-[#2563EB] hover:text-white\">Home</a></li>\n    <li><a href=\"services.html\" class=\"block lg:inline-block px-2 py-2 text-[#3B82F6] hover:bg-[#2563EB] hover:text-white\">Services</a></li>\n    <li><a href=\"about.html\" class=\"block lg:inline-block px-2 py-2 text-[#3B82F6] hover:bg-[#2563EB] hover:text-white\">About</a></li>\n    <li><a href=\"contact.html\" class=\"block lg:inline-block px-2 py-2 text-[#3B82F6] hover:bg-[#2563EB] hover:text-white\">Contact</a></li>\n    <li><a href=\"blog.html\" class=\"block lg:inline-block px-2 py-2 text-[#3B82F6] hover:bg-[#2563EB] hover:text-white\">Blog</a></li>\n  </ul>\n  <div class=\"lg:hidden absolute top-1/2 left-0 w-full bg-[#2563EB]\">\n    <ul id=\"mobile-menu\">\n      <li><a href=\"#\" class=\"block px-4 py-2 text-lg font-bold\">Home</a></li>\n      <li><a href=\"services.html\" class=\"block px-4 py-2 text-lg\">Services</a></li>\n      <li><a href=\"about.html\" class=\"block px-4 py-2 text-lg\">About</a></li>\n      <li><a href=\"contact.html\" class=\"block px-4 py-2 text-lg\">Contact</a></li>\n    </ul>\n  </div>\n</nav>\n\n<section class=\"bg-[#0f172a] p-6\">\n  <header class=\"text-white mt-16\">\n    <h1 class=\"text-5xl font-bold\" style=\"animation: fadeInUp 0.8s ease-out both\">Frequently Asked Questions</h1>\n  </header>\n  <main class=\"flex flex-col items-center\">\n    <article>\n      <section class=\"space-y-4\">\n        <div class=\"bg-white rounded-lg shadow-md glass-card w-full\">\n          <div class=\"p-6 bg-[#3B82F6] text-white\">\n            <h2 class=\"text-lg font-bold mb-4\">Q: What services do you offer?</h2>\n            <p class=\"text-lg\">We provide full detail, interior only, exterior wash, and paint correction.</p>\n          </div>\n        </div>\n        <div class=\"bg-white rounded-lg shadow-md glass-card w-full\">\n          <div class=\"p-6 bg-[#3B82F6] text-white\">\n            <h2 class=\"text-lg font-bold mb-4\">Q: How long does it take to get my car detailed?</h2>\n            <p class=\"text-lg\">The time varies based on the service selected. Contact us for an estimate.</p>\n          </div>\n        </div>\n      </section>\n    </article>\n  </main>\n</section>\n\n<footer class=\"bg-[#0f172a] p-6 text-white\">\n  <nav aria-label=\"Main Navigation\">\n    <ul class=\"flex justify-between mb-4\">\n      <li><a href=\"#\" class=\"block lg:inline-block px-2 py-2 text-lg\">Home</a></li>\n      <li><a href=\"services.html\" class=\"block lg:inline-block px-2 py-2 text-lg\">Services</a></li>\n      <li><a href=\"about.html\" class=\"block lg:inline-block px-2 py-2 text-lg\">About</a></li>\n      <li><a href=\"contact.html\" class=\"block lg:inline-block px-2 py-2 text-lg\">Contact</a></li>\n    </ul>\n  </nav>\n  <div class=\"mt-4\">\n    <button class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\" aria-label=\"Get a Quote\">Get a Quote</button>\n  </div>\n</footer>",
+          "order": 5
+        },
+        {
+          "id": "a20eb513",
+          "name": "testimonials",
+          "component_type": "testimonial-list",
+          "content": {
+            "items": [
+              {
+                "name": "Customer Name",
+                "text": "I was so impressed with the results! My car looked like new after just one visit."
+              }
+            ]
+          },
+          "html": "<nav aria-label=\"Testimonials\">\n  <header>\n    <h1>Apex Auto Detailing</h1>\n    <style>\n      @keyframes fadeInUp {\n        0% {\n          transform: translateY(-100%);\n        }\n        100% {\n          transform: translateY(0);\n        }\n      }\n      .heroHeading {\n        style=\"animation: fadeInUp 0.8s ease-out both\";\n      }\n    </style>\n    <h1 class=\"heroHeading text-4xl font-Poppins leading-tight text-gray-900\">Join Our Community</h1>\n  </header>\n\n  <section>\n    <article>\n      <div class=\"text-lg leading-relaxed\">\n        <p>Don't just take our word for it!</p>\n        <p>We've worked hard to earn the trust of our customers.</p>\n      </div>\n      <ul>\n        @foreach($content->items as $item)\n          <li>{{ $item->name }}:</li>\n          <li>{{ $item->text }}</li>\n        @endforeach\n      </ul>\n    </article>\n\n    <h2 class=\"text-3xl font-Poppins leading-tight mt-8\">What Our Customers Say</h2>\n\n    <div class=\"flex justify-center gap-4\">\n      @foreach($content->items as $item)\n        <button class=\"btn btn-secondary bg-[#2563EB] hover:bg-[#1747CE] transition-all duration-300 hover:scale-105 hover:shadow-xl\" aria-label=\"{{ $item->name }}\">{{ $item->name }}</button>\n      @endforeach\n    </div>\n\n    <h2 class=\"text-3xl font-Poppins leading-tight mt-8\">Our Services</h2>\n\n    <ul>\n      <li><a href=\"/services/full-detail\" class=\"btn btn-primary bg-[#EA580C] hover:bg-[#F59900] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Full Detail</a></li>\n      <li><a href=\"/services/interior-only\" class=\"btn btn-secondary bg-[#3B82F6] hover:bg-[#4495E8] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Interior Only</a></li>\n      <li><a href=\"/services/exterior-wash\" class=\"btn btn-primary bg-[#2563EB] hover:bg-[#1747CE] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Exterior Wash</a></li>\n      <li><a href=\"/services/paint-correction\" class=\"btn btn-secondary bg-[#EA580C] hover:bg-[#F59900] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Paint Correction</a></li>\n    </ul>\n\n    <footer>\n      <p>&copy; {{ date('Y') }} Apex Auto Detailing. All rights reserved.</p>\n      <div class=\"flex justify-center gap-4\">\n        <a href=\"index.html\" class=\"btn btn-primary bg-[#2563EB] hover:bg-[#1747CE] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Home</a>\n        <a href=\"services.html\" class=\"btn btn-secondary bg-[#3B82F6] hover:bg-[#4495E8] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Services</a>\n        <a href=\"about.html\" class=\"btn btn-primary bg-[#2563EB] hover:bg-[#1747CE] transition-all duration-300 hover:scale-105 hover:shadow-xl\">About</a>\n        <a href=\"contact.html\" class=\"btn btn-secondary bg-[#EA580C] hover:bg-[#F59900] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Contact</a>\n        <a href=\"blog.html\" class=\"btn btn-primary bg-[#2563EB] hover:bg-[#1747CE] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Blog</a>\n        <a href=\"faq.html\" class=\"btn btn-secondary bg-[#EA580C] hover:bg-[#F59900] transition-all duration-300 hover:scale-105 hover:shadow-xl\">FAQ</a>\n      </div>\n    </footer>\n  </section>\n</nav>",
+          "order": 6
+        },
+        {
+          "id": "56b195b3",
+          "name": "map",
+          "component_type": "google-map",
+          "content": {
+            "location": {
+              "lat": 30.267153,
+              "lng": -97.743061
+            }
+          },
+          "html": "<section class=\"bg-[#3B82F6] py-24\">\n  <header class=\"text-white text-center lg:text-left mx-auto p-4 lg:p-0\">\n    <h1 class=\"text-[32px] font-Poppins mb-2\" style=\"animation: fadeInUp 0.8s ease-out both\">Apex Auto Detailing</h1>\n    <p class=\"text-lg text-white opacity-75 leading-loose\">Premium detailing, flawless results</p>\n  </header>\n  \n  <main class=\"max-w-[1200px] mx-auto p-4 lg:p-6 xl:p-12\">\n    <article class=\"bg-[#fff] rounded shadow-md glass-card w-full\">\n      <div class=\"flex flex-col sm:flex-row justify-center sm:justify-between mb-8\">\n        <h2 class=\"text-lg font-Poppins mb-2\">Our Location</h2>\n        <a href=\"#\" class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Learn More</a>\n      </div>\n      \n      <div class=\"grid grid-cols-[1fr_3fr] gap-6 sm:gap-12 lg:gap-24\">\n        <div class=\"bg-white rounded shadow-md glass-card w-full\">\n          <h2 class=\"text-lg font-Poppins mb-4\">30.267153, -97.743061</h2>\n          <p class=\"text-sm text-[#666] mb-8\">123 Main St, Austin, TX 78701</p>\n          <ul>\n            <li class=\"flex items-center\">\n              <i class=\"fas fa-map-marker-alt\"></i>\n              <span class=\"ml-2\">Austin, TX 78701</span>\n            </li>\n            <li class=\"flex items-center\">\n              <i class=\"fas fa-phone\"></i>\n              <span class=\"ml-2\">(512) 123-4567</span>\n            </li>\n            <li class=\"flex items-center\">\n              <i class=\"fas fa-envelope\"></i>\n              <span class=\"ml-2\">info@apexautodetailing.com</span>\n            </li>\n          </ul>\n        </div>\n        \n        <div class=\"bg-white rounded shadow-md glass-card w-full\">\n          <h2 class=\"text-lg font-Poppins mb-4\">Open Hours</h2>\n          <p class=\"text-sm text-[#666] mb-8\">Monday - Friday: 9am - 6pm</p>\n        </div>\n      </div>\n    </article>\n    \n    <nav aria-label=\"Main Navigation\">\n      <ul class=\"flex justify-between lg:justify-start sm:flex sm:justify-around mb-12\">\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">Home</a></li>\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">Services</a></li>\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">About</a></li>\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">Contact</a></li>\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">Blog</a></li>\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">FAQ</a></li>\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">Testimonials</a></li>\n      </ul>\n    </nav>\n  </main>\n</section>\n\n<style>\n  @keyframes fadeInUp {\n    from {\n      transform: translateY(-100%);\n    }\n    to {\n      transform: translateY(0);\n    }\n  }\n\n  .glass-card:hover:-translate-y-2 {\n    transition: transform duration-300;\n  }\n\n  .btn {\n    @apply rounded-lg py-3 px-6 text-white;\n  }\n</style>",
+          "order": 7
+        }
+      ],
+      "seo": {
+        "title": "Apex Auto Detailing - Full Detail, Interior Only, Exterior Wash, Paint Correction | Home",
+        "meta_description": "Welcome to Apex Auto Detailing! Get your car looking like new with our full detail, interior only, exterior wash, and paint correction services. Book now!",
+        "keywords": [
+          "auto detailing",
+          "car detail",
+          "full detail",
+          "interior clean",
+          "exterior wash",
+          "paint correction"
+        ],
+        "og_title": "Apex Auto Detailing - Your Car's Ultimate Detail",
+        "og_description": "Experience the difference with Apex Auto Detailing. Full detail, interior only, exterior wash, and paint correction services for your car.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Auto Detailing",
+          "url": "https://www.apexautodetailing.com/",
+          "logo": "https://www.apexautodetailing.com/logo.png",
+          "image": "https://www.apexautodetailing.com/banner.jpg",
+          "description": "Welcome to Apex Auto Detailing! Get your car looking like new with our full detail, interior only, exterior wash, and paint correction services.",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Car Wash Ave",
+            "addressLocality": "Anytown",
+            "addressRegion": "CA",
+            "postalCode": "12345"
+          },
+          "telephone": "+1-555-555-5555",
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "18:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "10:00",
+              "closes": "17:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Sunday"
+              ],
+              "opens": "12:00",
+              "closes": "16:00"
+            }
+          ],
+          "sameAs": [
+            "https://www.facebook.com/apexautodetailing",
+            "https://twitter.com/apexautodetailing",
+            "https://www.instagram.com/apexautodetailing"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Apex Auto Detailing offer?",
+            "a": "Apex Auto Detailing provides full detail, interior only, exterior wash, and paint correction services."
+          },
+          {
+            "q": "How can I book a service with Apex Auto Detailing?",
+            "a": "You can book a service by calling us at [phone number] or visiting our website to schedule an appointment."
+          },
+          {
+            "q": "What is the location of Apex Auto Detailing?",
+            "a": "Apex Auto Detailing serves Austin TX and operates in the mobile detailing industry."
+          },
+          {
+            "q": "How long does it take for a full detail service?",
+            "a": "A full detail service typically takes around 2-3 hours, depending on the vehicle's size and condition."
+          },
+          {
+            "q": "What is the cost of a paint correction service at Apex Auto Detailing?",
+            "a": "The cost of a paint correction service varies based on the extent of the damage and the specific treatment required. Please contact us for an accurate quote."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Auto Detailing",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Auto Detailing is a mobile detailing company serving Austin TX, offering full detail, interior only, exterior wash, and paint correction services to keep your vehicle looking its best.",
+        "topic_cluster": "Auto Detailing Services",
+        "related_topics": [
+          "Mobile Detailing",
+          "Car Wash",
+          "Interior Cleaning",
+          "Paint Protection",
+          "Automotive Maintenance"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - Apex Auto Detailing</title>\n  <meta name=\"description\" content=\"Premium detailing, flawless results\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<header class=\"bg-linear-gradient(135deg,#2563EB 0%,#3B82F6 60%,#EA580C 100%) p-4\">\n  <nav aria-label=\"Main Navigation\" role=\"navigation\">\n    <ul class=\"flex justify-between items-center gap-4\">\n      <a href=\"index.html\" class=\"text-lg font-bold text-white hover:text-[var(--color-accent)] transition-colors duration-200\">Home</a>\n      <a href=\"services.html\" class=\"text-lg font-bold text-white hover:text-[var(--color-accent)] transition-colors duration-200\">Services</a>\n      <a href=\"about.html\" class=\"text-lg font-bold text-white hover:text-[var(--color-accent)] transition-colors duration-200\">About</a>\n      <a href=\"contact.html\" class=\"text-lg font-bold text-white hover:text-[var(--color-accent)] transition-colors duration-200\">Contact</a>\n      <a href=\"blog.html\" class=\"text-lg font-bold text-white hover:text-[var(--color-accent)] transition-colors duration-200\">Blog</a>\n    </ul>\n  </nav>\n  <div class=\"flex flex-col items-center pt-4\">\n    <h1 class=\"bg-linear-gradient(90deg,var(--color-primary),var(--color-accent)) -webkit-background-clip:text; -webkit-text-fill-color:transparent text-lg font-bold leading-tight mb-2 transition-all duration-300 ease-in-out\" style=\"animation: fadeInUp 0.8s ease-out both\">\n      <span class=\"text-white\">Welcome to Apex Auto Detailing</span>\n    </h1>\n    <p class=\"text-lg font-body text-[var(--color-secondary)] mb-4\">Premium detailing, flawless results for your car in Austin TX</p>\n  </div>\n</header>\n\n<main class=\"mt-8\">\n  <section class=\"py-12 bg-white shadow-md rounded-lg glass-card w-full max-w-sm mx-auto p-6\">\n    <h2 class=\"text-lg font-bold mb-4\">Services</h2>\n    <ul class=\"flex flex-col items-center space-y-4\">\n      <li class=\"w-1/3 p-4\">\n        <div class=\"bg-linear-gradient(135deg,#2563EB 0%,#3B82F6 60%,#EA580C 100%) rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\"></div>\n        <a href=\"#\" class=\"text-white hover:text-[var(--color-accent)] transition-colors duration-200 w-full p-4\">Full Detail</a>\n      </li>\n      <li class=\"w-1/3 p-4\">\n        <div class=\"bg-linear-gradient(135deg,#2563EB 0%,#3B82F6 60%,#EA580C 100%) rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\"></div>\n        <a href=\"#\" class=\"text-white hover:text-[var(--color-accent)] transition-colors duration-200 w-full p-4\">Interior Only</a>\n      </li>\n      <li class=\"w-1/3 p-4\">\n        <div class=\"bg-linear-gradient(135deg,#2563EB 0%,#3B82F6 60%,#EA580C 100%) rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\"></div>\n        <a href=\"#\" class=\"text-white hover:text-[var(--color-accent)] transition-colors duration-200 w-full p-4\">Exterior Wash</a>\n      </li>\n    </ul>\n  </section>\n\n  <article class=\"py-12 bg-white shadow-md rounded-lg glass-card w-full max-w-sm mx-auto p-6\">\n    <h2 class=\"text-lg font-bold mb-4\">Book Your Appointment</h2>\n    <p class=\"text-lg font-body text-[var(--color-secondary)] mb-4\">Don't miss out on our limited time offer. Book your appointment today.</p>\n    <div class=\"flex justify-between\">\n      <a href=\"#\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl mx-auto p-2\">Book Now</a>\n      <a href=\"#\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl ml-4 p-2\">Learn More</a>\n    </div>\n  </article>\n\n  <section class=\"py-12 bg-white shadow-md rounded-lg glass-card w-full max-w-sm mx-auto p-6\">\n    <h2 class=\"text-lg font-bold mb-4\">Testimonials</h2>\n    <p class=\"text-lg font-body text-[var(--color-secondary)] mb-4\">Don't just take our word for it. Hear from our satisfied customers.</p>\n    <div class=\"flex flex-col items-center space-y-4\">\n      <li class=\"w-1/3 p-4\">\n        <img src=\"#\" alt=\"Customer Image\" class=\"h-20 w-full rounded-md shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <p>\"Great service and excellent detailing!\" - John Doe</p>\n      </li>\n      <li class=\"w-1/3 p-4\">\n        <img src=\"#\" alt=\"Customer Image\" class=\"h-20 w-full rounded-md shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <p>\"Impressed with the quality of work!\" - Jane Doe</p>\n      </li>\n    </div>\n  </section>\n\n  <footer class=\"bg-white py-4 text-center\">\n    <span class=\"text-lg font-bold\">Apex Auto Detailing | Austin, TX | (123) 456-7890 | info@apexautodetailing.com</span>\n  </footer>\n</main>\n\n<nav class=\"bg-white py-4 px-6 md:py-6\">\n  <div class=\"container mx-auto flex justify-between items-center\">\n    <a href=\"index.html\" class=\"text-lg font-Poppins text-gray-900 hover:text-blue-500\">Apex Auto Detailing</a>\n    <nav class=\"flex space-x-4 md:space-x-8\">\n      <a href=\"services.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Services</a>\n      <a href=\"about.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">About</a>\n      <a href=\"contact.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Contact</a>\n      <a href=\"blog.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Blog</a>\n      <a href=\"faq.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">FAQ</a>\n      <a href=\"testimonials.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Testimonials</a>\n      <a href=\"map.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Location</a>\n    </nav>\n  </div>\n</nav>\n\n<section class=\"bg-white py-16 md:py-24\">\n  <header class=\"text-lg font-Poppins text-gray-900 text-center mb-8 md:mb-12\">\n    <h1 style=\"animation: fadeInUp 0.8s ease-out both\">Our Services</h1>\n  </header>\n\n  <div class=\"container mx-auto max-w-7xl px-4 md:px-6 lg:px-8 mt-16 md:mt-20\">\n    <article>\n      <h2 class=\"text-lg font-Poppins text-gray-700 mb-4\">Our Services</h2>\n      <p class=\"mb-10 text-gray-600\">At Apex Auto Detailing, we offer a range of premium detailing services to restore your vehicle's original shine and color.</p>\n\n      <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n        <div class=\"glass-card bg-white shadow-md hover:-translate-y-2 transition-transform duration-300\">\n          <h3 class=\"text-lg font-Poppins text-gray-700 mb-4\">Full Detail</h3>\n          <p class=\"mb-8 text-gray-600\">Comprehensive interior and exterior cleaning.</p>\n          <button class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Book Now</button>\n        </div>\n\n        <div class=\"glass-card bg-white shadow-md hover:-translate-y-2 transition-transform duration-300\">\n          <h3 class=\"text-lg font-Poppins text-gray-700 mb-4\">Interior Only</h3>\n          <p class=\"mb-8 text-gray-600\">Clean, polished, and refreshed interiors.</p>\n          <button class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Book Now</button>\n        </div>\n\n        <div class=\"glass-card bg-white shadow-md hover:-translate-y-2 transition-transform duration-300\">\n          <h3 class=\"text-lg font-Poppins text-gray-700 mb-4\">Exterior Wash</h3>\n          <p class=\"mb-8 text-gray-600\">Shiny, streak-free exteriors for your car.</p>\n          <button class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Book Now</button>\n        </div>\n\n        <div class=\"glass-card bg-white shadow-md hover:-translate-y-2 transition-transform duration-300\">\n          <h3 class=\"text-lg font-Poppins text-gray-700 mb-4\">Paint Correction</h3>\n          <p class=\"mb-8 text-gray-600\">Restore your car's original shine and color.</p>\n          <button class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Book Now</button>\n        </div>\n      </div>\n    </article>\n  </div>\n\n  <footer class=\"bg-white py-4 px-6 md:py-6\">\n    <div class=\"container mx-auto flex justify-between items-center\">\n      <p class=\"text-gray-600 text-sm\">Phone: 555-555-5555 | Email: <a href=\"mailto:info@apexautodetailing.com\">info@apexautodetailing.com</a></p>\n      <div class=\"flex space-x-4 md:space-x-8\">\n        <a href=\"index.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Home</a>\n        <a href=\"services.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200 active:bg-white\">Services</a>\n        <a href=\"about.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">About</a>\n        <a href=\"contact.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Contact</a>\n        <a href=\"blog.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Blog</a>\n        <a href=\"faq.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">FAQ</a>\n        <a href=\"testimonials.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Testimonials</a>\n        <a href=\"map.html\" class=\"text-gray-700 hover:text-blue-500 transition-colors duration-200\">Location</a>\n      </div>\n    </div>\n  </footer>\n\n  <style>\n    @import url(\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap\");\n\n    .glass-card {\n      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);\n      border-radius: 10px;\n    }\n\n    @keyframes fadeInUp {\n      0% {\n        opacity: 0;\n        transform: translateY(-20%);\n      }\n      100% {\n        opacity: 1;\n        transform: translateY(0);\n      }\n    }\n  </style>\n</section>\n\n<nav>\n    <header class=\"text-2xl font-bold text-primary relative py-4\">\n        <h1 style=\"animation: fadeInUp 0.8s ease-out both\">About Us</h1>\n    </header>\n    \n    <div class=\"mt-6 max-w-3xl mx-auto text-lg text-gray-600\">\n        <p class=\"text-xl font-bold mb-4\">At Apex Auto Detailing, we understand that your car is more than just a mode of transportation. It's an extension of your personal style and comfort.</p>\n        \n        <article>\n            <h2 class=\"font-bold mb-2\">Our Story</h2>\n            <p class=\"text-lg\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet nulla auctor, vestibulum magna sed, convallis ex.</p>\n            <button type=\"button\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Learn More</button>\n        </article>\n        \n        <section>\n            <h2 class=\"font-bold mb-4\">Our Services</h2>\n            <ul>\n                <li class=\"mb-2\">\n                    <a href=\"#\" aria-label=\"Full Detail\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Full Detail</a>\n                </li>\n                <li class=\"mb-4\">\n                    <a href=\"#\" aria-label=\"Interior Only\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Interior Only</a>\n                </li>\n                <li>\n                    <a href=\"#\" aria-label=\"Exterior Wash\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Exterior Wash</a>\n                </li>\n            </ul>\n        </section>\n        \n        <footer>\n            <p>&copy; 2023 Apex Auto Detailing. All rights reserved.</p>\n        </footer>\n    </div>\n\n    <nav aria-label=\"Main Navigation\" role=\"navigation\">\n        <ul>\n            <li><a href=\"#\" aria-label=\"Home\">Home</a></li>\n            <li><a href=\"services.html\" aria-label=\"Services\">Services</a></li>\n            <li class=\"glass-card\">\n                <h3>Testimonials</h3>\n                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n            </li>\n            <li><a href=\"contact.html\" aria-label=\"Contact\">Contact</a></li>\n            <li><a href=\"blog.html\" aria-label=\"Blog\">Blog</a></li>\n        </ul>\n    </nav>\n\n    <footer>\n        <address>\n            Apex Auto Detailing<br>\n            123 Main St, Anytown USA 12345<br>\n            Phone: 555-555-5555<br>\n            Email: <a href=\"#\" aria-label=\"Email\">info@apexautodetailing.com</a>\n        </address>\n    </footer>\n</nav>\n\n<nav>\n    <header class=\"flex justify-between items-center py-4\">\n        <h1 class=\"text-3xl text-primary font-Poppins animate-fadeInUp\">Apex Auto Detailing</h1>\n    </header>\n    <div class=\"nav-container flex justify-between items-center space-x-6\">\n        <a href=\"index.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Home</a>\n        <a href=\"services.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Services</a>\n        <a href=\"about.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">About</a>\n        <a href=\"contact.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl active:bg-primary text-white\">Contact</a>\n        <a href=\"blog.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Blog</a>\n    </div>\n</nav>\n\n<main>\n    <section class=\"glass-card p-8 bg-gradient-to-r from-primary to-secondary\">\n        <header class=\"text-lg text-gray-900 font-Poppins animate-fadeInUp\" style=\"animation-delay: 0.2s;\">Get in Touch</header>\n        <form action=\"\" method=\"post\" id=\"contact-form\">\n            <div class=\"grid grid-cols-1 gap-y-4\">\n                <label for=\"name\">Name:</label>\n                <input type=\"text\" name=\"name\" id=\"name\" required aria-label=\"Name\">\n            </div>\n            <div class=\"grid grid-cols-1 gap-y-4\">\n                <label for=\"email\">Email:</label>\n                <input type=\"email\" name=\"email\" id=\"email\" required aria-label=\"Email\">\n            </div>\n            <div class=\"grid grid-cols-1 gap-y-4\">\n                <label for=\"phone\">Phone:</label>\n                <input type=\"tel\" name=\"phone\" id=\"phone\" required aria-label=\"Phone\">\n            </div>\n            <div class=\"grid grid-cols-1 gap-y-4\">\n                <label for=\"message\">Message:</label>\n                <textarea name=\"message\" id=\"message\" rows=\"10\" cols=\"50\" required aria-label=\"Message\"></textarea>\n            </div>\n            <button type=\"submit\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Send</button>\n        </form>\n    </section>\n</main>\n\n<footer>\n    <nav>\n        <a href=\"map.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl active:bg-primary text-white\">Location</a>\n    </nav>\n    <p>&copy; 2023 Apex Auto Detailing. All rights reserved.</p>\n</footer>\n\n<nav class=\"flex justify-between items-center py-4 bg-color-primary text-white\">\n  <h1 class=\"text-3xl font-heading\">Blog</h1>\n  <ul class=\"space-x-6 md:space-x-12\">\n    <li><a href=\"#\" aria-label=\"Home\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Home</a></li>\n    <li><a href=\"#\" aria-label=\"Services\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Services</a></li>\n    <li><a href=\"#\" aria-label=\"About\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">About</a></li>\n    <li><a href=\"#\" aria-label=\"Contact\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Contact</a></li>\n    <li><a href=\"#\" aria-label=\"Blog\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Blog</a></li>\n    <li><a href=\"#\" aria-label=\"FAQ\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">FAQ</a></li>\n    <li><a href=\"#\" aria-label=\"Testimonials\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Testimonials</a></li>\n    <li><a href=\"#\" aria-label=\"Location\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Location</a></li>\n  </ul>\n</nav>\n\n<section class=\"mt-12\">\n  <header class=\"text-3xl font-heading mb-6\" style=\"animation: fadeInUp 0.8s ease-out both;\">\n    Blog\n  </header>\n  <article class=\"bg-color-secondary p-4 rounded-md shadow-md glass-card hover:-translate-y-2 transition-transform duration-300\">\n    <h2 class=\"text-lg font-heading mb-2\">Latest Posts</h2>\n    <ul>\n      {% for post in content.hints.items %}\n        <li>\n          <a href=\"#\" aria-label=\"{{ post.title }}\" class=\"btn btn-link transition-all duration-300 hover:scale-105 hover:shadow-xl\">{{ post.title }}</a>\n          <p class=\"text-gray-500 text-xs mt-2\">{{ post.date }} | {{ post.summary }}</p>\n        </li>\n      {% endfor %}\n    </ul>\n  </article>\n</section>\n\n<footer class=\"bg-color-secondary p-4 text-white\">\n  <div class=\"flex justify-between items-center py-2\">\n    <a href=\"#\" aria-label=\"Phone\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Phone: {{ phone }}</a>\n    <p>Apex Auto Detailing | Premium detailing, flawless results</p>\n  </div>\n</footer>\n\n<nav aria-label=\"Main Navigation\">\n  <div class=\"flex justify-between mb-4\">\n    <a href=\"#\" class=\"text-lg font-bold text-[#2563EB]\">Apex Auto Detailing</a>\n    <button class=\"lg:hidden\" id=\"mobile-menu-btn\">\n      <svg fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\">\n        <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h8m-8 6h16\"></path>\n      </svg>\n    </button>\n  </div>\n  <ul class=\"hidden lg:flex lg:items-center\">\n    <li><a href=\"#\" class=\"block lg:inline-block px-2 py-2 text-[#3B82F6] hover:bg-[#2563EB] hover:text-white\">Home</a></li>\n    <li><a href=\"services.html\" class=\"block lg:inline-block px-2 py-2 text-[#3B82F6] hover:bg-[#2563EB] hover:text-white\">Services</a></li>\n    <li><a href=\"about.html\" class=\"block lg:inline-block px-2 py-2 text-[#3B82F6] hover:bg-[#2563EB] hover:text-white\">About</a></li>\n    <li><a href=\"contact.html\" class=\"block lg:inline-block px-2 py-2 text-[#3B82F6] hover:bg-[#2563EB] hover:text-white\">Contact</a></li>\n    <li><a href=\"blog.html\" class=\"block lg:inline-block px-2 py-2 text-[#3B82F6] hover:bg-[#2563EB] hover:text-white\">Blog</a></li>\n  </ul>\n  <div class=\"lg:hidden absolute top-1/2 left-0 w-full bg-[#2563EB]\">\n    <ul id=\"mobile-menu\">\n      <li><a href=\"#\" class=\"block px-4 py-2 text-lg font-bold\">Home</a></li>\n      <li><a href=\"services.html\" class=\"block px-4 py-2 text-lg\">Services</a></li>\n      <li><a href=\"about.html\" class=\"block px-4 py-2 text-lg\">About</a></li>\n      <li><a href=\"contact.html\" class=\"block px-4 py-2 text-lg\">Contact</a></li>\n    </ul>\n  </div>\n</nav>\n\n<section class=\"bg-[#0f172a] p-6\">\n  <header class=\"text-white mt-16\">\n    <h1 class=\"text-5xl font-bold\" style=\"animation: fadeInUp 0.8s ease-out both\">Frequently Asked Questions</h1>\n  </header>\n  <main class=\"flex flex-col items-center\">\n    <article>\n      <section class=\"space-y-4\">\n        <div class=\"bg-white rounded-lg shadow-md glass-card w-full\">\n          <div class=\"p-6 bg-[#3B82F6] text-white\">\n            <h2 class=\"text-lg font-bold mb-4\">Q: What services do you offer?</h2>\n            <p class=\"text-lg\">We provide full detail, interior only, exterior wash, and paint correction.</p>\n          </div>\n        </div>\n        <div class=\"bg-white rounded-lg shadow-md glass-card w-full\">\n          <div class=\"p-6 bg-[#3B82F6] text-white\">\n            <h2 class=\"text-lg font-bold mb-4\">Q: How long does it take to get my car detailed?</h2>\n            <p class=\"text-lg\">The time varies based on the service selected. Contact us for an estimate.</p>\n          </div>\n        </div>\n      </section>\n    </article>\n  </main>\n</section>\n\n<footer class=\"bg-[#0f172a] p-6 text-white\">\n  <nav aria-label=\"Main Navigation\">\n    <ul class=\"flex justify-between mb-4\">\n      <li><a href=\"#\" class=\"block lg:inline-block px-2 py-2 text-lg\">Home</a></li>\n      <li><a href=\"services.html\" class=\"block lg:inline-block px-2 py-2 text-lg\">Services</a></li>\n      <li><a href=\"about.html\" class=\"block lg:inline-block px-2 py-2 text-lg\">About</a></li>\n      <li><a href=\"contact.html\" class=\"block lg:inline-block px-2 py-2 text-lg\">Contact</a></li>\n    </ul>\n  </nav>\n  <div class=\"mt-4\">\n    <button class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\" aria-label=\"Get a Quote\">Get a Quote</button>\n  </div>\n</footer>\n\n<nav aria-label=\"Testimonials\">\n  <header>\n    <h1>Apex Auto Detailing</h1>\n    <style>\n      @keyframes fadeInUp {\n        0% {\n          transform: translateY(-100%);\n        }\n        100% {\n          transform: translateY(0);\n        }\n      }\n      .heroHeading {\n        style=\"animation: fadeInUp 0.8s ease-out both\";\n      }\n    </style>\n    <h1 class=\"heroHeading text-4xl font-Poppins leading-tight text-gray-900\">Join Our Community</h1>\n  </header>\n\n  <section>\n    <article>\n      <div class=\"text-lg leading-relaxed\">\n        <p>Don't just take our word for it!</p>\n        <p>We've worked hard to earn the trust of our customers.</p>\n      </div>\n      <ul>\n        @foreach($content->items as $item)\n          <li>{{ $item->name }}:</li>\n          <li>{{ $item->text }}</li>\n        @endforeach\n      </ul>\n    </article>\n\n    <h2 class=\"text-3xl font-Poppins leading-tight mt-8\">What Our Customers Say</h2>\n\n    <div class=\"flex justify-center gap-4\">\n      @foreach($content->items as $item)\n        <button class=\"btn btn-secondary bg-[#2563EB] hover:bg-[#1747CE] transition-all duration-300 hover:scale-105 hover:shadow-xl\" aria-label=\"{{ $item->name }}\">{{ $item->name }}</button>\n      @endforeach\n    </div>\n\n    <h2 class=\"text-3xl font-Poppins leading-tight mt-8\">Our Services</h2>\n\n    <ul>\n      <li><a href=\"/services/full-detail\" class=\"btn btn-primary bg-[#EA580C] hover:bg-[#F59900] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Full Detail</a></li>\n      <li><a href=\"/services/interior-only\" class=\"btn btn-secondary bg-[#3B82F6] hover:bg-[#4495E8] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Interior Only</a></li>\n      <li><a href=\"/services/exterior-wash\" class=\"btn btn-primary bg-[#2563EB] hover:bg-[#1747CE] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Exterior Wash</a></li>\n      <li><a href=\"/services/paint-correction\" class=\"btn btn-secondary bg-[#EA580C] hover:bg-[#F59900] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Paint Correction</a></li>\n    </ul>\n\n    <footer>\n      <p>&copy; {{ date('Y') }} Apex Auto Detailing. All rights reserved.</p>\n      <div class=\"flex justify-center gap-4\">\n        <a href=\"index.html\" class=\"btn btn-primary bg-[#2563EB] hover:bg-[#1747CE] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Home</a>\n        <a href=\"services.html\" class=\"btn btn-secondary bg-[#3B82F6] hover:bg-[#4495E8] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Services</a>\n        <a href=\"about.html\" class=\"btn btn-primary bg-[#2563EB] hover:bg-[#1747CE] transition-all duration-300 hover:scale-105 hover:shadow-xl\">About</a>\n        <a href=\"contact.html\" class=\"btn btn-secondary bg-[#EA580C] hover:bg-[#F59900] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Contact</a>\n        <a href=\"blog.html\" class=\"btn btn-primary bg-[#2563EB] hover:bg-[#1747CE] transition-all duration-300 hover:scale-105 hover:shadow-xl\">Blog</a>\n        <a href=\"faq.html\" class=\"btn btn-secondary bg-[#EA580C] hover:bg-[#F59900] transition-all duration-300 hover:scale-105 hover:shadow-xl\">FAQ</a>\n      </div>\n    </footer>\n  </section>\n</nav>\n\n<section class=\"bg-[#3B82F6] py-24\">\n  <header class=\"text-white text-center lg:text-left mx-auto p-4 lg:p-0\">\n    <h1 class=\"text-[32px] font-Poppins mb-2\" style=\"animation: fadeInUp 0.8s ease-out both\">Apex Auto Detailing</h1>\n    <p class=\"text-lg text-white opacity-75 leading-loose\">Premium detailing, flawless results</p>\n  </header>\n  \n  <main class=\"max-w-[1200px] mx-auto p-4 lg:p-6 xl:p-12\">\n    <article class=\"bg-[#fff] rounded shadow-md glass-card w-full\">\n      <div class=\"flex flex-col sm:flex-row justify-center sm:justify-between mb-8\">\n        <h2 class=\"text-lg font-Poppins mb-2\">Our Location</h2>\n        <a href=\"#\" class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Learn More</a>\n      </div>\n      \n      <div class=\"grid grid-cols-[1fr_3fr] gap-6 sm:gap-12 lg:gap-24\">\n        <div class=\"bg-white rounded shadow-md glass-card w-full\">\n          <h2 class=\"text-lg font-Poppins mb-4\">30.267153, -97.743061</h2>\n          <p class=\"text-sm text-[#666] mb-8\">123 Main St, Austin, TX 78701</p>\n          <ul>\n            <li class=\"flex items-center\">\n              <i class=\"fas fa-map-marker-alt\"></i>\n              <span class=\"ml-2\">Austin, TX 78701</span>\n            </li>\n            <li class=\"flex items-center\">\n              <i class=\"fas fa-phone\"></i>\n              <span class=\"ml-2\">(512) 123-4567</span>\n            </li>\n            <li class=\"flex items-center\">\n              <i class=\"fas fa-envelope\"></i>\n              <span class=\"ml-2\">info@apexautodetailing.com</span>\n            </li>\n          </ul>\n        </div>\n        \n        <div class=\"bg-white rounded shadow-md glass-card w-full\">\n          <h2 class=\"text-lg font-Poppins mb-4\">Open Hours</h2>\n          <p class=\"text-sm text-[#666] mb-8\">Monday - Friday: 9am - 6pm</p>\n        </div>\n      </div>\n    </article>\n    \n    <nav aria-label=\"Main Navigation\">\n      <ul class=\"flex justify-between lg:justify-start sm:flex sm:justify-around mb-12\">\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">Home</a></li>\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">Services</a></li>\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">About</a></li>\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">Contact</a></li>\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">Blog</a></li>\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">FAQ</a></li>\n        <li><a href=\"#\" class=\"btn btn-link transition-all duration-300 hover:text-[#2563EB]\">Testimonials</a></li>\n      </ul>\n    </nav>\n  </main>\n</section>\n\n<style>\n  @keyframes fadeInUp {\n    from {\n      transform: translateY(-100%);\n    }\n    to {\n      transform: translateY(0);\n    }\n  }\n\n  .glass-card:hover:-translate-y-2 {\n    transition: transform duration-300;\n  }\n\n  .btn {\n    @apply rounded-lg py-3 px-6 text-white;\n  }\n</style>\n\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    },
+    {
+      "slug": "services",
+      "title": "Services - Apex Auto Detailing",
+      "purpose": "Page to list and describe all services offered",
+      "sections": [
+        {
+          "id": "40ff7e21",
+          "name": "service-list",
+          "component_type": "service-list",
+          "content": {
+            "items": [
+              {
+                "title": "Full Detail",
+                "description": "Comprehensive interior and exterior cleaning"
+              },
+              {
+                "title": "Interior Only",
+                "description": "Clean, polished, and refreshed interiors"
+              },
+              {
+                "title": "Exterior Wash",
+                "description": "Shiny, streak-free exteriors for your car"
+              },
+              {
+                "title": "Paint Correction",
+                "description": "Restore your car's original shine and color"
+              }
+            ]
+          },
+          "html": "<section id=\"service-list\" class=\"bg-white py-16\">\n  <div class=\"container mx-auto px-4\">\n    <header>\n      <h2 class=\"text-3xl font-bold text-primary mb-8\">Our Services</h2>\n    </header>\n    <main>\n      <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n        <article class=\"bg-secondary p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary\">\n          <h3 class=\"text-xl font-bold text-white mb-4\">Full Detail</h3>\n          <p class=\"text-gray-700\">Comprehensive interior and exterior cleaning.</p>\n        </article>\n        <article class=\"bg-secondary p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary\">\n          <h3 class=\"text-xl font-bold text-white mb-4\">Interior Only</h3>\n          <p class=\"text-gray-700\">Clean, polished, and refreshed interiors.</p>\n        </article>\n        <article class=\"bg-secondary p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary\">\n          <h3 class=\"text-xl font-bold text-white mb-4\">Exterior Wash</h3>\n          <p class=\"text-gray-700\">Shiny, streak-free exteriors for your car.</p>\n        </article>\n        <article class=\"bg-secondary p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary\">\n          <h3 class=\"text-xl font-bold text-white mb-4\">Paint Correction</h3>\n          <p class=\"text-gray-700\">Restore your car's original shine and color.</p>\n        </article>\n      </div>\n    </main>\n  </div>\n</section>",
+          "order": 0
+        }
+      ],
+      "seo": {
+        "title": "Apex Auto Detailing - Full, Interior & Exterior Services",
+        "meta_description": "Discover Apex Auto Detailing's full range of services including full detail, interior only, exterior wash, and paint correction. Get your car looking like new today!",
+        "keywords": [
+          "auto detailing",
+          "car wash",
+          "paint correction",
+          "full detail",
+          "interior cleaning"
+        ],
+        "og_title": "Apex Auto Detailing - Professional Car Detailing Services",
+        "og_description": "Get your car's interior and exterior cleaned and polished to perfection with Apex Auto Detailing. Book now!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Auto Detailing",
+          "description": "Apex Auto Detailing offers a wide range of car detailing services including full detail, interior only, exterior wash, and paint correction.",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Not specified",
+            "addressLocality": "Not specified",
+            "addressRegion": "Not specified",
+            "postalCode": "Not specified"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "17:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "09:00",
+              "closes": "16:00"
+            }
+          ],
+          "serviceArea": [
+            {
+              "@type": "AdministrativeArea",
+              "name": "Local Area"
+            }
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Apex Auto Detailing offer?",
+            "a": "Apex Auto Detailing provides full detail, interior only, exterior wash, and paint correction services."
+          },
+          {
+            "q": "How can I schedule a service with Apex Auto Detailing?",
+            "a": "You can call Apex Auto Detailing at [phone number] or visit their website to schedule an appointment online."
+          },
+          {
+            "q": "What types of vehicles does Apex Auto Detailing detail?",
+            "a": "Apex Auto Detailing services mobile detailing for various vehicle types, including cars and trucks."
+          },
+          {
+            "q": "How long does it take for a full detail service with Apex Auto Detailing?",
+            "a": "A full detail service typically takes about 2-3 hours, depending on the vehicle's condition."
+          },
+          {
+            "q": "What is the location of Apex Auto Detailing?",
+            "a": "Apex Auto Detailing serves Austin TX and offers mobile detailing services throughout the area."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Auto Detailing",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Auto Detailing is a local mobile auto detailing service based in Austin, Texas. They offer comprehensive interior and exterior cleaning packages to keep your vehicle looking its best.",
+        "topic_cluster": "Mobile Auto Detailing Services",
+        "related_topics": [
+          "Vehicle Maintenance",
+          "Car Care Tips",
+          "Automotive Cleaning",
+          "Local Car Washes",
+          "Auto Detailing Equipment"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Services - Apex Auto Detailing</title>\n  <meta name=\"description\" content=\"Premium detailing, flawless results\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Discover Apex Auto Detailing's full range of services including full detail, interior only, exterior wash, and paint correction. Get your car looking like new today!\">\n  <meta name=\"keywords\" content=\"auto detailing, car wash, paint correction, full detail, interior cleaning\">\n  <meta property=\"og:title\" content=\"Apex Auto Detailing - Professional Car Detailing Services\">\n  <meta property=\"og:description\" content=\"Get your car's interior and exterior cleaned and polished to perfection with Apex Auto Detailing. Book now!\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Apex Auto Detailing\",\n  \"description\": \"Apex Auto Detailing offers a wide range of car detailing services including full detail, interior only, exterior wash, and paint correction.\",\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"Not specified\",\n    \"addressLocality\": \"Not specified\",\n    \"addressRegion\": \"Not specified\",\n    \"postalCode\": \"Not specified\"\n  },\n  \"openingHoursSpecification\": [\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Monday\",\n        \"Tuesday\",\n        \"Wednesday\",\n        \"Thursday\",\n        \"Friday\"\n      ],\n      \"opens\": \"09:00\",\n      \"closes\": \"17:00\"\n    },\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Saturday\"\n      ],\n      \"opens\": \"09:00\",\n      \"closes\": \"16:00\"\n    }\n  ],\n  \"serviceArea\": [\n    {\n      \"@type\": \"AdministrativeArea\",\n      \"name\": \"Local Area\"\n    }\n  ]\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What services does Apex Auto Detailing offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Auto Detailing provides full detail, interior only, exterior wash, and paint correction services.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I schedule a service with Apex Auto Detailing?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"You can call Apex Auto Detailing at [phone number] or visit their website to schedule an appointment online.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What types of vehicles does Apex Auto Detailing detail?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Auto Detailing services mobile detailing for various vehicle types, including cars and trucks.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How long does it take for a full detail service with Apex Auto Detailing?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"A full detail service typically takes about 2-3 hours, depending on the vehicle's condition.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What is the location of Apex Auto Detailing?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Apex Auto Detailing serves Austin TX and offers mobile detailing services throughout the area.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<section id=\"service-list\" class=\"bg-white py-16\">\n  <div class=\"container mx-auto px-4\">\n    <header>\n      <h2 class=\"text-3xl font-bold text-primary mb-8\">Our Services</h2>\n    </header>\n    <main>\n      <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n        <article class=\"bg-secondary p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary\">\n          <h3 class=\"text-xl font-bold text-white mb-4\">Full Detail</h3>\n          <p class=\"text-gray-700\">Comprehensive interior and exterior cleaning.</p>\n        </article>\n        <article class=\"bg-secondary p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary\">\n          <h3 class=\"text-xl font-bold text-white mb-4\">Interior Only</h3>\n          <p class=\"text-gray-700\">Clean, polished, and refreshed interiors.</p>\n        </article>\n        <article class=\"bg-secondary p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary\">\n          <h3 class=\"text-xl font-bold text-white mb-4\">Exterior Wash</h3>\n          <p class=\"text-gray-700\">Shiny, streak-free exteriors for your car.</p>\n        </article>\n        <article class=\"bg-secondary p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary\">\n          <h3 class=\"text-xl font-bold text-white mb-4\">Paint Correction</h3>\n          <p class=\"text-gray-700\">Restore your car's original shine and color.</p>\n        </article>\n      </div>\n    </main>\n  </div>\n</section>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What services does Apex Auto Detailing offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Auto Detailing provides full detail, interior only, exterior wash, and paint correction services.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I schedule a service with Apex Auto Detailing?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">You can call Apex Auto Detailing at [phone number] or visit their website to schedule an appointment online.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What types of vehicles does Apex Auto Detailing detail?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Auto Detailing services mobile detailing for various vehicle types, including cars and trucks.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How long does it take for a full detail service with Apex Auto Detailing?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">A full detail service typically takes about 2-3 hours, depending on the vehicle's condition.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What is the location of Apex Auto Detailing?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Apex Auto Detailing serves Austin TX and offers mobile detailing services throughout the area.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Services",
+      "nav_order": 2
+    },
+    {
+      "slug": "about",
+      "title": "About - Apex Auto Detailing",
+      "purpose": "Page to provide information about the company",
+      "sections": [
+        {
+          "id": "fa7636c5",
+          "name": "text-block",
+          "component_type": "text-block",
+          "content": {
+            "headline": "About Us",
+            "paragraphs": [
+              "At Apex Auto Detailing, we understand that your car is more than just a mode of transportation. It's an extension of your personal style and comfort. That's why we offer premium detailing services to ensure your vehicle looks its best."
+            ]
+          },
+          "html": "<nav class=\"text-lg py-12 flex justify-between mb-4\">\n  <h1 class=\"text-3xl text-center font-Poppins leading-tight\">Apex Auto Detailing</h1>\n  <div class=\"flex space-x-4\">\n    <a href=\"index.html\" aria-label=\"Go back to home page\" class=\"transition-all duration-300 hover:scale-105 hover:shadow-xl btn\">Home</a>\n    <a href=\"services.html\" aria-label=\"View services\" class=\"transition-all duration-300 hover:scale-105 hover:shadow-xl btn\">Services</a>\n    <a href=\"about.html\" aria-label=\"Learn about us\" class=\"transition-all duration-300 hover:scale-105 hover:shadow-xl btn\">About</a>\n    <a href=\"contact.html\" aria-label=\"Get in touch\" class=\"transition-all duration-300 hover:scale-105 hover:shadow-xl btn\">Contact</a>\n  </div>\n</nav>\n\n<header class=\"py-12 bg-linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%) text-center\">\n  <h1 class=\"text-5xl font-Poppins leading-tight animate-fadeInUp\" style=\"animation: fadeInUp 0.8s ease-out both\">About Us</h1>\n</header>\n\n<main>\n  <article class=\"glass-card w-full md:w-1/2 lg:w-1/3 xl:w-1/6 p-12\">\n    <h2 class=\"text-lg font-Poppins mb-4\">Our Mission</h2>\n    <p>At Apex Auto Detailing, we understand that your car is more than just a mode of transportation. It's an extension of your personal style and comfort. That's why we offer premium detailing services to ensure your vehicle looks its best.</p>\n  </article>\n\n  <article class=\"glass-card w-full md:w-1/2 lg:w-1/3 xl:w-1/6 p-12\">\n    <h2 class=\"text-lg font-Poppins mb-4\">Our Services</h2>\n    <ul>\n      <li>Full Detail</li>\n      <li>Interior Only</li>\n      <li>Exterior Wash</li>\n      <li>Paint Correction</li>\n    </ul>\n  </article>\n\n  <section class=\"text-lg py-12\">\n    <h2 class=\"text-3xl font-Poppins leading-tight mb-4\">Get in Touch</h2>\n    <div class=\"flex flex-wrap justify-center -mx-4\">\n      <div class=\"w-full md:w-1/2 lg:w-1/3 xl:w-1/6 p-12 mb-8 md:mb-0\">\n        <button aria-label=\"Contact us\" class=\"transition-all duration-300 hover:scale-105 hover:shadow-xl btn\">Contact</button>\n      </div>\n    </div>\n\n    <footer class=\"py-4 text-lg\">\n      <p>&copy; 2023 Apex Auto Detailing. All rights reserved.</p>\n    </footer>\n  </section>\n</main>",
+          "order": 0
+        }
+      ],
+      "seo": {
+        "title": "Apex Auto Detailing - About Our Company",
+        "meta_description": "Learn more about Apex Auto Detailing. Get a full detail, interior wash, exterior wash, or paint correction service today!",
+        "keywords": [
+          "auto detailing",
+          "full detail",
+          "interior wash",
+          "exterior wash",
+          "paint correction",
+          "Apex Auto Detailing"
+        ],
+        "og_title": "About Apex Auto Detailing",
+        "og_description": "Discover our services and learn more about Apex Auto Detailing. Get your car detailed today!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "http://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Auto Detailing",
+          "description": "Apex Auto Detailing provides full detail, interior wash, exterior wash, and paint correction services.",
+          "url": "https://www.apexautodetailing.com/about",
+          "logo": "https://www.apexautodetailing.com/images/logo.png",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Main St",
+            "addressLocality": "Anytown",
+            "addressRegion": "CA",
+            "postalCode": "12345"
+          },
+          "telephone": "+1-800-555-1234",
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "18:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "10:00",
+              "closes": "17:00"
+            }
+          ],
+          "sameAs": [
+            "https://www.facebook.com/apexautodetailing",
+            "https://twitter.com/apexautodetailing",
+            "https://www.instagram.com/apexautodetailing"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Apex Auto Detailing offer?",
+            "a": "Apex Auto Detailing provides full detail, interior only, exterior wash, and paint correction services."
+          },
+          {
+            "q": "Where is Apex Auto Detailing located?",
+            "a": "Apex Auto Detailing serves Austin TX."
+          },
+          {
+            "q": "What types of packages do you offer?",
+            "a": "They offer interior and exterior packages."
+          },
+          {
+            "q": "How can I contact Apex Auto Detailing?",
+            "a": "You can call them or visit their website to get in touch."
+          },
+          {
+            "q": "Do you provide mobile detailing services?",
+            "a": "Yes, Apex Auto Detailing offers mobile auto detailing services."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Auto Detailing",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Auto Detailing is a professional car detailing service based in Austin TX. They offer a range of services including full detail, interior only, exterior wash, and paint correction to keep your vehicle looking its best.",
+        "topic_cluster": "Auto Detailing Services",
+        "related_topics": [
+          "Car Care",
+          "Mobile Detailing",
+          "Vehicle Maintenance",
+          "Interior Cleaning",
+          "Exterior Wash"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>About - Apex Auto Detailing</title>\n  <meta name=\"description\" content=\"Premium detailing, flawless results\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<nav class=\"text-lg py-12 flex justify-between mb-4\">\n  <h1 class=\"text-3xl text-center font-Poppins leading-tight\">Apex Auto Detailing</h1>\n  <div class=\"flex space-x-4\">\n    <a href=\"index.html\" aria-label=\"Go back to home page\" class=\"transition-all duration-300 hover:scale-105 hover:shadow-xl btn\">Home</a>\n    <a href=\"services.html\" aria-label=\"View services\" class=\"transition-all duration-300 hover:scale-105 hover:shadow-xl btn\">Services</a>\n    <a href=\"about.html\" aria-label=\"Learn about us\" class=\"transition-all duration-300 hover:scale-105 hover:shadow-xl btn\">About</a>\n    <a href=\"contact.html\" aria-label=\"Get in touch\" class=\"transition-all duration-300 hover:scale-105 hover:shadow-xl btn\">Contact</a>\n  </div>\n</nav>\n\n<header class=\"py-12 bg-linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%) text-center\">\n  <h1 class=\"text-5xl font-Poppins leading-tight animate-fadeInUp\" style=\"animation: fadeInUp 0.8s ease-out both\">About Us</h1>\n</header>\n\n<main>\n  <article class=\"glass-card w-full md:w-1/2 lg:w-1/3 xl:w-1/6 p-12\">\n    <h2 class=\"text-lg font-Poppins mb-4\">Our Mission</h2>\n    <p>At Apex Auto Detailing, we understand that your car is more than just a mode of transportation. It's an extension of your personal style and comfort. That's why we offer premium detailing services to ensure your vehicle looks its best.</p>\n  </article>\n\n  <article class=\"glass-card w-full md:w-1/2 lg:w-1/3 xl:w-1/6 p-12\">\n    <h2 class=\"text-lg font-Poppins mb-4\">Our Services</h2>\n    <ul>\n      <li>Full Detail</li>\n      <li>Interior Only</li>\n      <li>Exterior Wash</li>\n      <li>Paint Correction</li>\n    </ul>\n  </article>\n\n  <section class=\"text-lg py-12\">\n    <h2 class=\"text-3xl font-Poppins leading-tight mb-4\">Get in Touch</h2>\n    <div class=\"flex flex-wrap justify-center -mx-4\">\n      <div class=\"w-full md:w-1/2 lg:w-1/3 xl:w-1/6 p-12 mb-8 md:mb-0\">\n        <button aria-label=\"Contact us\" class=\"transition-all duration-300 hover:scale-105 hover:shadow-xl btn\">Contact</button>\n      </div>\n    </div>\n\n    <footer class=\"py-4 text-lg\">\n      <p>&copy; 2023 Apex Auto Detailing. All rights reserved.</p>\n    </footer>\n  </section>\n</main>\n\n</body>\n</html>",
+      "nav_label": "About",
+      "nav_order": 3
+    },
+    {
+      "slug": "contact",
+      "title": "Contact - Apex Auto Detailing",
+      "purpose": "Page for customers to contact the business",
+      "sections": [
+        {
+          "id": "9c9a8583",
+          "name": "form",
+          "component_type": "form",
+          "content": {
+            "headline": "Get in Touch",
+            "fields": [
+              {
+                "label": "Name",
+                "type": "text"
+              },
+              {
+                "label": "Email",
+                "type": "email"
+              },
+              {
+                "label": "Phone",
+                "type": "tel"
+              },
+              {
+                "label": "Message",
+                "type": "textarea"
+              }
+            ]
+          },
+          "html": "<nav aria-label=\"Main Navigation\">\n    <ul>\n        <li><a href=\"index.html\" class=\"btn\">Home</a></li>\n        <li><a href=\"services.html\" class=\"btn\">Services</a></li>\n        <li><a href=\"about.html\" class=\"btn\">About</a></li>\n        <li><a href=\"contact.html\" class=\"btn\">Contact</a></li>\n    </ul>\n    <div class=\"space-y-4\">\n        <header>\n            <h1 class=\"text-3xl font-Poppins leading-tight text-gray-900\" style=\"animation: fadeInUp 0.8s ease-out both;\">Get in Touch with Apex Auto Detailing</h1>\n        </header>\n    </div>\n</nav>\n\n<section id=\"contact\">\n    <main>\n        <article class=\"mt-16 lg:mt-24\">\n            <form action=\"/contact\" method=\"post\" class=\"flex flex-col space-y-4\">\n                <div>\n                    <label for=\"name\" class=\"block\">Name:</label>\n                    <input type=\"text\" id=\"name\" name=\"name\" class=\"px-3 py-2 border rounded text-lg focus:outline-none\">\n                </div>\n                <div>\n                    <label for=\"email\" class=\"block\">Email:</label>\n                    <input type=\"email\" id=\"email\" name=\"email\" class=\"px-3 py-2 border rounded text-lg focus:outline-none\">\n                </div>\n                <div>\n                    <label for=\"phone\" class=\"block\">Phone:</label>\n                    <input type=\"tel\" id=\"phone\" name=\"phone\" class=\"px-3 py-2 border rounded text-lg focus:outline-none\">\n                </div>\n                <div>\n                    <label for=\"message\" class=\"block\">Message:</label>\n                    <textarea id=\"message\" name=\"message\" rows=\"4\" cols=\"50\" class=\"px-3 py-2 border rounded\"></textarea>\n                </div>\n                <button type=\"submit\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Get in Touch</button>\n            </form>\n        </article>\n    </main>\n</section>\n\n<footer class=\"text-center mt-16 lg:mt-24\">\n    <p>&copy; 2023 Apex Auto Detailing. All Rights Reserved.</p>\n    <div class=\"flex justify-between space-x-4\">\n        <a href=\"#\" class=\"btn btn-primary\">Contact Us</a>\n        <ul class=\"list-none space-y-2\">\n            <li><a href=\"index.html\" class=\"btn btn-secondary\">Home</a></li>\n            <li><a href=\"services.html\" class=\"btn btn-secondary\">Services</a></li>\n            <li><a href=\"about.html\" class=\"btn btn-secondary\">About</a></li>\n            <li><a href=\"contact.html\" class=\"btn btn-primary\">Contact Us</a></li>\n        </ul>\n    </div>\n</footer>\n\n<div class=\"glass-card shadow-md hover:shadow-2xl transition-all duration-300\">\n    <h3>Phone:</h3>\n    <p>(123) 456-7890</p>\n</div>\n\n<div class=\"glass-card shadow-md hover:shadow-2xl transition-all duration-300\">\n    <h3>Email:</h3>\n    <p><a href=\"mailto:info@apexautodetailing.com\">info@apexautodetailing.com</a></p>\n</div>\n\n<div class=\"glass-card shadow-md hover:shadow-2xl transition-all duration-300\">\n    <h3>Address:</h3>\n    <p>Apt 123, 456 Main St. Anytown, USA 12345</p>\n</div>",
+          "order": 0
+        }
+      ],
+      "seo": {
+        "title": "Apex Auto Detailing - Contact Us for Full Detail, Interior Only, Exterior Wash, and Paint Correction",
+        "meta_description": "Contact Apex Auto Detailing today to schedule a full detail, interior only, exterior wash, or paint correction service.",
+        "keywords": [
+          "Apex Auto Detailing",
+          "contact us",
+          "full detail",
+          "interior only",
+          "exterior wash",
+          "paint correction"
+        ],
+        "og_title": "Apex Auto Detailing - Contact Us",
+        "og_description": "Get in touch with Apex Auto Detailing for top-notch car detailing services including full detail, interior only, exterior wash, and paint correction.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "http://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Auto Detailing",
+          "url": "https://www.apexautodetailing.com/contact",
+          "logo": "https://www.apexautodetailing.com/images/logo.png",
+          "image": "https://www.apexautodetailing.com/images/services.jpg",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Detail St.",
+            "addressLocality": "City",
+            "addressRegion": "State",
+            "postalCode": "12345",
+            "addressCountry": "US"
+          },
+          "telephone": "+1-555-123-4567",
+          "email": "contact@apexautodetailing.com",
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "17:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "08:00",
+              "closes": "16:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Sunday"
+              ],
+              "opens": "10:00",
+              "closes": "15:00"
+            }
+          ],
+          "sameAs": [
+            "https://www.facebook.com/apexautodetailing",
+            "https://twitter.com/ApexAutoDetail",
+            "https://www.instagram.com/apexautodetailing/"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Apex Auto Detailing offer?",
+            "a": "Apex Auto Detailing provides full detail, interior only, exterior wash, and paint correction services."
+          },
+          {
+            "q": "How can I contact Apex Auto Detailing?",
+            "a": "You can contact Apex Auto Detailing by visiting their website or calling them directly."
+          },
+          {
+            "q": "What areas does Apex Auto Detailing serve?",
+            "a": "Apex Auto Detailing serves the Austin TX area with its mobile detailing services."
+          },
+          {
+            "q": "Do they offer both interior and exterior detailing packages?",
+            "a": "Yes, Apex Auto Detailing offers both interior only and full detail (which includes interior and exterior) packages."
+          },
+          {
+            "q": "How do I schedule an appointment with Apex Auto Detailing?",
+            "a": "You can schedule an appointment by calling their phone number or visiting their website to book online."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Auto Detailing",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Auto Detailing is a mobile detailing service based in Austin, TX, offering a variety of car cleaning and restoration services including full detail, interior only, exterior wash, and paint correction.",
+        "topic_cluster": "Mobile Car Detailing Services",
+        "related_topics": [
+          "Car Cleaning",
+          "Auto Restoration",
+          "Mobile Detailing",
+          "Car Maintenance",
+          "Local Car Detailing"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Contact - Apex Auto Detailing</title>\n  <meta name=\"description\" content=\"Premium detailing, flawless results\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<nav aria-label=\"Main Navigation\">\n    <ul>\n        <li><a href=\"index.html\" class=\"btn\">Home</a></li>\n        <li><a href=\"services.html\" class=\"btn\">Services</a></li>\n        <li><a href=\"about.html\" class=\"btn\">About</a></li>\n        <li><a href=\"contact.html\" class=\"btn\">Contact</a></li>\n    </ul>\n    <div class=\"space-y-4\">\n        <header>\n            <h1 class=\"text-3xl font-Poppins leading-tight text-gray-900\" style=\"animation: fadeInUp 0.8s ease-out both;\">Get in Touch with Apex Auto Detailing</h1>\n        </header>\n    </div>\n</nav>\n\n<section id=\"contact\">\n    <main>\n        <article class=\"mt-16 lg:mt-24\">\n            <form action=\"/contact\" method=\"post\" class=\"flex flex-col space-y-4\">\n                <div>\n                    <label for=\"name\" class=\"block\">Name:</label>\n                    <input type=\"text\" id=\"name\" name=\"name\" class=\"px-3 py-2 border rounded text-lg focus:outline-none\">\n                </div>\n                <div>\n                    <label for=\"email\" class=\"block\">Email:</label>\n                    <input type=\"email\" id=\"email\" name=\"email\" class=\"px-3 py-2 border rounded text-lg focus:outline-none\">\n                </div>\n                <div>\n                    <label for=\"phone\" class=\"block\">Phone:</label>\n                    <input type=\"tel\" id=\"phone\" name=\"phone\" class=\"px-3 py-2 border rounded text-lg focus:outline-none\">\n                </div>\n                <div>\n                    <label for=\"message\" class=\"block\">Message:</label>\n                    <textarea id=\"message\" name=\"message\" rows=\"4\" cols=\"50\" class=\"px-3 py-2 border rounded\"></textarea>\n                </div>\n                <button type=\"submit\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Get in Touch</button>\n            </form>\n        </article>\n    </main>\n</section>\n\n<footer class=\"text-center mt-16 lg:mt-24\">\n    <p>&copy; 2023 Apex Auto Detailing. All Rights Reserved.</p>\n    <div class=\"flex justify-between space-x-4\">\n        <a href=\"#\" class=\"btn btn-primary\">Contact Us</a>\n        <ul class=\"list-none space-y-2\">\n            <li><a href=\"index.html\" class=\"btn btn-secondary\">Home</a></li>\n            <li><a href=\"services.html\" class=\"btn btn-secondary\">Services</a></li>\n            <li><a href=\"about.html\" class=\"btn btn-secondary\">About</a></li>\n            <li><a href=\"contact.html\" class=\"btn btn-primary\">Contact Us</a></li>\n        </ul>\n    </div>\n</footer>\n\n<div class=\"glass-card shadow-md hover:shadow-2xl transition-all duration-300\">\n    <h3>Phone:</h3>\n    <p>(123) 456-7890</p>\n</div>\n\n<div class=\"glass-card shadow-md hover:shadow-2xl transition-all duration-300\">\n    <h3>Email:</h3>\n    <p><a href=\"mailto:info@apexautodetailing.com\">info@apexautodetailing.com</a></p>\n</div>\n\n<div class=\"glass-card shadow-md hover:shadow-2xl transition-all duration-300\">\n    <h3>Address:</h3>\n    <p>Apt 123, 456 Main St. Anytown, USA 12345</p>\n</div>\n\n</body>\n</html>",
+      "nav_label": "Contact",
+      "nav_order": 4
+    },
+    {
+      "slug": "blog",
+      "title": "Blog - Apex Auto Detailing",
+      "purpose": "Page to display blog posts",
+      "sections": [
+        {
+          "id": "35d7403b",
+          "name": "blog-list",
+          "component_type": "blog-list",
+          "content": {
+            "items": [
+              {
+                "title": "Blog Post Title 1",
+                "date": "2023-04-01",
+                "summary": "Summary of blog post"
+              },
+              {
+                "title": "Blog Post Title 2",
+                "date": "2023-04-02",
+                "summary": "Summary of blog post"
+              }
+            ]
+          },
+          "html": "<nav>\n  <div class=\"container mx-auto py-4\">\n    <h1 class=\"text-3xl font-Poppins text-center mb-8\">Blog</h1>\n    <section class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n      <article class=\"glass-card bg-linear-gradient(135deg, #2563EB 0%, #3B82F6 60%, #EA580C 100%) w-full h-80\" aria-label=\"Latest blog posts\">\n        <h1 class=\"text-xl font-Poppins text-white bg-linear-gradient(90deg, var(--color-primary),var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">Blog Post Title 1</h1>\n        <p class=\"text-lg font-Open-Sans mt-4 text-gray-800\">Published on April 1st, 2023.</p>\n      </article>\n      <article class=\"glass-card bg-linear-gradient(135deg, #2563EB 0%, #3B82F6 60%, #EA580C 100%) w-full h-80\" aria-label=\"Latest blog posts\">\n        <h1 class=\"text-xl font-Poppins text-white bg-linear-gradient(90deg,var(--color-primary),var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">Blog Post Title 2</h1>\n        <p class=\"text-lg font-Open-Sans mt-4 text-gray-800\">Published on April 2nd, 2023.</p>\n      </article>\n      <article class=\"glass-card bg-linear-gradient(135deg, #2563EB 0%, #3B82F6 60%, #EA580C 100%) w-full h-80\" aria-label=\"Latest blog posts\">\n        <h1 class=\"text-xl font-Poppins text-white bg-linear-gradient(90deg,var(--color-primary),var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">Blog Post Title 3</h1>\n        <p class=\"text-lg font-Open-Sans mt-4 text-gray-800\">Published on April 3rd, 2023.</p>\n      </article>\n    </section>\n    <div class=\"flex justify-center mt-8\">\n      <a href=\"#\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\" aria-label=\"Read more blog posts\">Read More</a>\n    </div>\n  </div>\n</nav>\n\n<footer class=\"container mx-auto py-4 bg-gray-200\">\n  <div class=\"flex justify-center text-lg font-Open-Sans mt-8\">\n    <p>2023 Apex Auto Detailing. All rights reserved.</p>\n  </div>\n</footer>",
+          "order": 0
+        }
+      ],
+      "seo": {
+        "title": "Apex Auto Detailing Blog - Get Your Car Sparkling Clean!",
+        "meta_description": "Read our blog for tips on car detailing, maintenance, and care. Learn how to keep your vehicle looking its best with Apex Auto Detailing.",
+        "keywords": [
+          "car detailing",
+          "auto detail services",
+          "vehicle maintenance",
+          "car wash",
+          "paint correction"
+        ],
+        "og_title": "Apex Auto Detailing Blog - Get Your Car Sparkling Clean!",
+        "og_description": "Read our blog for tips on car detailing, maintenance, and care. Learn how to keep your vehicle looking its best with Apex Auto Detailing.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Auto Detailing",
+          "description": "Apex Auto Detailing provides full detail, interior only, exterior wash, and paint correction services for vehicles.",
+          "url": "https://apexautodetailing.com/blog",
+          "logo": "https://apexautodetailing.com/logo.png",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Main St",
+            "addressLocality": "Anytown",
+            "addressRegion": "CA",
+            "postalCode": "12345"
+          },
+          "telephone": "+1-800-555-1234",
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "18:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "09:00",
+              "closes": "17:00"
+            }
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Apex Auto Detailing offer?",
+            "a": "Apex Auto Detailing provides full detail, interior only, exterior wash, and paint correction services."
+          },
+          {
+            "q": "Where is Apex Auto Detailing located?",
+            "a": "Apex Auto Detailing serves Austin TX."
+          },
+          {
+            "q": "How can I book an appointment with Apex Auto Detailing?",
+            "a": "You can call Apex Auto Detailing or visit their website to book an appointment."
+          },
+          {
+            "q": "What types of packages do they offer?",
+            "a": "They offer interior and exterior packages."
+          },
+          {
+            "q": "Is Apex Auto Detailing mobile?",
+            "a": "Yes, Apex Auto Detailing is a mobile auto detailing service."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Auto Detailing",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Auto Detailing is a mobile auto detailing business based in Austin TX, offering full detail, interior only, exterior wash, and paint correction services.",
+        "topic_cluster": "Mobile Auto Detailing Services",
+        "related_topics": [
+          "Car Detailing",
+          "Mobile Car Wash",
+          "Interior Cleaning",
+          "Exterior Maintenance",
+          "Paint Correction"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Blog - Apex Auto Detailing</title>\n  <meta name=\"description\" content=\"Premium detailing, flawless results\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<nav>\n  <div class=\"container mx-auto py-4\">\n    <h1 class=\"text-3xl font-Poppins text-center mb-8\">Blog</h1>\n    <section class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n      <article class=\"glass-card bg-linear-gradient(135deg, #2563EB 0%, #3B82F6 60%, #EA580C 100%) w-full h-80\" aria-label=\"Latest blog posts\">\n        <h1 class=\"text-xl font-Poppins text-white bg-linear-gradient(90deg, var(--color-primary),var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">Blog Post Title 1</h1>\n        <p class=\"text-lg font-Open-Sans mt-4 text-gray-800\">Published on April 1st, 2023.</p>\n      </article>\n      <article class=\"glass-card bg-linear-gradient(135deg, #2563EB 0%, #3B82F6 60%, #EA580C 100%) w-full h-80\" aria-label=\"Latest blog posts\">\n        <h1 class=\"text-xl font-Poppins text-white bg-linear-gradient(90deg,var(--color-primary),var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">Blog Post Title 2</h1>\n        <p class=\"text-lg font-Open-Sans mt-4 text-gray-800\">Published on April 2nd, 2023.</p>\n      </article>\n      <article class=\"glass-card bg-linear-gradient(135deg, #2563EB 0%, #3B82F6 60%, #EA580C 100%) w-full h-80\" aria-label=\"Latest blog posts\">\n        <h1 class=\"text-xl font-Poppins text-white bg-linear-gradient(90deg,var(--color-primary),var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">Blog Post Title 3</h1>\n        <p class=\"text-lg font-Open-Sans mt-4 text-gray-800\">Published on April 3rd, 2023.</p>\n      </article>\n    </section>\n    <div class=\"flex justify-center mt-8\">\n      <a href=\"#\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\" aria-label=\"Read more blog posts\">Read More</a>\n    </div>\n  </div>\n</nav>\n\n<footer class=\"container mx-auto py-4 bg-gray-200\">\n  <div class=\"flex justify-center text-lg font-Open-Sans mt-8\">\n    <p>2023 Apex Auto Detailing. All rights reserved.</p>\n  </div>\n</footer>\n\n</body>\n</html>",
+      "nav_label": "Blog",
+      "nav_order": 5
+    },
+    {
+      "slug": "faq",
+      "title": "FAQ - Apex Auto Detailing",
+      "purpose": "Page to answer frequently asked questions",
+      "sections": [
+        {
+          "id": "691b57d1",
+          "name": "faq-list",
+          "component_type": "faq-list",
+          "content": {
+            "items": [
+              {
+                "question": "What services do you offer?",
+                "answer": "We provide full detail, interior only, exterior wash, and paint correction."
+              },
+              {
+                "question": "How long does it take to get my car detailed?",
+                "answer": "The time varies based on the service selected. Contact us for an estimate."
+              }
+            ]
+          },
+          "html": "<nav class=\"flex justify-between items-center py-4\">\n  <a href=\"index.html\" class=\"text-lg font-bold text-primary\">Apex Auto Detailing</a>\n  <button class=\"lg:hidden flex items-center gap-2\" aria-label=\"Toggle menu\">\n    Menu\n    <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-4 h-4\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\">\n      <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h8m-8 6h16\" />\n    </svg>\n  </button>\n</nav>\n\n<header class=\"text-primary py-10\">\n  <h1 class=\"font-bold text-lg mb-2\">Frequently Asked Questions</h1>\n  <p class=\"mb-8 leading-loose\">Our FAQ section has everything you need to know about our services and the detailing process.</p>\n</header>\n\n<main class=\"grid grid-cols-1 md:grid-cols-2 gap-10\">\n  <section class=\"glass-card bg-gradient-to-r from-primary to-secondary rounded shadow-lg p-8\">\n    <h3 class=\"text-lg mb-4 font-bold\">What services do you offer?</h3>\n    <p class=\"mb-8 leading-loose\">We provide full detail, interior only, exterior wash, and paint correction.</p>\n    <button class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\" aria-label=\"Learn more about our services\">\n      Learn More\n    </button>\n  </section>\n\n  <article class=\"glass-card bg-gradient-to-r from-primary to-secondary rounded shadow-lg p-8\">\n    <h3 class=\"text-lg mb-4 font-bold\">How long does it take to get my car detailed?</h3>\n    <p class=\"mb-8 leading-loose\">The time varies based on the service selected. Contact us for an estimate.</p>\n  </article>\n</main>\n\n<footer class=\"py-10 bg-secondary text-primary\">\n  <nav class=\"flex justify-between items-center mb-4\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Home</a>\n    <a href=\"services.html\" class=\"text-lg font-bold\">Services</a>\n    <a href=\"about.html\" class=\"text-lg font-bold\">About</a>\n    <a href=\"contact.html\" class=\"text-lg font-bold\">Contact</a>\n    <a href=\"blog.html\" class=\"text-lg font-bold\">Blog</a>\n    <a href=\"faq.html\" class=\"text-lg font-bold active\">FAQ</a>\n    <a href=\"testimonials.html\" class=\"text-lg font-bold\">Testimonials</a>\n    <a href=\"map.html\" class=\"text-lg font-bold\">Location</a>\n  </nav>\n  <p>&copy; Apex Auto Detailing. All rights reserved.</p>\n</footer>\n\n<style>\n  @keyframes fadeInUp {\n    from { transform: translateY(-20px); }\n    to { transform: translateY(0); }\n  }\n\n  .glass-card {\n    transition: all 0.3s ease-in-out;\n  }\n\n  .glass-card:hover {\n    -translate-y-2;\n    transition-transform duration-300;\n    box-shadow: 0 4px 8px rgba(105, 179, 246, 0.4);\n  }\n</style>",
+          "order": 0
+        }
+      ],
+      "seo": {
+        "title": "Apex Auto Detailing: Your Ultimate Car Care Solution",
+        "meta_description": "Get your car looking its best with Apex Auto Detailing's full detail, interior only, exterior wash, and paint correction services. Contact us today!",
+        "keywords": [
+          "car detailing",
+          "auto detail",
+          "full detail",
+          "interior wash",
+          "exterior wash",
+          "paint correction",
+          "apex auto detailing"
+        ],
+        "og_title": "Apex Auto Detailing: Your Ultimate Car Care Solution",
+        "og_description": "Get your car looking its best with Apex Auto Detailing's full detail, interior only, exterior wash, and paint correction services. Contact us today!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Auto Detailing",
+          "description": "Get your car looking its best with Apex Auto Detailing's full detail, interior only, exterior wash, and paint correction services.",
+          "url": "https://www.apexautodetailing.com/faq",
+          "logo": "https://www.apexautodetailing.com/logo.png",
+          "image": "https://www.apexautodetailing.com/image.jpg",
+          "telephone": "+1-800-555-1234",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Main St",
+            "addressLocality": "Anytown",
+            "addressRegion": "CA",
+            "postalCode": "12345"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "17:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "09:00",
+              "closes": "16:00"
+            }
+          ],
+          "sameAs": [
+            "https://www.facebook.com/apexautodetailing",
+            "https://twitter.com/apexautodetailing",
+            "https://www.instagram.com/apexautodetailing"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Apex Auto Detailing offer?",
+            "a": "Apex Auto Detailing provides full detail, interior only, exterior wash, and paint correction."
+          },
+          {
+            "q": "How can I book an appointment with Apex Auto Detailing?",
+            "a": "You can book an appointment by calling our mobile detailing service or visiting our website to schedule a convenient time."
+          },
+          {
+            "q": "What is the cost for a full detail at Apex Auto Detailing?",
+            "a": "The cost for a full detail varies based on vehicle size and specific needs, but we offer competitive pricing options."
+          },
+          {
+            "q": "Is Apex Auto Detailing available in other locations besides Austin TX?",
+            "a": "Apex Auto Detailing currently serves only the Austin, TX area."
+          },
+          {
+            "q": "How long does it take for Apex Auto Detailing to complete a service?",
+            "a": "Completion time varies depending on the type of service and vehicle complexity, but we strive to provide quick turnaround times."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Auto Detailing",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Auto Detailing is a mobile detailing service based in Austin, TX. We offer comprehensive interior and exterior cleaning packages to keep your vehicle looking its best.",
+        "topic_cluster": "Mobile Auto Detailing Services",
+        "related_topics": [
+          "Car Detailing",
+          "Vehicle Maintenance",
+          "Automotive Cleaning",
+          "Mobile Car Wash",
+          "Interior Cleaning"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>FAQ - Apex Auto Detailing</title>\n  <meta name=\"description\" content=\"Premium detailing, flawless results\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<nav class=\"flex justify-between items-center py-4\">\n  <a href=\"index.html\" class=\"text-lg font-bold text-primary\">Apex Auto Detailing</a>\n  <button class=\"lg:hidden flex items-center gap-2\" aria-label=\"Toggle menu\">\n    Menu\n    <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-4 h-4\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\">\n      <path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 6h16M4 12h8m-8 6h16\" />\n    </svg>\n  </button>\n</nav>\n\n<header class=\"text-primary py-10\">\n  <h1 class=\"font-bold text-lg mb-2\">Frequently Asked Questions</h1>\n  <p class=\"mb-8 leading-loose\">Our FAQ section has everything you need to know about our services and the detailing process.</p>\n</header>\n\n<main class=\"grid grid-cols-1 md:grid-cols-2 gap-10\">\n  <section class=\"glass-card bg-gradient-to-r from-primary to-secondary rounded shadow-lg p-8\">\n    <h3 class=\"text-lg mb-4 font-bold\">What services do you offer?</h3>\n    <p class=\"mb-8 leading-loose\">We provide full detail, interior only, exterior wash, and paint correction.</p>\n    <button class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\" aria-label=\"Learn more about our services\">\n      Learn More\n    </button>\n  </section>\n\n  <article class=\"glass-card bg-gradient-to-r from-primary to-secondary rounded shadow-lg p-8\">\n    <h3 class=\"text-lg mb-4 font-bold\">How long does it take to get my car detailed?</h3>\n    <p class=\"mb-8 leading-loose\">The time varies based on the service selected. Contact us for an estimate.</p>\n  </article>\n</main>\n\n<footer class=\"py-10 bg-secondary text-primary\">\n  <nav class=\"flex justify-between items-center mb-4\">\n    <a href=\"index.html\" class=\"text-lg font-bold\">Home</a>\n    <a href=\"services.html\" class=\"text-lg font-bold\">Services</a>\n    <a href=\"about.html\" class=\"text-lg font-bold\">About</a>\n    <a href=\"contact.html\" class=\"text-lg font-bold\">Contact</a>\n    <a href=\"blog.html\" class=\"text-lg font-bold\">Blog</a>\n    <a href=\"faq.html\" class=\"text-lg font-bold active\">FAQ</a>\n    <a href=\"testimonials.html\" class=\"text-lg font-bold\">Testimonials</a>\n    <a href=\"map.html\" class=\"text-lg font-bold\">Location</a>\n  </nav>\n  <p>&copy; Apex Auto Detailing. All rights reserved.</p>\n</footer>\n\n<style>\n  @keyframes fadeInUp {\n    from { transform: translateY(-20px); }\n    to { transform: translateY(0); }\n  }\n\n  .glass-card {\n    transition: all 0.3s ease-in-out;\n  }\n\n  .glass-card:hover {\n    -translate-y-2;\n    transition-transform duration-300;\n    box-shadow: 0 4px 8px rgba(105, 179, 246, 0.4);\n  }\n</style>\n\n</body>\n</html>",
+      "nav_label": "FAQ",
+      "nav_order": 6
+    },
+    {
+      "slug": "testimonials",
+      "title": "Testimonials - Apex Auto Detailing",
+      "purpose": "Page to display customer testimonials",
+      "sections": [
+        {
+          "id": "c15ba4a8",
+          "name": "testimonial-list",
+          "component_type": "testimonial-list",
+          "content": {
+            "items": [
+              {
+                "name": "Customer Name",
+                "text": "I was so impressed with the results! My car looked like new after just one visit."
+              }
+            ]
+          },
+          "html": "<nav aria-label=\"Main navigation\">\n    <div class=\"flex justify-between items-center\">\n        <a href=\"index.html\" class=\"text-lg font-heading text-gray-900\">Apex Auto Detailing</a>\n        <ul class=\"hidden md:flex items-center space-x-4 lg:space-0\">\n            <li><a href=\"services.html\" aria-label=\"Services\">Services</a></li>\n            <li><a href=\"about.html\" aria-label=\"About\">About</a></li>\n            <li><a href=\"contact.html\" aria-label=\"Contact\">Contact</a></li>\n            <li><a href=\"blog.html\" aria-label=\"Blog\">Blog</a></li>\n            <li><a href=\"faq.html\" aria-label=\"FAQ\">FAQ</a></li>\n        </ul>\n        <div class=\"lg:hidden flex items-center space-x-2\">\n            <a href=\"services.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Learn More</a>\n            <a href=\"about.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">About Us</a>\n        </div>\n    </div>\n</nav>\n\n<section class=\"bg-linear-gradient-to-r primary-to-secondary secondary 100% h-screen\">\n    <header class=\"text-lg font-heading text-gray-900\" style=\"animation: fadeInUp 0.8s ease-out both;\">\n        <h1 class=\"leading-tight\">Why Choose Us?</h1>\n        <p class=\"max-w-6xl mx-auto mb-4 leading-relaxed\">\n            At Apex Auto Detailing, we offer a premium detailing experience that leaves your vehicle looking and feeling like new.\n        </p>\n    </header>\n    <main class=\"container mx-auto p-4 pt-0 md:p-6\">\n        <article class=\"glass-card w-full\">\n            <div class=\"flex justify-center items-center py-8\">\n                <h2 class=\"text-lg font-heading text-gray-900\">Full Detail</h2>\n                <p class=\"leading-tight\">Our full detail package includes a thorough exterior and interior detailing, ensuring your vehicle is showroom-ready.</p>\n            </div>\n        </article>\n        <article class=\"glass-card w-full\">\n            <div class=\"flex justify-center items-center py-8\">\n                <h2 class=\"text-lg font-heading text-gray-900\">Interior Only</h2>\n                <p class=\"leading-tight\">Our interior only detailing package is perfect for those who want a deep clean without the exterior work.</p>\n            </div>\n        </article>\n        <article class=\"glass-card w-full\">\n            <div class=\"flex justify-center items-center py-8\">\n                <h2 class=\"text-lg font-heading text-gray-900\">Exterior Wash</h2>\n                <p class=\"leading-tight\">Our exterior wash package is a quick and easy way to keep your vehicle looking its best.</p>\n            </div>\n        </article>\n        <article class=\"glass-card w-full\">\n            <div class=\"flex justify-center items-center py-8\">\n                <h2 class=\"text-lg font-heading text-gray-900\">Paint Correction</h2>\n                <p class=\"leading-tight\">Our paint correction package is perfect for those who want a showroom finish.</p>\n            </div>\n        </article>\n        <article class=\"glass-card w-full\">\n            <div class=\"flex justify-center items-center py-8\">\n                <h2 class=\"text-lg font-heading text-gray-900\">Customer Testimonials</h2>\n                <div class=\"space-y-4\">\n                    <p>Overall Rating: 5/5 stars</p>\n                    <p class=\"leading-tight\">Customer Name, Apex Auto Detailing</p>\n                    <p class=\"text-lg font-heading\" style=\"background: linear-gradient(90deg,var(--color-primary),var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">I was so impressed with the results! My car looked like new after just one visit.</p>\n                </div>\n            </div>\n        </article>\n    </main>\n</section>\n\n<footer class=\"bg-gray-800 text-lg font-heading text-white py-4\">\n    <div class=\"container mx-auto p-4 pt-0 md:p-6\">\n        <p>&copy; 2023 Apex Auto Detailing. All Rights Reserved.</p>\n        <ul>\n            <li><a href=\"#\" aria-label=\"Contact us\">Contact Us</a></li>\n            <li><a href=\"#\" aria-label=\"FAQs\">FAQs</a></li>\n        </ul>\n    </div>\n</footer>",
+          "order": 0
+        }
+      ],
+      "seo": {
+        "title": "Testimonials - Apex Auto Detailing | Read What Our Customers Say!",
+        "meta_description": "Read real customer testimonials about Apex Auto Detailing's services. Get your car detailed today!",
+        "keywords": [
+          "Apex Auto Detailing",
+          "customer testimonials",
+          "car detailing",
+          "full detail",
+          "interior wash"
+        ],
+        "og_title": "Testimonials - Apex Auto Detailing",
+        "og_description": "Read real customer testimonials about Apex Auto Detailing's services. Get your car detailed today!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "http://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Auto Detailing",
+          "description": "Apex Auto Detailing provides full detail, interior only, exterior wash, and paint correction services.",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "",
+            "addressLocality": "",
+            "addressRegion": "",
+            "postalCode": ""
+          },
+          "telephone": "",
+          "url": "https://www.apexautodetailing.com/testimonials"
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Apex Auto Detailing offer?",
+            "a": "Apex Auto Detailing provides full detail, interior only, exterior wash, and paint correction services."
+          },
+          {
+            "q": "Where is Apex Auto Detailing located?",
+            "a": "Apex Auto Detailing serves Austin TX."
+          },
+          {
+            "q": "How can I contact Apex Auto Detailing for a quote?",
+            "a": "You can call Apex Auto Detailing or visit their website to get a quote."
+          },
+          {
+            "q": "What types of packages do they offer?",
+            "a": "They offer interior and exterior packages."
+          },
+          {
+            "q": "Is Apex Auto Detailing mobile?",
+            "a": "Yes, Apex Auto Detailing is mobile and serves Austin TX."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Auto Detailing",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Auto Detailing is a mobile auto detailing service based in Austin TX, offering full detail, interior only, exterior wash, and paint correction services.",
+        "topic_cluster": "Mobile Auto Detailing Services",
+        "related_topics": [
+          "Auto Detailing",
+          "Car Wash",
+          "Paint Correction",
+          "Interior Cleaning",
+          "Exterior Cleaning"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Testimonials - Apex Auto Detailing</title>\n  <meta name=\"description\" content=\"Premium detailing, flawless results\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<nav aria-label=\"Main navigation\">\n    <div class=\"flex justify-between items-center\">\n        <a href=\"index.html\" class=\"text-lg font-heading text-gray-900\">Apex Auto Detailing</a>\n        <ul class=\"hidden md:flex items-center space-x-4 lg:space-0\">\n            <li><a href=\"services.html\" aria-label=\"Services\">Services</a></li>\n            <li><a href=\"about.html\" aria-label=\"About\">About</a></li>\n            <li><a href=\"contact.html\" aria-label=\"Contact\">Contact</a></li>\n            <li><a href=\"blog.html\" aria-label=\"Blog\">Blog</a></li>\n            <li><a href=\"faq.html\" aria-label=\"FAQ\">FAQ</a></li>\n        </ul>\n        <div class=\"lg:hidden flex items-center space-x-2\">\n            <a href=\"services.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Learn More</a>\n            <a href=\"about.html\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">About Us</a>\n        </div>\n    </div>\n</nav>\n\n<section class=\"bg-linear-gradient-to-r primary-to-secondary secondary 100% h-screen\">\n    <header class=\"text-lg font-heading text-gray-900\" style=\"animation: fadeInUp 0.8s ease-out both;\">\n        <h1 class=\"leading-tight\">Why Choose Us?</h1>\n        <p class=\"max-w-6xl mx-auto mb-4 leading-relaxed\">\n            At Apex Auto Detailing, we offer a premium detailing experience that leaves your vehicle looking and feeling like new.\n        </p>\n    </header>\n    <main class=\"container mx-auto p-4 pt-0 md:p-6\">\n        <article class=\"glass-card w-full\">\n            <div class=\"flex justify-center items-center py-8\">\n                <h2 class=\"text-lg font-heading text-gray-900\">Full Detail</h2>\n                <p class=\"leading-tight\">Our full detail package includes a thorough exterior and interior detailing, ensuring your vehicle is showroom-ready.</p>\n            </div>\n        </article>\n        <article class=\"glass-card w-full\">\n            <div class=\"flex justify-center items-center py-8\">\n                <h2 class=\"text-lg font-heading text-gray-900\">Interior Only</h2>\n                <p class=\"leading-tight\">Our interior only detailing package is perfect for those who want a deep clean without the exterior work.</p>\n            </div>\n        </article>\n        <article class=\"glass-card w-full\">\n            <div class=\"flex justify-center items-center py-8\">\n                <h2 class=\"text-lg font-heading text-gray-900\">Exterior Wash</h2>\n                <p class=\"leading-tight\">Our exterior wash package is a quick and easy way to keep your vehicle looking its best.</p>\n            </div>\n        </article>\n        <article class=\"glass-card w-full\">\n            <div class=\"flex justify-center items-center py-8\">\n                <h2 class=\"text-lg font-heading text-gray-900\">Paint Correction</h2>\n                <p class=\"leading-tight\">Our paint correction package is perfect for those who want a showroom finish.</p>\n            </div>\n        </article>\n        <article class=\"glass-card w-full\">\n            <div class=\"flex justify-center items-center py-8\">\n                <h2 class=\"text-lg font-heading text-gray-900\">Customer Testimonials</h2>\n                <div class=\"space-y-4\">\n                    <p>Overall Rating: 5/5 stars</p>\n                    <p class=\"leading-tight\">Customer Name, Apex Auto Detailing</p>\n                    <p class=\"text-lg font-heading\" style=\"background: linear-gradient(90deg,var(--color-primary),var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">I was so impressed with the results! My car looked like new after just one visit.</p>\n                </div>\n            </div>\n        </article>\n    </main>\n</section>\n\n<footer class=\"bg-gray-800 text-lg font-heading text-white py-4\">\n    <div class=\"container mx-auto p-4 pt-0 md:p-6\">\n        <p>&copy; 2023 Apex Auto Detailing. All Rights Reserved.</p>\n        <ul>\n            <li><a href=\"#\" aria-label=\"Contact us\">Contact Us</a></li>\n            <li><a href=\"#\" aria-label=\"FAQs\">FAQs</a></li>\n        </ul>\n    </div>\n</footer>\n\n</body>\n</html>",
+      "nav_label": "Testimonials",
+      "nav_order": 7
+    },
+    {
+      "slug": "map",
+      "title": "Map - Apex Auto Detailing",
+      "purpose": "Page to display location map",
+      "sections": [
+        {
+          "id": "577d0867",
+          "name": "google-map",
+          "component_type": "google-map",
+          "content": {
+            "location": {
+              "lat": 30.267153,
+              "lng": -97.743061
+            }
+          },
+          "html": "<div class=\"h-screen lg:h-4/5 px-6 py-24 bg-gradient-to-r from-primary to-secondary\">\n  <header>\n    <nav aria-label=\"Apex Auto Detailing Navigation\" role=\"navigation\">\n      <ul class=\"flex justify-between items-center gap-4\">\n        <a href=\"#\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Get a Quote</a>\n        <a href=\"#\" class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Book Now</a>\n      </ul>\n    </nav>\n  </header>\n  <main>\n    <article>\n      <section class=\"glass-card\">\n        <h1 class=\"text-6xl font-heading animate-fadeInUp\" style=\"animation: fadeInUp 0.8s ease-out both\">Welcome to Apex Auto Detailing</h1>\n        <p class=\"text-lg text-body font-body mt-4\">Our mission is to provide premium detailing services with flawless results.</p>\n      </section>\n    </article>\n  </main>\n  <section class=\"flex flex-col items-center gap-8\">\n    <div class=\"flex justify-between items-center mb-8\">\n      <h2 class=\"text-3xl font-heading\">Our Services</h2>\n      <a href=\"#\" class=\"btn btn-secondary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Learn More</a>\n    </div>\n    <ul class=\"flex flex-wrap gap-4\">\n      <li>\n        <article class=\"glass-card\">\n          <h3 class=\"text-2xl font-heading\">Full Detail</h3>\n          <p class=\"text-lg text-body mt-4\">Our full detail package includes interior and exterior detailing.</p>\n        </article>\n      </li>\n      <li>\n        <article class=\"glass-card\">\n          <h3 class=\"text-2xl font-heading\">Interior Only</h3>\n          <p class=\"text-lg text-body mt-4\">Our interior only detail package focuses on cleaning and conditioning your vehicle's interior.</p>\n        </article>\n      </li>\n      <li>\n        <article class=\"glass-card\">\n          <h3 class=\"text-2xl font-heading\">Exterior Wash</h3>\n          <p class=\"text-lg text-body mt-4\">Our exterior wash package includes a thorough cleaning of your vehicle's exterior.</p>\n        </article>\n      </li>\n    </ul>\n  </section>\n  <section class=\"flex flex-col items-center gap-8\">\n    <div class=\"flex justify-between items-center mb-8\">\n      <h2 class=\"text-3xl font-heading\">Get in Touch</h2>\n      <a href=\"#\" class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Contact Us</a>\n    </div>\n    <ul class=\"flex flex-wrap gap-4\">\n      <li>\n        <article class=\"glass-card\">\n          <h3 class=\"text-2xl font-heading\">Email:</h3>\n          <p class=\"text-lg text-body mt-4\">info@apexautodetailing.com</p>\n        </article>\n      </li>\n    </ul>\n  </section>\n  <footer>\n    <div class=\"flex justify-between items-center gap-8\">\n      <a href=\"#\" class=\"btn btn-secondary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Get Directions</a>\n      <p class=\"text-lg text-body mt-4\">123 Main St, Anytown USA 12345</p>\n    </div>\n  </footer>\n  <div id=\"map\" style=\"width: 100%; height: calc(100vh - 200px);\"></div>\n  <script src=\"https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap\" async defer></script>\n</div>\n\n<style>\n  .glass-card {\n    @apply bg-white shadow-md;\n    transition-transform duration-300 hover:-translate-y-2;\n  }\n  \n  h1.animate-fadeInUp {\n    animation: fadeInUp 0.8s ease-out both;\n  }\n  \n  @keyframes fadeInUp {\n    from {\n      transform: translateY(-100%);\n    }\n    to {\n      transform: translateY(0);\n    }\n  }\n</style>",
+          "order": 0
+        }
+      ],
+      "seo": {
+        "title": "Apex Auto Detailing - Location Map",
+        "meta_description": "Find Apex Auto Detailing's location. Get directions to our detailing service today!",
+        "keywords": [
+          "Apex Auto Detailing",
+          "location map",
+          "detailing services"
+        ],
+        "og_title": "Apex Auto Detailing - Location Map",
+        "og_description": "Get the latest updates on Apex Auto Detailing's services and location. Contact us for a quote or visit our website.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Apex Auto Detailing",
+          "image": "https://apexautodetailing.com/logo.png",
+          "url": "https://apexautodetailing.com/map",
+          "telephone": "+1234567890",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Main St",
+            "addressLocality": "City",
+            "addressRegion": "State",
+            "postalCode": "Zip",
+            "addressCountry": "US"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "17:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "08:00",
+              "closes": "16:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Sunday"
+              ],
+              "opens": "10:00",
+              "closes": "15:00"
+            }
+          ],
+          "sameAs": [
+            "https://www.facebook.com/apexautodetailing",
+            "https://twitter.com/apexautodetailing",
+            "https://www.instagram.com/apexautodetailing"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Apex Auto Detailing offer?",
+            "a": "Apex Auto Detailing provides full detail, interior only, exterior wash, and paint correction services."
+          },
+          {
+            "q": "Where is Apex Auto Detailing located?",
+            "a": "Apex Auto Detailing serves Austin TX."
+          },
+          {
+            "q": "How can I contact Apex Auto Detailing?",
+            "a": "You can reach Apex Auto Detailing by visiting their website or calling them directly."
+          },
+          {
+            "q": "What types of vehicles do they detail?",
+            "a": "Apex Auto Detailing offers services for various vehicle types, including cars and trucks."
+          },
+          {
+            "q": "Do they offer any special promotions or discounts?",
+            "a": "For specific promotions, please visit the Apex Auto Detailing website or contact them directly."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Apex Auto Detailing",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Apex Auto Detailing is a mobile auto detailing service based in Austin TX, offering full detail, interior only, exterior wash, and paint correction services.",
+        "topic_cluster": "Auto Detailing Services",
+        "related_topics": [
+          "Mobile Auto Detailing",
+          "Car Wash",
+          "Paint Correction",
+          "Interior Cleaning",
+          "Vehicle Maintenance"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Map - Apex Auto Detailing</title>\n  <meta name=\"description\" content=\"Premium detailing, flawless results\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<div class=\"h-screen lg:h-4/5 px-6 py-24 bg-gradient-to-r from-primary to-secondary\">\n  <header>\n    <nav aria-label=\"Apex Auto Detailing Navigation\" role=\"navigation\">\n      <ul class=\"flex justify-between items-center gap-4\">\n        <a href=\"#\" class=\"btn transition-all duration-300 hover:scale-105 hover:shadow-xl\">Get a Quote</a>\n        <a href=\"#\" class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Book Now</a>\n      </ul>\n    </nav>\n  </header>\n  <main>\n    <article>\n      <section class=\"glass-card\">\n        <h1 class=\"text-6xl font-heading animate-fadeInUp\" style=\"animation: fadeInUp 0.8s ease-out both\">Welcome to Apex Auto Detailing</h1>\n        <p class=\"text-lg text-body font-body mt-4\">Our mission is to provide premium detailing services with flawless results.</p>\n      </section>\n    </article>\n  </main>\n  <section class=\"flex flex-col items-center gap-8\">\n    <div class=\"flex justify-between items-center mb-8\">\n      <h2 class=\"text-3xl font-heading\">Our Services</h2>\n      <a href=\"#\" class=\"btn btn-secondary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Learn More</a>\n    </div>\n    <ul class=\"flex flex-wrap gap-4\">\n      <li>\n        <article class=\"glass-card\">\n          <h3 class=\"text-2xl font-heading\">Full Detail</h3>\n          <p class=\"text-lg text-body mt-4\">Our full detail package includes interior and exterior detailing.</p>\n        </article>\n      </li>\n      <li>\n        <article class=\"glass-card\">\n          <h3 class=\"text-2xl font-heading\">Interior Only</h3>\n          <p class=\"text-lg text-body mt-4\">Our interior only detail package focuses on cleaning and conditioning your vehicle's interior.</p>\n        </article>\n      </li>\n      <li>\n        <article class=\"glass-card\">\n          <h3 class=\"text-2xl font-heading\">Exterior Wash</h3>\n          <p class=\"text-lg text-body mt-4\">Our exterior wash package includes a thorough cleaning of your vehicle's exterior.</p>\n        </article>\n      </li>\n    </ul>\n  </section>\n  <section class=\"flex flex-col items-center gap-8\">\n    <div class=\"flex justify-between items-center mb-8\">\n      <h2 class=\"text-3xl font-heading\">Get in Touch</h2>\n      <a href=\"#\" class=\"btn btn-primary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Contact Us</a>\n    </div>\n    <ul class=\"flex flex-wrap gap-4\">\n      <li>\n        <article class=\"glass-card\">\n          <h3 class=\"text-2xl font-heading\">Email:</h3>\n          <p class=\"text-lg text-body mt-4\">info@apexautodetailing.com</p>\n        </article>\n      </li>\n    </ul>\n  </section>\n  <footer>\n    <div class=\"flex justify-between items-center gap-8\">\n      <a href=\"#\" class=\"btn btn-secondary transition-all duration-300 hover:scale-105 hover:shadow-xl\">Get Directions</a>\n      <p class=\"text-lg text-body mt-4\">123 Main St, Anytown USA 12345</p>\n    </div>\n  </footer>\n  <div id=\"map\" style=\"width: 100%; height: calc(100vh - 200px);\"></div>\n  <script src=\"https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap\" async defer></script>\n</div>\n\n<style>\n  .glass-card {\n    @apply bg-white shadow-md;\n    transition-transform duration-300 hover:-translate-y-2;\n  }\n  \n  h1.animate-fadeInUp {\n    animation: fadeInUp 0.8s ease-out both;\n  }\n  \n  @keyframes fadeInUp {\n    from {\n      transform: translateY(-100%);\n    }\n    to {\n      transform: translateY(0);\n    }\n  }\n</style>\n\n</body>\n</html>",
+      "nav_label": "Location",
+      "nav_order": 8
+    }
+  ],
+  "template_ids": [],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/apex-auto-detailing",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n",
+  "sitemap_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://apexautodetailing.com/index.html</loc>\n    <priority>1.0</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexautodetailing.com/services.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexautodetailing.com/about.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexautodetailing.com/contact.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexautodetailing.com/blog.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexautodetailing.com/faq.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexautodetailing.com/testimonials.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexautodetailing.com/map.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>",
+  "robots_txt": "User-agent: *\nAllow: /\nSitemap: https://apexautodetailing.com/sitemap.xml\n",
+  "errors": [
+    "[index] Multiple <h1> tags found (2)",
+    "[services] Missing <h1> tag",
+    "[about] Missing <h1> tag",
+    "[blog] Missing <h1> tag",
+    "[faq] Missing <h1> tag",
+    "[testimonials] Missing <h1> tag",
+    "[map] Missing <h1> tag",
+    "[index][llm] Broken link in FAQ section"
+  ],
+  "metadata": {
+    "design_context": {
+      "style_name": "Soft UI Evolution",
+      "primary_color": "#2563EB",
+      "secondary_color": "#3B82F6",
+      "accent_color": "#EA580C",
+      "heading_font": "Poppins",
+      "body_font": "Open Sans"
+    },
+    "ux_scores": {
+      "index": 77,
+      "services": 77,
+      "about": 79,
+      "contact": 79,
+      "blog": 79,
+      "faq": 80,
+      "testimonials": 79,
+      "map": 79
+    }
+  }
+}

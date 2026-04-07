@@ -37,7 +37,16 @@ SKIP_PATTERNS = {
 # These suppress specific patterns in files where they're expected.
 PER_FILE_ALLOWLIST: dict[str, set[str]] = {
     "bcrypt_hash_in_source": {"k8s/adguard-home/deployment.yaml"},
-    "plaintext_password_assignment": {"k8s/adguard-home/deployment.yaml"},
+    "plaintext_password_assignment": {
+        "k8s/adguard-home/deployment.yaml",
+        "backend/tests/test_security_agent.py",  # scanner unit tests use fake creds as fixtures
+    },
+    "private_key_block": {
+        "backend/tests/test_security_agent.py",  # scanner unit tests use fake PEM header as fixture
+    },
+    "generic_api_key": {
+        "backend/tests/test_security_agent.py",  # scanner unit tests use fake key patterns as fixtures
+    },
 }
 
 BINARY_EXTENSIONS = {

@@ -37,6 +37,7 @@ class SitePlannerAgent(WebAgentBase):
     ) -> None:
         super().__init__(llm)
         self.store = store or TemplateStore()
+        self.design_ctx = None  # injected by pipeline
 
     async def run(self, project: SiteProject) -> SiteProject:
         """
@@ -76,6 +77,15 @@ class SitePlannerAgent(WebAgentBase):
         if brief.pages_requested:
             pages_hint = f"\nClient requested pages: {', '.join(brief.pages_requested)}"
 
+        design_hint = ""
+        if self.design_ctx:
+            design_hint = (
+                f"\nDesign system: {self.design_ctx.style_name}\n"
+                f"Style keywords: {self.design_ctx.style_keywords}\n"
+                f"Effects: {self.design_ctx.effects_hint}\n"
+                f"Primary color: {self.design_ctx.primary_color}\n"
+            )
+
         template_hint = ""
         if template_context:
             template_hint = f"\n\nExisting template to base the plan on:\n{template_context}"
@@ -90,6 +100,7 @@ Services: {", ".join(brief.services) if brief.services else "Not specified"}
 Target Audience: {brief.target_audience}
 Tone: {brief.tone}
 {pages_hint}
+{design_hint}
 {template_hint}
 
 Create a detailed site plan with:
