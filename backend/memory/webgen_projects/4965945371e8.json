@@ -1,0 +1,338 @@
+{
+  "id": "4965945371e8",
+  "created_at": "2026-04-06T01:10:19.543397+00:00",
+  "updated_at": "2026-04-06T01:10:19.590463+00:00",
+  "status": "generated",
+  "brief": {
+    "business_name": "lex fitness",
+    "business_type": "custom",
+    "tagline": "",
+    "description": "lex fitness",
+    "services": [],
+    "target_audience": "",
+    "tone": "professional",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": []
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - lex fitness",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "0724e4a9",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "fabdaf3d",
+          "name": "hero",
+          "component_type": "hero",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "a046464a",
+          "name": "features",
+          "component_type": "features",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "9f4e9a73",
+          "name": "testimonials",
+          "component_type": "testimonials",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "719467ed",
+          "name": "cta",
+          "component_type": "cta",
+          "content": {},
+          "html": "",
+          "order": 4
+        },
+        {
+          "id": "40413524",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 5
+        }
+      ],
+      "seo": {
+        "title": "Home - lex fitness | lex fitness",
+        "meta_description": "lex fitness",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "lex fitness",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - lex fitness</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"lex fitness\">\n  <meta property=\"og:type\" content=\"website\">\n</head>\n<body class=\"min-h-screen bg-white\">\n\n\n\n\n\n\n\n\n\n\n\n\n\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    },
+    {
+      "slug": "about",
+      "title": "About Us - lex fitness",
+      "purpose": "Company story and team",
+      "sections": [
+        {
+          "id": "bf1dc6c6",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "427e8453",
+          "name": "hero-small",
+          "component_type": "hero-small",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "d0811b52",
+          "name": "story",
+          "component_type": "story",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "bc6ca95e",
+          "name": "team",
+          "component_type": "team",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "ad84108b",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "About Us - lex fitness | lex fitness",
+        "meta_description": "lex fitness",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "lex fitness",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>About Us - lex fitness</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"lex fitness\">\n  <meta property=\"og:type\" content=\"website\">\n</head>\n<body class=\"min-h-screen bg-white\">\n\n\n\n\n\n\n\n\n\n\n\n</body>\n</html>",
+      "nav_label": "About Us",
+      "nav_order": 2
+    },
+    {
+      "slug": "services",
+      "title": "Services - lex fitness",
+      "purpose": "Service offerings",
+      "sections": [
+        {
+          "id": "b4f21322",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "c14a6c15",
+          "name": "hero-small",
+          "component_type": "hero-small",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "fb418de6",
+          "name": "services-grid",
+          "component_type": "services-grid",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "4acdb620",
+          "name": "cta",
+          "component_type": "cta",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "57da2ffe",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "Services - lex fitness | lex fitness",
+        "meta_description": "lex fitness",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "lex fitness",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Services - lex fitness</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"lex fitness\">\n  <meta property=\"og:type\" content=\"website\">\n</head>\n<body class=\"min-h-screen bg-white\">\n\n\n\n\n\n\n\n\n\n\n\n</body>\n</html>",
+      "nav_label": "Services",
+      "nav_order": 3
+    },
+    {
+      "slug": "contact",
+      "title": "Contact - lex fitness",
+      "purpose": "Contact form and info",
+      "sections": [
+        {
+          "id": "c06dd918",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "16610841",
+          "name": "hero-small",
+          "component_type": "hero-small",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "fde78cbb",
+          "name": "contact-form",
+          "component_type": "contact-form",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "c5c812f3",
+          "name": "map",
+          "component_type": "map",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "a812ef7d",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "Contact - lex fitness | lex fitness",
+        "meta_description": "lex fitness",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "lex fitness",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Contact - lex fitness</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"lex fitness\">\n  <meta property=\"og:type\" content=\"website\">\n</head>\n<body class=\"min-h-screen bg-white\">\n\n\n\n\n\n\n\n\n\n\n\n</body>\n</html>",
+      "nav_label": "Contact",
+      "nav_order": 4
+    }
+  ],
+  "template_ids": [],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/lex-fitness",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n",
+  "sitemap_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://lexfitness.com/index.html</loc>\n    <priority>1.0</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://lexfitness.com/about.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://lexfitness.com/services.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://lexfitness.com/contact.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>",
+  "robots_txt": "User-agent: *\nAllow: /\nSitemap: https://lexfitness.com/sitemap.xml\n",
+  "errors": [
+    "[index] Missing <h1> tag",
+    "[index] Missing og:title meta tag",
+    "[index] Missing JSON-LD structured data",
+    "[index] Page body seems too short (< 100 chars)",
+    "[about] Missing <h1> tag",
+    "[about] Missing og:title meta tag",
+    "[about] Missing JSON-LD structured data",
+    "[about] Page body seems too short (< 100 chars)",
+    "[services] Missing <h1> tag",
+    "[services] Missing og:title meta tag",
+    "[services] Missing JSON-LD structured data",
+    "[services] Page body seems too short (< 100 chars)",
+    "[contact] Missing <h1> tag",
+    "[contact] Missing og:title meta tag",
+    "[contact] Missing JSON-LD structured data",
+    "[contact] Page body seems too short (< 100 chars)"
+  ],
+  "metadata": {}
+}

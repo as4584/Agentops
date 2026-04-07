@@ -1,0 +1,99 @@
+---
+# Uptime Kuma — Self-hosted uptime monitoring with Discord alerts
+# Monitors: services, ports, ping targets, DNS, HTTP keywords
+# Dashboard: kubectl port-forward -n agent-ops svc/uptime-kuma 3001:3001
+#            then open http://localhost:3001
+#
+# First-time setup in the UI:
+#   1. Create admin account
+#   2. Add monitors (see suggested list below)
+#   3. Go to Settings → Notifications → Add Discord notification
+#      (paste your Discord webhook URL)
+#
+# Suggested monitors to add after setup:
+#   - HTTP(s): http://agentop-backend.agent-ops:8000/health  (Agentop Backend)
+#   - HTTP(s): http://localhost:3007                          (Frontend)
+#   - HTTP(s): http://localhost:11434/api/tags                (Ollama)
+#   - HTTP(s): http://localhost:19999                         (Netdata)
+#   - TCP Port: 192.168.0.1:80                               (Router admin)
+#   - Ping:     192.168.0.1                                  (Router reachability)
+#   - DNS:      your domain (if any)
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: uptime-kuma-data
+  namespace: agent-ops
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uptime-kuma
+  namespace: agent-ops
+  labels:
+    app: uptime-kuma
+    tier: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uptime-kuma
+  template:
+    metadata:
+      labels:
+        app: uptime-kuma
+    spec:
+      containers:
+        - name: uptime-kuma
+          image: louislam/uptime-kuma:1
+          ports:
+            - name: web
+              containerPort: 3001
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: uptime-kuma-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: uptime-kuma
+  namespace: agent-ops
+  labels:
+    app: uptime-kuma
+spec:
+  selector:
+    app: uptime-kuma
+  ports:
+    - name: web
+      port: 3001
+      targetPort: 3001
+  type: ClusterIP

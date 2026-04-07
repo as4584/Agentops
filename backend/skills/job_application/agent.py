@@ -4,9 +4,9 @@ Handles job search, resume tailoring, cover letter generation,
 application tracking, and scholarship research for Lex Santiago.
 Only uses skills verified from github.com/as4584 and this Agentop repo.
 """
-import json
-import sqlite3
+
 import datetime
+import sqlite3
 from pathlib import Path
 
 SKILL_DIR = Path(__file__).parent
@@ -25,10 +25,36 @@ RESUME_MAP = {
 
 LEX_SKILLS = {
     "languages": ["Python", "TypeScript", "JavaScript", "Kotlin", "Dart", "Lua", "Rust", "SQL", "HTML/CSS"],
-    "frameworks": ["FastAPI", "Flask", "Flutter", "LangGraph", "Docker", "Redis", "PostgreSQL", "Playwright", "Pydantic", "Next.js"],
-    "ai_ml": ["OpenAI GPT", "RAG pipelines", "Ollama", "LangGraph orchestration", "Twilio Voice", "multi-agent systems"],
+    "frameworks": [
+        "FastAPI",
+        "Flask",
+        "Flutter",
+        "LangGraph",
+        "Docker",
+        "Redis",
+        "PostgreSQL",
+        "Playwright",
+        "Pydantic",
+        "Next.js",
+    ],
+    "ai_ml": [
+        "OpenAI GPT",
+        "RAG pipelines",
+        "Ollama",
+        "LangGraph orchestration",
+        "Twilio Voice",
+        "multi-agent systems",
+    ],
     "integrations": ["SAP ARP", "Lightspeed POS", "Twilio", "Google Sheets API", "MCP Docker bridge"],
-    "practices": ["REST API design", "JWT auth", "Docker", "E2E testing (Playwright)", "Git", "CI/CD", "multi-agent orchestration"],
+    "practices": [
+        "REST API design",
+        "JWT auth",
+        "Docker",
+        "E2E testing (Playwright)",
+        "Git",
+        "CI/CD",
+        "multi-agent orchestration",
+    ],
     "projects": {
         "Agentop": "Local-first multi-agent AI orchestration system. LangGraph, Ollama, 47 tools, Drift Guard middleware, VS Code extension.",
         "AI Receptionist": "Production FastAPI + OpenAI + Twilio + RAG + PostgreSQL + Redis. Serving real salon/HVAC clients 24/7.",
@@ -37,7 +63,7 @@ LEX_SKILLS = {
         "Restaurant App": "Cross-platform Flutter mobile ordering and menu app.",
         "IS218 Series": "FastAPI + Docker + JWT + Pydantic + Playwright E2E — Modules 10–13.",
         "DonXera Inventory": "SAP ARP + Lightspeed POS real-time inventory sync for 140+ SKUs across multiple locations.",
-    }
+    },
 }
 
 
@@ -75,8 +101,9 @@ def init_db():
     conn.close()
 
 
-def track_application(company: str, role: str, url: str = "", status: str = "to_apply",
-                      resume_used: str = "", notes: str = "") -> dict:
+def track_application(
+    company: str, role: str, url: str = "", status: str = "to_apply", resume_used: str = "", notes: str = ""
+) -> dict:
     """Log a job application to the tracker."""
     init_db()
     applied = datetime.date.today().isoformat() if status == "applied" else None
@@ -85,7 +112,7 @@ def track_application(company: str, role: str, url: str = "", status: str = "to_
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.execute(
         "INSERT INTO applications (company, role, url, status, resume_used, applied_date, follow_up_date, notes) VALUES (?,?,?,?,?,?,?,?)",
-        (company, role, url, status, resume, applied, follow_up, notes)
+        (company, role, url, status, resume, applied, follow_up, notes),
     )
     conn.commit()
     row_id = cursor.lastrowid
@@ -101,14 +128,19 @@ def get_resume_for_company(company: str) -> str:
 
 def generate_cover_letter(company: str, role: str, jd_keywords: list[str] | None = None) -> str:
     """Generate a cover letter template from Lex's verified skills and the job description."""
-    resume_file = get_resume_for_company(company)
+    _resume_file = get_resume_for_company(company)  # reserved: future resume-tailoring logic
     matched_skills = []
     if jd_keywords:
-        all_skills = (LEX_SKILLS["languages"] + LEX_SKILLS["frameworks"] +
-                      LEX_SKILLS["ai_ml"] + LEX_SKILLS["practices"])
-        matched_skills = [s for s in all_skills if any(k.lower() in s.lower() or s.lower() in k.lower() for k in jd_keywords)]
+        all_skills = LEX_SKILLS["languages"] + LEX_SKILLS["frameworks"] + LEX_SKILLS["ai_ml"] + LEX_SKILLS["practices"]
+        matched_skills = [
+            s for s in all_skills if any(k.lower() in s.lower() or s.lower() in k.lower() for k in jd_keywords)
+        ]
 
-    skills_line = ", ".join(matched_skills[:6]) if matched_skills else "Python, FastAPI, PostgreSQL, Docker, REST APIs, AI/ML pipelines"
+    skills_line = (
+        ", ".join(matched_skills[:6])
+        if matched_skills
+        else "Python, FastAPI, PostgreSQL, Docker, REST APIs, AI/ML pipelines"
+    )
 
     return f"""Dear {company} Hiring Team,
 

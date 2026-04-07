@@ -28,7 +28,7 @@ if not _master_key_raw:
 
     warnings.warn(
         "AGENTOP_GATEWAY_MASTER_KEY is not set. Gateway encryption disabled. "
-        "Generate one: python -c \"import secrets; print(secrets.token_hex(32))\"",
+        'Generate one: python -c "import secrets; print(secrets.token_hex(32))"',
         stacklevel=2,
     )
 

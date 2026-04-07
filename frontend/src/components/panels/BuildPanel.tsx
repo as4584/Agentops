@@ -1,70 +1,76 @@
-import { API_BASE } from '@/lib/api';
+import { API_BASE, API_SECRET } from '@/lib/api';
 import React, { useEffect, useState } from 'react';
-import { Stack, Group, Text, Badge, Box, ScrollArea, Progress } from '@mantine/core';
+import { Stack, Group, Text, Badge, Box, ScrollArea } from '@mantine/core';
 
-interface BuildJob {
+interface WebgenProject {
   id: string;
-  status: 'pending' | 'running' | 'done' | 'failed';
-  site_name: string;
-  progress: number;
-  message: string;
-  started_at: string;
+  business_name: string;
+  status: 'ready' | 'generated' | 'deploying' | 'deployed' | 'error';
+  updated_at: string;
 }
 
 const statusColor = (s: string) =>
-  s === 'done' ? 'green' : s === 'failed' ? 'red' : s === 'running' ? 'blue' : 'gray';
+  s === 'deployed' ? 'green' : s === 'error' ? 'red' : s === 'deploying' ? 'blue' : 'teal';
+
+const statusLabel = (s: string) =>
+  s === 'deployed' ? 'deployed' : s === 'error' ? 'failed' : s === 'deploying' ? 'running' : s;
 
 export default function BuildPanel() {
-  const [jobs, setJobs] = useState<BuildJob[]>([]);
+  const [projects, setProjects] = useState<WebgenProject[]>([]);
 
-  const fetchJobs = async () => {
+  const fetchProjects = async () => {
     try {
-      const r = await fetch(`${API_BASE}/webgen/jobs`);
-      if (r.ok) setJobs(await r.json());
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(API_SECRET ? { Authorization: `Bearer ${API_SECRET}` } : {}),
+      };
+      const r = await fetch(`${API_BASE}/api/webgen/projects`, { headers });
+      if (r.ok) {
+        const data = await r.json();
+        setProjects(data.projects ?? []);
+      }
     } catch {}
   };
 
   useEffect(() => {
-    fetchJobs();
-    const iv = setInterval(fetchJobs, 3000);
+    fetchProjects();
+    const iv = setInterval(fetchProjects, 5000);
     return () => clearInterval(iv);
   }, []);
 
-  const running = jobs.filter((j) => j.status === 'running');
-  const recent = jobs.filter((j) => j.status !== 'running').slice(0, 10);
+  const running = projects.filter((p) => p.status === 'deploying');
+  const recent = projects.filter((p) => p.status !== 'deploying').slice(0, 10);
 
   return (
     <Stack gap={8} h="100%">
-      <Text fw={700} size="sm" c="dimmed" tt="uppercase">Build</Text>
+      <Text fw={700} size="sm" c="dimmed" tt="uppercase">WebGen Projects</Text>
 
       {running.length > 0 && (
         <Stack gap={6}>
-          <Text size="xs" c="dimmed">Running ({running.length})</Text>
-          {running.map((j) => (
-            <Box key={j.id} px={8} py={6} style={{ background: '#141619', borderRadius: 4 }}>
-              <Group justify="space-between" mb={4}>
-                <Text size="xs" fw={600}>{j.site_name}</Text>
-                <Badge size="xs" color="blue">running</Badge>
+          <Text size="xs" c="dimmed">Deploying ({running.length})</Text>
+          {running.map((p) => (
+            <Box key={p.id} px={8} py={6} style={{ background: '#141619', borderRadius: 4 }}>
+              <Group justify="space-between">
+                <Text size="xs" fw={600}>{p.business_name}</Text>
+                <Badge size="xs" color="blue">deploying</Badge>
               </Group>
-              <Progress value={j.progress} size="xs" color="blue" mb={4} animated />
-              <Text size="xs" c="dimmed" lineClamp={1}>{j.message}</Text>
             </Box>
           ))}
         </Stack>
       )}
 
-      <Text size="xs" c="dimmed">Recent</Text>
+      <Text size="xs" c="dimmed">Recent ({recent.length})</Text>
       <ScrollArea flex={1}>
         <Stack gap={4}>
-          {recent.length === 0 && <Text size="xs" c="dimmed">No builds yet</Text>}
-          {recent.map((j) => (
-            <Group key={j.id} justify="space-between" px={8} py={4}
+          {recent.length === 0 && <Text size="xs" c="dimmed">No projects yet</Text>}
+          {recent.map((p) => (
+            <Group key={p.id} justify="space-between" px={8} py={4}
               style={{ background: '#141619', borderRadius: 4 }}>
               <Box>
-                <Text size="xs" fw={600}>{j.site_name}</Text>
-                <Text size="xs" c="dimmed">{j.message}</Text>
+                <Text size="xs" fw={600}>{p.business_name}</Text>
+                <Text size="xs" c="dimmed">{new Date(p.updated_at).toLocaleDateString()}</Text>
               </Box>
-              <Badge size="xs" color={statusColor(j.status)}>{j.status}</Badge>
+              <Badge size="xs" color={statusColor(p.status)}>{statusLabel(p.status)}</Badge>
             </Group>
           ))}
         </Stack>

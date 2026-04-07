@@ -190,6 +190,7 @@ DEFAULT_TASK_MODELS: dict[str, str] = {
     "architecture_analysis": "kimi-k2-thinking",
     "system_design": "kimi-k2-thinking",
     "qa_review": "claude-sonnet",
+    "web_generation": "lex-webgen-v1",
     "general": OLLAMA_MODEL,
 }
 

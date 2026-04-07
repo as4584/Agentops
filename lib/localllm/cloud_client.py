@@ -107,6 +107,22 @@ CLOUD_MODELS: dict[str, dict[str, Any]] = {
         "context_window": 1048576,
         "strengths": ["speed", "bulk", "metadata"],
     },
+    "qwen3-coder-free": {
+        "id": "qwen/qwen3-coder:free",
+        "name": "Qwen3 Coder (Free)",
+        "input_cost_per_m": 0.0,
+        "output_cost_per_m": 0.0,
+        "context_window": 32768,
+        "strengths": ["code", "html", "css", "web-generation"],
+    },
+    "qwen3-plus-free": {
+        "id": "qwen/qwen3.6-plus:free",
+        "name": "Qwen3.6 Plus (Free)",
+        "input_cost_per_m": 0.0,
+        "output_cost_per_m": 0.0,
+        "context_window": 131072,
+        "strengths": ["reasoning", "code", "general"],
+    },
 }
 
 DEFAULT_CLOUD_MODEL = "kimi-k2"

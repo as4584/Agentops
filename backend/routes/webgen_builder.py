@@ -22,7 +22,7 @@ from backend.webgen.site_store import SiteStore
 
 router = APIRouter(prefix="/api/webgen", tags=["webgen-builder"])
 
-_pipeline = WebGenPipeline(llm=OllamaClient(model="webgen"))
+_pipeline = WebGenPipeline(llm=OllamaClient(model="qwen2.5-coder:7b"))
 _store = SiteStore()
 
 

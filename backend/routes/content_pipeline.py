@@ -254,6 +254,7 @@ async def check_upload_window() -> dict:
 async def youtube_auth_status() -> dict:
     """Check if YouTube OAuth tokens are saved and valid."""
     from backend.content.publishers.youtube_auth import TOKEN_PATH, is_authenticated
+
     return {
         "authenticated": is_authenticated(),
         "token_path": str(TOKEN_PATH),
@@ -273,7 +274,7 @@ async def youtube_auth_start(background_tasks: BackgroundTasks) -> dict:
     The user signs in manually — tokens are saved automatically on redirect.
     Runs in the background so the request returns immediately.
     """
-    from backend.content.publishers.youtube_auth import is_authenticated, run_auth_flow
+    from backend.content.publishers.youtube_auth import is_authenticated
 
     if is_authenticated():
         return {"status": "already_authenticated", "message": "Token already exists. No action needed."}
@@ -292,9 +293,9 @@ async def youtube_auth_start(background_tasks: BackgroundTasks) -> dict:
 
 async def _run_oauth_flow() -> None:
     from backend.content.publishers.youtube_auth import run_auth_flow
+
     try:
         await run_auth_flow()
         logger.info("[YouTubeAuth] OAuth flow completed successfully")
     except Exception as e:
         logger.error(f"[YouTubeAuth] OAuth flow failed: {e}")
-

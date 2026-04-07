@@ -40,6 +40,7 @@ class PageGeneratorAgent(WebAgentBase):
     ) -> None:
         super().__init__(llm)
         self.store = store or TemplateStore()
+        self.design_ctx = None  # injected by pipeline
 
     async def run(self, project: SiteProject) -> SiteProject:
         """Generate HTML for all pages in the project."""
@@ -97,6 +98,7 @@ class PageGeneratorAgent(WebAgentBase):
         section: SectionSpec,
         brief: ClientBrief,
         nav_items: list[dict],
+        critique: list[str] | None = None,
     ) -> str:
         """Generate HTML for a single section."""
         # Try to find a matching component template
@@ -127,6 +129,22 @@ class PageGeneratorAgent(WebAgentBase):
                 f"Variables to fill: {template_vars}"
             )
 
+        design_hint = ""
+        if self.design_ctx:
+            design_hint = (
+                f"\nDesign system: {self.design_ctx.style_name} — {self.design_ctx.style_keywords}"
+                f"\nColors: primary={self.design_ctx.primary_color}, "
+                f"secondary={self.design_ctx.secondary_color}, accent={self.design_ctx.accent_color}"
+                f"\nFonts: heading='{self.design_ctx.heading_font}', body='{self.design_ctx.body_font}'"
+                f"\nEffects hint: {self.design_ctx.effects_hint}"
+            )
+        critique_block = ""
+        if critique:
+            critique_block = (
+                "\n\nCRITIQUE FROM PREVIOUS VERSION — fix ALL of these before returning:\n"
+                + "".join(f"  ✗ {v}\n" for v in critique)
+                + "This regeneration MUST address every violation above."
+            )
         prompt = f"""Generate HTML for a '{section.name}' section of a website.
 
 Business: {brief.business_name}
@@ -137,27 +155,56 @@ Tone: {brief.tone}
 Phone: {brief.phone}
 Email: {brief.email}
 {content_hints}
+{design_hint}
 
 Navigation items:
 {nav_context}
 {template_context}
 
 Requirements:
-- Use Tailwind CSS utility classes
+- Use Tailwind CSS utility classes + inline <style> when Tailwind can't express the effect
 - Semantic HTML5 elements
 - Mobile-first responsive design
 - Component type: {section.component_type}
+- Use the exact brand colors from the design system above as CSS vars or Tailwind arbitrary values
 - Include aria labels for accessibility
-
+- Hero sections: heading MUST have `style="animation: fadeInUp 0.8s ease-out both"`
+- All <button> and <a class="btn"> MUST have `class="... transition-all duration-300 hover:scale-105 hover:shadow-xl"`
+- Feature/service cards MUST use class `glass-card` (defined in global.css)
+{critique_block}
 Return ONLY the HTML for this section, no explanation."""
 
         system = (
-            "You are a frontend developer. Generate clean, semantic, "
-            "responsive HTML with Tailwind CSS. Output only HTML code, "
-            "no markdown fences, no explanation."
+            "You are a senior frontend engineer building premium, award-winning websites. "
+            "Generate VISUALLY STUNNING HTML using Tailwind CSS + inline <style> for animations. "
+            "Output only HTML — no markdown fences, no explanation.\n"
+            "VISUAL MANDATES (all required — creativity is rewarded, rigidity is penalized):\n"
+            "- ANIMATIONS: Hero headings MUST have `style='animation: fadeInUp 0.8s ease-out both'`. "
+            "Add staggered delays on sub-elements (0.2s, 0.4s). Feel free to invent bespoke keyframes.\n"
+            "- GRADIENTS: Hero/header backgrounds MUST use multi-stop gradients e.g. "
+            "`background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%)`. "
+            "Gradient text on h1: `background: linear-gradient(90deg,var(--color-primary),var(--color-accent)); "
+            "-webkit-background-clip:text; -webkit-text-fill-color:transparent`\n"
+            "- GLASS CARDS: Service/feature cards MUST use class `glass-card` (defined in global CSS). "
+            "Add `hover:-translate-y-2 transition-transform duration-300` to every card.\n"
+            "- MICRO-INTERACTIONS: ALL buttons → `transition-all duration-300 hover:scale-105 hover:shadow-2xl`. "
+            "ALL nav links → `hover:text-[var(--color-accent)] transition-colors duration-200`.\n"
+            "- EFFECTS HINT: If an effects_hint is in the prompt, implement it — never ignore it.\n"
+            "- CREATIVITY: You have freedom within the design system. Surprise with layout, depth, color.\n"
+            "STRUCTURE RULES (mandatory):\n"
+            "- Use <nav> for ALL navigation menus. NEVER use <div> as a navigation container.\n"
+            "- Use <header> for page/section headers.\n"
+            "- Use <main> to wrap primary content.\n"
+            "- Use <footer> for footer regions.\n"
+            "- Use <section> for distinct content areas. Each section MUST have an accessible heading.\n"
+            "- Use <article> for self-contained content blocks.\n"
+            "- Use <h1> exactly once per page. Use <h2>/<h3> for subsections.\n"
+            "- Include at most 3 CTAs per section and at most 7 nav links.\n"
+            "- Interactive CTAs: buttons need `role='button'` and `aria-label`."
         )
 
-        html = await self.ask_llm(prompt, system=system, temperature=0.6, max_tokens=3000)
+        temperature = 0.85 if critique else 0.7
+        html = await self.ask_llm(prompt, system=system, temperature=temperature, max_tokens=3500)
 
         # Clean any markdown artifacts
         html = html.strip()
@@ -169,20 +216,61 @@ Return ONLY the HTML for this section, no explanation."""
 
         return html
 
+    async def _regenerate_with_critique(
+        self,
+        page: PageSpec,
+        brief: ClientBrief,
+        nav_items: list[dict],
+        global_css: str,
+        violations: list[str],
+    ) -> str:
+        """
+        Re-generate a full page with UX violation critique fed back to the LLM.
+        Higher temperature for creative variation — find the art, not the formula.
+        """
+        sections_html = []
+        for section in sorted(page.sections, key=lambda s: s.order):
+            html = await self._generate_section(section, brief, nav_items, critique=violations)
+            section.html = html
+            sections_html.append(html)
+
+        body = "\n\n".join(sections_html)
+        return self._wrap_page(
+            title=page.title or brief.business_name,
+            body=body,
+            global_css=global_css,
+            brief=brief,
+        )
+
     async def _generate_global_css(self, brief: ClientBrief) -> str:
         """Generate global CSS custom properties based on brand."""
-        colors = brief.colors or {}
-        primary = colors.get("primary", "#2563eb")  # blue-600
-        secondary = colors.get("secondary", "#1e40af")  # blue-800
-        accent = colors.get("accent", "#f59e0b")  # amber-500
+        if self.design_ctx:
+            primary = self.design_ctx.primary_color
+            secondary = self.design_ctx.secondary_color
+            accent = self.design_ctx.accent_color
+            background = self.design_ctx.background_color
+            foreground = self.design_ctx.foreground_color
+            heading_font = self.design_ctx.heading_font
+            body_font = self.design_ctx.body_font
+        else:
+            colors = brief.colors or {}
+            primary = colors.get("primary", "#2563eb")
+            secondary = colors.get("secondary", "#1e40af")
+            accent = colors.get("accent", "#f59e0b")
+            background = "#F8FAFC"
+            foreground = "#1E293B"
+            heading_font = "Poppins"
+            body_font = "Open Sans"
 
         return f"""/* WebGen Global Styles */
 :root {{
   --color-primary: {primary};
   --color-secondary: {secondary};
   --color-accent: {accent};
-  --font-heading: system-ui, -apple-system, sans-serif;
-  --font-body: system-ui, -apple-system, sans-serif;
+  --color-bg: {background};
+  --color-fg: {foreground};
+  --font-heading: '{heading_font}', system-ui, -apple-system, sans-serif;
+  --font-body: '{body_font}', system-ui, -apple-system, sans-serif;
 }}
 
 body {{
@@ -216,12 +304,83 @@ a:hover {{
 
 .btn-primary:hover {{
   background-color: var(--color-secondary);
+  transform: scale(1.05);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}}
+
+/* ── Premium animation keyframes ─────────────────── */
+@keyframes fadeInUp {{
+  from {{ opacity: 0; transform: translateY(32px); }}
+  to   {{ opacity: 1; transform: translateY(0); }}
+}}
+
+@keyframes slideInLeft {{
+  from {{ opacity: 0; transform: translateX(-40px); }}
+  to   {{ opacity: 1; transform: translateX(0); }}
+}}
+
+@keyframes glowPulse {{
+  0%, 100% {{ box-shadow: 0 0 20px {accent}4d; }}
+  50%       {{ box-shadow: 0 0 40px {accent}b3; }}
+}}
+
+@keyframes gradientShift {{
+  0%   {{ background-position: 0% 50%; }}
+  50%  {{ background-position: 100% 50%; }}
+  100% {{ background-position: 0% 50%; }}
+}}
+
+/* ── Glassmorphism card ───────────────────────────── */
+.glass-card {{
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}}
+
+.glass-card:hover {{
+  transform: translateY(-8px);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+}}
+
+/* ── Gradient text utility ───────────────────────── */
+.gradient-text {{
+  background: linear-gradient(90deg, {primary}, {accent});
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}}
+
+/* ── Animated hero gradient background ──────────── */
+.hero-gradient {{
+  background: linear-gradient(135deg, {primary} 0%, {secondary} 50%, #0f172a 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}}
+
+/* ── Scroll-reveal (JS-free fade) ────────────────── */
+.reveal {{
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}}
+
+.reveal.visible {{
+  opacity: 1;
+  transform: translateY(0);
 }}
 """
 
-    @staticmethod
-    def _wrap_page(title: str, body: str, global_css: str, brief: ClientBrief) -> str:
+    def _wrap_page(self, title: str, body: str, global_css: str, brief: ClientBrief) -> str:
         """Wrap section HTML in a full page document."""
+        fonts_link = ""
+        if self.design_ctx and self.design_ctx.google_fonts_css_import:
+            hf = self.design_ctx.heading_font.replace(" ", "+")
+            bf = self.design_ctx.body_font.replace(" ", "+")
+            fonts_link = f'  <link href="https://fonts.googleapis.com/css2?family={hf}:wght@400;600;700&family={bf}:wght@300;400;500&display=swap" rel="stylesheet">\n'
         return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -230,7 +389,7 @@ a:hover {{
   <title>{title}</title>
   <meta name="description" content="{brief.tagline}">
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
+{fonts_link}  <style>
 {global_css}
   </style>
 </head>

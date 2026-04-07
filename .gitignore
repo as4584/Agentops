@@ -99,3 +99,6 @@ backend/ml/experiments/
 *.so
 .openclaw/
 .openclaw/
+
+# Sensitive content - NEVER push
+content_creation_pack/

@@ -108,16 +108,27 @@ class AvatarVideoAgent(ContentAgent):
             return False
         try:
             cmd = [
-                "docker", "run", "--rm",
-                "--gpus", "all",
-                "-v", f"{audio.parent}:/audio",
-                "-v", f"{AVATAR_DIR}:/avatar",
-                "-v", f"{output.parent}:/output",
+                "docker",
+                "run",
+                "--rm",
+                "--gpus",
+                "all",
+                "-v",
+                f"{audio.parent}:/audio",
+                "-v",
+                f"{AVATAR_DIR}:/avatar",
+                "-v",
+                f"{output.parent}:/output",
                 "vinthony/sadtalker",
-                "--driven_audio", f"/audio/{audio.name}",
-                "--source_image", f"/avatar/{AVATAR_IMAGE_PATH.name}",
-                "--result_dir", "/output",
-                "--still", "--preprocess", "crop",
+                "--driven_audio",
+                f"/audio/{audio.name}",
+                "--source_image",
+                f"/avatar/{AVATAR_IMAGE_PATH.name}",
+                "--result_dir",
+                "/output",
+                "--still",
+                "--preprocess",
+                "crop",
             ]
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
             if result.returncode == 0 and output.exists():

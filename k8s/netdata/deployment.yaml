@@ -1,0 +1,93 @@
+---
+# Netdata — Real-time system metrics dashboard
+# Watches: CPU, RAM, disk I/O, network, Docker container stats, processes
+# Dashboard: kubectl port-forward -n agent-ops svc/netdata 19999:19999
+#            then open http://localhost:19999
+#
+# Netdata auto-discovers Docker containers and shows per-container CPU/RAM.
+# No config needed — works out of the box.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netdata
+  namespace: agent-ops
+  labels:
+    app: netdata
+    tier: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netdata
+  template:
+    metadata:
+      labels:
+        app: netdata
+    spec:
+      # Needs host-level access for real metrics
+      hostPID: true
+      hostIPC: true
+      hostNetwork: false
+      containers:
+        - name: netdata
+          image: netdata/netdata:stable
+          ports:
+            - name: dashboard
+              containerPort: 19999
+          securityContext:
+            capabilities:
+              add:
+                - SYS_PTRACE
+                - SYS_ADMIN
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+            - name: netdata-data
+              mountPath: /var/lib/netdata
+          env:
+            - name: NETDATA_CLAIM_TOKEN
+              value: ""   # leave empty for local-only (no Netdata Cloud)
+            - name: DOCKER_HOST
+              value: "unix:///var/run/docker.sock"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+        - name: netdata-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netdata
+  namespace: agent-ops
+  labels:
+    app: netdata
+spec:
+  selector:
+    app: netdata
+  ports:
+    - name: dashboard
+      port: 19999
+      targetPort: 19999
+  type: ClusterIP

@@ -7,6 +7,7 @@
  */
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+export const API_SECRET = process.env.NEXT_PUBLIC_AGENTOP_API_SECRET || '';
 
 export interface AgentDefinition {
   agent_id: string;
@@ -145,9 +146,16 @@ export interface CampaignGenerateResponse {
 }
 
 async function fetchAPI<T>(path: string, options?: RequestInit): Promise<T> {
+  const baseHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(API_SECRET ? { Authorization: `Bearer ${API_SECRET}` } : {}),
+  };
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers: {
+      ...baseHeaders,
+      ...(options?.headers as Record<string, string> | undefined),
+    },
   });
   if (!res.ok) {
     const text = await res.text();

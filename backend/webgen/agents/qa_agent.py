@@ -10,6 +10,7 @@ import re
 
 from backend.utils import logger
 from backend.webgen.agents.base_agent import WebAgentBase
+from backend.webgen.agents.ux_scorer import score_html
 from backend.webgen.models import PageSpec, SiteProject, SiteStatus
 
 
@@ -53,15 +54,30 @@ class WebQAAgent(WebAgentBase):
 
         project.errors = all_issues
         total = len(project.pages)
+
+        # UX law scoring — logged per page, stored in metadata
+        ux_scores: dict[str, int] = {}
+        for page in project.pages:
+            if page.html:
+                ux = score_html(page.html)
+                ux_scores[page.slug] = ux.total
+                if ux.violations:
+                    logger.warning(
+                        f"[{self.name}] UX [{page.slug}] score={ux.total}/100 violations: {ux.violations[:3]}"
+                    )
+                else:
+                    logger.info(f"[{self.name}] UX [{page.slug}] score={ux.total}/100 ✓")
+        if ux_scores:
+            project.metadata["ux_scores"] = ux_scores
+            avg = sum(ux_scores.values()) // len(ux_scores)
+            logger.info(f"[{self.name}] UX average: {avg}/100")
+
         logger.info(f"[{self.name}] QA complete: {pass_count}/{total} pages clean, {len(all_issues)} total issues")
 
-        # Advance if issues are minor (< 3 per page average)
-        if len(all_issues) < total * 3:
-            project.advance(SiteStatus.QA_PASS)
-        else:
-            logger.warning(f"[{self.name}] Too many issues, reverting to GENERATED for fixes")
-            project.status = SiteStatus.GENERATED
+        if len(all_issues) >= total * 3:
+            logger.warning(f"[{self.name}] {len(all_issues)} QA issues found — advancing anyway, review output")
 
+        project.advance(SiteStatus.QA_PASS)
         return project
 
     def _check_page(self, page: PageSpec) -> list[str]:

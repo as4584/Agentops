@@ -1,0 +1,338 @@
+{
+  "id": "b4d12ea1cd4e",
+  "created_at": "2026-04-06T05:42:29.621365+00:00",
+  "updated_at": "2026-04-06T05:42:29.666693+00:00",
+  "status": "ready",
+  "brief": {
+    "business_name": "Apex Fitness Studio",
+    "business_type": "fitness",
+    "tagline": "Train Like a Champion",
+    "description": "Train Like a Champion",
+    "services": [],
+    "target_audience": "",
+    "tone": "professional",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": []
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - Apex Fitness Studio",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "63ee748d",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "bfd2ff9d",
+          "name": "hero",
+          "component_type": "hero",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "fe2afd96",
+          "name": "features",
+          "component_type": "features",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "1f929a22",
+          "name": "testimonials",
+          "component_type": "testimonials",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "4bfedda9",
+          "name": "cta",
+          "component_type": "cta",
+          "content": {},
+          "html": "",
+          "order": 4
+        },
+        {
+          "id": "aeef4a7b",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 5
+        }
+      ],
+      "seo": {
+        "title": "Home - Apex Fitness Studio | Apex Fitness Studio",
+        "meta_description": "Train Like a Champion",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "Apex Fitness Studio",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - Apex Fitness Studio</title>\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <meta property=\"og:type\" content=\"website\">\n</head>\n<body class=\"min-h-screen bg-white\">\n\n\n\n\n\n\n\n\n\n\n\n\n\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    },
+    {
+      "slug": "about",
+      "title": "About Us - Apex Fitness Studio",
+      "purpose": "Company story and team",
+      "sections": [
+        {
+          "id": "b69637c8",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "8290e420",
+          "name": "hero-small",
+          "component_type": "hero-small",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "2f5ecec5",
+          "name": "story",
+          "component_type": "story",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "8f6b3768",
+          "name": "team",
+          "component_type": "team",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "abecc0b5",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "About Us - Apex Fitness Studio | Apex Fitness Studio",
+        "meta_description": "Train Like a Champion",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "Apex Fitness Studio",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>About Us - Apex Fitness Studio</title>\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <meta property=\"og:type\" content=\"website\">\n</head>\n<body class=\"min-h-screen bg-white\">\n\n\n\n\n\n\n\n\n\n\n\n</body>\n</html>",
+      "nav_label": "About Us",
+      "nav_order": 2
+    },
+    {
+      "slug": "services",
+      "title": "Services - Apex Fitness Studio",
+      "purpose": "Service offerings",
+      "sections": [
+        {
+          "id": "3b6d4b36",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "71a07269",
+          "name": "hero-small",
+          "component_type": "hero-small",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "a8b10bec",
+          "name": "services-grid",
+          "component_type": "services-grid",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "d5e0ffa0",
+          "name": "cta",
+          "component_type": "cta",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "649762aa",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "Services - Apex Fitness Studio | Apex Fitness Studio",
+        "meta_description": "Train Like a Champion",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "Apex Fitness Studio",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Services - Apex Fitness Studio</title>\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <meta property=\"og:type\" content=\"website\">\n</head>\n<body class=\"min-h-screen bg-white\">\n\n\n\n\n\n\n\n\n\n\n\n</body>\n</html>",
+      "nav_label": "Services",
+      "nav_order": 3
+    },
+    {
+      "slug": "contact",
+      "title": "Contact - Apex Fitness Studio",
+      "purpose": "Contact form and info",
+      "sections": [
+        {
+          "id": "f5941444",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "6aebcff7",
+          "name": "hero-small",
+          "component_type": "hero-small",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "41f88cfe",
+          "name": "contact-form",
+          "component_type": "contact-form",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "2be5a1ac",
+          "name": "map",
+          "component_type": "map",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "63987b8e",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "Contact - Apex Fitness Studio | Apex Fitness Studio",
+        "meta_description": "Train Like a Champion",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "Apex Fitness Studio",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Contact - Apex Fitness Studio</title>\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Train Like a Champion\">\n  <meta property=\"og:type\" content=\"website\">\n</head>\n<body class=\"min-h-screen bg-white\">\n\n\n\n\n\n\n\n\n\n\n\n</body>\n</html>",
+      "nav_label": "Contact",
+      "nav_order": 4
+    }
+  ],
+  "template_ids": [],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/apex-fitness-studio",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563eb;\n  --color-secondary: #1e40af;\n  --color-accent: #f59e0b;\n  --font-heading: system-ui, -apple-system, sans-serif;\n  --font-body: system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n}\n",
+  "sitemap_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://apexfitnessstudio.com/index.html</loc>\n    <priority>1.0</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexfitnessstudio.com/about.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexfitnessstudio.com/services.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://apexfitnessstudio.com/contact.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>",
+  "robots_txt": "User-agent: *\nAllow: /\nSitemap: https://apexfitnessstudio.com/sitemap.xml\n",
+  "errors": [
+    "[index] Missing <h1> tag",
+    "[index] Missing og:title meta tag",
+    "[index] Missing JSON-LD structured data",
+    "[index] Page body seems too short (< 100 chars)",
+    "[about] Missing <h1> tag",
+    "[about] Missing og:title meta tag",
+    "[about] Missing JSON-LD structured data",
+    "[about] Page body seems too short (< 100 chars)",
+    "[services] Missing <h1> tag",
+    "[services] Missing og:title meta tag",
+    "[services] Missing JSON-LD structured data",
+    "[services] Page body seems too short (< 100 chars)",
+    "[contact] Missing <h1> tag",
+    "[contact] Missing og:title meta tag",
+    "[contact] Missing JSON-LD structured data",
+    "[contact] Page body seems too short (< 100 chars)"
+  ],
+  "metadata": {}
+}

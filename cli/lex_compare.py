@@ -165,7 +165,7 @@ def compare_message(
 # ── Rich display ────────────────────────────────────────────────────────────
 
 
-def _agent_badge(agent: str | None, console_: "Console") -> "Text":
+def _agent_badge(agent: str | None, console_: Console) -> Text:
     """Return a coloured Text badge for an agent name."""
     if not agent:
         return Text("(none)", style="dim")
@@ -173,8 +173,7 @@ def _agent_badge(agent: str | None, console_: "Console") -> "Text":
     return Text(agent, style=f"bold {color}")
 
 
-def print_comparison(result: dict, console_: "Console") -> None:
-    from rich.columns import Columns
+def print_comparison(result: dict, console_: Console) -> None:
 
     msg = result["message"]
     expected = result.get("expected")
@@ -229,7 +228,7 @@ def print_comparison_simple(result: dict) -> None:
 # ── Batch mode (eval split) ─────────────────────────────────────────────────
 
 
-def run_batch(v2_model: str, v3_model: str, limit: int, console_: "Console | None") -> None:
+def run_batch(v2_model: str, v3_model: str, limit: int, console_: Console | None) -> None:
     if not EVAL_SPLIT.exists():
         msg = f"Eval split not found: {EVAL_SPLIT}\nRun: python scripts/finetune_lex.py --prep-only"
         if console_:
@@ -293,14 +292,16 @@ def run_batch(v2_model: str, v3_model: str, limit: int, console_: "Console | Non
 # ── Interactive REPL ────────────────────────────────────────────────────────
 
 
-def run_interactive(v2_model: str, v3_model: str, console_: "Console | None") -> None:
+def run_interactive(v2_model: str, v3_model: str, console_: Console | None) -> None:
     if console_:
-        console_.print(Panel(
-            f"[bold]lex compare REPL[/bold]\n"
-            f"v2=[cyan]{v2_model}[/cyan]  v3=[green]{v3_model}[/green]\n"
-            f"Type a message to compare routing. [dim]Ctrl+C to exit.[/dim]",
-            title="lex-compare",
-        ))
+        console_.print(
+            Panel(
+                f"[bold]lex compare REPL[/bold]\n"
+                f"v2=[cyan]{v2_model}[/cyan]  v3=[green]{v3_model}[/green]\n"
+                f"Type a message to compare routing. [dim]Ctrl+C to exit.[/dim]",
+                title="lex-compare",
+            )
+        )
     else:
         print(f"\nlex-compare REPL  (v2={v2_model}  v3={v3_model})")
         print("Type a message to compare routing. Ctrl+C to exit.\n")
