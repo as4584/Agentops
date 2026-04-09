@@ -277,6 +277,7 @@ class TestHandleStructuredToolCalls:
         agent = make_agent("security_agent")
         response = "[TOOL_CALLS:not-valid-json]"
         match = re.search(r"\[TOOL_CALLS:(.*?)\]", response, re.DOTALL)
+        assert match is not None
         result = await agent._handle_structured_tool_calls(response, match)
         # With bad JSON, should return the original response
         assert result == response

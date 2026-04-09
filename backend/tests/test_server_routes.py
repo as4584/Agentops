@@ -135,7 +135,7 @@ class TestSystemStatus:
             status=DriftStatus.GREEN,
             pending_updates=[],
             violations=[],
-            last_check=datetime.utcnow().isoformat(),
+            last_check=datetime.utcnow(),
         )
         mock_orchestrator.get_drift_report.return_value = dr
 

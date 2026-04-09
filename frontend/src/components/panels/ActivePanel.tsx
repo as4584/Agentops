@@ -32,8 +32,6 @@ export default function ActivePanel() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [events, setEvents] = useState<StreamEvent[]>([]);
 
-  const authHeader: Record<string, string> = API_SECRET ? { Authorization: `Bearer ${API_SECRET}` } : {};
-
   const fetchAll = async () => {
     try {
       const [sr, ar] = await Promise.all([

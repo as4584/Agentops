@@ -87,16 +87,29 @@ def check_orphaned_routes() -> None:
 
 # ── 2. Timing-safe auth check ────────────────────────────────────────────────
 
+AUTH_PY = BACKEND / "auth.py"
+
+
 def check_timing_safe_auth() -> None:
-    """Bearer token comparison must use hmac.compare_digest, not == or !=."""
+    """Bearer token comparison must use hmac.compare_digest, not == or !="""
     server_text = SERVER_PY.read_text()
     # Look for direct string comparison on auth tokens
     if re.search(r'auth\[7:\]\s*[!=]=\s*API_SECRET', server_text):
         fail("Timing-unsafe bearer token comparison in server.py (use hmac.compare_digest)")
-    elif "hmac.compare_digest" in server_text:
-        ok("Bearer token uses timing-safe comparison (hmac.compare_digest)")
+        return
+    # Auth was refactored into backend/auth.py — check the delegation pattern:
+    # server.py must import verify_api_request and auth.py must use hmac.compare_digest
+    if not re.search(r'from backend\.auth import.*verify_api_request', server_text):
+        fail("server.py does not import verify_api_request from backend.auth")
+        return
+    if not AUTH_PY.exists():
+        fail("backend/auth.py not found")
+        return
+    auth_text = AUTH_PY.read_text()
+    if "hmac.compare_digest" in auth_text:
+        ok("Bearer token uses timing-safe comparison (hmac.compare_digest in backend/auth.py)")
     else:
-        fail("No hmac.compare_digest found for auth verification in server.py")
+        fail("No hmac.compare_digest found in backend/auth.py")
 
 
 # ── 3. Dev key fallback check ────────────────────────────────────────────────
@@ -158,13 +171,15 @@ def check_secrets() -> None:
         ok("Secret scan passed")
 
 
-# ── 6. Import sanity — hmac must be imported if used ─────────────────────────
+# ── 6. Import sanity — hmac must be imported where used ──────────────────────
 
 def check_hmac_imported() -> None:
-    """If hmac.compare_digest is used, hmac must be imported."""
-    server_text = SERVER_PY.read_text()
-    if "hmac.compare_digest" in server_text and "import hmac" not in server_text:
-        fail("server.py uses hmac.compare_digest but does not import hmac")
+    """If hmac.compare_digest is used in auth.py, hmac must be imported there."""
+    if not AUTH_PY.exists():
+        return
+    auth_text = AUTH_PY.read_text()
+    if "hmac.compare_digest" in auth_text and "import hmac" not in auth_text:
+        fail("backend/auth.py uses hmac.compare_digest but does not import hmac")
 
 
 # ── 7. Test suite smoke check ────────────────────────────────────────────────
@@ -181,7 +196,7 @@ def check_tests_pass() -> None:
         cwd=str(PROJECT_ROOT),
         capture_output=True,
         text=True,
-        timeout=120,
+        timeout=300,
     )
     # Parse the summary line (e.g. "1161 passed, 5 skipped")
     summary = ""

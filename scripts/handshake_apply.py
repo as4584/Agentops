@@ -75,6 +75,7 @@ def main():
         _print_status()
         return
 
+    _interactive_label = "Interactive — paste Copilot/Sonnet output per job"
     print(f"""
 ╔══════════════════════════════════════════════════════╗
 ║       AGENTOP — HANDSHAKE APPLICATION CAMPAIGN       ║
@@ -85,7 +86,7 @@ def main():
   Mode:    {"DRY RUN (no submissions)" if args.dry_run else "LIVE (submitting applications)"}
   Limit:   {args.limit} jobs
   Browser: {"Headless" if args.headless else "Headed (visible window)"}
-  Letters: {"Interactive \u2014 paste Copilot/Sonnet output per job" if args.interactive else "Auto (Ollama template, or skipped if no field)"}
+  Letters: {_interactive_label if args.interactive else "Auto (Ollama template, or skipped if no field)"}
   Profile: data/handshake_profile/ (persistent login)
 
 """)

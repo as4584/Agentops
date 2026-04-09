@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 import urllib.error
+from http.client import HTTPMessage
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from backend.tools import (
@@ -236,7 +237,7 @@ class TestWebhookSendExtended:
 
 class TestHealthCheckExtended:
     async def test_http_error_returns_reachable_with_status(self):
-        exc = urllib.error.HTTPError("http://example.com", 404, "Not Found", {}, None)
+        exc = urllib.error.HTTPError("http://example.com", 404, "Not Found", HTTPMessage(), None)
         with patch("urllib.request.urlopen", side_effect=exc):
             result = await health_check("http://example.com/health", "agent")
         assert result["reachable"] is True

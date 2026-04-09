@@ -523,6 +523,7 @@ class TestDetectToolFailure:
 
         ok, msg = detect_tool_failure({"error": "something went wrong"})
         assert ok is True
+        assert msg is not None
         assert "something went wrong" in msg
 
     def test_success_false_triggers_failure(self):
@@ -530,6 +531,7 @@ class TestDetectToolFailure:
 
         ok, msg = detect_tool_failure({"success": False, "message": "write failed"})
         assert ok is True
+        assert msg is not None
         assert "write failed" in msg
 
     def test_reachable_false_triggers_failure(self):
@@ -537,6 +539,7 @@ class TestDetectToolFailure:
 
         ok, msg = detect_tool_failure({"reachable": False, "url": "http://x.com"})
         assert ok is True
+        assert msg is not None
         assert "unreachable" in msg
 
     def test_exists_false_triggers_failure(self):
@@ -544,6 +547,7 @@ class TestDetectToolFailure:
 
         ok, msg = detect_tool_failure({"exists": False})
         assert ok is True
+        assert msg is not None
         assert "file not found" in msg
 
     def test_nonzero_return_code_triggers_failure(self):
@@ -551,6 +555,7 @@ class TestDetectToolFailure:
 
         ok, msg = detect_tool_failure({"return_code": 1, "stderr": "bad exit"})
         assert ok is True
+        assert msg is not None
         assert "exit code 1" in msg
 
     def test_blocked_nonzero_is_not_failure(self):
@@ -958,6 +963,7 @@ class TestTaskDelegator:
         )
         assert len(result.outcomes) == 1
         assert result.outcomes[0].success is False
+        assert result.outcomes[0].error is not None
         assert "not registered" in result.outcomes[0].error
 
     @pytest.mark.asyncio
@@ -1032,6 +1038,7 @@ class TestTaskDelegator:
             synthesize=False,
         )
         assert result.outcomes[0].success is False
+        assert result.outcomes[0].error is not None
         assert "Timeout" in result.outcomes[0].error
 
     @pytest.mark.asyncio

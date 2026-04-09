@@ -1,4 +1,4 @@
-import { API_BASE, API_SECRET } from '@/lib/api';
+import { API_BASE } from '@/lib/api';
 import React, { useEffect, useState } from 'react';
 import { Stack, Group, Text, Badge, Box, ScrollArea } from '@mantine/core';
 

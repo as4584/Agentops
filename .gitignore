@@ -110,3 +110,16 @@ backend/ml/experiments/
 # Sensitive content - NEVER push
 content_creation_pack/
 sandbox/tmp/
+
+# Generated live training / DPO / routing data (runtime churn, never commit)
+data/training/live_*.jsonl
+data/dpo/live_*.jsonl
+
+# ML monitoring metrics (runtime-generated)
+backend/ml/monitoring/metrics.jsonl
+
+# GSD auto-generated architecture docs
+docs/gsd/
+
+# Soul core runtime state
+data/agents/soul_core/

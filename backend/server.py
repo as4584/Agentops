@@ -15,7 +15,6 @@ except through sanctioned message endpoints.
 from __future__ import annotations
 
 import asyncio
-import hmac
 import os
 import time
 import uuid
