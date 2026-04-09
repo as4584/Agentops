@@ -174,7 +174,6 @@ def _agent_badge(agent: str | None, console_: Console) -> Text:
 
 
 def print_comparison(result: dict, console_: Console) -> None:
-
     msg = result["message"]
     expected = result.get("expected")
     v2 = result["v2"]

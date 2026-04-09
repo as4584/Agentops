@@ -28,13 +28,13 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from backend.llm import OllamaClient
-from backend.webgen.agents.design_advisor import DesignAdvisorAgent
-from backend.webgen.agents.page_generator import PageGeneratorAgent
-from backend.webgen.agents.ux_scorer import score_html
-from backend.webgen.gallery import list_gallery, save_iteration
-from backend.webgen.site_store import SiteStore
-from backend.webgen.template_store import TemplateStore
+from backend.llm import OllamaClient  # noqa: E402
+from backend.webgen.agents.design_advisor import DesignAdvisorAgent  # noqa: E402
+from backend.webgen.agents.page_generator import PageGeneratorAgent  # noqa: E402
+from backend.webgen.agents.ux_scorer import score_html  # noqa: E402
+from backend.webgen.gallery import list_gallery, save_iteration  # noqa: E402
+from backend.webgen.site_store import SiteStore  # noqa: E402
+from backend.webgen.template_store import TemplateStore  # noqa: E402
 
 # ── Display helpers ─────────────────────────────────────────────────────────
 

@@ -1,0 +1,45 @@
+# ── Never bake these into the image ──────────────────────────────────────────
+.env
+.env.*
+*.enc
+
+# Runtime data — lives on PVC
+data/
+output/
+backend/logs/
+backend/memory/*.db
+
+# Dev / local tools
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+htmlcov/
+.coverage
+.mypy_cache/
+.ruff_cache/
+
+# Frontend — not needed in backend image
+frontend/
+
+# Training data / sandbox junk — keeps image small
+.training_data/
+sandbox/
+pixel-agents/
+animation_salvage_lab/
+SigmaSimulator/
+
+# Git / IDE
+.git/
+.github/
+.obsidian/
+.vscode/
+
+# K8s manifests — not needed at runtime
+k8s/
+
+# Secrets / keys — never in image
+*.pem
+*.key
+*.p12

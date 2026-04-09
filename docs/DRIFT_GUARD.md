@@ -25,12 +25,14 @@ These invariants MUST hold at all times. Violation halts execution.
 | INV-11| WebGen output MUST use hand-crafted design system, not LLM HTML | HIGH |
 | INV-12| Vercel repos MUST include explicit framework/build/install/output fields | MEDIUM |
 | INV-13| All cloud LLM calls MUST route through LLMRouter — no direct OpenRouter calls | HIGH |
-| INV-14| API keys MUST live in .env with chmod 600 — never committed to git | CRITICAL |
+| INV-14| All secrets MUST be stored in Doppler (project: agentop, config: dev). The .env file is a local-only fallback — never commit it. Prefer `doppler run --` over load_dotenv() for all process starts. | CRITICAL |
 | INV-15| Monthly cloud LLM cost MUST NOT exceed budget without soul_core approval | HIGH |
-| INV-16| Embeddings MUST use local models only — cloud does not support them | MEDIUM || INV-17| Agents MUST NOT accumulate images/screenshots in conversation context — max 10 per session | CRITICAL |
+| INV-16| Embeddings MUST use local models only — cloud does not support them | MEDIUM |
+| INV-17| Agents MUST NOT accumulate images/screenshots in conversation context — max 10 per session | CRITICAL |
 | INV-18| Credentials MUST NEVER appear in agent context, tool params, or logs — vault-only | CRITICAL |
 | INV-19| Browser automation MUST go through browser-worker pod — no host-level Playwright | HIGH     |
 | INV-20| Network reserved ports (Xbox: 3074,88,500,3544,4500) MUST NOT be modified by agents | CRITICAL |
+| INV-21| Secret rotation MUST use `doppler secrets set KEY=value` or `scripts/migrate_secrets_to_doppler.py --rotate-sensitive`. Never generate or store new credentials in .env directly. | CRITICAL |
 ## 2. System Boundaries
 
 ```

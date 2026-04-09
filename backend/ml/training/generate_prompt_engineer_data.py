@@ -500,7 +500,7 @@ def _fill_template(template: dict) -> dict:
             val = val.replace("{pct}", random.choice(_PCTS))
             result[key] = val
         elif isinstance(val, list):
-            result[key] = [
+            result[key] = [  # type: ignore[assignment]
                 v.replace("{branch}", random.choice(_BRANCHES))
                 .replace("{file}", random.choice(_FILES))
                 .replace("{port}", random.choice(_PORTS))
@@ -634,8 +634,8 @@ def main() -> None:
             f.write(json.dumps(ex) + "\n")
 
     # Stats
-    difficulties = {}
-    agents = {}
+    difficulties: dict[str, int] = {}
+    agents: dict[str, int] = {}
     for ex in examples:
         d = ex["metadata"]["difficulty"]
         a = ex["metadata"]["agent"]

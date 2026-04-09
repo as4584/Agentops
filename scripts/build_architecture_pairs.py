@@ -365,7 +365,7 @@ curl -X POST http://localhost:8000/skills/newsletter_weekly_tips/run \\
 | 8000 | FastAPI backend | `python -m backend.port_guard serve backend.server:app` |
 | 3007 | Next.js dashboard | `cd frontend && npm run dev` |
 | 11434 | Ollama LLM server | `ollama serve` |
-| 6333 | Qdrant vector store | `docker run -p 6333:6333 qdrant/qdrant` |
+| 6333 | Qdrant vector store | `docker run -p 127.0.0.1:6333:6333 -p 127.0.0.1:6334:6334 -v qdrant_storage:/qdrant/storage:z qdrant/qdrant` |
 
 **Port Guard** (`backend/port_guard.py`) checks if 8000 is already in use before starting. If it is, it kills the old process (with confirmation) and then starts fresh. This prevents the common WSL double-start issue.
 

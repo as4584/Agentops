@@ -7,6 +7,8 @@ Tailwind CSS, semantic HTML5, mobile-first responsive.
 
 from __future__ import annotations
 
+import asyncio
+
 from backend.llm import OllamaClient
 from backend.utils import logger
 from backend.webgen.agents.base_agent import WebAgentBase
@@ -76,12 +78,19 @@ class PageGeneratorAgent(WebAgentBase):
         global_css: str,
     ) -> str:
         """Generate a complete HTML page."""
-        # Generate each section
-        sections_html = []
-        for section in sorted(page.sections, key=lambda s: s.order):
-            html = await self._generate_section(section, brief, nav_items)
-            section.html = html
-            sections_html.append(html)
+        # Generate all sections concurrently — they are independent
+        sorted_sections = sorted(page.sections, key=lambda s: s.order)
+        raw_results = await asyncio.gather(
+            *[self._generate_section(sec, brief, nav_items) for sec in sorted_sections],
+            return_exceptions=True,
+        )
+        sections_html: list[str] = []
+        for sec, html in zip(sorted_sections, raw_results):
+            if isinstance(html, Exception):
+                logger.error(f"[{self.name}] Section {sec.name} failed: {html}")
+                html = ""
+            sec.html = html  # type: ignore[assignment]
+            sections_html.append(html)  # type: ignore[arg-type]
 
         # Assemble full page
         body = "\n\n".join(sections_html)

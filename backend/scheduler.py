@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import uuid
 from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Any
@@ -35,7 +34,7 @@ async def _run_scheduled_dispatch(
 
 class AgentopScheduler:
     def __init__(self, db_path: Path) -> None:
-        self.scheduler_id = uuid.uuid4().hex
+        self.scheduler_id = "agentop_main"
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._scheduler = AsyncIOScheduler(

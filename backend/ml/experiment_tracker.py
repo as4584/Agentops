@@ -96,6 +96,7 @@ class ExperimentTracker:
         self._index_path = self._dir / "index.json"
         self._lock = Lock()
         self._runs: dict[str, ExperimentRun] = {}
+        self._metric_write_counts: dict[str, int] = {}
         self._load_index()
 
     # ── Public API ───────────────────────────────────────
@@ -138,7 +139,11 @@ class ExperimentTracker:
             if step is not None:
                 entry["step"] = step
             run.metrics[name].append(entry)
-            self._save_run(run)
+            # Batch writes: flush every 5 metrics to reduce disk I/O.
+            # end_run() always flushes regardless.
+            self._metric_write_counts[run_id] = self._metric_write_counts.get(run_id, 0) + 1
+            if self._metric_write_counts[run_id] % 5 == 0:
+                self._save_run(run)
 
     def log_artifact(self, run_id: str, artifact_path: str) -> None:
         """Register an artifact (model file, plot, etc.) for a run."""
@@ -154,8 +159,9 @@ class ExperimentTracker:
             run.status = status
             run.ended_at = datetime.now(UTC).isoformat()
             run.notes = notes
-            self._save_run(run)
+            self._save_run(run)  # always flush on end
             self._save_index()
+            self._metric_write_counts.pop(run_id, None)
         logger.info(f"[ExperimentTracker] Ended run {run_id} — {status}")
 
     def get_run(self, run_id: str) -> dict[str, Any]:

@@ -412,7 +412,29 @@ Built sites are static HTML/CSS/JS with no runtime framework dependency.
 
 ---
 
-## 12. Content Production Pipeline
+## 12. Secrets Management
+
+**Provider:** Doppler — `https://dashboard.doppler.com` (project: `agentop`, config: `dev`)
+**Migrated:** 2026-04-08 — all 50 secrets from `.env` pushed to Doppler.
+
+### Rules (enforced by INV-14, INV-21)
+- `.env` is gitignored, local-only fallback. Never the source of truth.
+- All processes should start via `doppler run --` to inject secrets as env vars — no file on disk.
+- New secrets: `doppler secrets set KEY=value` from CLI, never added to `.env` only.
+- Rotation (free plan, manual): `doppler secrets set OLD_KEY=new_value`, then revoke at the provider API dashboard.
+- Rotation (automated): requires Team plan. Script at `scripts/migrate_secrets_to_doppler.py --rotate-sensitive`.
+- Audit: `python scripts/sync_doppler.py audit` or `doppler secrets` to verify live state.
+
+### Agents responsible
+| Agent | Role |
+|---|---|
+| `security_agent` | Flags secrets found outside Doppler via `secret_scanner` tool |
+| `devops_agent` | Ensures `doppler run --` is used in all deploy/run scripts |
+| `soul_core` | Enforces INV-14/INV-21 invariants, blocks non-compliant tool calls |
+
+---
+
+## 13. Content Production Pipeline
 
 **Location:** `backend/content/`
 **CLI:** `content_cli.py`

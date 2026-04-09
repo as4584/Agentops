@@ -13,11 +13,14 @@ Security controls
 
 from __future__ import annotations
 
+import ipaddress
 import re
+import socket
 import time
 import uuid
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from backend.config import OUTPUT_DIR, SSRF_BLOCKED_PREFIXES
 from backend.utils import logger
@@ -41,7 +44,15 @@ _SCREENSHOTS_BASE = OUTPUT_DIR / "browser"
 
 
 def _validate_url(url: str) -> None:
-    """Raise ``ValueError`` if the URL is disallowed."""
+    """Raise ``ValueError`` if the URL is disallowed.
+
+    Two-pass check:
+    1. String-prefix check against ``SSRF_BLOCKED_PREFIXES``.
+    2. DNS resolution check — resolves the hostname and verifies each
+       returned IP is not private/loopback/link-local. This closes the
+       DNS-rebinding attack vector where an external domain resolves to
+       a private address after the string check passes.
+    """
     if not _SCHEME_RE.match(url):
         raise ValueError(f"Disallowed URL scheme — only http/https are permitted: {url!r}")
 
@@ -49,6 +60,36 @@ def _validate_url(url: str) -> None:
     for blocked in SSRF_BLOCKED_PREFIXES:
         if url_lower.startswith(blocked.lower()):
             raise ValueError(f"SSRF policy blocks target URL: {url!r}")
+
+    # DNS rebinding check — resolve and inspect every returned address
+    try:
+        parsed = urlparse(url)
+        hostname = parsed.hostname or ""
+        if hostname:
+            infos = socket.getaddrinfo(hostname, None)
+            for _fam, _typ, _proto, _canon, sockaddr in infos:
+                raw_ip = sockaddr[0]
+                try:
+                    addr = ipaddress.ip_address(raw_ip)
+                except ValueError:
+                    continue
+                if (
+                    addr.is_loopback
+                    or addr.is_private
+                    or addr.is_link_local
+                    or addr.is_multicast
+                    or addr.is_reserved
+                    or addr.is_unspecified
+                ):
+                    raise ValueError(
+                        f"SSRF policy blocks {url!r} — hostname {hostname!r} resolves to"
+                        f" private/reserved address {raw_ip}"
+                    )
+    except ValueError:
+        raise
+    except OSError:
+        # DNS lookup failed — block the request (fail closed)
+        raise ValueError(f"SSRF policy blocks {url!r} — DNS resolution failed")
 
 
 def _redact_text(selector: str, text: str) -> str:

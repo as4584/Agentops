@@ -1047,10 +1047,15 @@ async def secret_scanner(target_path: str, agent_id: str) -> dict[str, Any]:
 
     _skip_dirs = {".git", "__pycache__", "node_modules", ".next", "dist", "build", "venv", ".venv"}
     _skip_exts = {".png", ".jpg", ".jpeg", ".gif", ".ico", ".woff", ".woff2", ".ttf", ".zip", ".bin"}
+    # .env files are the designated secrets location — scanning them always
+    # produces findings and is a known false positive. They are gitignored.
+    _skip_names = {".env", ".env.local", ".env.development", ".env.production", ".env.test"}
 
     findings: list[dict[str, Any]] = []
     files_scanned = 0
-    files: list[Path] = [target] if target.is_file() else []
+    files: list[Path] = []
+    if target.is_file() and target.name not in _skip_names:
+        files = [target]
 
     if target.is_dir():
         for f in target.rglob("*"):
@@ -1059,6 +1064,8 @@ async def secret_scanner(target_path: str, agent_id: str) -> dict[str, Any]:
             if any(part in _skip_dirs for part in f.parts):
                 continue
             if f.suffix.lower() in _skip_exts:
+                continue
+            if f.name in _skip_names:
                 continue
             files.append(f)
 

@@ -2,6 +2,7 @@
 # Secrets
 .env
 .env.*
+!.env.example
 *.key
 
 # Runtime
@@ -76,6 +77,10 @@ data/*.db
 data/*.json
 data/agents/
 
+# Browser profiles and user data (sensitive, large)
+data/handshake_profile/
+data/handshake_resumes/
+
 # Social media runtime token cache (sensitive)
 backend/memory/social_media/*.json
 
@@ -95,6 +100,8 @@ playground
 data/higgsfield/.session_cookies.json
 data/higgsfield/evidence/
 *.coverage
+.coverage
+htmlcov/
 backend/ml/experiments/
 *.so
 .openclaw/
@@ -102,3 +109,4 @@ backend/ml/experiments/
 
 # Sensitive content - NEVER push
 content_creation_pack/
+sandbox/tmp/

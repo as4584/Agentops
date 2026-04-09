@@ -966,8 +966,10 @@ class TestSecurityHelpers:
     @pytest.mark.asyncio
     async def test_verify_auth_no_secret(self):
         """Auth passes when API_SECRET is empty."""
+        import backend.auth as _auth_mod
+
         mock_req = MagicMock()
-        with patch.object(server_module, "API_SECRET", ""):
+        with patch.object(_auth_mod, "API_SECRET", ""):
             await server_module._verify_auth(mock_req)  # Should not raise
 
     @pytest.mark.asyncio
@@ -975,9 +977,11 @@ class TestSecurityHelpers:
         """Auth fails when header is missing."""
         from fastapi import HTTPException
 
+        import backend.auth as _auth_mod
+
         mock_req = MagicMock()
         mock_req.headers.get.return_value = ""
-        with patch.object(server_module, "API_SECRET", "mysecret"):
+        with patch.object(_auth_mod, "API_SECRET", "mysecret"):
             with pytest.raises(HTTPException) as exc_info:
                 await server_module._verify_auth(mock_req)
         assert exc_info.value.status_code == 401
@@ -987,9 +991,11 @@ class TestSecurityHelpers:
         """Auth fails with incorrect token."""
         from fastapi import HTTPException
 
+        import backend.auth as _auth_mod
+
         mock_req = MagicMock()
         mock_req.headers.get.return_value = "Bearer wrongtoken"
-        with patch.object(server_module, "API_SECRET", "correctsecret"):
+        with patch.object(_auth_mod, "API_SECRET", "correctsecret"):
             with pytest.raises(HTTPException) as exc_info:
                 await server_module._verify_auth(mock_req)
         assert exc_info.value.status_code == 401
@@ -997,9 +1003,11 @@ class TestSecurityHelpers:
     @pytest.mark.asyncio
     async def test_verify_auth_correct_token(self):
         """Auth passes with correct token."""
+        import backend.auth as _auth_mod
+
         mock_req = MagicMock()
         mock_req.headers.get.return_value = "Bearer mysecret"
-        with patch.object(server_module, "API_SECRET", "mysecret"):
+        with patch.object(_auth_mod, "API_SECRET", "mysecret"):
             await server_module._verify_auth(mock_req)  # Should not raise
 
 
