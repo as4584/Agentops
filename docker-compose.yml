@@ -69,6 +69,32 @@ services:
     volumes:
       - ollama-models:/root/.ollama
 
+  # ── Ollama model seeder ─────────────────────────────────────────────────
+  # Waits for Ollama to be ready, then pulls required models.
+  # lex-v2 is a custom model — import it separately if not in registry:
+  #   ollama show lex-v2 --modelfile > Modelfile   (on source machine)
+  #   ollama create lex-v2 -f Modelfile             (on target machine)
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: agentop-ollama-init
+    restart: "no"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    entrypoint: >
+      /bin/sh -c "
+        echo 'Waiting for Ollama...';
+        until ollama list > /dev/null 2>&1; do sleep 2; done;
+        echo 'Pulling llama3.2...';
+        ollama pull llama3.2;
+        echo 'Attempting lex-v2 (best-effort)...';
+        ollama pull lex-v2 || echo 'lex-v2 not in registry — import manually (see docker-compose.yml comments)';
+        echo 'Model seeding complete.'
+      "
+    depends_on:
+      - ollama
+    volumes:
+      - ollama-models:/root/.ollama
+
   # ── Qdrant (vector store) ───────────────────────────────────────────────
   qdrant:
     image: qdrant/qdrant:latest

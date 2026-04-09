@@ -363,7 +363,7 @@ class TestProcessRestartExtended:
         mock_proc.communicate = AsyncMock(return_value=(b"", b""))
 
         with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
-            result = await process_restart("backend", "agent")
+            result = await process_restart("backend", "agent", confirm=True, reason="test restart")
         assert result["success"] is True
         assert result["process"] == "backend"
         assert "return_code" in result
@@ -373,15 +373,25 @@ class TestProcessRestartExtended:
         mock_proc.communicate = AsyncMock(side_effect=TimeoutError())
 
         with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
-            result = await process_restart("ollama", "agent")
+            result = await process_restart("ollama", "agent", confirm=True, reason="test restart")
         assert result["success"] is False
         assert "timed out" in result["error"].lower()
 
     async def test_generic_exception_returns_error(self):
         with patch("asyncio.create_subprocess_exec", side_effect=Exception("spawn failed")):
-            result = await process_restart("frontend", "agent")
+            result = await process_restart("frontend", "agent", confirm=True, reason="test restart")
         assert result["success"] is False
         assert "spawn failed" in result["error"]
+
+    async def test_blocked_without_confirm_payload(self):
+        result = await process_restart("backend", "agent")
+        assert result["success"] is False
+        assert "confirm payload required" in result["error"]
+
+    async def test_blocked_without_reason(self):
+        result = await process_restart("backend", "agent", confirm=True, reason="")
+        assert result["success"] is False
+        assert "confirm payload required" in result["error"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -58,6 +58,7 @@ VALID_TOOLS: frozenset[str] = frozenset(
     {
         "safe_shell",
         "file_reader",
+        "document_ocr",
         "doc_updater",
         "system_info",
         "webhook_send",
@@ -201,6 +202,24 @@ class DecisionCollector:
         - Difficulty level based on confidence
         - Generates a Lex training pair for the decision
         """
+        # Validate agent ID before recording
+        if chosen_agent not in VALID_AGENTS:
+            logger.warning(
+                f"[DecisionCollector] Skipping invalid agent_id={chosen_agent!r} — "
+                f"not in VALID_AGENTS. Add it to decision_collector.VALID_AGENTS if real."
+            )
+            return RoutingDecision(
+                user_message=user_message,
+                chosen_agent=chosen_agent,
+                method=method,
+                confidence=confidence,
+                latency_ms=latency_ms,
+                reasoning=reasoning,
+                tools_likely=tools_likely or [],
+                rejected_agents=rejected_agents or [],
+                difficulty="invalid",
+            )
+
         # Detect boundary
         is_boundary = False
         boundary_agents: list[str] = []

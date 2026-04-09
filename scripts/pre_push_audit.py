@@ -25,6 +25,25 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 BACKEND = PROJECT_ROOT / "backend"
 SERVER_PY = BACKEND / "server.py"
 ROUTES_DIR = BACKEND / "routes"
+SKILLS_DIR = BACKEND / "skills"
+
+# Canonical 12 agent IDs — update when a new agent is added to ALL_AGENT_DEFINITIONS
+VALID_AGENT_IDS: frozenset[str] = frozenset(
+    {
+        "soul_core",
+        "devops_agent",
+        "monitor_agent",
+        "self_healer_agent",
+        "code_review_agent",
+        "security_agent",
+        "data_agent",
+        "comms_agent",
+        "cs_agent",
+        "it_agent",
+        "knowledge_agent",
+        "ocr_agent",
+    }
+)
 
 RED = "\033[0;31m"
 GREEN = "\033[0;32m"
@@ -33,11 +52,17 @@ BOLD = "\033[1m"
 RESET = "\033[0m"
 
 violations: list[str] = []
+warnings: list[str] = []
 
 
 def fail(msg: str) -> None:
     violations.append(msg)
     print(f"  {RED}✗{RESET} {msg}")
+
+
+def warn(msg: str) -> None:
+    warnings.append(msg)
+    print(f"  {YELLOW}⚠{RESET} {msg}")
 
 
 def ok(msg: str) -> None:
@@ -83,6 +108,39 @@ def check_orphaned_routes() -> None:
                 pass
             else:
                 fail(f"Route imported but not registered: backend/routes/{rf.name}")
+
+
+# ── 1b. Orphaned skill manifests (warn-only) ─────────────────────────────────
+
+def check_orphaned_skills() -> None:
+    """Warn if any skill.json references an agent ID not in VALID_AGENT_IDS."""
+    import json as _json
+
+    skill_files = sorted(SKILLS_DIR.glob("*/skill.json"))
+    if not skill_files:
+        ok("Skills: no skill.json manifests found")
+        return
+
+    bad: list[str] = []
+    for sf in skill_files:
+        try:
+            data = _json.loads(sf.read_text())
+        except Exception:
+            warn(f"Skills: could not parse {sf.relative_to(PROJECT_ROOT)}")
+            continue
+        allowed = data.get("allowed_agents", [])
+        if not isinstance(allowed, list):
+            continue
+        # "*" is a valid wildcard meaning "any agent" — skip it
+        invalid = [a for a in allowed if a != "*" and a not in VALID_AGENT_IDS]
+        if invalid:
+            bad.append(f"{sf.parent.name}: {invalid}")
+
+    if bad:
+        for entry in bad:
+            warn(f"Skill manifest references unknown agent(s): {entry}")
+    else:
+        ok(f"Skills: all {len(skill_files)} manifests reference valid agents")
 
 
 # ── 2. Timing-safe auth check ────────────────────────────────────────────────
@@ -241,6 +299,7 @@ def main() -> int:
     print()
 
     check_orphaned_routes()
+    check_orphaned_skills()
     check_timing_safe_auth()
     check_no_dev_key_fallback()
     check_injection_patterns()
@@ -257,7 +316,10 @@ def main() -> int:
         print()
         return 1
     else:
-        print(f"{GREEN}{BOLD}  ✓ Audit passed — all checks clean.{RESET}")
+        if warnings:
+            print(f"{YELLOW}{BOLD}  ⚠ Audit passed with {len(warnings)} warning(s). Review above before pushing.{RESET}")
+        else:
+            print(f"{GREEN}{BOLD}  ✓ Audit passed — all checks clean.{RESET}")
         print()
         return 0
 

@@ -166,6 +166,7 @@ All agents are defined in `backend/agents/__init__.py → ALL_AGENT_DEFINITIONS`
 | `cs_agent` | 3 | Customer support, query handling, knowledge base | LOW |
 | `it_agent` | 3 | Infrastructure monitoring, diagnostics | HIGH |
 | `knowledge_agent` | 3 | Semantic Q&A over local vectorized corpus | MEDIUM |
+| `ocr_agent` | 3 | PDF/image text extraction via GLM-OCR sidecar (port 5002) | MEDIUM |
 
 **Content pipeline agents** (in `backend/content/`): `script_writer`, `voice_agent`, `avatar_video_agent`, `qa_agent`, `publisher_agent`, `analytics_agent`, `idea_intake_agent`, `caption_agent`, `trend_researcher`
 

@@ -1144,13 +1144,28 @@ _RESTARTABLE_PROCESSES: dict[str, list[str]] = {
 }
 
 
-async def process_restart(process_name: str, agent_id: str) -> dict[str, Any]:
+async def process_restart(
+    process_name: str,
+    agent_id: str,
+    confirm: bool = False,
+    reason: str = "",
+) -> dict[str, Any]:
     """
     Send SIGTERM to a whitelisted process by logical name.
 
     STATE_MODIFY — terminates a running process (service manager restarts it).
     Only names declared in _RESTARTABLE_PROCESSES are allowed.
+
+    Callers MUST pass confirm=True and a non-empty reason string or the call
+    is rejected. This prevents runaway restart loops during dev sessions.
     """
+    if not confirm or not reason:
+        logger.warning(
+            f"[process_restart] BLOCKED — no confirm payload. "
+            f"agent={agent_id} process={process_name}"
+        )
+        return {"success": False, "error": "confirm payload required (pass confirm=True and reason='...')"}
+
     if process_name not in _RESTARTABLE_PROCESSES:
         return {
             "success": False,

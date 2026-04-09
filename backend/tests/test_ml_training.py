@@ -28,6 +28,7 @@ class TestModuleConstants:
             "cs_agent",
             "it_agent",
             "knowledge_agent",
+            "ocr_agent",
         }
         assert set(AGENT_DOMAINS.keys()) == expected
 

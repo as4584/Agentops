@@ -599,27 +599,32 @@ class TestDbQuery:
 
 class TestProcessRestart:
     async def test_unknown_process_refused(self):
-        result = await process_restart("malicious_process", "agent")
+        result = await process_restart("malicious_process", "agent", confirm=True, reason="test")
         assert result["success"] is False
         assert "whitelist" in result["error"].lower()
+
+    async def test_blocked_without_confirm_payload(self):
+        result = await process_restart("backend", "agent")
+        assert result["success"] is False
+        assert "confirm payload required" in result["error"]
 
     async def test_whitelisted_backend(self):
         mock_proc = _make_proc(returncode=0)
         with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
-            result = await process_restart("backend", "agent")
+            result = await process_restart("backend", "agent", confirm=True, reason="unit test")
         assert result["success"] is True
         assert result["process"] == "backend"
 
     async def test_whitelisted_frontend(self):
         mock_proc = _make_proc(returncode=0)
         with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
-            result = await process_restart("frontend", "agent")
+            result = await process_restart("frontend", "agent", confirm=True, reason="unit test")
         assert result["success"] is True
 
     async def test_whitelisted_ollama(self):
         mock_proc = _make_proc(returncode=0)
         with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
-            result = await process_restart("ollama", "agent")
+            result = await process_restart("ollama", "agent", confirm=True, reason="unit test")
         assert result["success"] is True
 
     async def test_timeout_returns_failure(self):
@@ -631,13 +636,13 @@ class TestProcessRestart:
 
         with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
             with patch("asyncio.wait_for", side_effect=TimeoutError()):
-                result = await process_restart("backend", "agent")
+                result = await process_restart("backend", "agent", confirm=True, reason="unit test")
         assert result["success"] is False
         assert "timed out" in result["error"].lower()
 
     async def test_subprocess_exception(self):
         with patch("asyncio.create_subprocess_exec", side_effect=OSError("pkill missing")):
-            result = await process_restart("backend", "agent")
+            result = await process_restart("backend", "agent", confirm=True, reason="unit test")
         assert result["success"] is False
 
 
