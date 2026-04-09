@@ -454,8 +454,8 @@ def main() -> None:
             f.write(json.dumps(ex) + "\n")
 
     # Stats
-    studios = {}
-    confusion_types = {}
+    studios: dict[str, int] = {}
+    confusion_types: dict[str, int] = {}
     for ex in examples:
         s = ex["metadata"]["studio"]
         c = ex["metadata"]["confusion_type"]

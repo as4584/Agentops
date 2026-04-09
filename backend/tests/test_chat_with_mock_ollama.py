@@ -153,6 +153,7 @@ class TestChatValidation:
         Also patch API_SECRET to empty so auth is in dev-mode and these
         input-validation tests don't need a Bearer token.
         """
+        import backend.auth as _auth
         import backend.server as srv
         from backend.llm import OllamaClient
         from backend.orchestrator import AgentOrchestrator
@@ -162,11 +163,11 @@ class TestChatValidation:
         client._client = httpx.AsyncClient(transport=transport)
         srv._orchestrator = AgentOrchestrator(llm_client=client)
 
-        _orig_secret = srv.API_SECRET
-        srv.API_SECRET = ""
+        _orig_secret = _auth.API_SECRET
+        _auth.API_SECRET = ""
         yield
         srv._orchestrator = None
-        srv.API_SECRET = _orig_secret
+        _auth.API_SECRET = _orig_secret
 
     def test_empty_message_rejected(self):
         from fastapi.testclient import TestClient

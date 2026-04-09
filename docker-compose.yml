@@ -1,0 +1,97 @@
+# ── Agentop Docker Compose ───────────────────────────────────────────────────
+# Brings up the full local stack: backend, frontend, Ollama, Qdrant.
+# Optional services (GLM-OCR, MCP Gateway) via profiles.
+#
+# Quick start:
+#   cp .env.example .env          # fill in secrets
+#   docker compose up -d          # core stack
+#   docker compose --profile ocr up -d   # include GLM-OCR sidecar
+#
+# Data is persisted in named volumes — survives container recreation.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  # ── Backend (FastAPI) ────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agentop-backend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file: .env
+    environment:
+      - BACKEND_HOST=0.0.0.0
+      - BACKEND_PORT=8000
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+    volumes:
+      - agentop-data:/app/data
+      - agentop-output:/app/output
+      - agentop-logs:/app/backend/logs
+    depends_on:
+      ollama:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+  # ── Frontend (Next.js) ───────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - AGENTOP_API_URL=http://backend:8000
+    container_name: agentop-frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3007:3007"
+    environment:
+      - AGENTOP_API_URL=http://backend:8000
+      - AGENTOP_API_SECRET=${AGENTOP_API_SECRET}
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # ── Ollama (LLM backend) ────────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: agentop-ollama
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+
+  # ── Qdrant (vector store) ───────────────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: agentop-qdrant
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6333:6333"
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+  # ── GLM-OCR sidecar (optional) ─────────────────────────────────────────
+  glm-ocr:
+    image: agentop/glm-ocr:latest
+    container_name: agentop-glm-ocr
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5002:5002"
+    profiles:
+      - ocr
+
+volumes:
+  agentop-data:
+  agentop-output:
+  agentop-logs:
+  ollama-models:
+  qdrant-data:

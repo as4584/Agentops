@@ -215,7 +215,225 @@ async def list_ab_experiments(status: str | None = None) -> list[dict[str, Any]]
     return _ab.list_experiments(status=status)
 
 
+@router.post("/ab/seed")
+async def seed_ab_experiments() -> dict[str, Any]:
+    """
+    Seed the A/B dashboard with real completed experiments derived from the
+    15 golden-task eval results already stored in eval_results/.
+
+    Creates two experiments:
+      1. LLM Router (lex-v2) vs Keyword Fallback
+      2. Temperature 0.1 (production) vs 0.3 (exploratory) — Variant B runs live.
+    """
+    import json
+    import time
+
+    from backend.config import ML_EXPERIMENTS_DIR
+    from backend.orchestrator.lex_router import keyword_route, lex_route_with_override
+
+    eval_dir = ML_EXPERIMENTS_DIR / "eval_results"
+    cases = sorted(
+        [json.loads(f.read_text()) for f in eval_dir.glob("gt_*.json")],
+        key=lambda c: c["case_id"],
+    )
+    if not cases:
+        raise HTTPException(404, "No eval result files found in eval_results/")
+
+    created_ids: list[str] = []
+
+    # ── Experiment 1: LLM Router vs Keyword Fallback ─────────────────
+    exp1_id = _ab.create_experiment(
+        name="LLM Router (lex-v2) vs Keyword Fallback",
+        description=(
+            "Compares the lex-v2 LLM router against the Python keyword heuristic "
+            "on all 15 golden routing tasks. Variant A uses stored inference results; "
+            "Variant B uses the instant keyword fallback."
+        ),
+        variants=[
+            {"name": "lex-v2", "model": "lex-v2", "temperature": 0.1},
+            {"name": "keyword-fallback", "model": "keyword", "temperature": 0.0},
+        ],
+        metric_for_winner="avg_score",
+    )
+    created_ids.append(exp1_id)
+
+    for case in cases:
+        prompt = case["input_prompt"]
+        expected = case["expected_output"]
+
+        # Variant A: stored lex result
+        _ab.record_variant_case(
+            exp1_id,
+            "lex-v2",
+            {
+                "case_id": case["case_id"],
+                "passed": case["passed"],
+                "overall_score": case["overall_score"],
+                "latency_ms": case["latency_ms"],
+                "tokens_in": case.get("tokens_in", 0),
+                "tokens_out": case.get("tokens_out", 0),
+                "cost_usd": case.get("cost_usd", 0.0),
+            },
+        )
+
+        # Variant B: live keyword route (instant, no LLM)
+        t0 = time.monotonic()
+        kw_agent = keyword_route(prompt)
+        kw_latency = (time.monotonic() - t0) * 1000
+        kw_passed = kw_agent == expected
+        _ab.record_variant_case(
+            exp1_id,
+            "keyword-fallback",
+            {
+                "case_id": case["case_id"],
+                "passed": kw_passed,
+                "overall_score": 1.0 if kw_passed else 0.0,
+                "latency_ms": kw_latency,
+                "tokens_in": 0,
+                "tokens_out": 0,
+                "cost_usd": 0.0,
+            },
+        )
+
+    _ab.complete_experiment(exp1_id)
+
+    # ── Experiment 2: Temperature 0.1 vs 0.3 ─────────────────────────
+    exp2_id = _ab.create_experiment(
+        name="Router Temperature: 0.1 (Production) vs 0.3 (Exploratory)",
+        description=(
+            "Compares lex-v2 routing accuracy at temp=0.1 (production default) "
+            "vs temp=0.3 (exploratory) on the golden routing task suite. "
+            "Variant A uses stored results; Variant B runs live inference."
+        ),
+        variants=[
+            {"name": "temp-0.1", "model": "lex-v2", "temperature": 0.1},
+            {"name": "temp-0.3", "model": "lex-v2", "temperature": 0.3},
+        ],
+        metric_for_winner="avg_score",
+    )
+    created_ids.append(exp2_id)
+
+    for case in cases:
+        prompt = case["input_prompt"]
+        expected = case["expected_output"]
+
+        # Variant A: stored temp=0.1 result
+        _ab.record_variant_case(
+            exp2_id,
+            "temp-0.1",
+            {
+                "case_id": case["case_id"],
+                "passed": case["passed"],
+                "overall_score": case["overall_score"],
+                "latency_ms": case["latency_ms"],
+                "tokens_in": case.get("tokens_in", 0),
+                "tokens_out": case.get("tokens_out", 0),
+                "cost_usd": case.get("cost_usd", 0.0),
+            },
+        )
+
+        # Variant B: live lex inference at temp=0.3
+        t0 = time.monotonic()
+        try:
+            agent_id, _conf = await lex_route_with_override(prompt, temperature=0.3)
+            if not agent_id:
+                agent_id = keyword_route(prompt)
+        except Exception:
+            agent_id = keyword_route(prompt)
+        live_latency = (time.monotonic() - t0) * 1000
+        live_passed = agent_id == expected
+        _ab.record_variant_case(
+            exp2_id,
+            "temp-0.3",
+            {
+                "case_id": case["case_id"],
+                "passed": live_passed,
+                "overall_score": 1.0 if live_passed else 0.0,
+                "latency_ms": live_latency,
+                "tokens_in": 0,
+                "tokens_out": 0,
+                "cost_usd": 0.0,
+            },
+        )
+
+    _ab.complete_experiment(exp2_id)
+
+    return {
+        "seeded": len(created_ids),
+        "experiment_ids": created_ids,
+        "cases_used": len(cases),
+    }
+
+
 # ── Golden Task Endpoints ────────────────────────────────
+
+
+@router.post("/golden/run-all")
+async def run_all_golden_tasks() -> dict[str, Any]:
+    """
+    Route every golden task through the Lex router and score the result.
+    Populates eval results so the ML Lab dashboard shows real data.
+    """
+    import time
+
+    from backend.orchestrator.lex_router import resolve_agent
+
+    tasks = _golden.list_tasks()
+    if not tasks:
+        raise HTTPException(404, "No golden tasks found — add some first")
+
+    passed = 0
+    failed = 0
+    results = []
+
+    for task in tasks:
+        task_id = task.get("task_id", "")
+        prompt = task.get("input_prompt", "")
+        expected_agent = task.get("expected_output", "")
+
+        t0 = time.monotonic()
+        try:
+            route = await resolve_agent(prompt)
+            actual_agent = route.get("agent_id", "unknown")
+        except Exception as exc:
+            actual_agent = f"error:{exc}"
+        latency_ms = (time.monotonic() - t0) * 1000
+
+        correct = actual_agent == expected_agent
+        if correct:
+            passed += 1
+        else:
+            failed += 1
+
+        _eval.evaluate(
+            EvalCase(
+                case_id=task_id,
+                task_type="routing",
+                input_prompt=prompt,
+                expected_output=expected_agent,
+                actual_output=actual_agent,
+                model="lex-router",
+                latency_ms=latency_ms,
+            )
+        )
+        results.append(
+            {
+                "task_id": task_id,
+                "expected": expected_agent,
+                "actual": actual_agent,
+                "correct": correct,
+                "latency_ms": round(latency_ms, 1),
+            }
+        )
+
+    total = passed + failed
+    return {
+        "total": total,
+        "passed": passed,
+        "failed": failed,
+        "pass_rate": round(passed / total * 100, 1) if total else 0,
+        "results": results,
+    }
 
 
 @router.post("/golden/add")

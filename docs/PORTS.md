@@ -5,15 +5,23 @@
 
 ## Quick Reference
 
-| Port | Service | Default Bind | Protocol | Notes |
-|------|---------|--------------|----------|-------|
-| 3000 | Next.js Dashboard (dev) | `localhost` | HTTP | Frontend dev server |
-| 3007 | Next.js Dashboard (alt) | `localhost` | HTTP | Alternative frontend port |
-| 8000 | FastAPI Backend | `127.0.0.1` | HTTP | **Primary backend API** |
-| 8100-8999 | Sandbox Backend Range | `127.0.0.1` | HTTP | Dynamic allocation for sandbox sessions |
-| 3100-3999 | Sandbox Frontend Range | `localhost` | HTTP | Dynamic allocation for sandbox sessions |
-| 8811 | Docker MCP Gateway | `localhost` | HTTP | MCP tool gateway (optional) |
-| 11434 | Ollama LLM | `localhost` | HTTP | Local LLM inference |
+| Port | Service | Default Bind | Protocol | Status | Notes |
+|------|---------|--------------|----------|--------|-------|
+| 3000 | Next.js Dashboard (dev) | `localhost` | HTTP | Optional alt | Frontend dev server |
+| 3007 | Next.js Dashboard (alt) | `localhost` | HTTP | **Active** | Primary frontend port |
+| 3009 | ML Lab Viewer | `localhost` | HTTP | Dev only | WebGen drift monitor (`ml-lab-viewer/`) |
+| 5000 | MLflow UI | `localhost` | HTTP | Optional | ML experiment dashboard |
+| 5002 | GLM-OCR Sidecar | `localhost` | HTTP | Optional | Document/image OCR |
+| 6333 | Qdrant Vector Store | `localhost` | HTTP | Optional | Knowledge semantic search |
+| 6379 | Redis | `localhost` | TCP | Optional | Gateway rate limiting — credentials in `.env` |
+| 8000 | FastAPI Backend | `127.0.0.1` | HTTP | **Active** | Primary backend API |
+| 8100-8999 | Sandbox Backend Range | `127.0.0.1` | HTTP | Dynamic | Per-session allocation |
+| 3100-3999 | Sandbox Frontend Range | `localhost` | HTTP | Dynamic | Per-session allocation |
+| 8765 | YouTube OAuth Callback | `localhost` | HTTP | Ephemeral | Opened only during token generation |
+| 8811 | Docker MCP Gateway | `localhost` | HTTP | Optional | MCP tool gateway |
+| 11434 | Ollama LLM | `localhost` | HTTP | **Active** | Local LLM inference |
+
+> **Credential note:** Any port that requires auth (Redis 6379, Qdrant 6333, etc.) — store connection strings in `.env` only, never in docs or code.
 
 ## Port Assignments by Component
 
@@ -47,10 +55,55 @@ Ollama LLM:
 
 MCP Gateway (optional):
   Port: 8811
-  Config: MCP_GATEWAY_PORT=8811
+  Config: MCP_GATEWAY_PORT=8811  (set in .env)
   Files:
     - backend/config.py
     - backend/mcp/__init__.py
+
+GLM-OCR Sidecar (optional):
+  Port: 5002
+  Config: GLMOCR_URL=http://localhost:5002  (set in .env)
+  Purpose: Document/image OCR via file_reader tool auto-routing
+  Files:
+    - backend/ocr/__init__.py
+    - backend/config.py
+
+Gateway Redis (optional):
+  Port: 6379
+  Config: GATEWAY_REDIS_URL=redis://localhost:6379/0  (set in .env — includes auth if needed)
+  Purpose: Rate limiting for /v1/* gateway routes
+  Files:
+    - backend/config_gateway.py
+  Note: Only active when GATEWAY_ENABLED=true
+
+Qdrant Vector Store (optional):
+  Port: 6333
+  Config: QDRANT_URL=http://localhost:6333  (set in .env)
+  Purpose: Knowledge agent semantic search
+  Start: docker run -p 6333:6333 qdrant/qdrant
+  Files:
+    - backend/knowledge/
+
+MLflow UI (optional):
+  Port: 5000
+  Purpose: ML experiment tracking dashboard
+  Start: mlflow ui --port 5000
+  Files:
+    - backend/ml/mlflow_tracker.py
+
+YouTube OAuth Callback (ephemeral):
+  Port: 8765
+  Purpose: Localhost redirect_uri for YouTube OAuth flow — opened temporarily during token generation, not a persistent service
+  Files:
+    - backend/content/publishers/youtube_auth.py
+
+ML Lab Viewer (standalone WebGen drift monitor):
+  Port: 3009
+  Start: cd ml-lab-viewer && npm run dev
+  Files:
+    - ml-lab-viewer/package.json
+    - backend/routes/ml_webgen.py  (API routes it calls)
+    - backend/config.py            (CORS: localhost:3009 registered)
 ```
 
 ### Sandbox/Isolation Services (Dynamic Port Ranges)
@@ -162,13 +215,15 @@ python -m backend.port_guard kill 8000
 
 ### Environment Variables for Port Control
 
-```bash
-# Use different ports to avoid conflicts
-export BACKEND_PORT=8765
-export NEXT_PUBLIC_API_URL=http://localhost:8765
+Port overrides are configured via `.env` (never committed). See `.env` for actual values.
 
-# Or use UNIX sockets (Linux/Mac) for guaranteed isolation
-export BACKEND_BIND=unix:/tmp/agentop-$$.sock
+```bash
+# Override backend port — set in .env, not in shell history
+# BACKEND_PORT=<port>          (see .env)
+# NEXT_PUBLIC_API_URL=<url>    (see .env)
+
+# Verify active bind after start
+python -m backend.port_guard status
 ```
 
 ## Reserved Port Blocks
@@ -217,11 +272,12 @@ Symptom: API returns old data, routes missing, changes not reflected
 # Check for multiple uvicorn processes
 ps aux | grep uvicorn
 
-# Kill all and restart clean
-pkill -9 -f uvicorn
-sleep 1
+# Kill via port_guard (correct way — preserves reservation state)
+python -m backend.port_guard kill 8000
 python -m backend.port_guard serve backend.server:app --port 8000
 ```
+
+> **Never use `pkill -f uvicorn` directly** — it bypasses port_guard and leaves stale reservations.
 
 ### Port works but wrong instance
 
@@ -238,3 +294,19 @@ python -m backend.port_guard status
 python -m backend.port_guard kill 8000
 python -m backend.port_guard serve backend.server:app --port 8000
 ```
+
+---
+
+## Kubernetes Cluster Ports (k8s/ only)
+
+These are pod/service ports inside the `agent-ops` namespace — not exposed on localhost unless you run `kubectl port-forward` explicitly.
+
+| Port | Service | k8s Component | Access |
+|------|---------|--------------|--------|
+| 8080 | Browser Worker API | `k8s/browser-worker/` | Internal cluster only |
+| 6080 | Browser Worker noVNC | `k8s/browser-worker/` | `kubectl port-forward` + VNC viewer |
+| 3001 | Uptime Kuma | `k8s/uptime-kuma/` | `kubectl port-forward` |
+| 19999 | Netdata | `k8s/netdata/` | `kubectl port-forward` |
+| 6060 | AdGuard Home | `k8s/adguard-home/` | `kubectl port-forward` |
+
+> These ports do **not** conflict with local dev services. No reservation in port_guard needed.

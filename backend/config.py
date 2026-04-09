@@ -109,6 +109,7 @@ BACKEND_PORT: int = int(os.getenv("BACKEND_PORT", "8000"))
 # ---------------------------------------------------------------------------
 # API key for bearer-token authentication.  Set to "" to disable (dev only).
 API_SECRET: str = os.getenv("AGENTOP_API_SECRET", "")
+API_DOCS_ENABLED: bool = os.getenv("AGENTOP_ENABLE_API_DOCS", "false").lower() == "true"
 # Maximum chat message size (bytes)
 MAX_CHAT_MESSAGE_LENGTH: int = int(os.getenv("MAX_CHAT_MESSAGE_LENGTH", "8192"))
 # Rate limit: max requests per minute per IP (0 = disabled)
@@ -118,14 +119,29 @@ RATE_LIMIT_RPM: int = int(os.getenv("RATE_LIMIT_RPM", "600"))
 LLM_RATE_LIMIT_RPM: int = int(os.getenv("LLM_RATE_LIMIT_RPM", "30"))
 # Internal-only URL prefixes that webhook_send / health_check must NOT contact
 SSRF_BLOCKED_PREFIXES: list[str] = [
-    "http://169.254.",  # cloud metadata
+    "http://169.254.",  # cloud metadata (AWS/GCP/Azure IMDS)
     "http://127.",  # loopback
     "http://localhost",  # loopback
     "http://0.0.0.0",  # wildcard loopback
     "http://[::1]",  # ipv6 loopback
-    "http://10.",  # private RFC-1918
-    "http://172.16.",  # private RFC-1918
-    "http://192.168.",  # private RFC-1918
+    "http://10.",  # private RFC-1918 class A
+    "http://172.16.",  # private RFC-1918 class B (172.16.0.0/12 — covers 172.16–172.31)
+    "http://172.17.",  # Docker bridge default range
+    "http://172.18.",
+    "http://172.19.",
+    "http://172.20.",
+    "http://172.21.",
+    "http://172.22.",
+    "http://172.23.",
+    "http://172.24.",
+    "http://172.25.",
+    "http://172.26.",
+    "http://172.27.",
+    "http://172.28.",
+    "http://172.29.",
+    "http://172.30.",
+    "http://172.31.",
+    "http://192.168.",  # private RFC-1918 class C
     "https://169.254.",
     "https://127.",
     "https://localhost",
@@ -133,6 +149,21 @@ SSRF_BLOCKED_PREFIXES: list[str] = [
     "https://[::1]",
     "https://10.",
     "https://172.16.",
+    "https://172.17.",
+    "https://172.18.",
+    "https://172.19.",
+    "https://172.20.",
+    "https://172.21.",
+    "https://172.22.",
+    "https://172.23.",
+    "https://172.24.",
+    "https://172.25.",
+    "https://172.26.",
+    "https://172.27.",
+    "https://172.28.",
+    "https://172.29.",
+    "https://172.30.",
+    "https://172.31.",
     "https://192.168.",
 ]
 
@@ -209,7 +240,12 @@ def _parse_cors_origins() -> list[str]:
     """
     raw = os.getenv("AGENTOP_CORS_ORIGINS", "")
     if not raw.strip():
-        return ["http://localhost:3007", "http://127.0.0.1:3007"]
+        return [
+            "http://localhost:3007",
+            "http://127.0.0.1:3007",
+            "http://localhost:3009",
+            "http://127.0.0.1:3009",
+        ]
     origins: list[str] = []
     for origin in raw.split(","):
         origin = origin.strip()
@@ -234,7 +270,12 @@ def _parse_cors_origins() -> list[str]:
         normalized = f"{parsed.scheme}://{parsed.netloc}"
         if normalized not in origins:
             origins.append(normalized)
-    return origins or ["http://localhost:3007", "http://127.0.0.1:3007"]
+    return origins or [
+        "http://localhost:3007",
+        "http://127.0.0.1:3007",
+        "http://localhost:3009",
+        "http://127.0.0.1:3009",
+    ]
 
 
 CORS_ORIGINS: list[str] = _parse_cors_origins()

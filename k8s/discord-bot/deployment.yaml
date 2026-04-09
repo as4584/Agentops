@@ -53,6 +53,14 @@ spec:
               value: "http://agentop-backend.agent-ops:8000"
             - name: DISCORD_BOT_PREFIX
               value: "!"
+            - name: DISCORD_SECURITY_CHANNEL_ID
+              value: "1491011157698285628"
+            - name: DISCORD_ALERT_POLL_SECONDS
+              value: "30"
+            - name: DISCORD_NEWS_CHANNEL_NAME
+              value: "news-intel"
+            - name: DISCORD_NEWS_POLL_SECONDS
+              value: "600"
             # Optional: restrict to specific channel IDs
             # - name: DISCORD_CHANNEL_IDS
             #   value: "123456789,987654321"

@@ -61,7 +61,7 @@ live('backend health is green', async ({ page }) => {
 });
 
 live('drift status is GREEN', async ({ page }) => {
-  const secret = (process.env.NEXT_PUBLIC_AGENTOP_API_SECRET || '').trim();
+  const secret = (process.env.AGENTOP_API_SECRET || '').trim();
   const res = await page.request.get('http://localhost:8000/drift', {
     headers: { Authorization: `Bearer ${secret}` },
   });
@@ -80,7 +80,7 @@ live('SSE stream/activity connects without auth error', async ({ page }) => {
   await Promise.race([requestDone, page.waitForTimeout(2000)]);
   if (latestStatus !== null) {
     // Got a full response — must not be 401
-    expect(latestStatus).not.toBe(401);
+    expect(latestStatus as number).not.toBe(401);
   }
   // latestStatus === null means still streaming → 200 connection established → pass
 });
@@ -121,7 +121,7 @@ live('agents list loads at least one agent', async ({ page }) => {
 
 live('/preview/ static mount serves generated HTML', async ({ page }) => {
   // Check if any site has been generated
-  const secret = (process.env.NEXT_PUBLIC_AGENTOP_API_SECRET || '').trim();
+  const secret = (process.env.AGENTOP_API_SECRET || '').trim();
   const res = await page.request.get('http://localhost:8000/api/webgen/projects', {
     headers: { Authorization: `Bearer ${secret}` },
   });

@@ -29,7 +29,9 @@ from fastapi import FastAPI, HTTPException, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, RedirectResponse, StreamingResponse
 
+from backend.auth import verify_api_request
 from backend.config import (
+    API_DOCS_ENABLED,
     API_SECRET,
     BACKEND_HOST,
     BACKEND_PORT,
@@ -87,15 +89,21 @@ from backend.routes.knowledge import router as knowledge_router
 from backend.routes.knowledge import set_knowledge_store
 from backend.routes.llm_registry import router as llm_registry_router
 from backend.routes.marketing import router as marketing_router
+from backend.routes.mcp_server import router as mcp_router
+from backend.routes.mcp_server import set_orchestrator as set_mcp_orchestrator
 from backend.routes.memory_management import router as memory_management_router
 from backend.routes.ml import router as ml_router
 from backend.routes.ml_eval import router as ml_eval_router
 from backend.routes.ml_training import router as ml_training_router
+from backend.routes.ml_webgen import router as ml_webgen_router
 from backend.routes.network import router as network_router
+from backend.routes.news import router as news_router
 from backend.routes.sandbox import router as sandbox_router
 from backend.routes.schedule_routes import router as scheduler_router
+from backend.routes.security_alerts import router as security_alerts_router
 from backend.routes.skills import router as skills_router
 from backend.routes.social_media import router as social_media_router
+from backend.routes.studio import router as studio_router
 from backend.routes.task_management import router as task_management_router
 from backend.routes.webgen_builder import router as webgen_builder_router
 from backend.routes.webhooks import router as webhooks_router
@@ -107,6 +115,8 @@ from backend.tools import execute_tool, get_tool_definitions
 from backend.utils import logger
 from backend.websocket.hub import handle_ws_connection, ws_hub
 from deerflow.execution import ExecutionAnalyzer, ExecutionRecorder
+from deerflow.tools.health import ToolHealthMonitor
+from deerflow.tools.repair import ToolRepairEngine
 
 # ---------------------------------------------------------------------------
 # Application State (module-level singletons)
@@ -117,6 +127,7 @@ _orchestrator: AgentOrchestrator | None = None
 _llm_client: OllamaClient | None = None
 _execution_recorder: ExecutionRecorder | None = None
 _execution_analyzer: ExecutionAnalyzer | None = None
+_tool_health_monitor: ToolHealthMonitor | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -144,26 +155,7 @@ def _rate_limit(request: Request) -> None:
 
 
 async def _verify_auth(request: Request) -> None:
-    """
-    Verify Bearer token when API_SECRET is configured.
-    If API_SECRET is empty, authentication is disabled (dev mode).
-    Uses hmac.compare_digest for timing-safe comparison.
-    EventSource clients (SSE) cannot send custom headers, so a ?token= query
-    parameter is accepted as a fallback for streaming endpoints only.
-    """
-    if not API_SECRET:
-        return  # auth disabled
-    auth = request.headers.get("Authorization", "")
-    raw_key: str | None = None
-    if auth.startswith("Bearer ") and len(auth) > 7:
-        raw_key = auth[7:].strip()
-    elif request.url.path in ("/stream/activity",):
-        # Fallback: browsers cannot send headers via EventSource
-        raw_key = request.query_params.get("token")
-    if not raw_key:
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
-    if not hmac.compare_digest(raw_key, API_SECRET):
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+    await verify_api_request(request)
 
 
 # ---------------------------------------------------------------------------
@@ -178,7 +170,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     Initializes LLM client, orchestrator, and governance checks on startup.
     Cleans up resources on shutdown.
     """
-    global _start_time, _orchestrator, _llm_client, _execution_recorder, _execution_analyzer
+    global _start_time, _orchestrator, _llm_client, _execution_recorder, _execution_analyzer, _tool_health_monitor
 
     _start_time = time.time()
     _knowledge_seed_task: asyncio.Task[None] | None = None
@@ -212,19 +204,25 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     _orchestrator = AgentOrchestrator(_llm_client)
     logger.info("Orchestrator initialized with all registered agents")
     set_agent_control_orchestrator(_orchestrator)
+    set_mcp_orchestrator(_orchestrator)
 
     # Wire knowledge vector store to REST routes
     if hasattr(_orchestrator, "_knowledge_store"):
         set_knowledge_store(_orchestrator._knowledge_store)
 
-    # Execution recorder + async analyzer (OpenSpace-inspired)
+    # DeerFlow observability fabric — recorder, analyzer, tool health monitor
     _execution_recorder = ExecutionRecorder(base_dir=PROJECT_ROOT / "data" / "agents")
+    _tool_health_monitor = ToolHealthMonitor(memory_store)
+    _tool_repair_engine = ToolRepairEngine(
+        llm_client=_llm_client,
+        health_monitor=_tool_health_monitor,
+    )
     _execution_analyzer = ExecutionAnalyzer(
         llm_client=_llm_client,
-        health_monitor=None,  # no chain.health_monitor at this layer; patch in later
-        repair_engine=None,
+        health_monitor=_tool_health_monitor,
+        repair_engine=_tool_repair_engine,
     )
-    logger.info("ExecutionRecorder + ExecutionAnalyzer ready")
+    logger.info("DeerFlow fabric ready: ExecutionRecorder + ToolHealthMonitor + ExecutionAnalyzer")
 
     async def _scheduler_dispatch(agent_id: str, message: str, context: dict[str, Any]) -> dict[str, Any]:
         if not _orchestrator:
@@ -303,45 +301,73 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         )
         logger.info("Social media: Daily report + token check jobs registered", event_type="social_media_init")
 
-    # ── Tech News Cron — free RSS/web scrape for tech updates ───────────────
-    scheduler.add_cron_job(
-        job_id="tech_news_morning_digest",
-        agent_id="knowledge_agent",
-        message=(
-            "Fetch today's top tech news from free RSS feeds and public sources. "
-            "Sources: Hacker News (news.ycombinator.com/rss), TechCrunch RSS, "
-            "The Verge RSS, ArsTechnica RSS, GitHub Trending, Product Hunt. "
-            "Summarize top 10 stories with title, source, one-line summary, and URL. "
-            "Save digest to data/agents/knowledge_agent/tech_news_latest.json. "
-            "If any story mentions AI agents, multi-agent systems, LLM fine-tuning, "
-            "Ollama, or local-first AI, flag it as HIGH RELEVANCE."
-        ),
-        cron_expr="0 7 * * *",  # daily at 07:00 UTC
+    # ── News Intelligence Watcher — sandboxed browser + RSS scraper ─────────
+    # Replaces shallow prompt-only tech_news cron jobs.
+    # NewsIntelWatcher runs its own 6-hour loop, fetches RSS feeds and JS-heavy
+    # HTML pages in isolated Playwright contexts (strict domain allowlist),
+    # writes to data/agents/knowledge_agent/news_intel/, and fires events for
+    # HIGH_RELEVANCE items → SecurityEventWatcher → Discord #security.
+    from backend.news.intel_scraper import NewsIntelWatcher as _NewsIntelWatcher
+
+    _news_watcher = _NewsIntelWatcher(memory_store)
+    asyncio.ensure_future(_news_watcher.run())
+    logger.info(
+        "NewsIntelWatcher started — scraping every 6h: Google, Anthropic, OpenAI, "
+        "DeepSeek, Qwen, ByteDance, ModelScope, ArXiv, SecurityWeek, CISA + more",
+        event_type="news_intel_init",
     )
+
+    # Weekly synthesis — knowledge_agent reads the scraped data and writes a summary
     scheduler.add_cron_job(
-        job_id="tech_news_evening_scan",
+        job_id="news_intel_weekly_synthesis",
         agent_id="knowledge_agent",
         message=(
-            "Evening tech news scan — check for breaking news since morning digest. "
-            "Focus on: AI/ML announcements, new open-source tools, security advisories, "
-            "framework releases (Next.js, FastAPI, Ollama, LangChain, etc.). "
-            "Append any new stories to data/agents/knowledge_agent/tech_news_latest.json. "
-            "Alert via alert_dispatch if any critical security advisory found."
-        ),
-        cron_expr="0 19 * * *",  # daily at 19:00 UTC
-    )
-    scheduler.add_cron_job(
-        job_id="tech_news_weekly_roundup",
-        agent_id="knowledge_agent",
-        message=(
-            "Generate weekly tech news roundup from the past 7 days of daily digests. "
-            "Group by category: AI/ML, DevOps, Security, Open Source, Industry. "
-            "Highlight top 3 most relevant stories for Agentop development. "
-            "Save to data/agents/knowledge_agent/tech_news_weekly.json."
+            "Read data/agents/knowledge_agent/news_intel/latest.json and synthesize "
+            "a weekly briefing. Group by topic: Google/Gemini, Anthropic/Claude, "
+            "OpenAI/Codex, DeepSeek, Qwen/Alibaba, ByteDance, China OSS, Cybersecurity, "
+            "AI Research. For each group: top 3 stories, one-sentence summary, relevance "
+            "to Agentop development. Flag any items relevant to lex-v3 training or "
+            "multi-agent system design. Save to "
+            "data/agents/knowledge_agent/news_intel/weekly_synthesis.json."
         ),
         cron_expr="0 10 * * 0",  # Sunday at 10:00 UTC
     )
-    logger.info("Tech news: 3 cron jobs registered (morning, evening, weekly)", event_type="tech_news_init")
+    logger.info("News intel: weekly synthesis cron registered (Sunday 10:00 UTC)", event_type="news_intel_init")
+
+    # ── Security Agent — proactive cron monitoring ───────────────────────────
+    scheduler.add_cron_job(
+        job_id="security_proactive_scan",
+        agent_id="security_agent",
+        message=(
+            "Proactive security scan — run a full secret and vulnerability check. "
+            "Scan: backend/ for hardcoded secrets, exposed credentials, and insecure patterns. "
+            "Check: running processes for unexpected listeners. "
+            "Review: backend/logs/system.jsonl for anomalous patterns in the last 100 lines. "
+            "If any HIGH or CRITICAL finding: call alert_dispatch with full details. "
+            "Log summary to data/agents/security_agent/scan_history.json."
+        ),
+        cron_expr="*/30 * * * *",  # every 30 minutes
+    )
+    scheduler.add_cron_job(
+        job_id="security_daily_report",
+        agent_id="security_agent",
+        message=(
+            "Generate daily security report. "
+            "Summarize: all findings from data/agents/security_agent/scan_history.json for the last 24h. "
+            "Count by severity: CRITICAL, HIGH, MEDIUM. "
+            "Flag any new CVEs relevant to FastAPI, Python, or Ollama from this week. "
+            "Save report to data/agents/security_agent/daily_report.json."
+        ),
+        cron_expr="0 6 * * *",  # daily at 06:00 UTC
+    )
+    logger.info("Security: proactive scan (every 30min) + daily report cron registered", event_type="security_init")
+
+    # ── Security Event Watcher — alert_dispatch → security_alerts.json ───────
+    from backend.security.event_watcher import SecurityEventWatcher
+
+    _security_watcher = SecurityEventWatcher(memory_store)
+    asyncio.ensure_future(_security_watcher.run())
+    logger.info("SecurityEventWatcher started — monitoring shared events for security alerts")
 
     # Boot the Soul Agent — loads identity, goals, and reflection history
     soul_boot = await _orchestrator.boot_soul()
@@ -464,6 +490,9 @@ app = FastAPI(
     ),
     version="1.0.0",
     lifespan=lifespan,
+    docs_url="/docs" if API_DOCS_ENABLED else None,
+    redoc_url="/redoc" if API_DOCS_ENABLED else None,
+    openapi_url="/openapi.json" if API_DOCS_ENABLED else None,
 )
 
 # CORS — origins driven from CORS_ORIGINS config (env: AGENTOP_CORS_ORIGINS)
@@ -506,9 +535,14 @@ app.include_router(gsd_router)
 app.include_router(ml_router)
 app.include_router(ml_eval_router)
 app.include_router(ml_training_router)
+app.include_router(ml_webgen_router)
 app.include_router(agent_factory_router)
 app.include_router(openclaw_router)
+app.include_router(mcp_router)
+app.include_router(security_alerts_router)
 app.include_router(network_router)
+app.include_router(news_router)
+app.include_router(studio_router)
 
 # Gateway — OpenAI-compatible API + admin endpoints
 if GATEWAY_ENABLED:
@@ -586,8 +620,11 @@ async def security_middleware(request: Request, call_next):
     path = request.url.path
     ip = request.client.host if request.client else "unknown"
     is_local = ip in ("127.0.0.1", "::1", "localhost")
-    # Skip auth for health check and OpenAPI docs
-    skip_auth_paths = {"/health", "/health/deps", "/docs", "/openapi.json", "/redoc"}
+    # Health checks remain open for readiness/liveness probes.
+    # /ml/webgen/* is a local dev tool (ML Lab viewer) — no external auth needed.
+    skip_auth_paths = {"/health", "/health/deps"}
+    if path.startswith("/ml/webgen/") or path.startswith("/preview/"):
+        skip_auth_paths.add(path)
     # Gateway-managed paths have their own dedicated auth middleware.
     # Let them pass through here so security headers are still applied.
     if path.startswith("/v1/") or path.startswith("/admin/"):
@@ -618,8 +655,11 @@ async def security_middleware(request: Request, call_next):
     response = await call_next(request)
     # Security headers
     response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
     response.headers["Cache-Control"] = "no-store"
+    # Allow /ml/webgen/site/* to be embedded in iframes (ML Lab viewer).
+    # All other paths stay DENY.
+    if not path.startswith("/ml/webgen/site/") and not path.startswith("/preview/"):
+        response.headers["X-Frame-Options"] = "DENY"
     return response
 
 
@@ -789,30 +829,35 @@ async def chat(request: ChatRequest) -> ChatResponse:
         routing_meta = await resolve_agent(request.message)
         resolved_agent_id = routing_meta["agent_id"]
 
+    # DeerFlow: open run BEFORE execution so timing is accurate
+    _run_id: str | None = None
+    if _execution_recorder:
+        _run_id = _execution_recorder.start_run(
+            agent_id=resolved_agent_id,
+            message=request.message,
+        )
+
     result = await _orchestrator.process_message(
         agent_id=resolved_agent_id,
         message=request.message,
         context={**request.context, "routing": routing_meta} if routing_meta else request.context,
     )
 
-    # Fire-and-forget post-run analysis (OpenSpace-inspired)
-    if _execution_recorder and _execution_analyzer:
-        run_id = _execution_recorder.start_run(
-            agent_id=request.agent_id,
-            message=request.message,
-        )
+    # DeerFlow: close run + fire async analysis (OpenSpace-inspired, fire-and-forget)
+    if _execution_recorder and _run_id:
         _execution_recorder.end_run(
-            run_id=run_id,
-            agent_id=request.agent_id,
+            run_id=_run_id,
+            agent_id=resolved_agent_id,
             response=result.get("response", ""),
         )
-        asyncio.ensure_future(
-            _execution_analyzer.analyze_run(
-                run_id=run_id,
-                agent_id=request.agent_id,
-                recorder=_execution_recorder,
+        if _execution_analyzer:
+            asyncio.ensure_future(
+                _execution_analyzer.analyze_run(
+                    run_id=_run_id,
+                    agent_id=resolved_agent_id,
+                    recorder=_execution_recorder,
+                )
             )
-        )
 
     if result.get("error") and not result.get("response"):
         raise HTTPException(status_code=400, detail=result["error"])
@@ -1488,6 +1533,9 @@ async def list_projects() -> dict[str, Any]:
                         "total_size_mb": round(total_size / (1024 * 1024), 2),
                         "created_at": datetime.fromtimestamp(child.stat().st_ctime).isoformat(),
                         "modified_at": datetime.fromtimestamp(child.stat().st_mtime).isoformat(),
+                        "preview_url": f"/preview/{child.name}/index.html",
+                        "deployed_url": "",
+                        "webgen_dir": child.name,
                     }
                 )
 
@@ -1521,13 +1569,23 @@ async def list_projects() -> dict[str, Any]:
                 projects.append(
                     {
                         "id": data.get("id", pf.stem),
-                        "name": data.get("business_name", pf.stem.replace("-", " ").replace("_", " ").title()),
+                        "name": data.get("business_name")
+                        or (data.get("brief") or {}).get(
+                            "business_name", pf.stem.replace("-", " ").replace("_", " ").title()
+                        ),
                         "type": "webgen_project",
                         "path": str(pf.relative_to(PROJECT_ROOT)),
                         "status": data.get("status", "unknown"),
                         "pages": data.get("page_count", 0),
                         "created_at": data.get("created_at", ""),
                         "modified_at": data.get("updated_at", ""),
+                        "webgen_dir": (data.get("output_dir") or "").rstrip("/").split("/")[-1],
+                        "preview_url": (
+                            f"/preview/{(data.get('output_dir') or '').rstrip('/').split('/')[-1]}/index.html"
+                            if data.get("output_dir")
+                            else ""
+                        ),
+                        "deployed_url": (data.get("metadata") or {}).get("deployed_url", ""),
                     }
                 )
             except Exception:
@@ -1577,6 +1635,79 @@ async def list_project_files(project_id: str, project_type: str = "webgen") -> d
         "project_type": project_type,
         "files": files,
         "file_count": len(files),
+    }
+
+
+@app.get("/preview/{slug}/{filepath:path}")
+async def preview_webgen_site(slug: str, filepath: str) -> Any:
+    """Serve a webgen output file for live iframe preview in the dashboard."""
+    import mimetypes
+
+    from fastapi.responses import Response as FastAPIResponse
+
+    # Guard against path traversal in slug
+    safe_slug = os.path.basename(slug)
+    webgen_root = (PROJECT_ROOT / "output" / "webgen").resolve()
+    site_root = (webgen_root / safe_slug).resolve()
+
+    try:
+        site_root.relative_to(webgen_root)
+    except ValueError:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    target = (site_root / filepath).resolve()
+    try:
+        target.relative_to(site_root)
+    except ValueError:
+        raise HTTPException(status_code=403, detail="Path traversal not allowed")
+
+    if not target.exists() or not target.is_file():
+        # Fallback: serve index.html for SPA-style routing
+        fallback = site_root / "index.html"
+        if fallback.exists():
+            target = fallback
+        else:
+            raise HTTPException(status_code=404, detail=f"File not found: {filepath}")
+
+    content_type, _ = mimetypes.guess_type(str(target))
+    content_type = content_type or "application/octet-stream"
+    return FastAPIResponse(content=target.read_bytes(), media_type=content_type)
+
+
+@app.get("/projects/{project_id}/files/content")
+async def get_project_file_content(project_id: str, path: str, project_type: str = "webgen") -> dict[str, Any]:
+    """Return text content of a specific project file (safe, source files only)."""
+    _source_exts = {".html", ".css", ".js", ".ts", ".json", ".txt", ".md", ".xml", ".svg"}
+    _max_bytes = 512 * 1024  # 512 KB cap
+
+    if project_type == "webgen":
+        project_dir = PROJECT_ROOT / "output" / "webgen" / project_id
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported project type: {project_type}")
+
+    safe_root = project_dir.resolve()
+    target = (project_dir / path).resolve()
+
+    try:
+        target.relative_to(safe_root)
+    except ValueError:
+        raise HTTPException(status_code=403, detail="Path traversal not allowed")
+
+    if not target.exists() or not target.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+
+    if target.suffix.lower() not in _source_exts:
+        raise HTTPException(status_code=415, detail="File type not supported for text preview")
+
+    size = target.stat().st_size
+    if size > _max_bytes:
+        raise HTTPException(status_code=413, detail=f"File too large: {size} bytes (limit {_max_bytes})")
+
+    content = target.read_text(encoding="utf-8", errors="replace")
+    return {
+        "content": content,
+        "path": str(target.relative_to(PROJECT_ROOT)),
+        "size_bytes": size,
     }
 
 

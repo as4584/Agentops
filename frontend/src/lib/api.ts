@@ -6,8 +6,7 @@
  * No direct backend mutation.
  */
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-export const API_SECRET = process.env.NEXT_PUBLIC_AGENTOP_API_SECRET || '';
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/proxy';
 
 export interface AgentDefinition {
   agent_id: string;
@@ -148,7 +147,6 @@ export interface CampaignGenerateResponse {
 async function fetchAPI<T>(path: string, options?: RequestInit): Promise<T> {
   const baseHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(API_SECRET ? { Authorization: `Bearer ${API_SECRET}` } : {}),
   };
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
@@ -374,6 +372,12 @@ export interface ProjectEntry {
   pages?: number;
   created_at: string;
   modified_at: string;
+  /** Local preview URL served by the backend (e.g. http://localhost:8000/preview/{slug}/index.html) */
+  preview_url?: string;
+  /** Vercel deployed URL if the site has been deployed */
+  deployed_url?: string;
+  /** Output directory slug — the leaf folder name under output/webgen/ */
+  webgen_dir?: string;
 }
 
 export interface ProjectsResponse {
@@ -516,6 +520,10 @@ export const api = {
   projects: () => fetchAPI<ProjectsResponse>('/projects'),
   projectFiles: (projectId: string, projectType = 'webgen') =>
     fetchAPI<ProjectFilesResponse>(`/projects/${projectId}/files?project_type=${projectType}`),
+  projectFileContent: (projectId: string, filePath: string, projectType = 'webgen') =>
+    fetchAPI<{ content: string; path: string; size_bytes: number }>(
+      `/projects/${projectId}/files/content?path=${encodeURIComponent(filePath)}&project_type=${projectType}`
+    ),
   // Customer operations
   customers: () => fetchAPI<CustomerRecord[]>('/api/customers/'),
   customer: (id: string) => fetchAPI<CustomerRecord>(`/api/customers/${id}`),
@@ -572,6 +580,22 @@ export const api = {
       body: JSON.stringify({ project_id: projectId, target_url: targetUrl }),
     }),
   webgenQrFileUrl: (qrPath: string) => `${API_BASE}/api/webgen/qr/file?path=${encodeURIComponent(qrPath)}`,
+
+  webgenReview: (payload: {
+    project_id: string;
+    business_slug: string;
+    overall_score: number;
+    visual_quality: number;
+    clarity: number;
+    conversion_strength: number;
+    mobile_confidence: number;
+    pass_fail: boolean;
+    notes: string;
+  }) =>
+    fetchAPI<{ status: string; file: string }>('/ml/webgen/review', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
 
   // ML Eval
   mlEvalSummary: (taskType?: string, model?: string) =>

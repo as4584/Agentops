@@ -344,8 +344,8 @@ class WebGenPipeline:
         }
 
         # Inject design context into agents
-        self.planner.design_ctx = design_ctx
-        self.generator.design_ctx = design_ctx
+        self.planner.design_ctx = design_ctx  # type: ignore[assignment]
+        self.generator.design_ctx = design_ctx  # type: ignore[assignment]
 
         # Plan → Generate → SEO → AEO → QA
         project = await self.plan(project)
@@ -355,22 +355,22 @@ class WebGenPipeline:
         project = await self.qa(project)
 
         # ── Critique-regen loop ──────────────────────────────────────────────
-        REGEN_THRESHOLD = 70
-        MAX_REGEN_ROUNDS = 2
+        regen_threshold = 70
+        max_regen_rounds = 2
         nav_items = [
             {"label": p.nav_label, "href": f"{p.slug}.html"} for p in sorted(project.pages, key=lambda p: p.nav_order)
         ]
         _dpo_pairs: list[dict] = []
 
-        for _round in range(MAX_REGEN_ROUNDS):
+        for _round in range(max_regen_rounds):
             ux_scores = project.metadata.get("ux_scores", {})
-            low_pages = [p for p in project.pages if ux_scores.get(p.slug, 100) < REGEN_THRESHOLD]
+            low_pages = [p for p in project.pages if ux_scores.get(p.slug, 100) < regen_threshold]
             if not low_pages:
                 logger.info("[WebGenPipeline] All pages above UX threshold ✓")
                 break
             logger.info(
-                f"[WebGenPipeline] Regen round {_round + 1}/{MAX_REGEN_ROUNDS}: "
-                f"{len(low_pages)} page(s) below {REGEN_THRESHOLD}"
+                f"[WebGenPipeline] Regen round {_round + 1}/{max_regen_rounds}: "
+                f"{len(low_pages)} page(s) below {regen_threshold}"
             )
             for page in low_pages:
                 old_score = ux_scores.get(page.slug, 0)

@@ -23,7 +23,7 @@ try:
 
     _enc = tiktoken.get_encoding("cl100k_base")
 except Exception:
-    _enc = None
+    _enc = None  # type: ignore[assignment]
 
 # ── Filler / hedging patterns ────────────────────────────────────────
 

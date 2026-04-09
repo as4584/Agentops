@@ -169,3 +169,51 @@
 {"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-07T08:57:07.688041+00:00"}
 {"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-07T08:57:07.703908+00:00"}
 {"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-07T08:57:07.719973+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T16:48:27.275560+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T16:48:27.322700+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T16:48:27.359409+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T16:49:16.170192+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T16:49:16.205497+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T16:49:16.240198+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T16:50:01.068202+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T16:50:01.108175+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T16:50:01.151777+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T16:50:51.807378+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T16:50:51.844905+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T16:50:51.887568+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T17:38:24.932752+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T17:38:24.950679+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T17:38:24.965440+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T17:49:00.872444+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T17:49:00.909594+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T17:49:00.941852+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T17:50:45.020186+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T17:50:45.052446+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T17:50:45.083881+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T17:54:32.439970+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T17:54:32.481573+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T17:54:32.518511+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T17:58:13.759523+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T17:58:13.803167+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T17:58:13.841643+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T18:15:00.538077+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T18:15:00.572000+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T18:15:00.602783+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T18:15:44.059040+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T18:15:44.089166+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T18:15:44.120504+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T18:16:31.167544+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T18:16:31.200899+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T18:16:31.237215+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T18:17:17.975597+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T18:17:18.014927+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T18:17:18.052790+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T18:17:59.490484+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T18:17:59.523178+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T18:17:59.553823+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T18:18:42.002792+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T18:18:42.037503+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T18:18:42.074244+00:00"}
+{"category": "latency", "endpoint": "/chat", "model_name": "llama3.2", "latency_ms": 120.5, "timestamp": "2026-04-09T18:19:25.252051+00:00"}
+{"category": "prediction", "model_name": "llama3.2", "predicted": "A", "actual": "A", "confidence": 0.9, "correct": true, "timestamp": "2026-04-09T18:19:25.288567+00:00"}
+{"category": "endpoint", "endpoint": "/health", "status_code": 200, "error": null, "success": true, "timestamp": "2026-04-09T18:19:25.323276+00:00"}

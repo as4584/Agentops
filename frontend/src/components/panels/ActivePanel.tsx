@@ -1,4 +1,4 @@
-import { API_BASE, API_SECRET } from '@/lib/api';
+import { API_BASE } from '@/lib/api';
 import React, { useEffect, useState } from 'react';
 import { Stack, Group, Text, Badge, ScrollArea, Box, ActionIcon } from '@mantine/core';
 import { IconRefresh, IconPlayerPlay, IconPlayerStop } from '@tabler/icons-react';
@@ -37,8 +37,8 @@ export default function ActivePanel() {
   const fetchAll = async () => {
     try {
       const [sr, ar] = await Promise.all([
-        fetch(`${API_BASE}/status`, { headers: authHeader }),
-        fetch(`${API_BASE}/agents`, { headers: authHeader }),
+        fetch(`${API_BASE}/status`),
+        fetch(`${API_BASE}/agents`),
       ]);
       if (sr.ok) {
         const data = await sr.json();
@@ -57,8 +57,7 @@ export default function ActivePanel() {
   useEffect(() => {
     fetchAll();
     const iv = setInterval(fetchAll, 5000);
-    const tokenParam = API_SECRET ? `?token=${encodeURIComponent(API_SECRET)}` : '';
-    const es = new EventSource(`${API_BASE}/stream/activity${tokenParam}`);
+    const es = new EventSource(`${API_BASE}/stream/activity`);
     es.onmessage = (e) => {
       try {
         const ev: StreamEvent = JSON.parse(e.data);

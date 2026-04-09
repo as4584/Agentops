@@ -42,7 +42,10 @@ class OllamaClient:
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.timeout = timeout
-        self._client = httpx.AsyncClient(timeout=timeout)
+        self._client = httpx.AsyncClient(
+            timeout=timeout,
+            limits=httpx.Limits(max_connections=20, max_keepalive_connections=10),
+        )
         logger.info(f"OllamaClient initialized: model={model}, url={base_url}")
 
     async def generate(

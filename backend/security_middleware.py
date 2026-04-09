@@ -145,17 +145,35 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         response = await call_next(request)
+        path = request.url.path
+        # /ml/webgen/site/* files are served into iframes in the ML Lab viewer.
+        is_ml_site = path.startswith("/ml/webgen/site/")
+        # /preview/* files are served into iframes in the main dashboard Projects tab.
+        is_preview = path.startswith("/preview/")
 
         # Prevent MIME-type sniffing
         response.headers["X-Content-Type-Options"] = "nosniff"
-        # Block framing to prevent clickjacking
-        response.headers["X-Frame-Options"] = "DENY"
+        # Block framing to prevent clickjacking — except iframe-served site files
+        if not is_ml_site and not is_preview:
+            response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        # Content Security Policy — tightened for an API-only backend
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self';"
-        )
+        # Content Security Policy
+        if is_ml_site:
+            # Allow framing from localhost for the ML Lab iframe viewer (port 3009)
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors http://localhost:3009 http://127.0.0.1:3009;"
+            )
+        elif is_preview:
+            # Allow framing from the main dashboard (port 3007)
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors http://localhost:3007 http://127.0.0.1:3007;"
+            )
+        else:
+            # Tightened for an API-only backend
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self';"
+            )
         # HTTP Strict Transport Security (safe for local TLS / proxied deployments)
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         # Disable intrusive browser features that this API never uses

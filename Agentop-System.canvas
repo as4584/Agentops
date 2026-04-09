@@ -1,0 +1,293 @@
+{
+  "nodes": [
+    {
+      "id": "title",
+      "type": "text",
+      "text": "# Agentop\n### Local-First Multi-Agent Control Center\n*100% local LLM · Zero cloud dependency · Self-improving via DPO flywheel*",
+      "x": -160,
+      "y": -780,
+      "width": 520,
+      "height": 120,
+      "color": "6"
+    },
+
+    {
+      "id": "copilot",
+      "type": "text",
+      "text": "## VS Code Copilot\n**Manager & Judge**\n- Delegates generation to local\n- Grades all outputs vs rubric\n- Only spends tokens on judgment\n- Retries with critique on failure\n- Logs DPO pairs on success",
+      "x": -900,
+      "y": -540,
+      "width": 280,
+      "height": 180,
+      "color": "5"
+    },
+    {
+      "id": "discord",
+      "type": "text",
+      "text": "## Discord\n**OpenClaw Interface**\n- Commands & task dispatch\n- Security alert channel\n- Escalation notifications\n- Job status updates",
+      "x": 480,
+      "y": -540,
+      "width": 240,
+      "height": 160,
+      "color": "6"
+    },
+
+    {
+      "id": "openclaw_llm",
+      "type": "text",
+      "text": "## OpenClaw Local LLM\n**Autonomous Employee**\n- Locally trained on ops workflows\n- Receives tasks from Discord\n- Uses Agentop as its hands\n- Risk assessment before execution\n- LOW → run local\n- HIGH → escalate to Claude\n- FAIL → escalate + log DPO pair",
+      "x": 380,
+      "y": -280,
+      "width": 300,
+      "height": 240,
+      "color": "6"
+    },
+    {
+      "id": "prompt_engineer",
+      "type": "text",
+      "text": "## Prompt Engineer\n**Pre-Routing Stage** *(missing — next build)*\n- KB context injection\n- Token optimization (merged)\n- Structured intent extraction\n- Feeds enriched payload to router",
+      "x": -900,
+      "y": -280,
+      "width": 280,
+      "height": 180,
+      "color": "3"
+    },
+
+    {
+      "id": "lex_router",
+      "type": "text",
+      "text": "## lex-v3 Router\n**3-Tier Routing**\n① C fast (~0.01ms) — unambiguous keywords\n② LLM Ollama (~800ms) — intent classification\n③ Python keyword — fallback\n\n*Every decision logged → training data*",
+      "x": -380,
+      "y": -280,
+      "width": 300,
+      "height": 180,
+      "color": "4"
+    },
+    {
+      "id": "firewall",
+      "type": "text",
+      "text": "## OpenClaw Firewall\n- 12 red-line patterns\n- Rate limit: 30 req/min\n- Blocked exfil domains\n- User ban list",
+      "x": 740,
+      "y": -280,
+      "width": 220,
+      "height": 140,
+      "color": "1"
+    },
+
+    {
+      "id": "orchestrator",
+      "type": "text",
+      "text": "## LangGraph Orchestrator\n**Agentop Core**\n- Stateful agent routing\n- Fan-out via DeerFlow TaskDelegator\n- DriftGuard invariant enforcement\n- All inter-agent comms route through here\n- Never direct agent-to-agent calls",
+      "x": -380,
+      "y": 0,
+      "width": 320,
+      "height": 180,
+      "color": "4"
+    },
+    {
+      "id": "deerflow",
+      "type": "text",
+      "text": "## DeerFlow Fabric\n**Intelligence Nervous System**\n- ExecutionRecorder → JSONL trajectories\n- ExecutionAnalyzer → post-run LLM critique\n- ToolHealthMonitor → failure rate tracking\n- ToolRepairEngine → proactive fix suggestions\n- FactMemory → per-agent long-term memory\n- ProgressiveSkillLoader → token-efficient skills\n- MiddlewareChain → before/after hooks",
+      "x": 80,
+      "y": 0,
+      "width": 300,
+      "height": 240,
+      "color": "5"
+    },
+
+    {
+      "id": "mcp_server",
+      "type": "text",
+      "text": "## MCP Server ✅ NEW\n`GET /mcp/sse`\n`POST /mcp/messages`\n\nTools exposed to Copilot:\n- agentop_chat\n- agentop_webgen\n- agentop_content_draft\n- agentop_security_scan\n- agentop_research",
+      "x": -900,
+      "y": 0,
+      "width": 240,
+      "height": 220,
+      "color": "5"
+    },
+
+    {
+      "id": "agents_core",
+      "type": "text",
+      "text": "## Core Agents (11)\nsoul_core · devops · monitor\nself_healer · code_review\nsecurity · data · comms\ncs · it · knowledge",
+      "x": -580,
+      "y": 280,
+      "width": 240,
+      "height": 120,
+      "color": "4"
+    },
+    {
+      "id": "tools_layer",
+      "type": "text",
+      "text": "## Tool Layer\n13 native tools\n26 MCP tools (Docker bridge)\n8 browser tools (Playwright)\nGLM-OCR sidecar (port 5002)",
+      "x": -280,
+      "y": 280,
+      "width": 240,
+      "height": 100,
+      "color": "4"
+    },
+    {
+      "id": "ollama",
+      "type": "text",
+      "text": "## Ollama\n*Local LLM Engine*\nllama3.2 · lex-v3 (router)\nGemma 3 12B (via OpenRouter)\nAll inference stays on-device",
+      "x": 80,
+      "y": 280,
+      "width": 240,
+      "height": 110,
+      "color": "4"
+    },
+    {
+      "id": "memory_store",
+      "type": "text",
+      "text": "## Memory Store\nNamespaced JSON per agent\nFact Memory (DeerFlow)\nVector KB (cosine search)\nRun trajectories (JSONL)",
+      "x": 380,
+      "y": 280,
+      "width": 220,
+      "height": 110,
+      "color": "4"
+    },
+
+    {
+      "id": "webgen",
+      "type": "text",
+      "text": "## WebGen Pipeline\nSitePlanner → PageGenerator\n→ SEO → AEO → QA → Export\n\nUX scorer + retry loop\nSandbox gate before release\nDPO pairs from regen loops\nGallery tracking per build",
+      "x": -1100,
+      "y": 520,
+      "width": 260,
+      "height": 170,
+      "color": "2"
+    },
+    {
+      "id": "content_farm",
+      "type": "text",
+      "text": "## Content Farm\nTrendResearcher → [greenlight]\n→ ScriptWriter → Voice*\n→ Avatar/Higgsfield* → Caption\n→ QA → Publisher\n\nPRE-GEN: prompt quality scorer\nPOST-GEN: GLM-OCR thumbnail read\nRETRY: critique-regen loop\nLEARN: failure → DPO pair\n*stub — needs wiring",
+      "x": -780,
+      "y": 520,
+      "width": 280,
+      "height": 210,
+      "color": "2"
+    },
+    {
+      "id": "security_plane",
+      "type": "text",
+      "text": "## Security Plane\n*Proactive Mode (cron)*\n- Scan every 5min\n- alert_dispatch on anomaly\n- Event watcher → Discord alert\n\n*Reactive Mode*\n- Answers via OpenClaw/chat\n- Escalates high-risk to cloud\n\n*Future: Kali-trained model*",
+      "x": -440,
+      "y": 520,
+      "width": 270,
+      "height": 200,
+      "color": "1"
+    },
+    {
+      "id": "business_launcher",
+      "type": "text",
+      "text": "## Business Launcher\nDeerFlow orchestrates:\n① WebGen → site\n② Vercel publish button\n③ Content calendar start\n④ AI Receptionist deploy\n⑤ Analytics dashboard",
+      "x": -100,
+      "y": 520,
+      "width": 260,
+      "height": 160,
+      "color": "3"
+    },
+    {
+      "id": "ml_lab",
+      "type": "text",
+      "text": "## ML Lab / Flywheel\nDecisionCollector → routing pairs\nWebGen regen → DPO pairs\nContent retries → DPO pairs\nReceptionist convos → SFT data\nCopilot retries → DPO pairs\n\nTraining pipeline → lex-v3\nEval gate → golden set\nModel swap → zero downtime",
+      "x": 200,
+      "y": 520,
+      "width": 270,
+      "height": 190,
+      "color": "6"
+    },
+
+    {
+      "id": "vercel_publish",
+      "type": "text",
+      "text": "## Vercel\n*Publish Button — NOT pipeline*\nUser names project\n→ vercel deploy --prod\n→ Link returned\nManual gate, on demand",
+      "x": -1100,
+      "y": 780,
+      "width": 220,
+      "height": 120,
+      "color": "3"
+    },
+    {
+      "id": "social_output",
+      "type": "text",
+      "text": "## Social Platforms\nTikTok (OAuth ✅)\nMeta (creds missing)\nYouTube (stub)\nScheduled publishing",
+      "x": -820,
+      "y": 780,
+      "width": 200,
+      "height": 110,
+      "color": "2"
+    },
+    {
+      "id": "ai_receptionist",
+      "type": "text",
+      "text": "## AI Receptionist\n*Separate Service*\nTwilio + DO droplet\nCalls Agentop /chat\nfor reasoning & KB lookup\nAgentop = brain\nReceptionist = voice",
+      "x": -560,
+      "y": 780,
+      "width": 220,
+      "height": 130,
+      "color": "2"
+    },
+    {
+      "id": "discord_alerts",
+      "type": "text",
+      "text": "## Discord Alerts\nSecurity anomalies\nSystem health events\nEscalation notices\nJob completions",
+      "x": -280,
+      "y": 780,
+      "width": 200,
+      "height": 110,
+      "color": "1"
+    },
+    {
+      "id": "training_data",
+      "type": "text",
+      "text": "## Training Data\ndata/dpo/*.jsonl\ndata/training/*.jsonl\n→ lex-v3 fine-tuning\n→ Higgsfield prompt model\n→ OpenClaw ops model\nSelf-improving over time",
+      "x": 80,
+      "y": 780,
+      "width": 220,
+      "height": 120,
+      "color": "6"
+    },
+
+    {
+      "id": "skills_system",
+      "type": "text",
+      "text": "## Skill System\n22 manifest skills\n17 legacy domain packs\nProgressiveLoader → inject only relevant\nToggle via /skills API",
+      "x": 680,
+      "y": 0,
+      "width": 240,
+      "height": 120,
+      "color": "4"
+    }
+  ],
+
+  "edges": [
+    { "id": "e1", "fromNode": "copilot", "fromSide": "right", "toNode": "mcp_server", "toSide": "left", "label": "MCP SSE tools/call" },
+    { "id": "e2", "fromNode": "mcp_server", "fromSide": "right", "toNode": "orchestrator", "toSide": "left", "label": "delegates" },
+    { "id": "e3", "fromNode": "discord", "fromSide": "bottom", "toNode": "openclaw_llm", "toSide": "top", "label": "commands" },
+    { "id": "e4", "fromNode": "openclaw_llm", "fromSide": "bottom", "toNode": "firewall", "toSide": "top", "label": "risk check" },
+    { "id": "e5", "fromNode": "firewall", "fromSide": "bottom", "toNode": "orchestrator", "toSide": "right", "label": "POST /openclaw/route" },
+    { "id": "e6", "fromNode": "prompt_engineer", "fromSide": "right", "toNode": "lex_router", "toSide": "left", "label": "enriched intent" },
+    { "id": "e7", "fromNode": "lex_router", "fromSide": "bottom", "toNode": "orchestrator", "toSide": "top", "label": "agent_id + confidence" },
+    { "id": "e8", "fromNode": "orchestrator", "fromSide": "bottom", "toNode": "agents_core", "toSide": "top", "label": "dispatch" },
+    { "id": "e9", "fromNode": "orchestrator", "fromSide": "right", "toNode": "deerflow", "toSide": "left", "label": "trajectories + analysis" },
+    { "id": "e10", "fromNode": "agents_core", "fromSide": "bottom", "toNode": "tools_layer", "toSide": "top", "label": "tool calls" },
+    { "id": "e11", "fromNode": "agents_core", "fromSide": "right", "toNode": "ollama", "toSide": "left", "label": "LLM calls" },
+    { "id": "e12", "fromNode": "deerflow", "fromSide": "right", "toNode": "memory_store", "toSide": "left", "label": "facts + runs" },
+    { "id": "e13", "fromNode": "deerflow", "fromSide": "right", "toNode": "skills_system", "toSide": "left", "label": "progressive load" },
+    { "id": "e14", "fromNode": "orchestrator", "fromSide": "bottom", "toNode": "webgen", "toSide": "top", "label": "/webgen/build" },
+    { "id": "e15", "fromNode": "orchestrator", "fromSide": "bottom", "toNode": "content_farm", "toSide": "top", "label": "/content/pipeline" },
+    { "id": "e16", "fromNode": "orchestrator", "fromSide": "bottom", "toNode": "security_plane", "toSide": "top", "label": "route + cron" },
+    { "id": "e17", "fromNode": "orchestrator", "fromSide": "bottom", "toNode": "business_launcher", "toSide": "top", "label": "meta-pipeline" },
+    { "id": "e18", "fromNode": "orchestrator", "fromSide": "bottom", "toNode": "ml_lab", "toSide": "top", "label": "all outputs" },
+    { "id": "e19", "fromNode": "webgen", "fromSide": "bottom", "toNode": "vercel_publish", "toSide": "top", "label": "publish button" },
+    { "id": "e20", "fromNode": "content_farm", "fromSide": "bottom", "toNode": "social_output", "toSide": "top", "label": "publish" },
+    { "id": "e21", "fromNode": "business_launcher", "fromSide": "bottom", "toNode": "ai_receptionist", "toSide": "top", "label": "deploy" },
+    { "id": "e22", "fromNode": "security_plane", "fromSide": "bottom", "toNode": "discord_alerts", "toSide": "top", "label": "alert_dispatch" },
+    { "id": "e23", "fromNode": "ml_lab", "fromSide": "bottom", "toNode": "training_data", "toSide": "top", "label": "DPO + SFT" },
+    { "id": "e24", "fromNode": "training_data", "fromSide": "left", "toNode": "ollama", "toSide": "bottom", "label": "lex-v3 improves", "color": "6" },
+    { "id": "e25", "fromNode": "deerflow", "fromSide": "bottom", "toNode": "ml_lab", "toSide": "top", "label": "escalate flag + DPO" },
+    { "id": "e26", "fromNode": "openclaw_llm", "fromSide": "bottom", "toNode": "discord_alerts", "toSide": "top", "label": "results + escalations" },
+    { "id": "e27", "fromNode": "copilot", "fromSide": "bottom", "toNode": "ml_lab", "toSide": "top", "label": "retry DPO pairs", "color": "5" }
+  ]
+}

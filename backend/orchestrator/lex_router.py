@@ -136,18 +136,25 @@ def _parse_lex_response(text: str) -> dict[str, Any] | None:
     return None
 
 
-async def _lex_route(message: str) -> tuple[str, float]:
+async def _lex_route(
+    message: str,
+    *,
+    model: str | None = None,
+    temperature: float | None = None,
+) -> tuple[str, float]:
     """Query the lex model for routing. Returns (agent_id, confidence)."""
+    _model = model or LEX_ROUTER_MODEL
+    _temp = temperature if temperature is not None else 0.1
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.post(
                 f"{OLLAMA_BASE_URL}/api/generate",
                 json={
-                    "model": LEX_ROUTER_MODEL,
+                    "model": _model,
                     "system": _ROUTER_SYSTEM_PROMPT,
                     "prompt": message,
                     "stream": False,
-                    "options": {"temperature": 0.1, "num_predict": 256},
+                    "options": {"temperature": _temp, "num_predict": 256},
                 },
             )
             resp.raise_for_status()
@@ -234,6 +241,20 @@ async def resolve_agent(message: str) -> dict[str, Any]:
     result = {"agent_id": agent_id, "method": "keyword", "confidence": 0.8}
     _record_decision(message, result, _t0)
     return result
+
+
+async def lex_route_with_override(
+    message: str,
+    model: str | None = None,
+    temperature: float | None = None,
+) -> tuple[str, float]:
+    """Public: route via LLM with optional model/temperature override."""
+    return await _lex_route(message, model=model, temperature=temperature)
+
+
+def keyword_route(message: str) -> str:
+    """Public: route via keyword heuristics (instant, no LLM)."""
+    return _keyword_route(message)
 
 
 def _record_decision(message: str, result: dict[str, Any], start_time: float) -> None:

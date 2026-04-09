@@ -20,11 +20,7 @@ export default function BuildPanel() {
 
   const fetchProjects = async () => {
     try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        ...(API_SECRET ? { Authorization: `Bearer ${API_SECRET}` } : {}),
-      };
-      const r = await fetch(`${API_BASE}/api/webgen/projects`, { headers });
+      const r = await fetch(`${API_BASE}/api/webgen/projects`);
       if (r.ok) {
         const data = await r.json();
         setProjects(data.projects ?? []);
