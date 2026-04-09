@@ -207,6 +207,7 @@ class TestGenerateEasyRouting:
         assert "user_message" in result
         assert result["difficulty"] == "easy"
         from backend.ml.training_generator import AGENT_DOMAINS
+
         assert result["expected_agent"] in AGENT_DOMAINS
 
     @pytest.mark.asyncio

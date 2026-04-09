@@ -1160,10 +1160,7 @@ async def process_restart(
     is rejected. This prevents runaway restart loops during dev sessions.
     """
     if not confirm or not reason:
-        logger.warning(
-            f"[process_restart] BLOCKED — no confirm payload. "
-            f"agent={agent_id} process={process_name}"
-        )
+        logger.warning(f"[process_restart] BLOCKED — no confirm payload. agent={agent_id} process={process_name}")
         return {"success": False, "error": "confirm payload required (pass confirm=True and reason='...')"}
 
     if process_name not in _RESTARTABLE_PROCESSES:

@@ -91,7 +91,16 @@ AGENT_DOMAINS: dict[str, dict[str, Any]] = {
         "role": "Semantic search over docs, knowledge retrieval",
     },
     "ocr_agent": {
-        "keywords": ["ocr", "pdf", "scan", "extract text", "document extract", "image to text", "read pdf", "parse document"],
+        "keywords": [
+            "ocr",
+            "pdf",
+            "scan",
+            "extract text",
+            "document extract",
+            "image to text",
+            "read pdf",
+            "parse document",
+        ],
         "tools": ["document_ocr", "file_reader"],
         "role": "PDF/image text extraction via GLM-OCR sidecar (port 5002)",
     },
