@@ -36,10 +36,11 @@ function live(name: string, fn: (fixtures: { page: import('@playwright/test').Pa
   });
 }
 
-// Shared helper — navigate to app and wait for "Connected"
+// Shared helper — navigate to app and wait for nav to be ready
 async function openApp(page: import('@playwright/test').Page) {
   await page.goto('http://localhost:3007');
   await page.locator('text=Connected').first().waitFor({ timeout: 15_000 });
+  await expect(page.getByText('Dashboard', { exact: true })).toBeVisible({ timeout: 15_000 });
 }
 
 // Click System nav without matching the "All Systems Nominal" badge

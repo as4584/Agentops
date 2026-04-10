@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 import urllib.error
+from http.client import HTTPMessage
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from backend.tools import (
@@ -236,7 +237,7 @@ class TestWebhookSendExtended:
 
 class TestHealthCheckExtended:
     async def test_http_error_returns_reachable_with_status(self):
-        exc = urllib.error.HTTPError("http://example.com", 404, "Not Found", {}, None)
+        exc = urllib.error.HTTPError("http://example.com", 404, "Not Found", HTTPMessage(), None)
         with patch("urllib.request.urlopen", side_effect=exc):
             result = await health_check("http://example.com/health", "agent")
         assert result["reachable"] is True
@@ -362,7 +363,7 @@ class TestProcessRestartExtended:
         mock_proc.communicate = AsyncMock(return_value=(b"", b""))
 
         with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
-            result = await process_restart("backend", "agent")
+            result = await process_restart("backend", "agent", confirm=True, reason="test restart")
         assert result["success"] is True
         assert result["process"] == "backend"
         assert "return_code" in result
@@ -372,15 +373,25 @@ class TestProcessRestartExtended:
         mock_proc.communicate = AsyncMock(side_effect=TimeoutError())
 
         with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
-            result = await process_restart("ollama", "agent")
+            result = await process_restart("ollama", "agent", confirm=True, reason="test restart")
         assert result["success"] is False
         assert "timed out" in result["error"].lower()
 
     async def test_generic_exception_returns_error(self):
         with patch("asyncio.create_subprocess_exec", side_effect=Exception("spawn failed")):
-            result = await process_restart("frontend", "agent")
+            result = await process_restart("frontend", "agent", confirm=True, reason="test restart")
         assert result["success"] is False
         assert "spawn failed" in result["error"]
+
+    async def test_blocked_without_confirm_payload(self):
+        result = await process_restart("backend", "agent")
+        assert result["success"] is False
+        assert "confirm payload required" in result["error"]
+
+    async def test_blocked_without_reason(self):
+        result = await process_restart("backend", "agent", confirm=True, reason="")
+        assert result["success"] is False
+        assert "confirm payload required" in result["error"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────

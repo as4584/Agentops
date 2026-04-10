@@ -29,7 +29,7 @@ from transformers import (
     BitsAndBytesConfig,
     TrainingArguments,
 )
-from trl import SFTTrainer, DataCollatorForCompletionOnlyLM
+from trl import SFTTrainer  # type: ignore[attr-defined]
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -146,7 +146,7 @@ def load_base_model(model_name: str):
 
 def _has_flash_attn() -> bool:
     try:
-        import flash_attn  # noqa: F401
+        import flash_attn  # type: ignore[import-untyped]  # noqa: F401
         return True
     except ImportError:
         return False
@@ -197,20 +197,20 @@ def train(
         save_strategy="steps",
         save_steps=SAVE_STEPS,
         save_total_limit=3,
-        evaluation_strategy="no",
+        eval_strategy="no",
         report_to="none",
         dataloader_num_workers=0,
         remove_unused_columns=False,
     )
 
-    trainer = SFTTrainer(
+    trainer = SFTTrainer(  # type: ignore[call-arg]
         model=model,
-        tokenizer=tokenizer,
         train_dataset=dataset,
         args=training_args,
-        max_seq_length=MAX_SEQ_LENGTH,
-        dataset_text_field="text",
-        packing=True,
+        processing_class=tokenizer,
+        max_seq_length=MAX_SEQ_LENGTH,  # type: ignore[call-arg]
+        dataset_text_field="text",  # type: ignore[call-arg]
+        packing=True,  # type: ignore[call-arg]
     )
 
     print(f"\n{'='*60}")

@@ -141,6 +141,7 @@ class TestSiteStore:
         project.status = SiteStatus.PLANNED
         store.save(project)
         loaded = store.load(project.id)
+        assert loaded is not None
         assert loaded.status == SiteStatus.PLANNED
 
     def test_list_skips_corrupt_files(self, tmp_path):

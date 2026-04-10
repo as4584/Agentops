@@ -40,6 +40,8 @@ import {
   ThemeIcon,
   Title,
   Tooltip,
+  SegmentedControl,
+  Slider,
   UnstyledButton,
   rem,
 } from '@mantine/core';
@@ -70,11 +72,17 @@ import {
   IconSettings,
   IconShield,
   IconTargetArrow,
+  IconExternalLink,
+  IconEye,
+  IconStar,
+  IconThumbUp,
+  IconThumbDown,
   IconTools,
   IconX,
 } from '@tabler/icons-react';
 
 import {
+  API_BASE,
   api,
   type AgentDefinition,
   type AgentState,
@@ -248,6 +256,14 @@ export default function DashboardPage() {
   const [projectFilter, setProjectFilter] = useState('all');
   const [selectedProject, setSelectedProject] = useState<ProjectEntry | null>(null);
   const [projectFiles, setProjectFiles] = useState<{ name: string; path: string; size_bytes: number; extension: string }[]>([]);
+  // WebGen detail
+  const [webgenDetailTab, setWebgenDetailTab] = useState<string>('preview');
+  const [selectedFileContent, setSelectedFileContent] = useState<string | null>(null);
+  const [selectedFileForContent, setSelectedFileForContent] = useState<string | null>(null);
+  const [loadingFileContent, setLoadingFileContent] = useState(false);
+  const [gradeData, setGradeData] = useState<{ overall_score: number; visual_quality: number; clarity: number; conversion_strength: number; mobile_confidence: number; pass_fail: boolean; notes: string }>({ overall_score: 7, visual_quality: 7, clarity: 7, conversion_strength: 7, mobile_confidence: 7, pass_fail: true, notes: '' });
+  const [submittingGrade, setSubmittingGrade] = useState(false);
+  const [gradeSubmitted, setGradeSubmitted] = useState(false);
 
   // Agent detail
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
@@ -337,7 +353,6 @@ export default function DashboardPage() {
   // ── SSE ────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!connected) return;
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const es = new EventSource(`${API_BASE}/stream/activity`);
     es.addEventListener('connected', () => setSseConnected(true));
     const handleEvent = (e: MessageEvent) => {
@@ -367,8 +382,35 @@ export default function DashboardPage() {
   // ── Project detail ─────────────────────────────────────────────────────
   const loadProjectFiles = async (proj: ProjectEntry) => {
     setSelectedProject(proj); setProjectFiles([]);
+    setSelectedFileContent(null); setSelectedFileForContent(null);
+    setWebgenDetailTab('preview'); setGradeSubmitted(false);
     try { const r = await api.projectFiles(proj.id, proj.type); setProjectFiles(r.files); } catch {}
   };
+
+  const loadFileContent = async (filePath: string) => {
+    if (!selectedProject) return;
+    setLoadingFileContent(true); setSelectedFileForContent(filePath);
+    try {
+      const r = await api.projectFileContent(selectedProject.id, filePath, selectedProject.type);
+      setSelectedFileContent(r.content);
+    } catch { setSelectedFileContent('// Error loading file content'); }
+    finally { setLoadingFileContent(false); }
+  };
+
+  const submitGrade = async () => {
+    if (!selectedProject || submittingGrade) return;
+    setSubmittingGrade(true);
+    try {
+      await api.webgenReview({
+        project_id: selectedProject.id,
+        business_slug: selectedProject.webgen_dir || selectedProject.id,
+        ...gradeData,
+      });
+      setGradeSubmitted(true);
+    } catch {} finally { setSubmittingGrade(false); }
+  };
+
+  const isWebgenProject = (p: ProjectEntry) => p.type === 'webgen' || p.type === 'webgen_project';
 
   // ── Helpers ────────────────────────────────────────────────────────────
   const getAgentState = (id: string) => agentStates.find(s => s.agent_id === id);
@@ -453,6 +495,7 @@ export default function DashboardPage() {
                     <Button component={Link} href="/pricing" size="xs" variant="light">Pricing</Button>
                     <Button component={Link} href="/webgen" size="xs" variant="light">Website Maker</Button>
                     <Button component={Link} href="/marketing" size="xs" variant="light">Marketing Console</Button>
+                    <Button component={Link} href="/studio" size="xs" variant="light" color="teal">🎬 Studio</Button>
                   </Group>
                 </Group>
               </Card>
@@ -869,42 +912,220 @@ export default function DashboardPage() {
 
                 {selectedProject ? (
                   <>
-                    <Button size="xs" variant="subtle" leftSection={<IconChevronLeft size={14} />} onClick={() => { setSelectedProject(null); setProjectFiles([]); }} mb="md">Back to Projects</Button>
-                    <Card shadow="sm" withBorder>
-                      <Group justify="space-between" mb="md">
-                        <div><Title order={3}>{selectedProject.name}</Title><Text size="xs" c="dimmed" ff="monospace">{selectedProject.path}</Text></div>
-                        <Badge color={projectTypeInfo(selectedProject.type).color} size="lg">{projectTypeInfo(selectedProject.type).label}</Badge>
-                      </Group>
-                      <SimpleGrid cols={4} mb="md">
-                        <Paper p="sm" withBorder ta="center"><Text size="xl" fw={700} c="agentop">{selectedProject.file_count || projectFiles.length}</Text><Text size="xs" c="dimmed">Files</Text></Paper>
-                        <Paper p="sm" withBorder ta="center"><Text size="xl" fw={700} c="agentop">{selectedProject.total_size_mb || '—'}</Text><Text size="xs" c="dimmed">MB</Text></Paper>
-                        <Paper p="sm" withBorder ta="center"><Text size="xl" fw={700} c="green">{selectedProject.status || 'Active'}</Text><Text size="xs" c="dimmed">Status</Text></Paper>
-                        <Paper p="sm" withBorder ta="center"><Text fw={600} c="dimmed">{fmt.date(selectedProject.created_at)}</Text><Text size="xs" c="dimmed">Created</Text></Paper>
-                      </SimpleGrid>
-                      {projectFiles.length > 0 && (
-                        <>
-                          <Text size="xs" fw={600} c="dimmed" tt="uppercase" mb="xs">Files</Text>
-                          <ScrollArea h={400} type="auto">
-                            <Stack gap={4}>
-                              {projectFiles.map(f => (
-                                <Paper key={f.path} p="xs" withBorder>
-                                  <Group justify="space-between" wrap="nowrap">
-                                    <Group gap="xs" wrap="nowrap" style={{ overflow: 'hidden' }}>
-                                      <IconFileText size={16} />
-                                      <Text size="xs" ff="monospace" truncate>{f.name}</Text>
-                                    </Group>
-                                    <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
-                                      <Badge size="xs" variant="light">{f.extension || 'file'}</Badge>
-                                      <Text size="xs" c="dimmed">{fmt.size(f.size_bytes)}</Text>
-                                    </Group>
-                                  </Group>
+                    <Button size="xs" variant="subtle" leftSection={<IconChevronLeft size={14} />} onClick={() => { setSelectedProject(null); setProjectFiles([]); setSelectedFileContent(null); setSelectedFileForContent(null); }} mb="md">Back to Projects</Button>
+
+                    {/* ── WebGen project detail view ── */}
+                    {isWebgenProject(selectedProject) ? (
+                      <Card shadow="sm" withBorder>
+                        {/* Header */}
+                        <Group justify="space-between" mb="md">
+                          <div>
+                            <Title order={3}>{selectedProject.name}</Title>
+                            <Text size="xs" c="dimmed" ff="monospace">{selectedProject.path}</Text>
+                          </div>
+                          <Group gap="xs">
+                            <Badge color={projectTypeInfo(selectedProject.type).color} size="lg">{projectTypeInfo(selectedProject.type).label}</Badge>
+                            {selectedProject.preview_url && (
+                              <Button
+                                component="a"
+                                href={selectedProject.preview_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                size="xs"
+                                variant="light"
+                                leftSection={<IconExternalLink size={14} />}
+                              >
+                                Open Site
+                              </Button>
+                            )}
+                          </Group>
+                        </Group>
+
+                        {/* Stats row */}
+                        <SimpleGrid cols={4} mb="md">
+                          <Paper p="sm" withBorder ta="center"><Text size="xl" fw={700} c="agentop">{selectedProject.file_count || projectFiles.length}</Text><Text size="xs" c="dimmed">Files</Text></Paper>
+                          <Paper p="sm" withBorder ta="center"><Text size="xl" fw={700} c="agentop">{selectedProject.total_size_mb || '—'}</Text><Text size="xs" c="dimmed">MB</Text></Paper>
+                          <Paper p="sm" withBorder ta="center"><Text size="xl" fw={700} c="green">{selectedProject.status || 'Active'}</Text><Text size="xs" c="dimmed">Status</Text></Paper>
+                          <Paper p="sm" withBorder ta="center"><Text fw={600} c="dimmed">{fmt.date(selectedProject.created_at)}</Text><Text size="xs" c="dimmed">Created</Text></Paper>
+                        </SimpleGrid>
+
+                        {/* Tab switcher */}
+                        <SegmentedControl
+                          value={webgenDetailTab}
+                          onChange={setWebgenDetailTab}
+                          data={[
+                            { label: 'Preview', value: 'preview' },
+                            { label: 'Code', value: 'code' },
+                            { label: 'Grade', value: 'grade' },
+                          ]}
+                          mb="md"
+                          fullWidth
+                        />
+
+                        {/* ── Preview tab ── */}
+                        {webgenDetailTab === 'preview' && (
+                          selectedProject.preview_url ? (
+                            <Box style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--mantine-color-dark-4)' }}>
+                              <iframe
+                                src={selectedProject.preview_url}
+                                style={{ width: '100%', height: '70vh', border: 'none', display: 'block' }}
+                                title={`Preview: ${selectedProject.name}`}
+                              />
+                            </Box>
+                          ) : (
+                            <Paper p="xl" withBorder ta="center">
+                              <Text c="dimmed">No preview available. The project may not have an index.html file.</Text>
+                            </Paper>
+                          )
+                        )}
+
+                        {/* ── Code tab ── */}
+                        {webgenDetailTab === 'code' && (
+                          <Grid>
+                            <Grid.Col span={4}>
+                              <Text size="xs" fw={600} c="dimmed" tt="uppercase" mb="xs">Files</Text>
+                              <ScrollArea h={500} type="auto">
+                                <Stack gap={4}>
+                                  {projectFiles.map(f => (
+                                    <Paper
+                                      key={f.path}
+                                      p="xs"
+                                      withBorder
+                                      style={{
+                                        cursor: 'pointer',
+                                        background: selectedFileForContent === f.path ? 'var(--mantine-color-dark-5)' : undefined,
+                                      }}
+                                      onClick={() => loadFileContent(f.path)}
+                                    >
+                                      <Group justify="space-between" wrap="nowrap">
+                                        <Group gap="xs" wrap="nowrap" style={{ overflow: 'hidden' }}>
+                                          <IconFileText size={14} />
+                                          <Text size="xs" ff="monospace" truncate>{f.name}</Text>
+                                        </Group>
+                                        <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>{fmt.size(f.size_bytes)}</Text>
+                                      </Group>
+                                    </Paper>
+                                  ))}
+                                </Stack>
+                              </ScrollArea>
+                            </Grid.Col>
+                            <Grid.Col span={8}>
+                              {loadingFileContent ? (
+                                <Paper p="xl" withBorder ta="center"><Loader size="sm" /></Paper>
+                              ) : selectedFileContent ? (
+                                <ScrollArea h={500} type="auto">
+                                  <Code block style={{ fontSize: 'var(--mantine-font-size-xs)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                                    {selectedFileContent}
+                                  </Code>
+                                </ScrollArea>
+                              ) : (
+                                <Paper p="xl" withBorder ta="center">
+                                  <Text c="dimmed" size="sm">Click a file to view its contents</Text>
                                 </Paper>
-                              ))}
-                            </Stack>
-                          </ScrollArea>
-                        </>
-                      )}
-                    </Card>
+                              )}
+                            </Grid.Col>
+                          </Grid>
+                        )}
+
+                        {/* ── Grade tab ── */}
+                        {webgenDetailTab === 'grade' && (
+                          <Stack gap="md">
+                            {gradeSubmitted && (
+                              <Paper p="sm" withBorder style={{ borderColor: 'var(--mantine-color-green-6)' }}>
+                                <Group gap="xs"><IconCheck size={16} color="var(--mantine-color-green-6)" /><Text size="sm" c="green">Grade submitted successfully.</Text></Group>
+                              </Paper>
+                            )}
+                            {[
+                              { key: 'overall_score', label: 'Overall Score' },
+                              { key: 'visual_quality', label: 'Visual Quality' },
+                              { key: 'clarity', label: 'Clarity' },
+                              { key: 'conversion_strength', label: 'Conversion Strength' },
+                              { key: 'mobile_confidence', label: 'Mobile Confidence' },
+                            ].map(({ key, label }) => (
+                              <div key={key}>
+                                <Group justify="space-between" mb={4}>
+                                  <Text size="sm" fw={500}>{label}</Text>
+                                  <Badge size="sm" variant="light">{gradeData[key as keyof typeof gradeData]}/10</Badge>
+                                </Group>
+                                <Slider
+                                  min={1}
+                                  max={10}
+                                  step={1}
+                                  value={gradeData[key as keyof typeof gradeData] as number}
+                                  onChange={(v) => setGradeData(prev => ({ ...prev, [key]: v }))}
+                                  marks={[{ value: 1, label: '1' }, { value: 5, label: '5' }, { value: 10, label: '10' }]}
+                                  mb="xs"
+                                />
+                              </div>
+                            ))}
+                            <Group gap="xs">
+                              <Text size="sm" fw={500}>Pass / Fail</Text>
+                              <SegmentedControl
+                                size="xs"
+                                value={gradeData.pass_fail ? 'pass' : 'fail'}
+                                onChange={(v) => setGradeData(prev => ({ ...prev, pass_fail: v === 'pass' }))}
+                                data={[
+                                  { label: 'Pass', value: 'pass' },
+                                  { label: 'Fail', value: 'fail' },
+                                ]}
+                              />
+                            </Group>
+                            <Textarea
+                              label="Notes"
+                              placeholder="Optional feedback on design, UX, copy quality..."
+                              value={gradeData.notes}
+                              onChange={(e) => setGradeData(prev => ({ ...prev, notes: e.currentTarget.value }))}
+                              minRows={3}
+                            />
+                            <Button
+                              onClick={submitGrade}
+                              loading={submittingGrade}
+                              leftSection={<IconStar size={16} />}
+                              disabled={gradeSubmitted}
+                            >
+                              {gradeSubmitted ? 'Grade Submitted' : 'Submit Grade'}
+                            </Button>
+                          </Stack>
+                        )}
+                      </Card>
+                    ) : (
+                      /* ── Non-WebGen project detail (file list only) ── */
+                      <Card shadow="sm" withBorder>
+                        <Group justify="space-between" mb="md">
+                          <div><Title order={3}>{selectedProject.name}</Title><Text size="xs" c="dimmed" ff="monospace">{selectedProject.path}</Text></div>
+                          <Badge color={projectTypeInfo(selectedProject.type).color} size="lg">{projectTypeInfo(selectedProject.type).label}</Badge>
+                        </Group>
+                        <SimpleGrid cols={4} mb="md">
+                          <Paper p="sm" withBorder ta="center"><Text size="xl" fw={700} c="agentop">{selectedProject.file_count || projectFiles.length}</Text><Text size="xs" c="dimmed">Files</Text></Paper>
+                          <Paper p="sm" withBorder ta="center"><Text size="xl" fw={700} c="agentop">{selectedProject.total_size_mb || '—'}</Text><Text size="xs" c="dimmed">MB</Text></Paper>
+                          <Paper p="sm" withBorder ta="center"><Text size="xl" fw={700} c="green">{selectedProject.status || 'Active'}</Text><Text size="xs" c="dimmed">Status</Text></Paper>
+                          <Paper p="sm" withBorder ta="center"><Text fw={600} c="dimmed">{fmt.date(selectedProject.created_at)}</Text><Text size="xs" c="dimmed">Created</Text></Paper>
+                        </SimpleGrid>
+                        {projectFiles.length > 0 && (
+                          <>
+                            <Text size="xs" fw={600} c="dimmed" tt="uppercase" mb="xs">Files</Text>
+                            <ScrollArea h={400} type="auto">
+                              <Stack gap={4}>
+                                {projectFiles.map(f => (
+                                  <Paper key={f.path} p="xs" withBorder>
+                                    <Group justify="space-between" wrap="nowrap">
+                                      <Group gap="xs" wrap="nowrap" style={{ overflow: 'hidden' }}>
+                                        <IconFileText size={16} />
+                                        <Text size="xs" ff="monospace" truncate>{f.name}</Text>
+                                      </Group>
+                                      <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
+                                        <Badge size="xs" variant="light">{f.extension || 'file'}</Badge>
+                                        <Text size="xs" c="dimmed">{fmt.size(f.size_bytes)}</Text>
+                                      </Group>
+                                    </Group>
+                                  </Paper>
+                                ))}
+                              </Stack>
+                            </ScrollArea>
+                          </>
+                        )}
+                      </Card>
+                    )}
                   </>
                 ) : (
                   <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>

@@ -16,9 +16,10 @@ The custom `lex-v2` model is a 3B router that classifies user messages to the co
 - `cs_agent` — Customer support, FAQ, knowledge base
 - `it_agent` — Infrastructure diagnostics, network, DNS
 - `knowledge_agent` — Document search, semantic Q&A
+- `ocr_agent` — PDF/image text extraction, document OCR via GLM-OCR sidecar (port 5002)
 
-## Valid Tools (12 native)
-safe_shell, file_reader, doc_updater, system_info, webhook_send,
+## Valid Tools (13 native)
+safe_shell, file_reader, document_ocr, doc_updater, system_info, webhook_send,
 git_ops, health_check, log_tail, alert_dispatch, secret_scanner,
 db_query, process_restart
 

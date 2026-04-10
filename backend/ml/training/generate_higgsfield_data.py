@@ -424,8 +424,8 @@ def main() -> None:
             f.write(json.dumps(ex) + "\n")
 
     # Stats
-    categories = {}
-    models_used = {}
+    categories: dict[str, int] = {}
+    models_used: dict[str, int] = {}
     for ex in examples:
         c = ex["metadata"]["category"]
         categories[c] = categories.get(c, 0) + 1

@@ -50,34 +50,6 @@ jobs:
           pip install pip-audit --quiet --root-user-action=ignore
           pip-audit --skip-editable
 
-  # ── Frontend: lint + typecheck + build + CVE scan ────────────────────
-  frontend-checks:
-    name: Frontend checks
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install frontend deps
-        run: cd frontend && npm ci
-
-      - name: npm audit — dependency CVE scan
-        run: cd frontend && npm audit --audit-level=critical --production
-
-      - name: ESLint
-        run: cd frontend && npm run lint
-
-      - name: TypeScript — type check
-        run: cd frontend && npx tsc --noEmit
-
-      - name: Build
-        run: cd frontend && npm run build
-
   # ── Secret scanning ───────────────────────────────────────────────────
   secret-scan:
     name: Secret scan

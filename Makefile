@@ -114,6 +114,59 @@ test-groups:
 	  $(PYTEST) -m $$group --tb=no $(NO_COV) --no-header -q 2>&1 | tail -2; \
 	done
 
+# ─── Kubernetes deploy ────────────────────────────────────────────────────────
+# Run these from WSL2. Requires docker + kubectl on PATH.
+
+.PHONY: k8s-secret
+k8s-secret:
+	@echo "Creating/updating agentop-env secret from .env..."
+	kubectl create secret generic agentop-env \
+	  --from-env-file=.env \
+	  -n agent-ops \
+	  --dry-run=client -o yaml | kubectl apply -f -
+
+.PHONY: k8s-build
+k8s-build:
+	@echo "Building agentop/backend:latest..."
+	docker build -t agentop/backend:latest .
+
+.PHONY: k8s-load
+k8s-load:
+	@echo "Loading image into cluster (Docker Desktop K8s — image shared automatically)..."
+	@echo "If using kind:     kind load docker-image agentop/backend:latest"
+	@echo "If using minikube: minikube image load agentop/backend:latest"
+	@echo "Docker Desktop: no load step needed — daemon is shared."
+
+.PHONY: k8s-apply
+k8s-apply:
+	kubectl apply -f k8s/backend/deployment.yaml
+	kubectl apply -f k8s/discord-bot/deployment.yaml
+
+.PHONY: k8s-deploy
+k8s-deploy: k8s-build k8s-secret k8s-apply
+	@echo "Waiting for rollout..."
+	kubectl rollout restart deployment/agentop-backend -n agent-ops
+	kubectl rollout status deployment/agentop-backend -n agent-ops --timeout=120s
+	@echo ""
+	@echo "Done. Both services in K8s:"
+	@echo "  agentop-backend  → http://agentop-backend.agent-ops:8000"
+	@echo "  discord-bot      → always-up, now connected"
+
+.PHONY: k8s-logs
+k8s-logs:
+	kubectl logs -n agent-ops -l app=agentop-backend -f
+
+.PHONY: k8s-status
+k8s-status:
+	kubectl get pods -n agent-ops
+	@echo ""
+	kubectl get svc -n agent-ops
+
+.PHONY: k8s-dashboard
+k8s-dashboard:
+	@echo "Port-forwarding backend to localhost:8000..."
+	kubectl port-forward -n agent-ops svc/agentop-backend 8000:8000
+
 # ─── CI gate (mirrors CLAUDE.md requirements) ─────────────────────────────────
 
 .PHONY: ci
@@ -130,7 +183,14 @@ typecheck:
 
 .PHONY: help
 help:
-	@echo "Agentop Test Targets"
+	@echo "Agentop Targets"
+	@echo "──────────────────────────────────────────────────"
+	@echo "  make k8s-deploy     Build image + sync secret + deploy to K8s"
+	@echo "  make k8s-logs       Tail backend pod logs"
+	@echo "  make k8s-status     Show all pods + services"
+	@echo "  make k8s-dashboard  Port-forward backend to localhost:8000"
+	@echo ""
+	@echo "Test Targets"
 	@echo "──────────────────────────────────────────────────"
 	@echo "  make test           All tests, no coverage"
 	@echo "  make test-all       All tests, with coverage"

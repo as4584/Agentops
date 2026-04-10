@@ -31,6 +31,12 @@ fi
 
 # 1) Start FastAPI backend
 echo "  → Starting backend (port 8000)..."
+export OLLAMA_NUM_PARALLEL=4
+export OLLAMA_MAX_LOADED_MODELS=1
+export OLLAMA_KEEP_ALIVE=30m
+export OLLAMA_FLASH_ATTENTION=1
+export OMP_NUM_THREADS=6
+export MKL_NUM_THREADS=6
 python3 app.py &
 BACKEND_PID=$!
 

@@ -1,0 +1,159 @@
+---
+# ── Agentop Backend — K8s Deployment ─────────────────────────────────────────
+#
+# Once this is running, the discord-bot's AGENTOP_API_URL=http://agentop-backend.agent-ops:8000
+# resolves automatically via K8s in-cluster DNS — no IP address juggling.
+#
+# First-time setup:
+#   1. Build the image (from Agentop root):
+#        docker build -t agentop/backend:latest .
+#
+#   2. Load into your local cluster (pick whichever you use):
+#        kind:      kind load docker-image agentop/backend:latest
+#        minikube:  minikube image load agentop/backend:latest
+#        k3s:       k3s ctr images import <(docker save agentop/backend:latest)
+#        Docker Desktop K8s: image is already available (shared daemon)
+#
+#   3. Create the secret from your .env:
+#        kubectl create secret generic agentop-env \
+#          --from-env-file=.env \
+#          -n agent-ops \
+#          --dry-run=client -o yaml | kubectl apply -f -
+#
+#   4. Apply this file:
+#        kubectl apply -f k8s/backend/deployment.yaml
+#
+#   5. Watch it come up:
+#        kubectl rollout status deployment/agentop-backend -n agent-ops
+#        kubectl logs -n agent-ops -l app=agentop-backend -f
+#
+# Updating after code changes:
+#   make k8s-deploy   (see Makefile)
+# ─────────────────────────────────────────────────────────────────────────────
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: agentop-data
+  namespace: agent-ops
+  labels:
+    app: agentop-backend
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentop-backend
+  namespace: agent-ops
+  labels:
+    app: agentop-backend
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agentop-backend
+  # Rolling update — brief overlap so the bot never loses its endpoint
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: agentop-backend
+        tier: backend
+    spec:
+      # Add host.docker.internal for Docker Desktop — lets the backend reach
+      # Ollama running on the Windows host
+      hostAliases:
+        - ip: "host-gateway"
+          hostnames:
+            - "host.docker.internal"
+      containers:
+        - name: agentop-backend
+          image: agentop/backend:latest
+          imagePullPolicy: Never       # local image — no registry needed
+          ports:
+            - name: http
+              containerPort: 8000
+          # All .env vars injected from the K8s secret
+          envFrom:
+            - secretRef:
+                name: agentop-env
+          # Override a few vars that differ inside the container
+          env:
+            - name: BACKEND_HOST
+              value: "0.0.0.0"
+            - name: BACKEND_PORT
+              value: "8000"
+            # Ollama lives on the Windows host — Docker Desktop resolves this
+            - name: OLLAMA_BASE_URL
+              value: "http://host.docker.internal:11434"
+            # Allow requests from the Next.js dashboard and in-cluster services
+            - name: AGENTOP_CORS_ORIGINS
+              value: "http://localhost:3007,http://127.0.0.1:3007,http://agentop-frontend.agent-ops:3007"
+          volumeMounts:
+            # Persistent data: memory store, news intel, SQLite DBs, logs
+            - name: data
+              mountPath: /app/data
+            - name: data
+              mountPath: /app/backend/memory
+              subPath: memory
+            - name: data
+              mountPath: /app/backend/logs
+              subPath: logs
+            - name: data
+              mountPath: /app/output
+              subPath: output
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"       # LangGraph + Playwright can spike
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60   # boot sequence takes a moment
+            periodSeconds: 30
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: agentop-data
+      restartPolicy: Always
+
+---
+# ── Service — this is what makes agentop-backend.agent-ops:8000 resolve ───────
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentop-backend
+  namespace: agent-ops
+  labels:
+    app: agentop-backend
+spec:
+  selector:
+    app: agentop-backend
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP

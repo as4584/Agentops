@@ -131,7 +131,7 @@ def generate_cover_letter(company: str, role: str, jd_keywords: list[str] | None
     _resume_file = get_resume_for_company(company)  # reserved: future resume-tailoring logic
     matched_skills = []
     if jd_keywords:
-        all_skills = LEX_SKILLS["languages"] + LEX_SKILLS["frameworks"] + LEX_SKILLS["ai_ml"] + LEX_SKILLS["practices"]
+        all_skills = LEX_SKILLS["languages"] + LEX_SKILLS["frameworks"] + LEX_SKILLS["ai_ml"] + LEX_SKILLS["practices"]  # type: ignore[operator]
         matched_skills = [
             s for s in all_skills if any(k.lower() in s.lower() or s.lower() in k.lower() for k in jd_keywords)
         ]

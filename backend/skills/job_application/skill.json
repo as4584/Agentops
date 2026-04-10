@@ -1,13 +1,14 @@
 {
   "id": "job_application",
   "name": "Job Application Engine",
-  "version": "1.0.0",
-  "description": "Searches job postings, tailors resumes and cover letters to job requirements, tracks applications, and manages the full job search pipeline. Supports job boards (LinkedIn, Indeed, Glassdoor), NJ/NYC proximity filtering, application status tracking in SQLite, and scholarship research.",
+  "version": "2.0.0",
+  "description": "Full Handshake automation + job search pipeline for Lex Santiago. Launches a persistent Chromium browser, logs into Handshake, scrapes all job listings, tailors cover letters via Ollama per job description, uploads the best-matched resume, fills GPA (2.2 if required / blank if optional), submits applications, and screenshots each confirmation. Also supports tracking, scholarship research, and CSV export.",
   "allowed_agents": ["gsd_agent", "devops_agent", "knowledge_agent", "cs_agent"],
   "required_tools": ["safe_shell", "file_reader", "doc_updater", "db_query", "webhook_send"],
   "risk_level": "low",
   "enabled": true,
   "capabilities": [
+    "handshake_campaign",
     "search_jobs",
     "tailor_resume",
     "generate_cover_letter",

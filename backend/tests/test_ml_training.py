@@ -28,6 +28,7 @@ class TestModuleConstants:
             "cs_agent",
             "it_agent",
             "knowledge_agent",
+            "ocr_agent",
         }
         assert set(AGENT_DOMAINS.keys()) == expected
 
@@ -110,6 +111,7 @@ class TestExtractJson:
     def test_nested_json(self):
         text = '{"outer": {"inner": [1, 2, 3]}}'
         result = self._extract(text)
+        assert result is not None
         assert result["outer"]["inner"] == [1, 2, 3]
 
     def test_with_whitespace_prefix(self):
@@ -204,7 +206,9 @@ class TestGenerateEasyRouting:
         assert result is not None
         assert "user_message" in result
         assert result["difficulty"] == "easy"
-        assert result["expected_agent"] in gen._get_all_agent_ids()
+        from backend.ml.training_generator import AGENT_DOMAINS
+
+        assert result["expected_agent"] in AGENT_DOMAINS
 
     @pytest.mark.asyncio
     async def test_too_short_message_returns_none(self, tmp_path):
