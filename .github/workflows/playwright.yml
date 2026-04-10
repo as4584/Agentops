@@ -25,10 +25,6 @@ jobs:
         run: node scripts/ci-mock-backend.js &
       - name: Wait for mock backend
         run: cd frontend && npx wait-on http://127.0.0.1:8000/health --timeout 10000
-      - name: Start frontend
-        run: cd frontend && npm run dev &
-      - name: Wait for frontend
-        run: cd frontend && npx wait-on http://127.0.0.1:3007 --timeout 60000
       - name: Install Playwright browser
         run: cd frontend && npx playwright install --with-deps chromium
       - name: Run Playwright tests (blocking)
