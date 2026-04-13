@@ -24,6 +24,9 @@ ANALYTICS_CACHE_PATH = Path("backend/memory/social_media/analytics_cache.json")
 POST_HISTORY_PATH = Path("backend/memory/social_media/posted_content.json")
 POST_QUEUE_PATH = Path("backend/memory/social_media/post_queue.json")
 ALERT_HISTORY_PATH = Path("backend/memory/social_media/alert_history.json")
+IG_PERFORMANCE_LOG_PATH = Path("backend/memory/social_media/instagram_performance_log.json")
+
+HYPOTHESIS_THRESHOLD = 15  # minimum posts before switching to pattern_recognition mode
 
 # Non-retryable Meta error codes — halt and alert operator
 META_NON_RETRYABLE = {3, 10, 368}
@@ -517,6 +520,159 @@ async def instagram_post_insights(media_id: str) -> dict:
     if "error" in data:
         _handle_meta_error(data)
     return data
+
+
+# ---------------------------------------------------------------------------
+# Instagram performance log + analyze_performance
+# ---------------------------------------------------------------------------
+
+
+@router.post("/instagram/performance/log")
+async def instagram_log_post(entry: dict) -> dict:
+    """Append a post entry to instagram_performance_log.json.
+
+    Caller provides any subset of the schema; missing fields default to UNKNOWN/0.
+    """
+    template: dict[str, Any] = {
+        "post_id": "UNKNOWN",
+        "type": "UNKNOWN",
+        "topic": "UNKNOWN",
+        "hook": "UNKNOWN",
+        "posted_at": "UNKNOWN",
+        "views": 0,
+        "saves": 0,
+        "comments": 0,
+        "follows": 0,
+        "reach": 0,
+        "source_breakdown": {"feed_pct": 0, "profile_pct": 0},
+        "hypotheses_tested": [],
+    }
+    template.update(entry)
+    log = _load_json(IG_PERFORMANCE_LOG_PATH, [])
+    log.append(template)
+    _save_json(IG_PERFORMANCE_LOG_PATH, log)
+    return {"status": "logged", "total_posts": len(log)}
+
+
+@router.get("/instagram/analyze")
+async def instagram_analyze_performance() -> dict:
+    """analyze_performance — data_confidence gate.
+
+    < 15 posts  → hypothesis mode: generate 3 testable hypotheses, tag posts
+    >= 15 posts → pattern_recognition mode: surface confirmed patterns
+    """
+    log: list[dict] = _load_json(IG_PERFORMANCE_LOG_PATH, [])
+    post_count = len(log)
+
+    if post_count < HYPOTHESIS_THRESHOLD:
+        mode = "hypothesis"
+        prompt = (
+            f"You have insufficient data for pattern recognition. "
+            f"Given these {post_count} posts, generate 3 testable hypotheses "
+            f"about what might drive saves/reach. "
+            f"Tag each post with which hypothesis it's testing. "
+            f"Flag when you have enough data to confirm or reject each one."
+        )
+        return {
+            "mode": mode,
+            "post_count": post_count,
+            "threshold": HYPOTHESIS_THRESHOLD,
+            "posts_until_pattern_mode": HYPOTHESIS_THRESHOLD - post_count,
+            "agent_prompt": prompt,
+            "posts": log,
+        }
+    else:
+        mode = "pattern_recognition"
+        saves_avg = (
+            sum(p.get("saves", 0) for p in log) / post_count if post_count else 0
+        )
+        reach_avg = (
+            sum(p.get("reach", 0) for p in log) / post_count if post_count else 0
+        )
+        top_by_saves = sorted(log, key=lambda p: p.get("saves", 0), reverse=True)[:3]
+        return {
+            "mode": mode,
+            "post_count": post_count,
+            "averages": {"saves": round(saves_avg, 2), "reach": round(reach_avg, 2)},
+            "top_posts_by_saves": top_by_saves,
+            "posts": log,
+        }
+
+
+@router.get("/instagram/performance/backfill")
+async def instagram_backfill_performance() -> dict:
+    """Attempt to backfill instagram_performance_log.json from the Graph API.
+
+    Reads post history for Instagram entries, fetches per-post insights,
+    and writes to the performance log. Requires INSTAGRAM_BUSINESS_ID and
+    META_PAGE_ACCESS_TOKEN to be set — returns a dry summary if credentials
+    are missing.
+    """
+    history: list[dict] = _load_json(POST_HISTORY_PATH, [])
+    ig_posts = [p for p in history if p.get("platform") == "instagram"]
+
+    if not ig_posts:
+        return {"status": "no_instagram_posts_in_history", "logged": 0}
+
+    ig_id = os.getenv("INSTAGRAM_BUSINESS_ID", "")
+    token = os.getenv("META_PAGE_ACCESS_TOKEN", "")
+    if not ig_id or not token:
+        return {
+            "status": "credentials_missing",
+            "detail": "INSTAGRAM_BUSINESS_ID and META_PAGE_ACCESS_TOKEN required",
+            "posts_found": len(ig_posts),
+            "logged": 0,
+        }
+
+    log: list[dict] = _load_json(IG_PERFORMANCE_LOG_PATH, [])
+    existing_ids = {e["post_id"] for e in log}
+    added = 0
+
+    async with httpx.AsyncClient(timeout=30) as client:
+        for post in ig_posts:
+            post_id = post.get("post_id")
+            if not post_id or post_id in existing_ids:
+                continue
+
+            # Fetch per-post insights
+            resp = await client.get(
+                f"{META_GRAPH_BASE}/{post_id}/insights",
+                params={
+                    "metric": "impressions,reach,likes,comments,shares,saved",
+                    "access_token": token,
+                },
+            )
+            raw = resp.json()
+            if "error" in raw:
+                continue  # skip on error, don't halt full backfill
+
+            metrics: dict[str, int] = {
+                m["name"]: m.get("values", [{}])[0].get("value", 0)
+                for m in raw.get("data", [])
+            }
+
+            entry: dict[str, Any] = {
+                "post_id": post_id,
+                "type": post.get("type", "UNKNOWN"),
+                "topic": "UNKNOWN",
+                "hook": "UNKNOWN",
+                "posted_at": post.get("posted_at", "UNKNOWN"),
+                "views": metrics.get("impressions", 0),
+                "saves": metrics.get("saved", 0),
+                "comments": metrics.get("comments", 0),
+                "follows": 0,  # Graph API does not expose per-post follows
+                "reach": metrics.get("reach", 0),
+                "source_breakdown": {"feed_pct": 0, "profile_pct": 0},
+                "hypotheses_tested": [],
+            }
+            log.append(entry)
+            existing_ids.add(post_id)
+            added += 1
+
+    if added:
+        _save_json(IG_PERFORMANCE_LOG_PATH, log)
+
+    return {"status": "ok", "posts_found": len(ig_posts), "logged": added}
 
 
 # ---------------------------------------------------------------------------

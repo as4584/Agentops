@@ -63,6 +63,31 @@ DUPLICATE_POST: code 506
   → modify content (change caption or timing), then retry
 ```
 
+## analyze_performance — data_confidence gate
+
+```python
+if post_count < 15:
+    mode = "hypothesis"
+    prompt = """
+    You have insufficient data for pattern recognition.
+    Given these {N} posts, generate 3 testable hypotheses
+    about what might drive saves/reach.
+    Tag each post with which hypothesis it's testing.
+    Flag when you have enough data to confirm or reject each one.
+    """
+else:
+    mode = "pattern_recognition"
+```
+
+**Endpoint:** `GET /social/instagram/analyze`
+- Returns `mode`, `post_count`, and `agent_prompt` (hypothesis mode) or `averages` + `top_posts_by_saves` (pattern mode)
+- Threshold: 15 posts (defined as `HYPOTHESIS_THRESHOLD` in route)
+
+**Performance log:** `backend/memory/social_media/instagram_performance_log.json`
+- Append via `POST /social/instagram/performance/log`
+- Backfill from history via `GET /social/instagram/performance/backfill`
+- Schema: `post_id`, `type`, `topic`, `hook`, `posted_at`, `views`, `saves`, `comments`, `follows`, `reach`, `source_breakdown`, `hypotheses_tested`
+
 ## Memory Namespace
 This skill writes to `backend/memory/social_media/`:
 - `post_queue.json` — scheduled posts waiting to publish
