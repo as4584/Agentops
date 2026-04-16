@@ -468,6 +468,54 @@ def get_tool_definition(name: str) -> ToolDefinition | None:
     return TOOL_REGISTRY.get(name)
 
 
+def to_openai_schema(tool: ToolDefinition) -> dict[str, Any]:
+    """
+    Convert a ToolDefinition to an OpenAI-compatible tool spec dict.
+
+    If the tool has a ``parameters`` JSON Schema attached, that schema is used
+    directly. Otherwise a permissive catch-all object schema is emitted so
+    the spec remains valid for any OpenAI-compatible endpoint.
+
+    Returns a dict matching the OpenAI ``tools`` array entry format::
+
+        {
+            "type": "function",
+            "function": {
+                "name": "...",
+                "description": "...",
+                "parameters": { ... },
+            }
+        }
+    """
+    parameters: dict[str, Any] = tool.parameters or {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": True,
+    }
+    return {
+        "type": "function",
+        "function": {
+            "name": tool.name,
+            "description": tool.description,
+            "parameters": parameters,
+        },
+    }
+
+
+def tools_to_openai_schemas(tool_names: list[str]) -> list[dict[str, Any]]:
+    """
+    Convert a list of tool names to OpenAI tool spec dicts.
+
+    Silently skips any name not found in TOOL_REGISTRY.
+    """
+    schemas: list[dict[str, Any]] = []
+    for name in tool_names:
+        defn = TOOL_REGISTRY.get(name)
+        if defn is not None:
+            schemas.append(to_openai_schema(defn))
+    return schemas
+
+
 # ---------------------------------------------------------------------------
 # safe_shell — Whitelisted command execution
 # ---------------------------------------------------------------------------

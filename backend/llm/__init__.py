@@ -240,6 +240,106 @@ class OllamaClient:
             logger.error(f"Failed to list models: {e}")
             return []
 
+    async def chat_with_schema(
+        self,
+        messages: list[dict[str, Any]],
+        schema: dict[str, Any],
+        temperature: float = 0.2,
+        max_tokens: int = 2048,
+        max_retries: int = 2,
+    ) -> dict[str, Any]:
+        """
+        Schema-constrained chat generation for local Ollama models.
+
+        Uses Ollama's native JSON format mode combined with a schema description
+        injected into the system prompt. On parse failure, retries up to
+        ``max_retries`` times before raising.
+
+        Args:
+            messages:    OpenAI-style message list (role/content dicts).
+            schema:      JSON Schema object the response must conform to.
+            temperature: Sampling temperature (low default for determinism).
+            max_tokens:  Maximum output tokens.
+            max_retries: Number of additional attempts on JSON parse failure.
+
+        Returns:
+            Parsed dict conforming to the provided schema.
+
+        Raises:
+            ValueError:  If the model fails to produce valid JSON after retries.
+            ConnectionError: If Ollama is unreachable.
+        """
+        import json as _json
+
+        schema_hint = _json.dumps(schema, indent=2)
+        schema_injection = (
+            "You MUST respond with valid JSON that matches this schema exactly. "
+            "Do not include any text outside the JSON object.\n\n"
+            f"Schema:\n{schema_hint}"
+        )
+
+        # Prepend or merge schema hint into system message
+        patched_messages: list[dict[str, Any]] = []
+        has_system = False
+        for msg in messages:
+            if msg.get("role") == "system":
+                patched_messages.append(
+                    {"role": "system", "content": f"{msg['content']}\n\n{schema_injection}"}
+                )
+                has_system = True
+            else:
+                patched_messages.append(msg)
+        if not has_system:
+            patched_messages = [{"role": "system", "content": schema_injection}, *patched_messages]
+
+        payload: dict[str, Any] = {
+            "model": self.model,
+            "messages": patched_messages,
+            "stream": False,
+            "format": "json",
+            "options": {
+                "temperature": temperature,
+                "num_predict": max_tokens,
+            },
+        }
+
+        last_error: Exception | None = None
+        for attempt in range(max_retries + 1):
+            try:
+                response = await self._client.post(
+                    f"{self.base_url}/api/chat",
+                    json=payload,
+                )
+                response.raise_for_status()
+                data = response.json()
+                raw_text = data.get("message", {}).get("content", "")
+                parsed = _json.loads(raw_text)
+                logger.info(
+                    f"chat_with_schema: model={self.model} attempt={attempt + 1} success"
+                )
+                return parsed
+            except _json.JSONDecodeError as exc:
+                last_error = exc
+                logger.warning(
+                    f"chat_with_schema: JSON parse failure attempt={attempt + 1}: {exc}"
+                )
+                continue
+            except httpx.ConnectError:
+                error_msg = (
+                    f"Cannot connect to Ollama at {self.base_url}. Ensure Ollama is running."
+                )
+                logger.error(error_msg)
+                raise ConnectionError(error_msg)
+            except httpx.HTTPStatusError as exc:
+                error_msg = f"Ollama HTTP error: {exc.response.status_code} — {exc.response.text}"
+                logger.error(error_msg)
+                raise RuntimeError(error_msg)
+
+        raise ValueError(
+            f"chat_with_schema: failed to produce valid JSON after {max_retries + 1} attempts. "
+            f"Last error: {last_error}"
+        )
+
     async def close(self) -> None:
         """Close the HTTP client."""
         await self._client.aclose()

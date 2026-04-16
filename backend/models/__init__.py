@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -93,6 +93,17 @@ class ToolDefinition(BaseModel):
     description: str = Field(..., description="Tool purpose")
     modification_type: ModificationType = Field(..., description="Impact classification")
     requires_doc_update: bool = Field(default=False, description="Whether tool requires doc update")
+    # Sprint 1: schema-first additions
+    parameters: dict[str, Any] | None = Field(
+        default=None,
+        description="JSON Schema object describing the tool's input parameters",
+    )
+    timeout_seconds: int = Field(default=30, description="Maximum execution time in seconds")
+    idempotent: bool = Field(default=False, description="True if re-running with same args is safe")
+    side_effects: list[str] = Field(
+        default_factory=list,
+        description="Human-readable list of external side effects (e.g. 'writes to disk', 'sends HTTP request')",
+    )
 
 
 class ToolExecutionRecord(BaseModel):
@@ -107,6 +118,102 @@ class ToolExecutionRecord(BaseModel):
     success: bool = True
     error: str | None = None
     doc_updated: bool = False
+
+
+# ---------------------------------------------------------------------------
+# Sprint 1 — Typed runtime contracts
+# ---------------------------------------------------------------------------
+
+
+class ToolCall(BaseModel):
+    """A single structured tool invocation within an agent turn."""
+
+    id: str = Field(..., description="Unique call ID (e.g. uuid4 hex)")
+    name: str = Field(..., description="Tool name from TOOL_REGISTRY")
+    arguments: dict[str, Any] = Field(default_factory=dict, description="Parsed tool arguments")
+    result: Any | None = Field(default=None, description="Execution result once available")
+    error: str | None = Field(default=None, description="Error message if execution failed")
+    duration_ms: float | None = Field(default=None, description="Wall-clock execution time")
+
+
+class AgentTurn(BaseModel):
+    """One reasoning step produced by an agent in the ReAct loop."""
+
+    turn_id: str = Field(..., description="Unique turn ID")
+    role: Literal["planner", "executor", "validator"] = Field(
+        ..., description="Which sub-role produced this turn"
+    )
+    model_id: str = Field(..., description="Model that generated this turn")
+    content: str = Field(..., description="Raw LLM output for this turn")
+    tool_calls: list[ToolCall] = Field(
+        default_factory=list, description="Structured tool calls parsed from this turn"
+    )
+    observations: list[str] = Field(
+        default_factory=list, description="Tool execution results observed after this turn"
+    )
+    is_final: bool = Field(default=False, description="True when the agent signals task complete")
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ExecutionPlan(BaseModel):
+    """A structured plan produced by the planner sub-role before executor runs."""
+
+    goal: str = Field(..., description="Original task goal")
+    steps: list[str] = Field(default_factory=list, description="Ordered list of execution steps")
+    required_tools: list[str] = Field(
+        default_factory=list, description="Tools the executor will need"
+    )
+    risk_level: ChangeImpactLevel = Field(
+        default=ChangeImpactLevel.LOW, description="Risk of the planned actions"
+    )
+    model_role_hints: dict[str, str] = Field(
+        default_factory=dict,
+        description="Suggested model IDs keyed by role (e.g. executor, validator)",
+    )
+    rejected_alternatives: list[str] = Field(
+        default_factory=list, description="Approaches considered but rejected"
+    )
+
+
+class ValidationReport(BaseModel):
+    """Validator sub-role output assessing an execution result."""
+
+    passed: bool = Field(..., description="True if the result meets acceptance criteria")
+    score: float = Field(
+        default=0.0, ge=0.0, le=1.0, description="Quality score 0–1"
+    )
+    issues: list[str] = Field(default_factory=list, description="Identified problems")
+    recommendations: list[str] = Field(
+        default_factory=list, description="Suggested improvements"
+    )
+    requires_retry: bool = Field(
+        default=False, description="True if the executor should retry"
+    )
+    retry_hint: str = Field(
+        default="", description="Guidance for the retry attempt"
+    )
+
+
+class ModelRolePolicy(BaseModel):
+    """Maps agent execution roles to preferred model IDs."""
+
+    router: str = Field(default="qwen2.5:3b", description="Fast classification / intent routing")
+    planner: str = Field(default="kimi-k2", description="Task decomposition and plan generation")
+    code_planner: str = Field(
+        default="qwen3-coder:free", description="Code-task plan generation"
+    )
+    executor: str = Field(
+        default="qwen2.5-coder:7b", description="Tool-calling execution (local first)"
+    )
+    validator_routine: str = Field(
+        default="llama3.2", description="Routine output validation"
+    )
+    validator_high_risk: str = Field(
+        default="deepseek-r1:free", description="High-risk / architectural validation"
+    )
+    retrieval_rewrite: str = Field(
+        default="llama3.2:1b", description="Query rewriting for RAG retrieval"
+    )
 
 
 # ---------------------------------------------------------------------------
