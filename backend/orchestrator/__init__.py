@@ -710,6 +710,121 @@ class AgentOrchestrator:
                 matched.append(message)
         return matched
 
+    def list_agent_inbox(self, agent_id: str, limit: int = 50) -> list[dict[str, Any]]:
+        """Return messages addressed *to* ``agent_id`` (unfiltered by ack status).
+
+        Results are ordered oldest-first.  Callers can check the ``acked``
+        field of ``A2ADispatchResult`` events in shared_events for processed status.
+        """
+        events = memory_store.get_shared_events(limit=max(limit * 5, 200))
+        inbox: list[dict[str, Any]] = []
+        for event in events:
+            if not isinstance(event, dict):
+                continue
+            if event.get("type") != "A2A_MESSAGE":
+                continue
+            message = event.get("message")
+            if not isinstance(message, dict):
+                continue
+            if message.get("to_agent") == agent_id:
+                inbox.append(message)
+        return inbox[-limit:]
+
+    async def dispatch_a2a_message(
+        self,
+        from_agent: str,
+        to_agent: str,
+        purpose: str,
+        payload: dict[str, Any],
+        depth: int = 0,
+        thread_id: str | None = None,
+        message_id: str | None = None,
+    ) -> "A2ADispatchResult":  # type: ignore[name-defined]
+        """Persist an A2A envelope **and** actually execute it on the target agent.
+
+        This is the high-fidelity dispatch path.  It:
+        1. Validates and persists the envelope via ``send_agent_message()``
+        2. Calls ``process_message()`` on the target agent with the payload text
+        3. Persists an ``A2A_ACK`` event to shared_events
+        4. Returns an :class:`~backend.models.A2ADispatchResult` with full timing
+
+        On execution failure the result has ``acked=False`` and ``error`` set;
+        the envelope is still persisted so callers can retry.
+        """
+        from datetime import UTC, datetime
+
+        from backend.models import A2ADispatchResult
+
+        t0 = datetime.now(UTC)
+        # 1. Validate + persist envelope (raises ValueError on bad args)
+        envelope = self.send_agent_message(
+            from_agent=from_agent,
+            to_agent=to_agent,
+            purpose=purpose,
+            payload=payload,
+            depth=depth,
+            thread_id=thread_id,
+            message_id=message_id,
+        )
+        resolved_message_id: str = envelope["message_id"]
+        resolved_thread_id: str = envelope["thread_id"]
+
+        # 2. Build the message text from payload or purpose
+        message_text: str = str(payload.get("message", payload.get("text", purpose)))
+
+        # 3. Execute on target agent
+        error_msg: str | None = None
+        response_text = ""
+        try:
+            result = await self.process_message(
+                agent_id=to_agent,
+                message=message_text,
+                context={
+                    "a2a": True,
+                    "from_agent": from_agent,
+                    "thread_id": resolved_thread_id,
+                    "depth": depth,
+                },
+            )
+            response_text = result.get("response", "")
+        except Exception as exc:
+            error_msg = f"dispatch execution error: {exc}"
+            logger.error(
+                "A2A dispatch failed",
+                event_type="a2a_dispatch_error",
+                message_id=resolved_message_id,
+                error=str(exc),
+            )
+
+        # 4. Record ack event
+        ack_at = datetime.now(UTC).isoformat()
+        duration_ms = (datetime.now(UTC) - t0).total_seconds() * 1000
+        memory_store.append_shared_event(
+            {
+                "type": "A2A_ACK",
+                "message_id": resolved_message_id,
+                "thread_id": resolved_thread_id,
+                "from_agent": from_agent,
+                "to_agent": to_agent,
+                "acked": error_msg is None,
+                "ack_at": ack_at,
+                "error": error_msg,
+                "duration_ms": round(duration_ms, 2),
+            }
+        )
+
+        return A2ADispatchResult(
+            message_id=resolved_message_id,
+            thread_id=resolved_thread_id,
+            from_agent=from_agent,
+            to_agent=to_agent,
+            response=response_text,
+            acked=error_msg is None,
+            ack_at=ack_at if error_msg is None else None,
+            error=error_msg,
+            duration_ms=round(duration_ms, 2),
+        )
+
     async def reindex_knowledge(self) -> dict[str, Any]:
         """Force rebuild the local vector DB and return index stats."""
         stats = await self._knowledge_store.rebuild_index()

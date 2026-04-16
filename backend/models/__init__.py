@@ -473,3 +473,28 @@ class EmbeddingConfig(BaseModel):
         """Build from the central config module values."""
         from backend.config import QDRANT_DEFAULT_DIM, QDRANT_EMBED_MODEL
         return cls(model=QDRANT_EMBED_MODEL, dim=QDRANT_DEFAULT_DIM)
+
+
+# ---------------------------------------------------------------------------
+# Sprint 3 — A2A Dispatch Contract
+# ---------------------------------------------------------------------------
+
+
+class A2ADispatchResult(BaseModel):
+    """Result of a dispatched agent-to-agent message.
+
+    Returned by ``AgentOrchestrator.dispatch_a2a_message()``.  On success
+    ``acked`` is ``True`` and ``response`` contains the target agent's reply.
+    On failure ``acked`` is ``False`` and ``error`` explains why.
+    """
+
+    message_id: str = Field(..., description="Envelope message ID")
+    thread_id: str = Field(..., description="Thread ID the message belongs to")
+    from_agent: str = Field(..., description="Sender agent ID")
+    to_agent: str = Field(..., description="Receiver agent ID")
+    response: str = Field(default="", description="Target agent's response text")
+    acked: bool = Field(default=False, description="True when target agent processed the message")
+    ack_at: str | None = Field(default=None, description="ISO-8601 timestamp of acknowledgment")
+    error: str | None = Field(default=None, description="Error message if dispatch failed")
+    retry_count: int = Field(default=0, ge=0, description="Number of delivery attempts so far")
+    duration_ms: float = Field(default=0.0, ge=0.0, description="Round-trip dispatch latency in ms")
