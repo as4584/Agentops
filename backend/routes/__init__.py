@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def register_all_routes(app: "FastAPI", gateway_enabled: bool = False) -> None:
+def register_all_routes(app: FastAPI, gateway_enabled: bool = False) -> None:
     """Register all Agentop route modules with the FastAPI application.
 
     Extracted from ``backend.server`` (Sprint 6) so that route wiring is
@@ -19,8 +19,10 @@ def register_all_routes(app: "FastAPI", gateway_enabled: bool = False) -> None:
         gateway_enabled: When True, include the OpenAI-compatible gateway
             and admin routers (controlled by ``GATEWAY_ENABLED`` config).
     """
+    from backend.orchestrator.openclaw_bridge import router as openclaw_router
     from backend.routes.a2ui import router as a2ui_router
-    from backend.routes.agent_control import a2a_router, router as agent_control_router
+    from backend.routes.agent_control import a2a_router
+    from backend.routes.agent_control import router as agent_control_router
     from backend.routes.agent_factory import router as agent_factory_router
     from backend.routes.auth_oauth import router as auth_oauth_router
     from backend.routes.content_pipeline import router as content_pipeline_router
@@ -47,7 +49,6 @@ def register_all_routes(app: "FastAPI", gateway_enabled: bool = False) -> None:
     from backend.routes.task_management import router as task_management_router
     from backend.routes.webgen_builder import router as webgen_builder_router
     from backend.routes.webhooks import router as webhooks_router
-    from backend.orchestrator.openclaw_bridge import router as openclaw_router
 
     app.include_router(agent_control_router)
     app.include_router(a2a_router)
@@ -86,4 +87,3 @@ def register_all_routes(app: "FastAPI", gateway_enabled: bool = False) -> None:
 
         app.include_router(gateway_router)
         app.include_router(gateway_admin_router)
-

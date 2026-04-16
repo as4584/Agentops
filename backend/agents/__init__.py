@@ -64,9 +64,11 @@ def _gitnexus_usable() -> bool:
     """
     try:
         from backend.mcp.gitnexus_health import get_gitnexus_health  # local to avoid circular
+
         return get_gitnexus_health().usable
     except Exception:
         return False
+
 
 # ---------------------------------------------------------------------------
 # Base Agent Class
@@ -124,6 +126,7 @@ class BaseAgent:
         if self._context_assembler is None:
             try:
                 from backend.knowledge.context_assembler import ContextAssembler
+
                 self._context_assembler = ContextAssembler(self.llm)
             except Exception as exc:
                 logger.warning(f"ContextAssembler init failed: {exc}")
@@ -426,14 +429,12 @@ class BaseAgent:
                             "role": "system",
                             "content": (
                                 f"Execution plan:\nGoal: {plan.goal}\n"
-                                + "\n".join(f"  {i+1}. {s}" for i, s in enumerate(plan.steps))
+                                + "\n".join(f"  {i + 1}. {s}" for i, s in enumerate(plan.steps))
                                 + f"\nRisk: {plan.risk_level.value}"
                             ),
                         }
                     )
-                    logger.info(
-                        f"Agent {self.agent_id} plan: {len(plan.steps)} steps, risk={plan.risk_level.value}"
-                    )
+                    logger.info(f"Agent {self.agent_id} plan: {len(plan.steps)} steps, risk={plan.risk_level.value}")
 
             for step in range(1, AGENT_MAX_STEPS + 1):
                 try:
@@ -454,7 +455,7 @@ class BaseAgent:
                             context=context,
                             turn_number=step,
                         )
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     logger.warning(
                         f"Agent {self.agent_id} step={step} timed out after "
                         f"{AGENT_STEP_TIMEOUT_SECONDS}s — aborting loop"
@@ -481,6 +482,7 @@ class BaseAgent:
                 # Execute tool calls declared in this turn
                 for tc in turn.tool_calls:
                     import time as _time
+
                     _t0 = _time.monotonic()
                     raw = await self._execute_tool(tc.name, tc.arguments)
                     _dur = (_time.monotonic() - _t0) * 1000
@@ -514,9 +516,7 @@ class BaseAgent:
                         }
                     )
 
-                self._conversation_history.append(
-                    {"role": "assistant", "content": turn.content}
-                )
+                self._conversation_history.append({"role": "assistant", "content": turn.content})
 
                 logger.info(
                     f"Agent {self.agent_id} step={step}/{AGENT_MAX_STEPS} "
@@ -541,13 +541,10 @@ class BaseAgent:
                         f"{report.issues} — retry_hint: {report.retry_hint}"
                     )
                     response = (
-                        f"{response}\n\n[Validation note: {'; '.join(report.issues)}. "
-                        f"Suggestion: {report.retry_hint}]"
+                        f"{response}\n\n[Validation note: {'; '.join(report.issues)}. Suggestion: {report.retry_hint}]"
                     )
                 elif report:
-                    logger.info(
-                        f"Agent {self.agent_id} validator passed (score={report.score:.2f})"
-                    )
+                    logger.info(f"Agent {self.agent_id} validator passed (score={report.score:.2f})")
 
             # Sprint 4: async memory write (non-blocking) + Qdrant dual-write
             await memory_store.write_async(
@@ -615,10 +612,7 @@ class BaseAgent:
         obs_block = ""
         if observations:
             obs_text = "\n".join(observations)
-            obs_block = (
-                f"\n\nObservations so far:\n{obs_text}\n\n"
-                'If you have enough information, set "is_final": true.'
-            )
+            obs_block = f'\n\nObservations so far:\n{obs_text}\n\nIf you have enough information, set "is_final": true.'
 
         # Sprint 4: inject RAG context on turn 1
         rag_block = ""
@@ -645,10 +639,7 @@ class BaseAgent:
         messages: list[dict[str, Any]] = [{"role": "system", "content": system_prompt}]
         messages.extend(self._conversation_history[-10:])
         # First turn injects the user message into history if not already there
-        if turn_number == 1 and not any(
-            m.get("role") == "user" and m.get("content") == message
-            for m in messages
-        ):
+        if turn_number == 1 and not any(m.get("role") == "user" and m.get("content") == message for m in messages):
             messages.append({"role": "user", "content": message})
 
         turn_schema = {
@@ -679,9 +670,7 @@ class BaseAgent:
                 temperature=0.3,
             )
             if not isinstance(parsed, dict):
-                raise TypeError(
-                    f"chat_with_schema returned {type(parsed).__name__}, expected dict"
-                )
+                raise TypeError(f"chat_with_schema returned {type(parsed).__name__}, expected dict")
         except Exception as _schema_exc:
             # PR 3: Explicit degraded mode — schema generation failed.
             # Count and log so operators can observe this through /metrics.
@@ -704,16 +693,17 @@ class BaseAgent:
                 continue
             validation = self._tool_validator.validate(tc_name)
             if not validation.valid:
-                logger.warning(
-                    f"Agent {self.agent_id}: blocked tool call '{tc_name}': {validation.error_message}"
-                )
+                logger.warning(f"Agent {self.agent_id}: blocked tool call '{tc_name}': {validation.error_message}")
                 continue
             self._tool_call_sequence += 1
-            call_id = str(rc.get("id") or make_tool_call_id(
-                agent_id=self.agent_id,
-                tool_name=tc_name,
-                sequence=self._tool_call_sequence,
-            ))
+            call_id = str(
+                rc.get("id")
+                or make_tool_call_id(
+                    agent_id=self.agent_id,
+                    tool_name=tc_name,
+                    sequence=self._tool_call_sequence,
+                )
+            )
             typed_calls.append(
                 ToolCall(
                     id=call_id,
@@ -775,7 +765,8 @@ class BaseAgent:
                 f"GitNexus is available (repo: {GITNEXUS_REPO_NAME}). "
                 "For code-change tasks, add 'mcp_gitnexus_impact' as a required_tool and include "
                 "a step to assess blast-radius BEFORE any code modification steps.\n\n"
-                if GITNEXUS_ENABLED and is_code_task and _gitnexus_usable() else ""
+                if GITNEXUS_ENABLED and is_code_task and _gitnexus_usable()
+                else ""
             )
             + "Respond with a JSON plan. Keep steps concise and actionable."
         )
@@ -852,7 +843,11 @@ class BaseAgent:
 
         _risk_order = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
         plan_risk_idx = _risk_order.index(plan.risk_level.value) if plan.risk_level.value in _risk_order else 0
-        threshold_idx = _risk_order.index(AGENT_VALIDATOR_HIGH_RISK_THRESHOLD) if AGENT_VALIDATOR_HIGH_RISK_THRESHOLD in _risk_order else 2
+        threshold_idx = (
+            _risk_order.index(AGENT_VALIDATOR_HIGH_RISK_THRESHOLD)
+            if AGENT_VALIDATOR_HIGH_RISK_THRESHOLD in _risk_order
+            else 2
+        )
         role_key = "validator_high_risk" if plan_risk_idx >= threshold_idx else "validator_routine"
         preferred_model = DEFAULT_TASK_MODELS.get(role_key, self.llm.model)
 

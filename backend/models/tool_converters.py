@@ -17,7 +17,6 @@ from typing import Any
 
 from backend.models import ToolCall, ToolCallStatus, ToolResult
 
-
 # ---------------------------------------------------------------------------
 # Raw dict → ToolResult
 # ---------------------------------------------------------------------------
@@ -77,11 +76,7 @@ def tool_result_from_raw_dict(
 
     # --- Success: extract meaningful content, strip internal metadata ---
     stripped = {k: v for k, v in raw.items() if k not in ("_health",)}
-    content: Any = (
-        stripped.get("content")
-        or stripped.get("stdout")
-        or stripped
-    )
+    content: Any = stripped.get("content") or stripped.get("stdout") or stripped
 
     return ToolResult(
         call_id=call_id,

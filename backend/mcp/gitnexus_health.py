@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import shutil
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -57,8 +57,8 @@ def _compute_stale(last_analyzed_at: str, stale_hours: int) -> bool:
     if stale_hours <= 0 or not last_analyzed_at:
         return False
     try:
-        last = datetime.fromisoformat(last_analyzed_at.rstrip("Z")).replace(tzinfo=timezone.utc)
-        now = datetime.now(tz=timezone.utc)
+        last = datetime.fromisoformat(last_analyzed_at.rstrip("Z")).replace(tzinfo=UTC)
+        now = datetime.now(tz=UTC)
         age_hours = (now - last).total_seconds() / 3600
         return age_hours > stale_hours
     except (ValueError, OverflowError):

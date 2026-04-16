@@ -305,12 +305,8 @@ async def test_call_tool_cli_failure_returns_error(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-import importlib
-import json
-import tempfile
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from unittest.mock import patch
+import importlib  # noqa: E402
+from datetime import UTC, datetime, timedelta  # noqa: E402
 
 
 def _make_meta(
@@ -319,7 +315,7 @@ def _make_meta(
     embeddings: int = 0,
     hours_ago: float = 1.0,
 ) -> dict:
-    analyzed_at = (datetime.now(tz=timezone.utc) - timedelta(hours=hours_ago)).isoformat()
+    analyzed_at = (datetime.now(tz=UTC) - timedelta(hours=hours_ago)).isoformat()
     return {
         "analyzedAt": analyzed_at,
         "stats": {
@@ -333,6 +329,7 @@ def _make_meta(
 class TestGitNexusHealth:
     def _get_health(self, **patch_cfg):
         import backend.mcp.gitnexus_health as gh
+
         importlib.reload(gh)
         for k, v in patch_cfg.items():
             setattr(gh, k, v)
@@ -340,6 +337,7 @@ class TestGitNexusHealth:
 
     def test_disabled_returns_disabled_state(self):
         from backend.mcp import gitnexus_health as gh
+
         with patch.object(gh, "GITNEXUS_ENABLED", False):
             state = gh.get_gitnexus_health()
         assert state.enabled is False
@@ -348,8 +346,8 @@ class TestGitNexusHealth:
 
     def test_missing_meta_returns_index_not_found(self, tmp_path):
         from backend.mcp import gitnexus_health as gh
-        with patch.object(gh, "GITNEXUS_ENABLED", True), \
-             patch.object(gh, "_META_PATH", tmp_path / "nonexistent.json"):
+
+        with patch.object(gh, "GITNEXUS_ENABLED", True), patch.object(gh, "_META_PATH", tmp_path / "nonexistent.json"):
             state = gh.get_gitnexus_health()
         assert state.enabled is True
         assert state.index_exists is False
@@ -358,40 +356,46 @@ class TestGitNexusHealth:
 
     def test_malformed_meta_returns_index_not_found(self, tmp_path):
         from backend.mcp import gitnexus_health as gh
+
         bad_file = tmp_path / "meta.json"
         bad_file.write_text("{ not valid json }", encoding="utf-8")
-        with patch.object(gh, "GITNEXUS_ENABLED", True), \
-             patch.object(gh, "_META_PATH", bad_file):
+        with patch.object(gh, "GITNEXUS_ENABLED", True), patch.object(gh, "_META_PATH", bad_file):
             state = gh.get_gitnexus_health()
         assert state.index_exists is False
 
     def test_meta_non_object_returns_not_found(self, tmp_path):
         from backend.mcp import gitnexus_health as gh
+
         bad_file = tmp_path / "meta.json"
         bad_file.write_text("[1, 2, 3]", encoding="utf-8")
-        with patch.object(gh, "GITNEXUS_ENABLED", True), \
-             patch.object(gh, "_META_PATH", bad_file):
+        with patch.object(gh, "GITNEXUS_ENABLED", True), patch.object(gh, "_META_PATH", bad_file):
             state = gh.get_gitnexus_health()
         assert state.index_exists is False
 
     def test_fresh_meta_is_not_stale(self, tmp_path):
         from backend.mcp import gitnexus_health as gh
+
         meta_file = tmp_path / "meta.json"
         meta_file.write_text(json.dumps(_make_meta(hours_ago=0.5)), encoding="utf-8")
-        with patch.object(gh, "GITNEXUS_ENABLED", True), \
-             patch.object(gh, "_META_PATH", meta_file), \
-             patch.object(gh, "GITNEXUS_STALE_HOURS", 24):
+        with (
+            patch.object(gh, "GITNEXUS_ENABLED", True),
+            patch.object(gh, "_META_PATH", meta_file),
+            patch.object(gh, "GITNEXUS_STALE_HOURS", 24),
+        ):
             state = gh.get_gitnexus_health()
         assert state.index_exists is True
         assert state.stale is False
 
     def test_old_meta_is_stale(self, tmp_path):
         from backend.mcp import gitnexus_health as gh
+
         meta_file = tmp_path / "meta.json"
         meta_file.write_text(json.dumps(_make_meta(hours_ago=30.0)), encoding="utf-8")
-        with patch.object(gh, "GITNEXUS_ENABLED", True), \
-             patch.object(gh, "_META_PATH", meta_file), \
-             patch.object(gh, "GITNEXUS_STALE_HOURS", 24):
+        with (
+            patch.object(gh, "GITNEXUS_ENABLED", True),
+            patch.object(gh, "_META_PATH", meta_file),
+            patch.object(gh, "GITNEXUS_STALE_HOURS", 24),
+        ):
             state = gh.get_gitnexus_health()
         assert state.stale is True
         assert state.usable is False
@@ -399,45 +403,57 @@ class TestGitNexusHealth:
 
     def test_zero_stale_hours_never_stale(self, tmp_path):
         from backend.mcp import gitnexus_health as gh
+
         meta_file = tmp_path / "meta.json"
         meta_file.write_text(json.dumps(_make_meta(hours_ago=9999.0)), encoding="utf-8")
-        with patch.object(gh, "GITNEXUS_ENABLED", True), \
-             patch.object(gh, "_META_PATH", meta_file), \
-             patch.object(gh, "GITNEXUS_STALE_HOURS", 0):
+        with (
+            patch.object(gh, "GITNEXUS_ENABLED", True),
+            patch.object(gh, "_META_PATH", meta_file),
+            patch.object(gh, "GITNEXUS_STALE_HOURS", 0),
+        ):
             state = gh.get_gitnexus_health()
         assert state.stale is False
 
     def test_symbol_and_relationship_counts_populated(self, tmp_path):
         from backend.mcp import gitnexus_health as gh
+
         meta_file = tmp_path / "meta.json"
         meta_file.write_text(json.dumps(_make_meta(symbols=100, relationships=200)), encoding="utf-8")
-        with patch.object(gh, "GITNEXUS_ENABLED", True), \
-             patch.object(gh, "_META_PATH", meta_file), \
-             patch.object(gh, "GITNEXUS_STALE_HOURS", 0):
+        with (
+            patch.object(gh, "GITNEXUS_ENABLED", True),
+            patch.object(gh, "_META_PATH", meta_file),
+            patch.object(gh, "GITNEXUS_STALE_HOURS", 0),
+        ):
             state = gh.get_gitnexus_health()
         assert state.symbol_count == 100
         assert state.relationship_count == 200
 
     def test_zero_embeddings_state(self, tmp_path):
         from backend.mcp import gitnexus_health as gh
+
         meta_file = tmp_path / "meta.json"
         meta_file.write_text(json.dumps(_make_meta(embeddings=0)), encoding="utf-8")
-        with patch.object(gh, "GITNEXUS_ENABLED", True), \
-             patch.object(gh, "_META_PATH", meta_file), \
-             patch.object(gh, "GITNEXUS_STALE_HOURS", 0), \
-             patch.object(gh, "GITNEXUS_EXPECT_EMBEDDINGS", True):
+        with (
+            patch.object(gh, "GITNEXUS_ENABLED", True),
+            patch.object(gh, "_META_PATH", meta_file),
+            patch.object(gh, "GITNEXUS_STALE_HOURS", 0),
+            patch.object(gh, "GITNEXUS_EXPECT_EMBEDDINGS", True),
+        ):
             state = gh.get_gitnexus_health()
         assert state.embeddings_present is False
         assert "embeddings" in state.reason.lower()
 
     def test_embeddings_present_state(self, tmp_path):
         from backend.mcp import gitnexus_health as gh
+
         meta_file = tmp_path / "meta.json"
         meta_file.write_text(json.dumps(_make_meta(embeddings=5000)), encoding="utf-8")
-        with patch.object(gh, "GITNEXUS_ENABLED", True), \
-             patch.object(gh, "_META_PATH", meta_file), \
-             patch.object(gh, "GITNEXUS_STALE_HOURS", 0), \
-             patch.object(gh, "GITNEXUS_EXPECT_EMBEDDINGS", True):
+        with (
+            patch.object(gh, "GITNEXUS_ENABLED", True),
+            patch.object(gh, "_META_PATH", meta_file),
+            patch.object(gh, "GITNEXUS_STALE_HOURS", 0),
+            patch.object(gh, "GITNEXUS_EXPECT_EMBEDDINGS", True),
+        ):
             state = gh.get_gitnexus_health()
         assert state.embeddings_present is True
         assert "embeddings" not in state.reason.lower()

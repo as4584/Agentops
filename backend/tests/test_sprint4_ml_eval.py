@@ -16,11 +16,9 @@ PR coverage:
 from __future__ import annotations
 
 import json
-import tempfile
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
-
 
 # ---------------------------------------------------------------------------
 # PR1 — GoldenEvalReport + ROUTING_ACCURACY_THRESHOLD
@@ -111,7 +109,7 @@ class TestEvaluateRouting:
         assert abs(report.routing_accuracy - 0.5) < 0.01
 
     def test_zero_accuracy_below_threshold_adds_recommendation(self) -> None:
-        from backend.ml.learning_lab import LearningLab, ROUTING_ACCURACY_THRESHOLD
+        from backend.ml.learning_lab import ROUTING_ACCURACY_THRESHOLD, LearningLab
 
         lab = LearningLab()
         golden = [
@@ -166,8 +164,18 @@ class TestEvaluateRouting:
 
         lab = LearningLab()
         golden = [
-            {"task_id": "b1", "expected_agent": "monitor_agent", "difficulty": "hard", "boundary": "monitor_agent<>it_agent"},
-            {"task_id": "b2", "expected_agent": "it_agent", "difficulty": "hard", "boundary": "monitor_agent<>it_agent"},
+            {
+                "task_id": "b1",
+                "expected_agent": "monitor_agent",
+                "difficulty": "hard",
+                "boundary": "monitor_agent<>it_agent",
+            },
+            {
+                "task_id": "b2",
+                "expected_agent": "it_agent",
+                "difficulty": "hard",
+                "boundary": "monitor_agent<>it_agent",
+            },
         ]
         predictions = [
             {"task_id": "b1", "predicted_agent": "monitor_agent"},  # correct
@@ -196,9 +204,6 @@ class TestSeedGoldenEvalSet:
     def test_seed_returns_count(self, tmp_path: Path) -> None:
         from backend.ml.learning_lab import LearningLab
 
-        lab = LearningLab()
-        # Override golden path for isolation
-        golden_path = tmp_path / "golden_eval_set.jsonl"
         with patch("backend.ml.learning_lab.PROJECT_ROOT", tmp_path):
             (tmp_path / "data" / "training").mkdir(parents=True, exist_ok=True)
             lab2 = LearningLab()
@@ -218,13 +223,19 @@ class TestSeedGoldenEvalSet:
 
             def _add(task_id, user_message, expected_agent, difficulty="medium", boundary="", **kw) -> dict[str, Any]:  # type: ignore[override]
                 p = tmp_path / "data" / "training" / "golden_eval_set.jsonl"
-                task = {"task_id": task_id, "user_message": user_message, "expected_agent": expected_agent, "difficulty": difficulty, "boundary": boundary}
+                task = {
+                    "task_id": task_id,
+                    "user_message": user_message,
+                    "expected_agent": expected_agent,
+                    "difficulty": difficulty,
+                    "boundary": boundary,
+                }
                 with p.open("a") as f:
                     f.write(json.dumps(task) + "\n")
                 return task
 
             lab2.list_golden_tasks = _list  # type: ignore[method-assign]
-            lab2.add_golden_task = _add  # type: ignore[method-assign]
+            lab2.add_golden_task = _add  # type: ignore[method-assign, assignment]
 
             count = lab2.seed_golden_eval_set()
             assert count > 0
@@ -247,7 +258,7 @@ class TestSeedGoldenEvalSet:
             return task
 
         lab.list_golden_tasks = _list  # type: ignore[method-assign]
-        lab.add_golden_task = _add  # type: ignore[method-assign]
+        lab.add_golden_task = _add  # type: ignore[method-assign, assignment]
 
         count1 = lab.seed_golden_eval_set()
         count2 = lab.seed_golden_eval_set()
@@ -264,7 +275,14 @@ class TestSeedGoldenEvalSet:
         tasks_added: list[dict[str, Any]] = []
 
         lab.list_golden_tasks = lambda: tasks_added  # type: ignore[method-assign]
-        lab.add_golden_task = lambda task_id, user_message, expected_agent, difficulty="medium", boundary="", **kw: tasks_added.append({"task_id": task_id, "expected_agent": expected_agent, "difficulty": difficulty}) or tasks_added[-1]  # type: ignore[method-assign]
+
+        def _add_redline(
+            task_id, user_message, expected_agent, difficulty="medium", boundary="", **kw
+        ) -> dict[str, Any]:  # type: ignore[override]
+            tasks_added.append({"task_id": task_id, "expected_agent": expected_agent, "difficulty": difficulty})
+            return tasks_added[-1]
+
+        lab.add_golden_task = _add_redline  # type: ignore[method-assign, assignment]
 
         lab.seed_golden_eval_set()
         blocked = [t for t in tasks_added if t.get("expected_agent") == "BLOCKED"]
@@ -280,7 +298,20 @@ class TestSeedGoldenEvalSet:
         tasks_added: list[dict[str, Any]] = []
 
         lab.list_golden_tasks = lambda: tasks_added  # type: ignore[method-assign]
-        lab.add_golden_task = lambda task_id, user_message, expected_agent, difficulty="medium", boundary="", **kw: tasks_added.append({"task_id": task_id, "expected_agent": expected_agent, "difficulty": difficulty, "boundary": boundary}) or tasks_added[-1]  # type: ignore[method-assign]
+
+        def _add_boundary(
+            task_id, user_message, expected_agent, difficulty="medium", boundary="", **kw
+        ) -> dict[str, Any]:  # type: ignore[override]
+            task = {
+                "task_id": task_id,
+                "expected_agent": expected_agent,
+                "difficulty": difficulty,
+                "boundary": boundary,
+            }
+            tasks_added.append(task)
+            return task
+
+        lab.add_golden_task = _add_boundary  # type: ignore[method-assign, assignment]
 
         lab.seed_golden_eval_set()
         boundary_tasks = [t for t in tasks_added if t.get("boundary")]
@@ -304,7 +335,7 @@ class TestRoutingEvalFromFile:
             {"task_id": "t1", "predicted_agent": "devops_agent"},
             {"task_id": "t2", "predicted_agent": "monitor_agent"},
         ]
-        predictions_file.write_text("\n".join(json.dumps(l) for l in lines))
+        predictions_file.write_text("\n".join(json.dumps(item) for item in lines))
 
         golden = [
             {"task_id": "t1", "expected_agent": "devops_agent", "difficulty": "easy"},
@@ -332,9 +363,7 @@ class TestRoutingEvalFromFile:
 
         # Create a live_routing file
         log_file = tmp_path / "live_routing_20260416_120000.jsonl"
-        log_file.write_text(
-            json.dumps({"task_id": "t1", "chosen_agent": "devops_agent"}) + "\n"
-        )
+        log_file.write_text(json.dumps({"task_id": "t1", "chosen_agent": "devops_agent"}) + "\n")
 
         golden = [{"task_id": "t1", "expected_agent": "devops_agent", "difficulty": "easy"}]
         lab.list_golden_tasks = lambda: golden  # type: ignore[method-assign]
@@ -399,7 +428,7 @@ class TestHealthReportWithAccuracy:
 
 class TestCIAccuracyGate:
     def test_failing_accuracy_produces_recommendation(self) -> None:
-        from backend.ml.learning_lab import LearningLab, ROUTING_ACCURACY_THRESHOLD
+        from backend.ml.learning_lab import ROUTING_ACCURACY_THRESHOLD, LearningLab
 
         lab = LearningLab()
         golden = [
@@ -418,7 +447,7 @@ class TestCIAccuracyGate:
         assert len(report.recommendations) > 0
 
     def test_passing_accuracy_no_threshold_recommendation(self) -> None:
-        from backend.ml.learning_lab import LearningLab, ROUTING_ACCURACY_THRESHOLD
+        from backend.ml.learning_lab import LearningLab
 
         lab = LearningLab()
         # Use a very low threshold to guarantee pass

@@ -16,15 +16,12 @@ Run:
 from __future__ import annotations
 
 import json
-import os
 import sqlite3
-import tempfile
 import threading
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 
 # ===========================================================================
 # PR 1 — Typed Embedding Config + Startup Validation
@@ -454,7 +451,7 @@ class TestTaskTrackerDurability:
 
     def test_task_persisted_to_sqlite(self, tmp_path: Path) -> None:
         """create_task() + complete_task() must write to SQLite."""
-        from backend.tasks import TaskTracker, TaskStatus
+        from backend.tasks import TaskStatus, TaskTracker
 
         db = tmp_path / "tasks.db"
         tracker = TaskTracker(db_path=db)
@@ -470,7 +467,7 @@ class TestTaskTrackerDurability:
 
     def test_failed_task_persisted_to_sqlite(self, tmp_path: Path) -> None:
         """fail_task() must persist FAILED status to SQLite."""
-        from backend.tasks import TaskTracker, TaskStatus
+        from backend.tasks import TaskStatus, TaskTracker
 
         db = tmp_path / "tasks.db"
         tracker = TaskTracker(db_path=db)
@@ -502,7 +499,7 @@ class TestTaskTrackerDurability:
 
     def test_task_status_restored_correctly(self, tmp_path: Path) -> None:
         """Status (COMPLETED / FAILED) must be correctly restored after restart."""
-        from backend.tasks import TaskTracker, TaskStatus
+        from backend.tasks import TaskStatus, TaskTracker
 
         db = tmp_path / "tasks.db"
         tracker1 = TaskTracker(db_path=db)

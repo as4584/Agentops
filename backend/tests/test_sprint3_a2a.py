@@ -20,7 +20,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -28,7 +27,6 @@ import pytest
 
 def _make_orchestrator() -> Any:
     """Build a minimal orchestrator with mocked LLM and agents."""
-    from unittest.mock import MagicMock
 
     from backend.orchestrator import AgentOrchestrator
 
@@ -173,21 +171,24 @@ class TestDispatchA2AExecution:
         orch = _make_orchestrator()
 
         async def _run() -> None:
-            with patch.object(
-                orch,
-                "send_agent_message",
-                return_value={
-                    "message_id": "msg_exec_001",
-                    "thread_id": "thread_exec_001",
-                    "from_agent": "devops_agent",
-                    "to_agent": "monitor_agent",
-                },
-            ), patch.object(
-                orch,
-                "process_message",
-                new_callable=AsyncMock,
-                return_value={"response": "health ok", "error": None},
-            ) as mock_pm:
+            with (
+                patch.object(
+                    orch,
+                    "send_agent_message",
+                    return_value={
+                        "message_id": "msg_exec_001",
+                        "thread_id": "thread_exec_001",
+                        "from_agent": "devops_agent",
+                        "to_agent": "monitor_agent",
+                    },
+                ),
+                patch.object(
+                    orch,
+                    "process_message",
+                    new_callable=AsyncMock,
+                    return_value={"response": "health ok", "error": None},
+                ) as mock_pm,
+            ):
                 result = await orch.dispatch_a2a_message(
                     from_agent="devops_agent",
                     to_agent="monitor_agent",
@@ -204,20 +205,23 @@ class TestDispatchA2AExecution:
         orch = _make_orchestrator()
 
         async def _run() -> None:
-            with patch.object(
-                orch,
-                "send_agent_message",
-                return_value={
-                    "message_id": "msg_ack_001",
-                    "thread_id": "thread_ack_001",
-                    "from_agent": "devops_agent",
-                    "to_agent": "monitor_agent",
-                },
-            ), patch.object(
-                orch,
-                "process_message",
-                new_callable=AsyncMock,
-                return_value={"response": "pong", "error": None},
+            with (
+                patch.object(
+                    orch,
+                    "send_agent_message",
+                    return_value={
+                        "message_id": "msg_ack_001",
+                        "thread_id": "thread_ack_001",
+                        "from_agent": "devops_agent",
+                        "to_agent": "monitor_agent",
+                    },
+                ),
+                patch.object(
+                    orch,
+                    "process_message",
+                    new_callable=AsyncMock,
+                    return_value={"response": "pong", "error": None},
+                ),
             ):
                 result = await orch.dispatch_a2a_message(
                     from_agent="devops_agent",
@@ -234,20 +238,23 @@ class TestDispatchA2AExecution:
         orch = _make_orchestrator()
 
         async def _run() -> Any:
-            with patch.object(
-                orch,
-                "send_agent_message",
-                return_value={
-                    "message_id": "msg_dur_001",
-                    "thread_id": "thread_dur_001",
-                    "from_agent": "devops_agent",
-                    "to_agent": "monitor_agent",
-                },
-            ), patch.object(
-                orch,
-                "process_message",
-                new_callable=AsyncMock,
-                return_value={"response": "ok"},
+            with (
+                patch.object(
+                    orch,
+                    "send_agent_message",
+                    return_value={
+                        "message_id": "msg_dur_001",
+                        "thread_id": "thread_dur_001",
+                        "from_agent": "devops_agent",
+                        "to_agent": "monitor_agent",
+                    },
+                ),
+                patch.object(
+                    orch,
+                    "process_message",
+                    new_callable=AsyncMock,
+                    return_value={"response": "ok"},
+                ),
             ):
                 return await orch.dispatch_a2a_message(
                     from_agent="devops_agent",
@@ -267,20 +274,23 @@ class TestDispatchA2AExecution:
         mid = f"msg_ack_persist_{uuid.uuid4().hex[:8]}"
 
         async def _run() -> None:
-            with patch.object(
-                orch,
-                "send_agent_message",
-                return_value={
-                    "message_id": mid,
-                    "thread_id": "thread_ack_persist",
-                    "from_agent": "devops_agent",
-                    "to_agent": "monitor_agent",
-                },
-            ), patch.object(
-                orch,
-                "process_message",
-                new_callable=AsyncMock,
-                return_value={"response": "persisted ok"},
+            with (
+                patch.object(
+                    orch,
+                    "send_agent_message",
+                    return_value={
+                        "message_id": mid,
+                        "thread_id": "thread_ack_persist",
+                        "from_agent": "devops_agent",
+                        "to_agent": "monitor_agent",
+                    },
+                ),
+                patch.object(
+                    orch,
+                    "process_message",
+                    new_callable=AsyncMock,
+                    return_value={"response": "persisted ok"},
+                ),
             ):
                 await orch.dispatch_a2a_message(
                     from_agent="devops_agent",
@@ -303,20 +313,23 @@ class TestDispatchA2AExecution:
         orch = _make_orchestrator()
 
         async def _run() -> Any:
-            with patch.object(
-                orch,
-                "send_agent_message",
-                return_value={
-                    "message_id": "msg_fail_001",
-                    "thread_id": "thread_fail_001",
-                    "from_agent": "devops_agent",
-                    "to_agent": "monitor_agent",
-                },
-            ), patch.object(
-                orch,
-                "process_message",
-                new_callable=AsyncMock,
-                side_effect=RuntimeError("agent exploded"),
+            with (
+                patch.object(
+                    orch,
+                    "send_agent_message",
+                    return_value={
+                        "message_id": "msg_fail_001",
+                        "thread_id": "thread_fail_001",
+                        "from_agent": "devops_agent",
+                        "to_agent": "monitor_agent",
+                    },
+                ),
+                patch.object(
+                    orch,
+                    "process_message",
+                    new_callable=AsyncMock,
+                    side_effect=RuntimeError("agent exploded"),
+                ),
             ):
                 return await orch.dispatch_a2a_message(
                     from_agent="devops_agent",
@@ -338,20 +351,23 @@ class TestDispatchA2AExecution:
         mid = f"msg_fail_persist_{uuid.uuid4().hex[:8]}"
 
         async def _run() -> None:
-            with patch.object(
-                orch,
-                "send_agent_message",
-                return_value={
-                    "message_id": mid,
-                    "thread_id": "thread_fail_persist",
-                    "from_agent": "devops_agent",
-                    "to_agent": "monitor_agent",
-                },
-            ), patch.object(
-                orch,
-                "process_message",
-                new_callable=AsyncMock,
-                side_effect=RuntimeError("boom"),
+            with (
+                patch.object(
+                    orch,
+                    "send_agent_message",
+                    return_value={
+                        "message_id": mid,
+                        "thread_id": "thread_fail_persist",
+                        "from_agent": "devops_agent",
+                        "to_agent": "monitor_agent",
+                    },
+                ),
+                patch.object(
+                    orch,
+                    "process_message",
+                    new_callable=AsyncMock,
+                    side_effect=RuntimeError("boom"),
+                ),
             ):
                 await orch.dispatch_a2a_message(
                     from_agent="devops_agent",
@@ -380,16 +396,19 @@ class TestDispatchA2AExecution:
             return {"response": "ok"}
 
         async def _run() -> None:
-            with patch.object(
-                orch,
-                "send_agent_message",
-                return_value={
-                    "message_id": "msg_ctx_001",
-                    "thread_id": "thread_ctx_001",
-                    "from_agent": "devops_agent",
-                    "to_agent": "monitor_agent",
-                },
-            ), patch.object(orch, "process_message", side_effect=_mock_pm):
+            with (
+                patch.object(
+                    orch,
+                    "send_agent_message",
+                    return_value={
+                        "message_id": "msg_ctx_001",
+                        "thread_id": "thread_ctx_001",
+                        "from_agent": "devops_agent",
+                        "to_agent": "monitor_agent",
+                    },
+                ),
+                patch.object(orch, "process_message", side_effect=_mock_pm),
+            ):
                 await orch.dispatch_a2a_message(
                     from_agent="devops_agent",
                     to_agent="monitor_agent",
@@ -413,7 +432,6 @@ class TestDispatchA2AExecution:
 class TestA2ADepthLimits:
     def test_depth_exceeded_raises_value_error(self) -> None:
         from backend.config import A2A_MAX_DEPTH
-        from backend.orchestrator import AgentOrchestrator
 
         orch = _make_orchestrator()
 
@@ -633,20 +651,23 @@ class TestA2AInboxRetrieval:
         orch = _make_orchestrator()
 
         async def _run() -> Any:
-            with patch.object(
-                orch,
-                "send_agent_message",
-                return_value={
-                    "message_id": "msg_type_check",
-                    "thread_id": "thread_type_check",
-                    "from_agent": "devops_agent",
-                    "to_agent": "monitor_agent",
-                },
-            ), patch.object(
-                orch,
-                "process_message",
-                new_callable=AsyncMock,
-                return_value={"response": "done"},
+            with (
+                patch.object(
+                    orch,
+                    "send_agent_message",
+                    return_value={
+                        "message_id": "msg_type_check",
+                        "thread_id": "thread_type_check",
+                        "from_agent": "devops_agent",
+                        "to_agent": "monitor_agent",
+                    },
+                ),
+                patch.object(
+                    orch,
+                    "process_message",
+                    new_callable=AsyncMock,
+                    return_value={"response": "done"},
+                ),
             ):
                 return await orch.dispatch_a2a_message(
                     from_agent="devops_agent",

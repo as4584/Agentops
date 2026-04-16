@@ -250,6 +250,7 @@ class MCPBridge:
         # so agents cannot hallucinate results from a stale or missing index.
         if server_name == "gitnexus":
             from backend.mcp.gitnexus_health import get_gitnexus_health  # local import avoids circular
+
             gn_state = get_gitnexus_health()
             if not gn_state.usable:
                 reason = gn_state.reason or "GitNexus is not usable (disabled, stale, or index missing)."

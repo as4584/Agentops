@@ -11,7 +11,7 @@ Tests the full set of health probes:
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -40,6 +40,7 @@ def client():
 # /health/live — must always return 200 with {status: alive}
 # ---------------------------------------------------------------------------
 
+
 class TestHealthLive:
     def test_returns_200(self, client):
         resp = client.get("/health/live")
@@ -53,6 +54,7 @@ class TestHealthLive:
         data = client.get("/health/live").json()
         assert "timestamp" in data
         from datetime import datetime
+
         datetime.fromisoformat(data["timestamp"])
 
     def test_no_auth_required(self, client):
@@ -64,6 +66,7 @@ class TestHealthLive:
 # ---------------------------------------------------------------------------
 # /health/ready — 503 when orchestrator absent, 200 when ready
 # ---------------------------------------------------------------------------
+
 
 class TestHealthReady:
     def test_returns_503_when_orchestrator_none(self, client):
@@ -111,6 +114,7 @@ class TestHealthReady:
 # /metrics — Prometheus-style metric export
 # ---------------------------------------------------------------------------
 
+
 class TestMetrics:
     def test_returns_200(self, client):
         resp = client.get("/metrics")
@@ -150,6 +154,7 @@ class TestMetrics:
 # /health — legacy composite endpoint still works
 # ---------------------------------------------------------------------------
 
+
 class TestHealthLegacy:
     def test_returns_200(self, client):
         resp = client.get("/health")
@@ -168,11 +173,13 @@ class TestHealthLegacy:
 # skip_auth_paths — all probe paths bypass auth
 # ---------------------------------------------------------------------------
 
+
 class TestAuthSkipPaths:
     """All health probes and /metrics must be in the auth skip list."""
 
     def test_live_in_skip_list(self):
         import backend.server as srv
+
         # Inspect the middleware dispatch function's declared skip set.
         # We do this by verifying the endpoints actually respond without auth.
         resp = TestClient(srv.app, raise_server_exceptions=False).get("/health/live")
@@ -180,10 +187,12 @@ class TestAuthSkipPaths:
 
     def test_ready_in_skip_list(self):
         import backend.server as srv
+
         resp = TestClient(srv.app, raise_server_exceptions=False).get("/health/ready")
         assert resp.status_code != 401
 
     def test_metrics_in_skip_list(self):
         import backend.server as srv
+
         resp = TestClient(srv.app, raise_server_exceptions=False).get("/metrics")
         assert resp.status_code != 401

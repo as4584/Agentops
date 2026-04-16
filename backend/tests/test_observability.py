@@ -19,6 +19,7 @@ from fastapi.testclient import TestClient
 @pytest.fixture(scope="module")
 def client():
     import backend.server as srv
+
     with TestClient(srv.app, raise_server_exceptions=False) as c:
         yield c
 
@@ -76,12 +77,14 @@ class TestCurrentTraceId:
 
     def test_returns_string(self):
         from backend.server import current_trace_id
+
         result = current_trace_id()
         assert isinstance(result, str)
 
     def test_returns_empty_outside_request(self):
         """Outside a live request, ContextVar default is empty string."""
         from backend.server import current_trace_id
+
         result = current_trace_id()
         # In a test context there is no active request, so default is used.
         assert result == ""

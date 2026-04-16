@@ -18,6 +18,7 @@ from fastapi.testclient import TestClient
 @pytest.fixture(scope="module")
 def client():
     import backend.server as srv
+
     with TestClient(srv.app, raise_server_exceptions=False) as c:
         yield c
 
@@ -26,20 +27,24 @@ def client():
 # Operator-only mode invariants
 # ---------------------------------------------------------------------------
 
+
 class TestOperatorOnlyMode:
     """Deployment mode must be operator_only. No public SaaS mode."""
 
     def test_deployment_mode_is_operator_only(self):
         from backend.config import AGENTOP_DEPLOYMENT_MODE
+
         assert AGENTOP_DEPLOYMENT_MODE == "operator_only"
 
     def test_supported_modes_contains_only_operator_only(self):
         from backend.config import _SUPPORTED_DEPLOYMENT_MODES
+
         assert _SUPPORTED_DEPLOYMENT_MODES == frozenset({"operator_only"})
 
     def test_validate_config_clean_in_default_env(self):
         """Validate config must return no errors in default operator environment."""
         from backend.config import validate_config
+
         # In default env (loopback host / no strict auth required),
         # config validation must return an empty list.
         errors = validate_config()
@@ -52,6 +57,7 @@ class TestOperatorOnlyMode:
 # ---------------------------------------------------------------------------
 # Health probe accessibility without auth
 # ---------------------------------------------------------------------------
+
 
 class TestHealthProbeAccessibility:
     """All k8s-style probes must be reachable without an API token."""
@@ -77,6 +83,7 @@ class TestHealthProbeAccessibility:
 # Protected routes require auth (when API_SECRET is set)
 # ---------------------------------------------------------------------------
 
+
 class TestProtectedRoutesRequireAuth:
     """Chat and mutation routes must require auth when API_SECRET is configured."""
 
@@ -100,20 +107,24 @@ class TestProtectedRoutesRequireAuth:
 # CORS configuration sanity
 # ---------------------------------------------------------------------------
 
+
 class TestCORSConfiguration:
     """CORS origins must come from config, not be wildcard in operator mode."""
 
     def test_cors_origins_is_list(self):
         from backend.config import CORS_ORIGINS
+
         assert isinstance(CORS_ORIGINS, list)
 
     def test_cors_origins_not_empty(self):
         from backend.config import CORS_ORIGINS
+
         assert len(CORS_ORIGINS) > 0
 
     def test_cors_origins_no_pure_wildcard_by_default(self):
         """Wildcard CORS ('*') without an API secret is unsafe in operator mode."""
-        from backend.config import CORS_ORIGINS, API_SECRET
+        from backend.config import API_SECRET, CORS_ORIGINS
+
         # If wildcard is present and secret is blank, that's risky but permitted
         # on loopback (config validator already checks this). Just verify we don't
         # ship '*' alone when there's no auth at all.
@@ -128,11 +139,13 @@ class TestCORSConfiguration:
 # Degraded dependency resilience
 # ---------------------------------------------------------------------------
 
+
 class TestDegradedDependencyResilience:
     """When external deps are unavailable, the API must return structured error envelopes."""
 
     def test_health_deps_returns_structured_response_when_ollama_absent(self, client):
-        from unittest.mock import AsyncMock, patch
+        from unittest.mock import AsyncMock
+
         import backend.server as srv
 
         original_client = srv._llm_client
@@ -154,6 +167,7 @@ class TestDegradedDependencyResilience:
 
     def test_health_deps_degraded_when_gitnexus_enabled_but_broken(self, client):
         from unittest.mock import patch
+
         from backend.mcp import gitnexus_health as gh
         from backend.models import GitNexusHealthState
 
@@ -172,6 +186,7 @@ class TestDegradedDependencyResilience:
 
     def test_health_deps_ok_when_gitnexus_disabled(self, client):
         from unittest.mock import patch
+
         from backend.mcp import gitnexus_health as gh
         from backend.models import GitNexusHealthState
 
@@ -186,15 +201,16 @@ class TestDegradedDependencyResilience:
     def test_mcp_tool_call_fails_gracefully_when_gitnexus_unavailable(self):
         """GitNexus MCP tool calls must return an error envelope, not raise."""
         from unittest.mock import patch
-        from backend.mcp import mcp_bridge, gitnexus_health as gh
+
+        from backend.mcp import gitnexus_health as gh
+        from backend.mcp import mcp_bridge
         from backend.models import GitNexusHealthState
 
         broken = GitNexusHealthState(enabled=True, index_exists=False, reason="index missing")
         with patch.object(gh, "get_gitnexus_health", return_value=broken):
             import asyncio
-            result = asyncio.run(
-                mcp_bridge.call_tool("mcp_gitnexus_query", "test_agent", {"query": "auth flow"})
-            )
+
+            result = asyncio.run(mcp_bridge.call_tool("mcp_gitnexus_query", "test_agent", {"query": "auth flow"}))
         assert result["success"] is False
         assert "GitNexus" in result.get("error", "") or "unavailable" in result.get("error", "").lower()
 
@@ -203,19 +219,23 @@ class TestDegradedDependencyResilience:
 # GitNexus protocol parity
 # ---------------------------------------------------------------------------
 
+
 class TestGitNexusProtocolParity:
     """GitNexus tool set in TOOL_REGISTRY == declared set in MCP_TOOL_MAP."""
 
-    CANONICAL = frozenset({
-        "mcp_gitnexus_query",
-        "mcp_gitnexus_context",
-        "mcp_gitnexus_impact",
-        "mcp_gitnexus_detect_changes",
-        "mcp_gitnexus_list_repos",
-    })
+    CANONICAL = frozenset(
+        {
+            "mcp_gitnexus_query",
+            "mcp_gitnexus_context",
+            "mcp_gitnexus_impact",
+            "mcp_gitnexus_detect_changes",
+            "mcp_gitnexus_list_repos",
+        }
+    )
 
     def test_tool_registry_has_all_canonical_gitnexus_tools(self):
         from backend.tools import TOOL_REGISTRY
+
         registered = frozenset(k for k in TOOL_REGISTRY if k.startswith("mcp_gitnexus_"))
         assert registered == self.CANONICAL, (
             f"Registry mismatch. Extra: {registered - self.CANONICAL}, Missing: {self.CANONICAL - registered}"
@@ -223,6 +243,7 @@ class TestGitNexusProtocolParity:
 
     def test_mcp_tool_map_has_all_canonical_gitnexus_tools(self):
         from backend.mcp import MCP_TOOL_MAP
+
         in_map = frozenset(k for k, v in MCP_TOOL_MAP.items() if v[0] == "gitnexus")
         assert in_map == self.CANONICAL, (
             f"MCP_TOOL_MAP mismatch. Extra: {in_map - self.CANONICAL}, Missing: {self.CANONICAL - in_map}"
@@ -230,6 +251,7 @@ class TestGitNexusProtocolParity:
 
     def test_agent_permissions_match_canonical_for_approved_agents(self):
         from backend.agents import ALL_AGENT_DEFINITIONS
+
         approved = frozenset({"code_review_agent", "devops_agent", "security_agent"})
         # At minimum each approved agent has at least one canonical tool
         for agent_id in approved:
@@ -243,11 +265,17 @@ class TestGitNexusProtocolParity:
 
     def test_inventory_gitnexus_tools_match_canonical(self):
         """Runtime inventory output must also match the canonical set."""
-        import subprocess, sys, json
+        import json
+        import subprocess
+        import sys
         from pathlib import Path
+
         result = subprocess.run(
             [sys.executable, "scripts/generate_runtime_inventory.py", "--stdout"],
-            capture_output=True, text=True, cwd=str(Path(__file__).resolve().parent.parent.parent), timeout=30
+            capture_output=True,
+            text=True,
+            cwd=str(Path(__file__).resolve().parent.parent.parent),
+            timeout=30,
         )
         assert result.returncode == 0
         inv = json.loads(result.stdout)

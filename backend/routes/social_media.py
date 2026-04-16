@@ -583,12 +583,8 @@ async def instagram_analyze_performance() -> dict:
         }
     else:
         mode = "pattern_recognition"
-        saves_avg = (
-            sum(p.get("saves", 0) for p in log) / post_count if post_count else 0
-        )
-        reach_avg = (
-            sum(p.get("reach", 0) for p in log) / post_count if post_count else 0
-        )
+        saves_avg = sum(p.get("saves", 0) for p in log) / post_count if post_count else 0
+        reach_avg = sum(p.get("reach", 0) for p in log) / post_count if post_count else 0
         top_by_saves = sorted(log, key=lambda p: p.get("saves", 0), reverse=True)[:3]
         return {
             "mode": mode,
@@ -646,10 +642,7 @@ async def instagram_backfill_performance() -> dict:
             if "error" in raw:
                 continue  # skip on error, don't halt full backfill
 
-            metrics: dict[str, int] = {
-                m["name"]: m.get("values", [{}])[0].get("value", 0)
-                for m in raw.get("data", [])
-            }
+            metrics: dict[str, int] = {m["name"]: m.get("values", [{}])[0].get("value", 0) for m in raw.get("data", [])}
 
             entry: dict[str, Any] = {
                 "post_id": post_id,

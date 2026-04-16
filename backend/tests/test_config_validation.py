@@ -13,8 +13,6 @@ from __future__ import annotations
 import importlib
 from unittest.mock import patch
 
-import pytest
-
 import backend.config as cfg
 
 

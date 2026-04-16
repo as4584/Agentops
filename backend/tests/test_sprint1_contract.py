@@ -30,7 +30,6 @@ from backend.models.tool_converters import (
     tool_schema_to_ollama,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -127,9 +126,7 @@ class TestToolResultModel:
     def test_duration_ms_optional(self):
         r = ToolResult(call_id="c6", tool_name="t", status=ToolCallStatus.SUCCESS)
         assert r.duration_ms is None
-        r2 = ToolResult(
-            call_id="c7", tool_name="t", status=ToolCallStatus.SUCCESS, duration_ms=42.5
-        )
+        r2 = ToolResult(call_id="c7", tool_name="t", status=ToolCallStatus.SUCCESS, duration_ms=42.5)
         assert r2.duration_ms == 42.5
 
 
@@ -302,9 +299,7 @@ class TestOllamaConverters:
 
 class TestToolResultToToolMessage:
     def test_success_message(self):
-        r = ToolResult(
-            call_id="c1", tool_name="safe_shell", status=ToolCallStatus.SUCCESS, content="output"
-        )
+        r = ToolResult(call_id="c1", tool_name="safe_shell", status=ToolCallStatus.SUCCESS, content="output")
         msg = tool_result_to_tool_message(r)
         assert msg["role"] == "tool"
         assert msg["tool_call_id"] == "c1"
@@ -402,10 +397,6 @@ class TestV2RuntimeToolResult:
             is_final=True,
         )
 
-        captured_tc: list[ToolCall] = []
-
-        original_execute = agent._execute_tool
-
         async def capture_and_error(tool_name, kwargs):
             return {"error": "command not allowed"}
 
@@ -475,11 +466,7 @@ class TestExplicitDegradedBehavior:
         agent = self._make_agent()
         before = BaseAgent._degraded_count
 
-        from backend.models import AgentTurn
-
-        agent.llm.chat_with_schema = AsyncMock(
-            return_value={"content": "all good", "tool_calls": [], "is_final": True}
-        )
+        agent.llm.chat_with_schema = AsyncMock(return_value={"content": "all good", "tool_calls": [], "is_final": True})
 
         await agent.process_message_v2("hello")
         assert BaseAgent._degraded_count == before
@@ -578,9 +565,7 @@ class TestOllamaAdapterToolParity:
                 "message": {
                     "role": "assistant",
                     "content": "",
-                    "tool_calls": [
-                        {"function": {"name": "safe_shell", "arguments": {"cmd": "pwd"}}}
-                    ],
+                    "tool_calls": [{"function": {"name": "safe_shell", "arguments": {"cmd": "pwd"}}}],
                 },
                 "done_reason": "tool_calls",
                 "prompt_eval_count": 5,

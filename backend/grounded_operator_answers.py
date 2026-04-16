@@ -60,9 +60,8 @@ def detect_grounded_chat_query(message: str) -> str | None:
     ):
         return "gitnexus_fail_closed"
 
-    if (
-        _contains_any(text, ("first v2 agent step", "v2 agent step", "v2 step"))
-        and _contains_any(text, ("times out", "timed out", "timeout"))
+    if _contains_any(text, ("first v2 agent step", "v2 agent step", "v2 step")) and _contains_any(
+        text, ("times out", "timed out", "timeout")
     ):
         return "v2_timeout_fallback"
 
@@ -146,23 +145,19 @@ def _format_dependency_health_reply(snapshot: dict[str, Any]) -> str:
 
     if gitnexus_detail.get("enabled"):
         lines.append(
-            (
-                f"- GitNexus: {_status_label(gitnexus.get('ok'))} - "
-                f"usable={gitnexus_detail.get('usable')}, index_exists={gitnexus_detail.get('index_exists')}, "
-                f"transport_available={gitnexus_detail.get('transport_available')}, "
-                f"stale={gitnexus_detail.get('stale')}."
-                f"{gitnexus_reason_suffix}"
-            )
+            f"- GitNexus: {_status_label(gitnexus.get('ok'))} - "
+            f"usable={gitnexus_detail.get('usable')}, index_exists={gitnexus_detail.get('index_exists')}, "
+            f"transport_available={gitnexus_detail.get('transport_available')}, "
+            f"stale={gitnexus_detail.get('stale')}."
+            f"{gitnexus_reason_suffix}"
         )
     else:
         lines.append(
-            (
-                f"- GitNexus: DISABLED - usable={gitnexus_detail.get('usable')}, "
-                f"index_exists={gitnexus_detail.get('index_exists')}, "
-                f"transport_available={gitnexus_detail.get('transport_available')}. "
-                "backend/server.py treats disabled GitNexus as non-degraded platform health."
-                f"{gitnexus_reason_suffix}"
-            )
+            f"- GitNexus: DISABLED - usable={gitnexus_detail.get('usable')}, "
+            f"index_exists={gitnexus_detail.get('index_exists')}, "
+            f"transport_available={gitnexus_detail.get('transport_available')}. "
+            "backend/server.py treats disabled GitNexus as non-degraded platform health."
+            f"{gitnexus_reason_suffix}"
         )
 
     return "\n".join(lines)

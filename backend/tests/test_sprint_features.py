@@ -28,10 +28,10 @@ from backend.mcp import MCP_TOOL_MAP
 from backend.memory import memory_store
 from backend.tools import TOOL_REGISTRY
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def make_agent(agent_id: str = "code_review_agent") -> BaseAgent:
     mock_llm = AsyncMock()
@@ -76,7 +76,7 @@ class TestContextAssembler:
         ca = ContextAssembler(mock_llm)
         # Patch VectorStore.search to raise and fallback to return empty
         with patch.object(ca._store, "search", side_effect=RuntimeError("qdrant down")):
-            with patch.object(ca, "_fallback_retrieve", return_value="") as fb:
+            with patch.object(ca, "_fallback_retrieve", return_value=""):
                 result = await ca.retrieve("test query", agent_id="code_review_agent")
         assert isinstance(result, str)
 
@@ -155,18 +155,14 @@ class TestGitNexusAgentPermissions:
     )
     @pytest.mark.parametrize("tool_name", GN_TOOLS)
     def test_agent_has_gitnexus_permission(self, agent_def, tool_name):
-        assert tool_name in agent_def.tool_permissions, (
-            f"{agent_def.agent_id} missing tool_permission: {tool_name}"
-        )
+        assert tool_name in agent_def.tool_permissions, f"{agent_def.agent_id} missing tool_permission: {tool_name}"
 
     def test_monitor_agent_does_not_have_gitnexus(self):
         from backend.agents import ALL_AGENT_DEFINITIONS
 
         monitor = ALL_AGENT_DEFINITIONS["monitor_agent"]
         for t in GN_TOOLS:
-            assert t not in monitor.tool_permissions, (
-                f"monitor_agent should NOT have {t}"
-            )
+            assert t not in monitor.tool_permissions, f"monitor_agent should NOT have {t}"
 
 
 # ===========================================================================
@@ -197,6 +193,7 @@ class TestStepTimeout:
             with patch.object(agent, "_executor_turn", side_effect=_slow_turn):
                 with patch.object(agent, "_planner_turn", return_value=None):
                     import backend.agents as _m
+
                     orig = _m.AGENT_PLANNER_ENABLED
                     _m.AGENT_PLANNER_ENABLED = False
                     response = await agent.process_message_v2("do something")
@@ -229,10 +226,7 @@ class TestLegacyDeprecationWarning:
                 with caplog.at_level(logging.WARNING, logger="backend.agents"):
                     await agent._handle_tool_calls(fake_response)
 
-        assert any(
-            "legacy [TOOL:...]" in r.message or "legacy" in r.message.lower()
-            for r in caplog.records
-        )
+        assert any("legacy [TOOL:...]" in r.message or "legacy" in r.message.lower() for r in caplog.records)
 
     @pytest.mark.asyncio
     async def test_legacy_warning_only_once_per_agent(self, caplog):
@@ -247,13 +241,9 @@ class TestLegacyDeprecationWarning:
                 mock_val.return_value = MagicMock(valid=True)
                 with caplog.at_level(logging.WARNING, logger="backend.agents"):
                     await agent._handle_tool_calls(fake_response)
-                    warning_count_1 = sum(
-                        1 for r in caplog.records if "legacy" in r.message.lower()
-                    )
+                    warning_count_1 = sum(1 for r in caplog.records if "legacy" in r.message.lower())
                     await agent._handle_tool_calls(fake_response)
-                    warning_count_2 = sum(
-                        1 for r in caplog.records if "legacy" in r.message.lower()
-                    )
+                    warning_count_2 = sum(1 for r in caplog.records if "legacy" in r.message.lower())
 
         # Second call must not add another warning
         assert warning_count_1 == warning_count_2
@@ -301,11 +291,13 @@ class TestAgentGitNexusDiscoverability:
 
     def test_gitnexus_usable_returns_bool(self):
         from backend.agents import _gitnexus_usable
+
         result = _gitnexus_usable()
         assert isinstance(result, bool)
 
     def test_gitnexus_usable_false_when_disabled(self):
         from unittest.mock import patch
+
         from backend.agents import _gitnexus_usable
         from backend.mcp import gitnexus_health as gh
         from backend.models import GitNexusHealthState
@@ -317,8 +309,10 @@ class TestAgentGitNexusDiscoverability:
 
     def test_gitnexus_usable_safe_on_import_error(self):
         """_gitnexus_usable() must never raise — return False on any error."""
-        from backend.agents import _gitnexus_usable
         from unittest.mock import patch
+
+        from backend.agents import _gitnexus_usable
+
         with patch("backend.mcp.gitnexus_health.get_gitnexus_health", side_effect=Exception("boom")):
             result = _gitnexus_usable()
         assert result is False

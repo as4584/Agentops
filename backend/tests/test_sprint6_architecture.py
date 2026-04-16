@@ -12,13 +12,10 @@ from __future__ import annotations
 
 import inspect
 import re
-import textwrap
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import FastAPI
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -79,8 +76,7 @@ class TestRouteRegistration:
     def test_register_all_routes_returns_none(self, fresh_app: FastAPI) -> None:
         from backend.routes import register_all_routes
 
-        result = register_all_routes(fresh_app)
-        assert result is None
+        register_all_routes(fresh_app)  # return type is None
 
     def test_routes_added_to_app(self, fresh_app: FastAPI) -> None:
         from backend.routes import register_all_routes
@@ -187,16 +183,9 @@ class TestServerPyRefactor:
         """
         source = SERVER_PY.read_text()
         # Strip comments
-        lines = [
-            ln for ln in source.splitlines() if not ln.strip().startswith("#")
-        ]
-        body_calls = [
-            ln for ln in lines if re.search(r"^\s*app\.include_router\(", ln)
-        ]
-        assert body_calls == [], (
-            f"Found inline app.include_router() calls in server.py body:\n"
-            + "\n".join(body_calls)
-        )
+        lines = [ln for ln in source.splitlines() if not ln.strip().startswith("#")]
+        body_calls = [ln for ln in lines if re.search(r"^\s*app\.include_router\(", ln)]
+        assert body_calls == [], "Found inline app.include_router() calls in server.py body:\n" + "\n".join(body_calls)
 
     def test_server_py_imports_register_all_routes(self) -> None:
         source = SERVER_PY.read_text()

@@ -23,14 +23,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from backend.agents import create_agent, BaseAgent
-from backend.llm import OllamaClient
+from backend.agents import BaseAgent, create_agent
 from backend.knowledge.context_assembler import ContextAssembler
-
+from backend.llm import OllamaClient
 
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
+
 
 def make_llm() -> OllamaClient:
     return OllamaClient()
@@ -49,59 +49,72 @@ def stub_assembler() -> Any:
 
 
 # Canned schema responses the mock LLM returns for chat_with_schema calls.
-_EXECUTOR_FINAL = json.dumps({
-    "content": "Analysis complete. No issues found.",
-    "tool_calls": [],
-    "is_final": True,
-})
-
-_EXECUTOR_TOOL_THEN_FINAL = [
-    json.dumps({
-        "content": "I need to read the file first.",
-        "tool_calls": [{"id": "tc_1", "name": "file_reader", "arguments": {"path": "backend/config.py"}}],
-        "is_final": False,
-    }),
-    json.dumps({
-        "content": "File read. No secrets detected.",
+_EXECUTOR_FINAL = json.dumps(
+    {
+        "content": "Analysis complete. No issues found.",
         "tool_calls": [],
         "is_final": True,
-    }),
+    }
+)
+
+_EXECUTOR_TOOL_THEN_FINAL = [
+    json.dumps(
+        {
+            "content": "I need to read the file first.",
+            "tool_calls": [{"id": "tc_1", "name": "file_reader", "arguments": {"path": "backend/config.py"}}],
+            "is_final": False,
+        }
+    ),
+    json.dumps(
+        {
+            "content": "File read. No secrets detected.",
+            "tool_calls": [],
+            "is_final": True,
+        }
+    ),
 ]
 
-_PLAN_RESPONSE = json.dumps({
-    "goal": "Review recent code changes for architectural violations.",
-    "steps": [
-        "1. Read git diff to identify changed files.",
-        "2. Check each changed file against DRIFT_GUARD.md invariants.",
-        "3. Produce APPROVED / NEEDS_CHANGES / BLOCKED verdict.",
-    ],
-    "required_tools": ["git_ops", "file_reader"],
-    "risk_level": "LOW",
-    "rejected_alternatives": ["Run linter (not architectural)"],
-})
+_PLAN_RESPONSE = json.dumps(
+    {
+        "goal": "Review recent code changes for architectural violations.",
+        "steps": [
+            "1. Read git diff to identify changed files.",
+            "2. Check each changed file against DRIFT_GUARD.md invariants.",
+            "3. Produce APPROVED / NEEDS_CHANGES / BLOCKED verdict.",
+        ],
+        "required_tools": ["git_ops", "file_reader"],
+        "risk_level": "LOW",
+        "rejected_alternatives": ["Run linter (not architectural)"],
+    }
+)
 
-_VALIDATION_PASS = json.dumps({
-    "passed": True,
-    "score": 0.91,
-    "issues": [],
-    "recommendations": ["Add test coverage for changed paths."],
-    "requires_retry": False,
-    "retry_hint": "",
-})
+_VALIDATION_PASS = json.dumps(
+    {
+        "passed": True,
+        "score": 0.91,
+        "issues": [],
+        "recommendations": ["Add test coverage for changed paths."],
+        "requires_retry": False,
+        "retry_hint": "",
+    }
+)
 
-_VALIDATION_FAIL = json.dumps({
-    "passed": False,
-    "score": 0.42,
-    "issues": ["Response does not cite any invariant."],
-    "recommendations": ["Reference INV-* code in your verdict."],
-    "requires_retry": True,
-    "retry_hint": "Re-check DRIFT_GUARD.md and cite the relevant invariant.",
-})
+_VALIDATION_FAIL = json.dumps(
+    {
+        "passed": False,
+        "score": 0.42,
+        "issues": ["Response does not cite any invariant."],
+        "recommendations": ["Reference INV-* code in your verdict."],
+        "requires_retry": True,
+        "retry_hint": "Re-check DRIFT_GUARD.md and cite the relevant invariant.",
+    }
+)
 
 
 # ---------------------------------------------------------------------------
 # Fixture: patch feature flags ON for the duration of a test
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def flags_all_on(monkeypatch):
@@ -111,6 +124,7 @@ def flags_all_on(monkeypatch):
     """
     import backend.agents as _agents
     import backend.config as _cfg
+
     monkeypatch.setattr(_cfg, "AGENT_RUNTIME_V2", True)
     monkeypatch.setattr(_cfg, "AGENT_PLANNER_ENABLED", True)
     monkeypatch.setattr(_cfg, "GITNEXUS_ENABLED", True)
@@ -136,6 +150,7 @@ def flags_all_on(monkeypatch):
 # 1. Multi-step ReAct execution (AGENT_RUNTIME_V2=true)
 # ===========================================================================
 
+
 class TestReActLoop:
     """process_message_v2 should run the bounded think/act/observe loop."""
 
@@ -150,6 +165,7 @@ class TestReActLoop:
             return json.loads(next(responses))
 
         import backend.agents as _agents
+
         with patch.object(agent.llm, "chat_with_schema", side_effect=_schema_resp):
             with patch.object(_agents, "AGENT_PLANNER_ENABLED", False):
                 result = await agent.process_message_v2("Check for exposed secrets.")
@@ -169,6 +185,7 @@ class TestReActLoop:
         tool_result = {"content": "No secrets found in config.py"}
 
         import backend.agents as _agents
+
         with patch.object(agent.llm, "chat_with_schema", side_effect=_schema_resp):
             with patch.object(agent, "_execute_tool", return_value=tool_result):
                 with patch.object(_agents, "AGENT_PLANNER_ENABLED", False):
@@ -181,11 +198,13 @@ class TestReActLoop:
         """Loop must stop after AGENT_MAX_STEPS even if model never sets is_final."""
         import backend.agents as _agents
 
-        always_loop = json.dumps({
-            "content": "Still working...",
-            "tool_calls": [{"id": "tc_x", "name": "file_reader", "arguments": {"path": "x"}}],
-            "is_final": False,
-        })
+        always_loop = json.dumps(
+            {
+                "content": "Still working...",
+                "tool_calls": [{"id": "tc_x", "name": "file_reader", "arguments": {"path": "x"}}],
+                "is_final": False,
+            }
+        )
 
         agent = make_agent("security_agent")
         agent._context_assembler = stub_assembler()
@@ -233,6 +252,7 @@ class TestReActLoop:
             return json.loads(next(responses))
 
         import backend.agents as _agents
+
         with patch.object(agent.llm, "chat_with_schema", side_effect=_schema_resp):
             with patch.object(_agents, "AGENT_PLANNER_ENABLED", False):
                 await agent.process_message_v2("Quick check.")
@@ -246,6 +266,7 @@ class TestReActLoop:
 # ===========================================================================
 # 2. Planner → executor → validator flow
 # ===========================================================================
+
 
 class TestPlannerExecutorValidator:
     """Full PEV pipeline with mocked schema responses."""
@@ -307,7 +328,7 @@ class TestPlannerExecutorValidator:
     @pytest.mark.asyncio
     async def test_validator_pass_does_not_modify_response(self, flags_all_on):
         """When validator passes, the response text is unchanged."""
-        from backend.models import ExecutionPlan, ChangeImpactLevel
+        from backend.models import ChangeImpactLevel, ExecutionPlan
 
         agent = make_agent("code_review_agent")
         plan = ExecutionPlan(
@@ -336,7 +357,7 @@ class TestPlannerExecutorValidator:
     @pytest.mark.asyncio
     async def test_validator_fail_surfaces_retry_hint(self, flags_all_on):
         """When validator fails, ValidationReport.requires_retry is True and hint is set."""
-        from backend.models import ExecutionPlan, ChangeImpactLevel
+        from backend.models import ChangeImpactLevel, ExecutionPlan
 
         agent = make_agent("code_review_agent")
         plan = ExecutionPlan(
@@ -391,9 +412,7 @@ class TestPlannerExecutorValidator:
                 return json.loads(_VALIDATION_PASS)
 
         with patch.object(agent.llm, "chat_with_schema", side_effect=_ordered_schema):
-            result = await agent.process_message_v2(
-                "Review the latest diff for DRIFT_GUARD violations."
-            )
+            result = await agent.process_message_v2("Review the latest diff for DRIFT_GUARD violations.")
 
         assert isinstance(result, str)
         assert len(result) > 0
@@ -406,12 +425,14 @@ class TestPlannerExecutorValidator:
 # 3. GitNexus use in code_review_agent
 # ===========================================================================
 
+
 class TestGitNexusInCodeReview:
     """code_review_agent has GitNexus tools in its tool_permissions.
     When GITNEXUS_ENABLED=true the planner hints at blast-radius analysis."""
 
     def test_code_review_agent_has_all_gitnexus_permissions(self):
         from backend.agents import CODE_REVIEW_AGENT_DEFINITION
+
         gn_tools = [
             "mcp_gitnexus_query",
             "mcp_gitnexus_context",
@@ -420,13 +441,12 @@ class TestGitNexusInCodeReview:
             "mcp_gitnexus_list_repos",
         ]
         for t in gn_tools:
-            assert t in CODE_REVIEW_AGENT_DEFINITION.tool_permissions, (
-                f"code_review_agent missing: {t}"
-            )
+            assert t in CODE_REVIEW_AGENT_DEFINITION.tool_permissions, f"code_review_agent missing: {t}"
 
     def test_gitnexus_tools_are_readonly(self):
-        from backend.tools import TOOL_REGISTRY
         from backend.models import ModificationType
+        from backend.tools import TOOL_REGISTRY
+
         for name, td in TOOL_REGISTRY.items():
             if name.startswith("mcp_gitnexus_"):
                 assert td.modification_type == ModificationType.READ_ONLY, (
@@ -439,22 +459,29 @@ class TestGitNexusInCodeReview:
         agent = make_agent("monitor_agent")
         agent._context_assembler = stub_assembler()
 
-        turn_with_gitnexus = json.dumps({
-            "content": "Let me check blast radius.",
-            "tool_calls": [{"id": "tc_1", "name": "mcp_gitnexus_impact", "arguments": {"symbol": "process_message"}}],
-            "is_final": False,
-        })
-        fallback_final = json.dumps({
-            "content": "Done.",
-            "tool_calls": [],
-            "is_final": True,
-        })
+        turn_with_gitnexus = json.dumps(
+            {
+                "content": "Let me check blast radius.",
+                "tool_calls": [
+                    {"id": "tc_1", "name": "mcp_gitnexus_impact", "arguments": {"symbol": "process_message"}}
+                ],
+                "is_final": False,
+            }
+        )
+        fallback_final = json.dumps(
+            {
+                "content": "Done.",
+                "tool_calls": [],
+                "is_final": True,
+            }
+        )
         responses = iter([turn_with_gitnexus, fallback_final])
 
         async def _schema_resp(*a, **kw):
             return json.loads(next(responses, json.dumps({"content": "Done.", "tool_calls": [], "is_final": True})))
 
         import backend.agents as _agents
+
         executed_tools: list[str] = []
 
         async def _mock_execute(tool_name, args):
@@ -466,15 +493,13 @@ class TestGitNexusInCodeReview:
                 with patch.object(_agents, "AGENT_PLANNER_ENABLED", False):
                     await agent.process_message_v2("Check health metrics.")
 
-        assert "mcp_gitnexus_impact" not in executed_tools, (
-            "monitor_agent must not execute mcp_gitnexus_impact"
-        )
+        assert "mcp_gitnexus_impact" not in executed_tools, "monitor_agent must not execute mcp_gitnexus_impact"
 
     @pytest.mark.asyncio
     async def test_executor_allows_gitnexus_for_code_review_agent(self, flags_all_on):
         """code_review_agent CAN call mcp_gitnexus_impact — ToolValidator must allow it."""
-        from backend.utils.tool_validator import validator_for_agent
         from backend.agents import CODE_REVIEW_AGENT_DEFINITION
+        from backend.utils.tool_validator import validator_for_agent
 
         validator = validator_for_agent(CODE_REVIEW_AGENT_DEFINITION.tool_permissions)
         result = validator.validate("mcp_gitnexus_impact")
@@ -485,6 +510,7 @@ class TestGitNexusInCodeReview:
 # 4. Qdrant-backed retrieval affecting agent context
 # ===========================================================================
 
+
 class TestQdrantRetrieval:
     """ContextAssembler with in-memory Qdrant."""
 
@@ -492,7 +518,7 @@ class TestQdrantRetrieval:
     def in_memory_assembler(self) -> ContextAssembler:
         """ContextAssembler backed by in-memory Qdrant."""
         from backend.knowledge.context_assembler import ContextAssembler
-        from backend.ml.vector_store import VectorStore, QDRANT_AVAILABLE
+        from backend.ml.vector_store import QDRANT_AVAILABLE, VectorStore
 
         if not QDRANT_AVAILABLE:
             pytest.skip("qdrant-client not installed")
@@ -560,6 +586,7 @@ class TestQdrantRetrieval:
         agent._context_assembler = mock_assembler
 
         import backend.agents as _agents
+
         with patch.object(agent.llm, "chat_with_schema", side_effect=_schema_resp):
             with patch.object(_agents, "AGENT_PLANNER_ENABLED", False):
                 await agent.process_message_v2("Review recent changes.")
@@ -572,7 +599,7 @@ class TestQdrantRetrieval:
     def test_health_check_reports_connected(self):
         """ContextAssembler.health_check() returns qdrant_available=True for in-memory store."""
         from backend.knowledge.context_assembler import ContextAssembler
-        from backend.ml.vector_store import VectorStore, QDRANT_AVAILABLE
+        from backend.ml.vector_store import QDRANT_AVAILABLE, VectorStore
 
         if not QDRANT_AVAILABLE:
             pytest.skip("qdrant-client not installed")
@@ -601,6 +628,7 @@ class TestQdrantRetrieval:
     async def test_fallback_logs_warning_when_qdrant_down(self, caplog):
         """_fallback_retrieve must emit WARNING so operators see degraded state."""
         import logging
+
         from backend.knowledge.context_assembler import ContextAssembler
 
         mock_llm = AsyncMock()
@@ -611,7 +639,6 @@ class TestQdrantRetrieval:
             with caplog.at_level(logging.WARNING, logger="backend.knowledge.context_assembler"):
                 await ca.retrieve(query="test", agent_id="code_review_agent")
 
-        assert any(
-            "fallback" in r.message.lower() or "unavailable" in r.message.lower()
-            for r in caplog.records
-        ), "ContextAssembler must log WARNING when using fallback path"
+        assert any("fallback" in r.message.lower() or "unavailable" in r.message.lower() for r in caplog.records), (
+            "ContextAssembler must log WARNING when using fallback path"
+        )

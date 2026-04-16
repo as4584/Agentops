@@ -15,6 +15,7 @@ except through sanctioned message endpoints.
 from __future__ import annotations
 
 import asyncio
+import contextvars
 import os
 import time
 import uuid
@@ -46,9 +47,9 @@ from backend.config import (
     validate_config,
 )
 from backend.config_gateway import GATEWAY_ENABLED
-from backend.grounded_operator_answers import build_grounded_chat_reply, detect_grounded_chat_query
 from backend.gateway.middleware import GatewayAuthMiddleware
 from backend.gateway.ratelimit import GatewayRateLimitMiddleware
+from backend.grounded_operator_answers import build_grounded_chat_reply, detect_grounded_chat_query
 from backend.llm import OllamaClient
 from backend.mcp import mcp_bridge
 from backend.memory import memory_store
@@ -97,6 +98,7 @@ def _qdrant_fallback_count() -> int:
     """Return the current Qdrant retrieval fallback count from ContextAssembler."""
     try:
         from backend.knowledge.context_assembler import ContextAssembler
+
         return ContextAssembler._fallback_count
     except Exception:
         return 0
@@ -152,9 +154,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     if _config_errors:
         for _err in _config_errors:
             logger.critical(f"[CONFIG] {_err}")
-        raise RuntimeError(
-            f"Startup aborted: {len(_config_errors)} config error(s). See logs above."
-        )
+        raise RuntimeError(f"Startup aborted: {len(_config_errors)} config error(s). See logs above.")
     logger.info("[CONFIG] Operator-only configuration validated OK.")
 
     # Auto-decrypt .env if only .env.enc exists (secrets at rest)
@@ -381,6 +381,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # ── Qdrant vector store health check ────────────────────────────────────
     try:
         from backend.knowledge.context_assembler import ContextAssembler, get_vector_store
+
         _vs = get_vector_store()
         _ca_health = ContextAssembler(_llm_client).health_check()
         if _ca_health["qdrant_available"]:
@@ -402,6 +403,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Logs warnings for mismatches — does NOT abort startup (graceful degradation).
     try:
         from backend.knowledge.context_assembler import validate_embedding_startup
+
         _embed_warnings = validate_embedding_startup()
         if _embed_warnings:
             for _warn in _embed_warnings:
@@ -497,12 +499,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 # FastAPI Application
 # ---------------------------------------------------------------------------
 
-import contextvars
-
-# ---------------------------------------------------------------------------
-# FastAPI Application
-# ---------------------------------------------------------------------------
-
 # Per-request trace ID — populated by TraceIDMiddleware below.
 _trace_id_ctx: contextvars.ContextVar[str] = contextvars.ContextVar("trace_id", default="")
 
@@ -563,7 +559,7 @@ if GATEWAY_ENABLED:
 # All routers are wired via register_all_routes() — defined in
 # backend/routes/__init__.py so that route binding is a single, testable
 # function rather than 30+ scattered include_router() calls.
-from backend.routes import register_all_routes
+from backend.routes import register_all_routes  # noqa: E402
 
 register_all_routes(app, gateway_enabled=GATEWAY_ENABLED)
 
@@ -784,6 +780,7 @@ async def health_deps() -> dict[str, Any]:
     embed_detail: dict[str, Any] = {}
     try:
         from backend.knowledge.context_assembler import ContextAssembler, validate_embedding_startup
+
         _ca = ContextAssembler(_llm_client)
         _ca_health = _ca.health_check()
         qdrant_ok = bool(_ca_health.get("qdrant_available", False))

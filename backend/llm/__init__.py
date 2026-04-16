@@ -283,9 +283,7 @@ class OllamaClient:
         has_system = False
         for msg in messages:
             if msg.get("role") == "system":
-                patched_messages.append(
-                    {"role": "system", "content": f"{msg['content']}\n\n{schema_injection}"}
-                )
+                patched_messages.append({"role": "system", "content": f"{msg['content']}\n\n{schema_injection}"})
                 has_system = True
             else:
                 patched_messages.append(msg)
@@ -314,20 +312,14 @@ class OllamaClient:
                 data = response.json()
                 raw_text = data.get("message", {}).get("content", "")
                 parsed = _json.loads(raw_text)
-                logger.info(
-                    f"chat_with_schema: model={self.model} attempt={attempt + 1} success"
-                )
+                logger.info(f"chat_with_schema: model={self.model} attempt={attempt + 1} success")
                 return parsed
             except _json.JSONDecodeError as exc:
                 last_error = exc
-                logger.warning(
-                    f"chat_with_schema: JSON parse failure attempt={attempt + 1}: {exc}"
-                )
+                logger.warning(f"chat_with_schema: JSON parse failure attempt={attempt + 1}: {exc}")
                 continue
             except httpx.ConnectError:
-                error_msg = (
-                    f"Cannot connect to Ollama at {self.base_url}. Ensure Ollama is running."
-                )
+                error_msg = f"Cannot connect to Ollama at {self.base_url}. Ensure Ollama is running."
                 logger.error(error_msg)
                 raise ConnectionError(error_msg)
             except httpx.HTTPStatusError as exc:
@@ -336,8 +328,7 @@ class OllamaClient:
                 raise RuntimeError(error_msg)
 
         raise ValueError(
-            f"chat_with_schema: failed to produce valid JSON after {max_retries + 1} attempts. "
-            f"Last error: {last_error}"
+            f"chat_with_schema: failed to produce valid JSON after {max_retries + 1} attempts. Last error: {last_error}"
         )
 
     async def close(self) -> None:

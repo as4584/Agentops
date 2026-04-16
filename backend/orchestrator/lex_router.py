@@ -46,15 +46,18 @@ def _get_collector():  # noqa: ANN202
 
 LEX_ROUTER_MODEL: str = os.getenv("LEX_ROUTER_MODEL", "lex")
 
+
 # Sprint 3: prefer the role-based router model from the registry when set.
 # Falls back to LEX_ROUTER_MODEL (the fine-tuned lex model) if the env is unset.
 def _effective_router_model() -> str:
     """Return the active router model, preferring DEFAULT_TASK_MODELS['router'] when available."""
     try:
         from backend.llm.unified_registry import DEFAULT_TASK_MODELS
+
         return DEFAULT_TASK_MODELS.get("router", LEX_ROUTER_MODEL)
     except Exception:
         return LEX_ROUTER_MODEL
+
 
 # ── C-accelerated pre-filter (optional, degrades to Python keywords) ─────
 try:

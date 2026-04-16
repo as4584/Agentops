@@ -77,9 +77,7 @@ class TestRuntimeInventory:
         for agent in approved:
             assert agent in perms, f"Approved agent '{agent}' missing from permissions"
             agent_tools = set(perms[agent])
-            assert agent_tools & gitnexus_tools, (
-                f"Approved agent '{agent}' has no GitNexus tools in permissions"
-            )
+            assert agent_tools & gitnexus_tools, f"Approved agent '{agent}' has no GitNexus tools in permissions"
 
     def test_gitnexus_health_present(self, inv):
         assert "gitnexus_health" in inv
@@ -94,6 +92,7 @@ class TestRuntimeInventory:
 
     def test_generated_at_is_iso(self, inv):
         from datetime import datetime
+
         ts = inv["generated_at"]
         # Must parse as ISO timestamp without raising
         datetime.fromisoformat(ts.replace("Z", "+00:00"))
@@ -107,6 +106,4 @@ class TestRuntimeInventory:
             if agent in approved:
                 continue
             agent_gn = [t for t in tools if t.startswith(gitnexus_prefix)]
-            assert not agent_gn, (
-                f"Unapproved agent '{agent}' holds GitNexus tools: {agent_gn}"
-            )
+            assert not agent_gn, f"Unapproved agent '{agent}' holds GitNexus tools: {agent_gn}"

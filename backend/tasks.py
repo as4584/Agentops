@@ -21,10 +21,11 @@ import json
 import sqlite3
 import threading
 from collections import deque
+from collections.abc import Generator
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any
 
 
 class TaskStatus:
@@ -109,9 +110,7 @@ class TaskTracker:
                 )
                 """
             )
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks (created_at DESC)"
-            )
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks (created_at DESC)")
 
     def _load_from_db(self) -> None:
         """Seed the in-memory deque with the most recent tasks from SQLite."""

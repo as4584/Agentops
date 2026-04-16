@@ -739,7 +739,7 @@ class AgentOrchestrator:
         depth: int = 0,
         thread_id: str | None = None,
         message_id: str | None = None,
-    ) -> "A2ADispatchResult":  # type: ignore[name-defined]
+    ) -> A2ADispatchResult:  # type: ignore[name-defined]  # noqa: F821
         """Persist an A2A envelope **and** actually execute it on the target agent.
 
         This is the high-fidelity dispatch path.  It:

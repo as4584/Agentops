@@ -17,7 +17,6 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-
 # ---------------------------------------------------------------------------
 # PR1 — validate_embedding_startup wired in server lifespan (unit test)
 # ---------------------------------------------------------------------------
@@ -70,6 +69,7 @@ class TestHealthDepsKeys:
     def test_health_deps_has_qdrant_key(self) -> None:
         """The /health/deps dependencies dict must include 'qdrant'."""
         import asyncio
+
         from backend.server import health_deps
 
         # health_deps is an async function
@@ -79,6 +79,7 @@ class TestHealthDepsKeys:
 
     def test_health_deps_has_embedding_config_key(self) -> None:
         import asyncio
+
         from backend.server import health_deps
 
         result = asyncio.run(health_deps())
@@ -86,6 +87,7 @@ class TestHealthDepsKeys:
 
     def test_health_deps_qdrant_entry_has_ok_field(self) -> None:
         import asyncio
+
         from backend.server import health_deps
 
         result = asyncio.run(health_deps())
@@ -94,6 +96,7 @@ class TestHealthDepsKeys:
 
     def test_health_deps_embedding_config_entry_has_ok_field(self) -> None:
         import asyncio
+
         from backend.server import health_deps
 
         result = asyncio.run(health_deps())
@@ -102,6 +105,7 @@ class TestHealthDepsKeys:
 
     def test_health_deps_qdrant_detail_has_connected(self) -> None:
         import asyncio
+
         from backend.server import health_deps
 
         result = asyncio.run(health_deps())
@@ -110,6 +114,7 @@ class TestHealthDepsKeys:
 
     def test_health_deps_embedding_detail_has_warnings(self) -> None:
         import asyncio
+
         from backend.server import health_deps
 
         result = asyncio.run(health_deps())
@@ -118,6 +123,7 @@ class TestHealthDepsKeys:
 
     def test_health_deps_status_field_present(self) -> None:
         import asyncio
+
         from backend.server import health_deps
 
         result = asyncio.run(health_deps())
@@ -126,6 +132,7 @@ class TestHealthDepsKeys:
 
     def test_health_deps_timestamp_present(self) -> None:
         import asyncio
+
         from backend.server import health_deps
 
         result = asyncio.run(health_deps())
@@ -194,6 +201,7 @@ class TestEmbeddingStartupWarnings:
 class TestMetricsEndpoint:
     def test_metrics_has_qdrant_fallback_counter(self) -> None:
         import asyncio
+
         from backend.server import metrics
 
         result = asyncio.run(metrics())
@@ -201,6 +209,7 @@ class TestMetricsEndpoint:
 
     def test_metrics_has_degraded_fallback_counter(self) -> None:
         import asyncio
+
         from backend.server import metrics
 
         result = asyncio.run(metrics())
@@ -208,6 +217,7 @@ class TestMetricsEndpoint:
 
     def test_metrics_qdrant_fallback_is_int(self) -> None:
         import asyncio
+
         from backend.server import metrics
 
         result = asyncio.run(metrics())
@@ -215,6 +225,7 @@ class TestMetricsEndpoint:
 
     def test_metrics_uptime_non_negative(self) -> None:
         import asyncio
+
         from backend.server import metrics
 
         result = asyncio.run(metrics())
@@ -222,6 +233,7 @@ class TestMetricsEndpoint:
 
     def test_metrics_has_meta(self) -> None:
         import asyncio
+
         from backend.server import metrics
 
         result = asyncio.run(metrics())
@@ -237,6 +249,7 @@ class TestMetricsEndpoint:
 class TestHealthReady:
     def test_health_ready_503_without_orchestrator(self) -> None:
         import asyncio
+
         from backend import server as srv
 
         original = srv._orchestrator
@@ -249,6 +262,7 @@ class TestHealthReady:
 
     def test_health_live_always_200(self) -> None:
         import asyncio
+
         from backend.server import health_live
 
         result = asyncio.run(health_live())
@@ -256,8 +270,9 @@ class TestHealthReady:
 
     def test_health_live_has_timestamp(self) -> None:
         import asyncio
-        from backend.server import health_live
         import json
+
+        from backend.server import health_live
 
         result = asyncio.run(health_live())
         body = json.loads(result.body)
@@ -266,6 +281,7 @@ class TestHealthReady:
     def test_health_ready_ok_with_orchestrator(self) -> None:
         import asyncio
         from unittest.mock import MagicMock
+
         from backend import server as srv
 
         original = srv._orchestrator

@@ -61,10 +61,10 @@ class ToolCallStatus(str, Enum):
 
     SUCCESS = "success"
     VALIDATION_FAILURE = "validation_failure"  # tool name / arg schema rejected
-    EXECUTION_ERROR = "execution_error"         # tool ran but returned an error
-    TIMEOUT = "timeout"                         # tool exceeded its time budget
-    UNAVAILABLE = "unavailable"                 # tool not registered / not allowed
-    DEGRADED = "degraded"                       # result produced by a fallback path
+    EXECUTION_ERROR = "execution_error"  # tool ran but returned an error
+    TIMEOUT = "timeout"  # tool exceeded its time budget
+    UNAVAILABLE = "unavailable"  # tool not registered / not allowed
+    DEGRADED = "degraded"  # result produced by a fallback path
 
 
 # ---------------------------------------------------------------------------
@@ -175,17 +175,11 @@ class AgentTurn(BaseModel):
     """One reasoning step produced by an agent in the ReAct loop."""
 
     turn_id: str = Field(..., description="Unique turn ID")
-    role: Literal["planner", "executor", "validator"] = Field(
-        ..., description="Which sub-role produced this turn"
-    )
+    role: Literal["planner", "executor", "validator"] = Field(..., description="Which sub-role produced this turn")
     model_id: str = Field(..., description="Model that generated this turn")
     content: str = Field(..., description="Raw LLM output for this turn")
-    tool_calls: list[ToolCall] = Field(
-        default_factory=list, description="Structured tool calls parsed from this turn"
-    )
-    observations: list[str] = Field(
-        default_factory=list, description="Tool execution results observed after this turn"
-    )
+    tool_calls: list[ToolCall] = Field(default_factory=list, description="Structured tool calls parsed from this turn")
+    observations: list[str] = Field(default_factory=list, description="Tool execution results observed after this turn")
     is_final: bool = Field(default=False, description="True when the agent signals task complete")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
@@ -195,38 +189,24 @@ class ExecutionPlan(BaseModel):
 
     goal: str = Field(..., description="Original task goal")
     steps: list[str] = Field(default_factory=list, description="Ordered list of execution steps")
-    required_tools: list[str] = Field(
-        default_factory=list, description="Tools the executor will need"
-    )
-    risk_level: ChangeImpactLevel = Field(
-        default=ChangeImpactLevel.LOW, description="Risk of the planned actions"
-    )
+    required_tools: list[str] = Field(default_factory=list, description="Tools the executor will need")
+    risk_level: ChangeImpactLevel = Field(default=ChangeImpactLevel.LOW, description="Risk of the planned actions")
     model_role_hints: dict[str, str] = Field(
         default_factory=dict,
         description="Suggested model IDs keyed by role (e.g. executor, validator)",
     )
-    rejected_alternatives: list[str] = Field(
-        default_factory=list, description="Approaches considered but rejected"
-    )
+    rejected_alternatives: list[str] = Field(default_factory=list, description="Approaches considered but rejected")
 
 
 class ValidationReport(BaseModel):
     """Validator sub-role output assessing an execution result."""
 
     passed: bool = Field(..., description="True if the result meets acceptance criteria")
-    score: float = Field(
-        default=0.0, ge=0.0, le=1.0, description="Quality score 0–1"
-    )
+    score: float = Field(default=0.0, ge=0.0, le=1.0, description="Quality score 0–1")
     issues: list[str] = Field(default_factory=list, description="Identified problems")
-    recommendations: list[str] = Field(
-        default_factory=list, description="Suggested improvements"
-    )
-    requires_retry: bool = Field(
-        default=False, description="True if the executor should retry"
-    )
-    retry_hint: str = Field(
-        default="", description="Guidance for the retry attempt"
-    )
+    recommendations: list[str] = Field(default_factory=list, description="Suggested improvements")
+    requires_retry: bool = Field(default=False, description="True if the executor should retry")
+    retry_hint: str = Field(default="", description="Guidance for the retry attempt")
 
 
 class ModelRolePolicy(BaseModel):
@@ -234,21 +214,11 @@ class ModelRolePolicy(BaseModel):
 
     router: str = Field(default="qwen2.5:3b", description="Fast classification / intent routing")
     planner: str = Field(default="kimi-k2", description="Task decomposition and plan generation")
-    code_planner: str = Field(
-        default="qwen3-coder:free", description="Code-task plan generation"
-    )
-    executor: str = Field(
-        default="qwen2.5-coder:7b", description="Tool-calling execution (local first)"
-    )
-    validator_routine: str = Field(
-        default="llama3.2", description="Routine output validation"
-    )
-    validator_high_risk: str = Field(
-        default="deepseek-r1:free", description="High-risk / architectural validation"
-    )
-    retrieval_rewrite: str = Field(
-        default="llama3.2:1b", description="Query rewriting for RAG retrieval"
-    )
+    code_planner: str = Field(default="qwen3-coder:free", description="Code-task plan generation")
+    executor: str = Field(default="qwen2.5-coder:7b", description="Tool-calling execution (local first)")
+    validator_routine: str = Field(default="llama3.2", description="Routine output validation")
+    validator_high_risk: str = Field(default="deepseek-r1:free", description="High-risk / architectural validation")
+    retrieval_rewrite: str = Field(default="llama3.2:1b", description="Query rewriting for RAG retrieval")
 
 
 # ---------------------------------------------------------------------------
@@ -461,6 +431,7 @@ class EmbeddingConfig(BaseModel):
         """Return True if dim is consistent with a known model→dim mapping."""
         try:
             from backend.config import KNOWN_EMBED_DIMS
+
             known = KNOWN_EMBED_DIMS.get(self.model.lower())
             if known is None:
                 return True  # unknown model — can't validate, assume OK
@@ -469,9 +440,10 @@ class EmbeddingConfig(BaseModel):
             return True
 
     @classmethod
-    def from_config(cls) -> "EmbeddingConfig":
+    def from_config(cls) -> EmbeddingConfig:
         """Build from the central config module values."""
         from backend.config import QDRANT_DEFAULT_DIM, QDRANT_EMBED_MODEL
+
         return cls(model=QDRANT_EMBED_MODEL, dim=QDRANT_DEFAULT_DIM)
 
 

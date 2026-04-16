@@ -24,7 +24,14 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from backend.llm import OllamaClient
 
-from backend.config import KNOWN_EMBED_DIMS, QDRANT_DEFAULT_DIM, QDRANT_EMBED_MODEL, QDRANT_HOST, QDRANT_IN_MEMORY, QDRANT_PORT
+from backend.config import (
+    KNOWN_EMBED_DIMS,
+    QDRANT_DEFAULT_DIM,
+    QDRANT_EMBED_MODEL,
+    QDRANT_HOST,
+    QDRANT_IN_MEMORY,
+    QDRANT_PORT,
+)
 from backend.ml.vector_store import QDRANT_AVAILABLE, VectorStore
 
 logger = logging.getLogger(__name__)
@@ -100,6 +107,7 @@ def _get_fallback_store(llm_client: Any) -> Any:
     if _fallback_store is None:
         try:
             from backend.knowledge import KnowledgeVectorStore
+
             _fallback_store = KnowledgeVectorStore(llm_client)
         except Exception as exc:
             logger.warning(f"ContextAssembler: failed to init fallback KnowledgeVectorStore: {exc}")
@@ -282,12 +290,7 @@ class ContextAssembler:
         lines: list[str] = []
         for r in results[:limit]:
             payload = r.get("payload", {})
-            content = (
-                payload.get("content")
-                or payload.get("text")
-                or payload.get("answer")
-                or ""
-            )
+            content = payload.get("content") or payload.get("text") or payload.get("answer") or ""
             if not content or content in seen:
                 continue
             seen.add(content)

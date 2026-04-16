@@ -467,13 +467,9 @@ def _parse_positive_int(name: str, raw: str, min_val: int = 0) -> int:
     try:
         value = int(raw)
     except ValueError:
-        raise ValueError(
-            f"Config error: {name}={raw!r} is not a valid integer."
-        ) from None
+        raise ValueError(f"Config error: {name}={raw!r} is not a valid integer.") from None
     if value < min_val:
-        raise ValueError(
-            f"Config error: {name}={value} must be >= {min_val}."
-        )
+        raise ValueError(f"Config error: {name}={value} must be >= {min_val}.")
     return value
 
 
@@ -481,9 +477,7 @@ def _parse_url(name: str, raw: str) -> str:
     """Parse a URL env var and raise a clear ValueError on bad input."""
     parsed = urlparse(raw)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
-        raise ValueError(
-            f"Config error: {name}={raw!r} is not a valid absolute URL (expected http:// or https://)."
-        )
+        raise ValueError(f"Config error: {name}={raw!r} is not a valid absolute URL (expected http:// or https://).")
     return raw
 
 
@@ -551,9 +545,11 @@ def validate_config() -> list[str]:
 
         # Non-local CORS origins require an explicit secret.
         non_local_cors = [
-            o for o in CORS_ORIGINS
-            if not any(o.startswith(p) for p in ("http://localhost", "https://localhost",
-                                                   "http://127.", "https://127."))
+            o
+            for o in CORS_ORIGINS
+            if not any(
+                o.startswith(p) for p in ("http://localhost", "https://localhost", "http://127.", "https://127.")
+            )
         ]
         if non_local_cors and not API_SECRET:
             errors.append(
@@ -578,4 +574,3 @@ if __name__ == "__main__":
         else:
             print("Config validation OK — operator_only defaults are safe.")
             sys.exit(0)
-
