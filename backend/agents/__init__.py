@@ -27,6 +27,7 @@ from backend.config import (
     AGENT_MAX_STEPS,
     AGENT_PLANNER_ENABLED,
     AGENT_RUNTIME_V2,
+    AGENT_STEP_TIMEOUT_SECONDS,
     AGENT_VALIDATOR_HIGH_RISK_THRESHOLD,
     GITNEXUS_ENABLED,
     GITNEXUS_REPO_NAME,
@@ -65,6 +66,9 @@ class BaseAgent:
     - Action logging (INV-7)
     - No direct inter-agent calls (INV-2)
     """
+
+    # Sprint 6: track which agent IDs have already emitted the legacy tool-call deprecation warning.
+    _legacy_tool_warned: set[str] = set()
 
     def __init__(
         self,
@@ -235,6 +239,15 @@ class BaseAgent:
         if not matches:
             return response
 
+        # Sprint 6: emit once-per-agent deprecation warning for the legacy pattern.
+        if self.agent_id not in BaseAgent._legacy_tool_warned:
+            BaseAgent._legacy_tool_warned.add(self.agent_id)
+            logger.warning(
+                f"Agent {self.agent_id}: legacy [TOOL:...] text pattern detected. "
+                "Enable AGENT_RUNTIME_V2=true to use the structured JSON tool-call path. "
+                "The legacy pattern will be removed in a future release."
+            )
+
         for tool_name, params_str in matches:
             # Validate tool name before execution.
             validation = self._tool_validator.validate(tool_name)
@@ -401,12 +414,30 @@ class BaseAgent:
                     )
 
             for step in range(1, AGENT_MAX_STEPS + 1):
-                turn = await self._executor_turn(
-                    message=message,
-                    observations=observations,
-                    context=context,
-                    turn_number=step,
-                )
+                try:
+                    if AGENT_STEP_TIMEOUT_SECONDS > 0:
+                        turn = await asyncio.wait_for(
+                            self._executor_turn(
+                                message=message,
+                                observations=observations,
+                                context=context,
+                                turn_number=step,
+                            ),
+                            timeout=AGENT_STEP_TIMEOUT_SECONDS,
+                        )
+                    else:
+                        turn = await self._executor_turn(
+                            message=message,
+                            observations=observations,
+                            context=context,
+                            turn_number=step,
+                        )
+                except asyncio.TimeoutError:
+                    logger.warning(
+                        f"Agent {self.agent_id} step={step} timed out after "
+                        f"{AGENT_STEP_TIMEOUT_SECONDS}s — aborting loop"
+                    )
+                    break
                 all_turns.append(turn)
 
                 # Execute tool calls declared in this turn

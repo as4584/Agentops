@@ -196,6 +196,9 @@ AGENT_PLANNER_ENABLED: bool = os.getenv("AGENT_PLANNER_ENABLED", "false").lower(
 # Risk threshold above which the high-risk validator model is used instead of routine.
 # Values: LOW, MEDIUM, HIGH, CRITICAL
 AGENT_VALIDATOR_HIGH_RISK_THRESHOLD: str = os.getenv("AGENT_VALIDATOR_HIGH_RISK_THRESHOLD", "HIGH")
+# Per-step LLM timeout in seconds for each ReAct executor turn.
+# Set to 0 to disable timeout enforcement.
+AGENT_STEP_TIMEOUT_SECONDS: float = float(os.getenv("AGENT_STEP_TIMEOUT_SECONDS", "60"))
 
 # ---------------------------------------------------------------------------
 # GitNexus Code Intelligence (Sprint 5)
