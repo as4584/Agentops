@@ -56,6 +56,18 @@ jobs:
             --cov-report=term-missing \
             --cov-fail-under=58
 
+      - name: Production boundary suite — operator contract
+        run: |
+          pytest \
+            backend/tests/test_config_validation.py \
+            backend/tests/test_mcp_bridge.py \
+            backend/tests/test_architecture_drift.py \
+            backend/tests/test_runtime_inventory.py \
+            backend/tests/test_health_endpoints.py \
+            backend/tests/test_observability.py \
+            backend/tests/test_regression_matrix.py \
+            --no-cov -q --tb=short
+
       - name: pip-audit — dependency CVE scan
         run: |
           pip install --upgrade pip --quiet --root-user-action=ignore
