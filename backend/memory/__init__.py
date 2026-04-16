@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+import tempfile
 from datetime import datetime
 from pathlib import Path
 from threading import Lock
@@ -21,6 +23,28 @@ from typing import Any
 
 from backend.config import MEMORY_DIR
 from backend.utils import logger
+
+
+def _atomic_write_json(path: Path, data: Any) -> None:
+    """Write JSON atomically via a temp file and os.replace().
+
+    On POSIX systems, os.replace() is guaranteed atomic when src and dst
+    are on the same filesystem.  Writing to a sibling temp file ensures
+    they share the same filesystem and the final replace is never partial.
+    """
+    content = json.dumps(data, indent=2, default=str)
+    dir_path = path.parent
+    fd, tmp_path = tempfile.mkstemp(dir=dir_path, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(content)
+        os.replace(tmp_path, path)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
 
 
 class MemoryStore:
@@ -154,7 +178,7 @@ class MemoryStore:
                 data = {"events": []}
             event["timestamp"] = datetime.utcnow().isoformat()
             data["events"].append(event)
-            events_file.write_text(json.dumps(data, indent=2))
+            _atomic_write_json(events_file, data)
             logger.info(f"Shared event appended: {event.get('type', 'unknown')}")
 
     def get_shared_events(self, limit: int = 50) -> list[dict[str, Any]]:
@@ -224,7 +248,7 @@ class MemoryStore:
                 "ttl_seconds": ttl_seconds,
             }
             data["handoffs"].append(entry)
-            handoff_file.write_text(json.dumps(data, indent=2, default=str))
+            _atomic_write_json(handoff_file, data)
             logger.info(f"Handoff WRITE: {from_agent} → {to_agent} (id={handoff_id}, ttl={ttl_seconds}s)")
             return handoff_id
 
@@ -264,7 +288,7 @@ class MemoryStore:
                     alive.append(entry)
 
             data["handoffs"] = alive
-            handoff_file.write_text(json.dumps(data, indent=2, default=str))
+            _atomic_write_json(handoff_file, data)
 
             if matched:
                 logger.info(f"Handoff READ: {agent_id} consumed {len(matched)} handoff(s)")
@@ -284,9 +308,9 @@ class MemoryStore:
         return {"data": {}, "created": datetime.utcnow().isoformat()}
 
     def _save_store(self, namespace: str, store: dict[str, Any]) -> None:
-        """Save the JSON store for a namespace."""
+        """Save the JSON store for a namespace atomically."""
         store_file = self._store_file(namespace)
-        store_file.write_text(json.dumps(store, indent=2, default=str))
+        _atomic_write_json(store_file, store)
 
 
 # Module-level singleton

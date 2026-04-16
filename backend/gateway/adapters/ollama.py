@@ -19,13 +19,53 @@ from backend.gateway.adapters.base import (
     StreamChunk,
     UsageInfo,
 )
+from backend.models.tool_converters import tool_schema_to_ollama
 
 
 def _messages_to_ollama(messages: list) -> list[dict]:
     result = []
     for m in messages:
         content = m.content if isinstance(m.content, str) else json.dumps(m.content)
-        result.append({"role": m.role, "content": content})
+        entry: dict = {"role": m.role, "content": content}
+        # Forward tool_calls if present (assistant turn that made tool calls)
+        if m.tool_calls:
+            entry["tool_calls"] = m.tool_calls
+        # Forward tool_call_id for tool-role messages
+        if m.tool_call_id:
+            entry["tool_call_id"] = m.tool_call_id
+        result.append(entry)
+    return result
+
+
+def _ollama_tool_calls_to_openai(
+    tool_calls: list[dict],
+) -> list[dict]:
+    """Convert Ollama tool_calls format to OpenAI-compatible format.
+
+    Ollama v0.3+ returns::
+
+        [{"function": {"name": "...", "arguments": {...}}}]
+
+    OpenAI format expected by downstream consumers::
+
+        [{"id": "...", "type": "function", "function": {"name": "...", "arguments": "..."}}]
+    """
+    result = []
+    for tc in tool_calls:
+        fn = tc.get("function") or {}
+        args = fn.get("arguments", {})
+        if not isinstance(args, str):
+            args = json.dumps(args)
+        result.append(
+            {
+                "id": f"ollama-tc-{uuid.uuid4().hex[:8]}",
+                "type": "function",
+                "function": {
+                    "name": fn.get("name", ""),
+                    "arguments": args,
+                },
+            }
+        )
     return result
 
 
@@ -47,6 +87,10 @@ class OllamaAdapter(BaseProviderAdapter):
         if request.temperature is not None:
             payload.setdefault("options", {})["temperature"] = request.temperature
 
+        # PR 4: Forward tools so Ollama v0.3+ can use native function calling.
+        if request.tools:
+            payload["tools"] = [tool_schema_to_ollama(t) for t in request.tools]
+
         async with httpx.AsyncClient(timeout=self._timeout) as client:
             try:
                 resp = await client.post(f"{self._base_url}/api/chat", json=payload)
@@ -63,13 +107,21 @@ class OllamaAdapter(BaseProviderAdapter):
             completion_tokens=data.get("eval_count", 0),
             total_tokens=data.get("prompt_eval_count", 0) + data.get("eval_count", 0),
         )
+
+        # PR 4: Parse tool_calls from the Ollama response and normalise to OpenAI format.
+        raw_tool_calls: list[dict] | None = msg.get("tool_calls") or None
+        normalized_tool_calls: list[dict] | None = None
+        if raw_tool_calls:
+            normalized_tool_calls = _ollama_tool_calls_to_openai(raw_tool_calls)
+
         return ChatCompletionResponse(
             id=f"ollama-{uuid.uuid4().hex[:12]}",
             model=request.model,
             provider=self.provider_name,
-            content=msg.get("content", ""),
+            content=msg.get("content", "") or "",
             finish_reason=data.get("done_reason", "stop"),
             usage=usage,
+            tool_calls=normalized_tool_calls,
             raw=data,
         )
 

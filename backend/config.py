@@ -88,8 +88,19 @@ QDRANT_PORT: int = int(os.getenv("QDRANT_PORT", "6333"))
 QDRANT_IN_MEMORY: bool = os.getenv("QDRANT_IN_MEMORY", "false").lower() == "true"
 # Sprint 4: standardised on nomic-embed-text (768 dims) across all collections.
 # The old default was 384 (all-MiniLM-L6-v2). If you switch embed models,
-# update this value AND recreate all Qdrant collections.
+# update BOTH values AND recreate all Qdrant collections.
 QDRANT_DEFAULT_DIM: int = int(os.getenv("QDRANT_DEFAULT_DIM", "768"))
+# Sprint 2: explicit embedding model name — must be consistent with QDRANT_DEFAULT_DIM.
+# Known pairings: nomic-embed-text → 768, all-MiniLM-L6-v2 → 384.
+# Validated at startup via backend.knowledge.context_assembler.validate_embedding_startup().
+QDRANT_EMBED_MODEL: str = os.getenv("QDRANT_EMBED_MODEL", "nomic-embed-text")
+# Known dimension for common embedding models — used for startup dimension validation.
+KNOWN_EMBED_DIMS: dict[str, int] = {
+    "nomic-embed-text": 768,
+    "all-minilm-l6-v2": 384,
+    "mxbai-embed-large": 1024,
+    "all-minilm": 384,
+}
 
 # Eval thresholds
 EVAL_PASS_SCORE: float = float(os.getenv("EVAL_PASS_SCORE", "0.7"))

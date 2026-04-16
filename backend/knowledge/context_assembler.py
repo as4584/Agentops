@@ -24,13 +24,58 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from backend.llm import OllamaClient
 
-from backend.config import QDRANT_DEFAULT_DIM, QDRANT_HOST, QDRANT_IN_MEMORY, QDRANT_PORT
+from backend.config import KNOWN_EMBED_DIMS, QDRANT_DEFAULT_DIM, QDRANT_EMBED_MODEL, QDRANT_HOST, QDRANT_IN_MEMORY, QDRANT_PORT
 from backend.ml.vector_store import QDRANT_AVAILABLE, VectorStore
 
 logger = logging.getLogger(__name__)
 
 # Module-level singleton — shared across all agents in the same process.
 _vector_store: VectorStore | None = None
+
+
+def validate_embedding_startup() -> list[str]:
+    """Validate embedding model / dimension consistency at startup.
+
+    Returns a list of warning strings.  An empty list means the config is
+    self-consistent.  Warnings are also emitted via ``logger.warning`` so they
+    appear in startup logs even if the caller ignores the return value.
+
+    Checks performed:
+    1. QDRANT_EMBED_MODEL is set to a non-empty value.
+    2. QDRANT_DEFAULT_DIM is > 0.
+    3. If the model name is in the KNOWN_EMBED_DIMS table, the configured dim
+       matches the expected dim for that model.
+    """
+    warnings: list[str] = []
+
+    if not QDRANT_EMBED_MODEL:
+        msg = "QDRANT_EMBED_MODEL is empty — embedding model is unset"
+        logger.warning("EmbeddingStartup: %s", msg)
+        warnings.append(msg)
+
+    if QDRANT_DEFAULT_DIM <= 0:
+        msg = f"QDRANT_DEFAULT_DIM={QDRANT_DEFAULT_DIM} is invalid — must be > 0"
+        logger.warning("EmbeddingStartup: %s", msg)
+        warnings.append(msg)
+
+    known_dim = KNOWN_EMBED_DIMS.get(QDRANT_EMBED_MODEL.lower())
+    if known_dim is not None and known_dim != QDRANT_DEFAULT_DIM:
+        msg = (
+            f"Dimension mismatch: QDRANT_EMBED_MODEL={QDRANT_EMBED_MODEL!r} "
+            f"expects dim={known_dim} but QDRANT_DEFAULT_DIM={QDRANT_DEFAULT_DIM}. "
+            "Recreate Qdrant collections or update QDRANT_DEFAULT_DIM."
+        )
+        logger.warning("EmbeddingStartup: %s", msg)
+        warnings.append(msg)
+
+    if not warnings:
+        logger.info(
+            "EmbeddingStartup: config OK — model=%r dim=%d",
+            QDRANT_EMBED_MODEL,
+            QDRANT_DEFAULT_DIM,
+        )
+
+    return warnings
 
 
 def get_vector_store() -> VectorStore:
@@ -74,6 +119,10 @@ class ContextAssembler:
     # Collections searched for every agent regardless of agent_id.
     GLOBAL_COLLECTIONS: list[str] = ["docs", "knowledge_agent"]
 
+    # Class-level counter: total JSON-fallback retrievals since process start.
+    # Exposed via health_check() and the /metrics endpoint for operator observability.
+    _fallback_count: int = 0
+
     def __init__(self, llm_client: OllamaClient) -> None:
         self._llm = llm_client
         self._store = get_vector_store()
@@ -110,6 +159,7 @@ class ContextAssembler:
         return {
             "qdrant_available": connected,
             "fallback_active": not connected,
+            "fallback_count": ContextAssembler._fallback_count,
             "host": f"{QDRANT_HOST}:{QDRANT_PORT}",
             "in_memory": QDRANT_IN_MEMORY,
             "collections": collections,
@@ -254,12 +304,16 @@ class ContextAssembler:
         """
         Fall back to JSON KnowledgeVectorStore when Qdrant is unavailable.
 
-        Logs a WARNING on every call so operators can see that RAG is degraded.
-        This is intentionally noisy — silence here would hide a misconfiguration.
+        Increments the class-level ``_fallback_count`` counter so operators can
+        see fallback activation via ``health_check()`` and the ``/metrics`` endpoint.
+        Logs a WARNING on every call — intentionally noisy to surface misconfigurations.
         """
+        ContextAssembler._fallback_count += 1
         logger.warning(
-            "ContextAssembler: Qdrant unavailable — using JSON KnowledgeVectorStore fallback. "
-            "Set QDRANT_IN_MEMORY=true for tests or point QDRANT_HOST to a running instance."
+            "ContextAssembler: Qdrant unavailable — using JSON KnowledgeVectorStore fallback "
+            "(total_fallback_retrievals=%d). "
+            "Set QDRANT_IN_MEMORY=true for tests or point QDRANT_HOST to a running instance.",
+            ContextAssembler._fallback_count,
         )
         try:
             kv = _get_fallback_store(self._llm)

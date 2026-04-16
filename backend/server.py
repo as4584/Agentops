@@ -46,6 +46,7 @@ from backend.config import (
     validate_config,
 )
 from backend.config_gateway import GATEWAY_ENABLED
+from backend.grounded_operator_answers import build_grounded_chat_reply, detect_grounded_chat_query
 from backend.gateway.middleware import GatewayAuthMiddleware
 from backend.gateway.ratelimit import GatewayRateLimitMiddleware
 from backend.llm import OllamaClient
@@ -128,6 +129,15 @@ _llm_client: OllamaClient | None = None
 _execution_recorder: ExecutionRecorder | None = None
 _execution_analyzer: ExecutionAnalyzer | None = None
 _tool_health_monitor: ToolHealthMonitor | None = None
+
+
+def _qdrant_fallback_count() -> int:
+    """Return the current Qdrant retrieval fallback count from ContextAssembler."""
+    try:
+        from backend.knowledge.context_assembler import ContextAssembler
+        return ContextAssembler._fallback_count
+    except Exception:
+        return 0
 
 
 # ---------------------------------------------------------------------------
@@ -845,6 +855,7 @@ async def metrics() -> dict[str, Any]:
     This endpoint is intentionally unauthenticated so that monitoring
     infrastructure can scrape it without embedding an API token.
     """
+    from backend.agents import BaseAgent
     from backend.mcp.gitnexus_health import get_gitnexus_health
 
     gn_state = get_gitnexus_health()
@@ -859,6 +870,12 @@ async def metrics() -> dict[str, Any]:
         "agentop_gitnexus_usable": 1 if gn_state.usable else 0,
         "agentop_gitnexus_symbol_count": gn_state.symbol_count,
         "agentop_llm_client_ready": 1 if _llm_client is not None else 0,
+        # Sprint 1 (PR 3): degraded-mode counter — increments each time schema-
+        # constrained generation fails and the plain-text fallback is used.
+        "agentop_degraded_fallback_total": BaseAgent._degraded_count,
+        # Sprint 2 (PR 2): Qdrant retrieval fallback counter — increments each time
+        # the JSON KnowledgeVectorStore fallback is used instead of Qdrant.
+        "agentop_qdrant_fallback_total": _qdrant_fallback_count(),
         "_meta": {
             "generated_at": datetime.utcnow().isoformat(),
             "deployment_mode": "operator_only",
@@ -951,6 +968,42 @@ async def chat(request: ChatRequest) -> ChatResponse:
             raise HTTPException(
                 status_code=400,
                 detail="Message contains disallowed content",
+            )
+
+    grounded_kind = detect_grounded_chat_query(request.message)
+    if grounded_kind:
+        deps_snapshot = await health_deps() if grounded_kind == "dependency_health" else None
+        grounded_reply = build_grounded_chat_reply(
+            kind=grounded_kind,
+            requested_agent_id=request.agent_id,
+            deps_snapshot=deps_snapshot,
+        )
+        if grounded_reply is not None:
+            _run_id: str | None = None
+            if _execution_recorder:
+                _run_id = _execution_recorder.start_run(
+                    agent_id=grounded_reply.agent_id,
+                    message=request.message,
+                )
+            if _execution_recorder and _run_id:
+                _execution_recorder.end_run(
+                    run_id=_run_id,
+                    agent_id=grounded_reply.agent_id,
+                    response=grounded_reply.message,
+                )
+                if _execution_analyzer:
+                    asyncio.ensure_future(
+                        _execution_analyzer.analyze_run(
+                            run_id=_run_id,
+                            agent_id=grounded_reply.agent_id,
+                            recorder=_execution_recorder,
+                        )
+                    )
+            return ChatResponse(
+                agent_id=grounded_reply.agent_id,
+                message=grounded_reply.message,
+                drift_status=DriftStatus.GREEN,
+                timestamp=datetime.utcnow(),
             )
 
     # ── Lex Router: auto-resolve agent when agent_id is "auto" ───────

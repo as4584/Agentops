@@ -233,6 +233,123 @@ class TestChatEndpoint:
         assert result.agent_id == "devops_agent"
 
     @pytest.mark.asyncio
+    async def test_chat_dependency_health_uses_grounded_reply(self, mock_orchestrator):
+        from backend.models import ChatRequest
+
+        req = ChatRequest(
+            agent_id="auto",
+            message="Check current dependency health and summarize Ollama, MCP bridge, GitNexus, Docker, and Ruff status.",
+        )
+        deps_snapshot = {
+            "status": "healthy",
+            "dependencies": {
+                "ollama": {"ok": True, "detail": "reachable"},
+                "mcp_bridge": {
+                    "ok": True,
+                    "detail": {
+                        "enabled": True,
+                        "cli_available": True,
+                        "initialised": True,
+                        "discovered_tools": 6,
+                        "declared_tool_count": 31,
+                    },
+                },
+                "docker": {"ok": True, "path": "/usr/bin/docker"},
+                "ruff": {"ok": True, "path": "/usr/local/bin/ruff"},
+                "gitnexus": {
+                    "ok": True,
+                    "detail": {
+                        "enabled": False,
+                        "usable": False,
+                        "index_exists": False,
+                        "transport_available": False,
+                        "stale": False,
+                        "reason": "GitNexus is disabled (GITNEXUS_ENABLED=false).",
+                    },
+                },
+            },
+        }
+
+        with (
+            patch.object(server_module, "_orchestrator", mock_orchestrator),
+            patch.object(server_module, "_execution_recorder", None),
+            patch.object(server_module, "_execution_analyzer", None),
+            patch.object(server_module, "health_deps", AsyncMock(return_value=deps_snapshot)),
+        ):
+            result = await server_module.chat(req)
+
+        assert result.agent_id == "devops_agent"
+        assert "Grounded from live /health/deps" in result.message
+        assert "Ollama: OK" in result.message
+        assert "GitNexus: DISABLED" in result.message
+        mock_orchestrator.process_message.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_chat_mcpbridge_review_uses_grounded_reply(self, mock_orchestrator):
+        from backend.models import ChatRequest
+
+        req = ChatRequest(
+            agent_id="devops_agent",
+            message="Review __init__.py and tell me how MCPBridge degrades when Docker or GitNexus is unavailable.",
+        )
+
+        with (
+            patch.object(server_module, "_orchestrator", mock_orchestrator),
+            patch.object(server_module, "_execution_recorder", None),
+            patch.object(server_module, "_execution_analyzer", None),
+        ):
+            result = await server_module.chat(req)
+
+        assert result.agent_id == "devops_agent"
+        assert "backend/mcp/__init__.py" in result.message
+        assert "backend/mcp/gitnexus_health.py" in result.message
+        assert "Non-GitNexus MCP tools are not blocked by GitNexus health" in result.message
+        mock_orchestrator.process_message.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_chat_v2_timeout_question_uses_grounded_reply(self, mock_orchestrator):
+        from backend.models import ChatRequest
+
+        req = ChatRequest(
+            agent_id="soul_core",
+            message="Explain what happens if the first v2 agent step times out, and why the system now falls back instead of returning no response.",
+        )
+
+        with (
+            patch.object(server_module, "_orchestrator", mock_orchestrator),
+            patch.object(server_module, "_execution_recorder", None),
+            patch.object(server_module, "_execution_analyzer", None),
+        ):
+            result = await server_module.chat(req)
+
+        assert result.agent_id == "soul_core"
+        assert "backend/agents/__init__.py" in result.message
+        assert "legacy single-pass" in result.message
+        assert "There is no special retry loop" in result.message
+        mock_orchestrator.process_message.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_chat_gitnexus_fail_closed_question_uses_grounded_reply(self, mock_orchestrator):
+        from backend.models import ChatRequest
+
+        req = ChatRequest(
+            agent_id="auto",
+            message="Explain why GitNexus calls are blocked when the index is stale, but GitHub MCP tools still continue to work.",
+        )
+
+        with (
+            patch.object(server_module, "_orchestrator", mock_orchestrator),
+            patch.object(server_module, "_execution_recorder", None),
+            patch.object(server_module, "_execution_analyzer", None),
+        ):
+            result = await server_module.chat(req)
+
+        assert result.agent_id == "code_review_agent"
+        assert "backend/mcp/__init__.py" in result.message
+        assert "GitHub MCP tools do not go through that branch" in result.message
+        mock_orchestrator.process_message.assert_not_called()
+
+    @pytest.mark.asyncio
     async def test_chat_orchestrator_error(self, mock_orchestrator):
         from fastapi import HTTPException
 

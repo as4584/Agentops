@@ -52,6 +52,21 @@ class AgentStatus(str, Enum):
     HALTED = "HALTED"
 
 
+class ToolCallStatus(str, Enum):
+    """Outcome classification for a single tool invocation.
+
+    Used by ToolResult to communicate exactly how an invocation ended
+    so callers can branch on structured outcomes instead of string-matching.
+    """
+
+    SUCCESS = "success"
+    VALIDATION_FAILURE = "validation_failure"  # tool name / arg schema rejected
+    EXECUTION_ERROR = "execution_error"         # tool ran but returned an error
+    TIMEOUT = "timeout"                         # tool exceeded its time budget
+    UNAVAILABLE = "unavailable"                 # tool not registered / not allowed
+    DEGRADED = "degraded"                       # result produced by a fallback path
+
+
 # ---------------------------------------------------------------------------
 # Agent Models
 # ---------------------------------------------------------------------------
@@ -134,6 +149,26 @@ class ToolCall(BaseModel):
     result: Any | None = Field(default=None, description="Execution result once available")
     error: str | None = Field(default=None, description="Error message if execution failed")
     duration_ms: float | None = Field(default=None, description="Wall-clock execution time")
+
+
+class ToolResult(BaseModel):
+    """Canonical result of a single tool invocation.
+
+    Returned by tool-execution helpers and consumed by the agent v2 runtime.
+    Separates the invocation record (ToolCall) from the outcome so the
+    runtime can branch on ``status`` without inspecting raw strings.
+    """
+
+    call_id: str = Field(..., description="Matches ToolCall.id that produced this result")
+    tool_name: str = Field(..., description="Matches ToolCall.name")
+    status: ToolCallStatus = Field(..., description="Structured outcome classification")
+    content: Any = Field(default=None, description="Structured output on success")
+    error: str | None = Field(default=None, description="Error message when status != success")
+    duration_ms: float | None = Field(default=None, description="Wall-clock execution time in ms")
+    degraded: bool = Field(
+        default=False,
+        description="True when this result was produced by a degraded or fallback path",
+    )
 
 
 class AgentTurn(BaseModel):
@@ -397,3 +432,44 @@ class GitNexusHealthState(BaseModel):
     def usable(self) -> bool:
         """Convenience: True only when the subsystem is fully operational."""
         return self.enabled and self.transport_available and self.index_exists and not self.stale
+
+
+# ---------------------------------------------------------------------------
+# Sprint 2 — Embedding Configuration Contract
+# ---------------------------------------------------------------------------
+
+
+class EmbeddingConfig(BaseModel):
+    """Typed configuration for the embedding model used across Qdrant collections.
+
+    A single ``EmbeddingConfig`` instance is the source of truth for embedding
+    model name and expected vector dimension.  Both values must be consistent —
+    changing one without the other will cause silent collection dimension mismatches.
+
+    Validated at startup via ``validate_embedding_startup()`` in
+    ``backend.knowledge.context_assembler``.
+    """
+
+    model: str = Field(..., description="Ollama model name used for embedding (e.g. nomic-embed-text)")
+    dim: int = Field(..., gt=0, description="Expected embedding vector dimension")
+    collection_prefix: str = Field(
+        default="",
+        description="Optional prefix applied to all Qdrant collection names in this context",
+    )
+
+    def dim_matches_known(self) -> bool:
+        """Return True if dim is consistent with a known model→dim mapping."""
+        try:
+            from backend.config import KNOWN_EMBED_DIMS
+            known = KNOWN_EMBED_DIMS.get(self.model.lower())
+            if known is None:
+                return True  # unknown model — can't validate, assume OK
+            return known == self.dim
+        except Exception:
+            return True
+
+    @classmethod
+    def from_config(cls) -> "EmbeddingConfig":
+        """Build from the central config module values."""
+        from backend.config import QDRANT_DEFAULT_DIM, QDRANT_EMBED_MODEL
+        return cls(model=QDRANT_EMBED_MODEL, dim=QDRANT_DEFAULT_DIM)

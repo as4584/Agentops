@@ -43,8 +43,11 @@ from backend.models import (
     ChangeImpactLevel,
     ExecutionPlan,
     ToolCall,
+    ToolCallStatus,
+    ToolResult,
     ValidationReport,
 )
+from backend.models.tool_converters import tool_result_from_raw_dict
 from backend.skills import build_skills_prompt
 from backend.tasks import TaskStatus, task_tracker
 from backend.tools import execute_tool
@@ -83,6 +86,11 @@ class BaseAgent:
 
     # Sprint 6: track which agent IDs have already emitted the legacy tool-call deprecation warning.
     _legacy_tool_warned: set[str] = set()
+
+    # Sprint 1 (PR 3): count degraded fallback activations across all agents.
+    # Incremented when chat_with_schema fails and plain chat() is used instead.
+    # Exposed via /metrics for operator visibility.
+    _degraded_count: int = 0
 
     def __init__(
         self,
@@ -451,15 +459,51 @@ class BaseAgent:
                         f"Agent {self.agent_id} step={step} timed out after "
                         f"{AGENT_STEP_TIMEOUT_SECONDS}s — aborting loop"
                     )
+                    if step == 1 and not all_turns:
+                        logger.warning(
+                            f"Agent {self.agent_id} step={step} timed out before any turns completed — "
+                            "falling back to legacy single-pass chat"
+                        )
+                        if (
+                            self._conversation_history
+                            and self._conversation_history[-1].get("role") == "user"
+                            and self._conversation_history[-1].get("content") == message
+                        ):
+                            self._conversation_history.pop()
+                        task_tracker.complete_task(
+                            _tid,
+                            detail="Fell back to legacy single-pass after executor timeout",
+                        )
+                        return await self._process_message_legacy(message, context)
                     break
                 all_turns.append(turn)
 
                 # Execute tool calls declared in this turn
                 for tc in turn.tool_calls:
+                    import time as _time
+                    _t0 = _time.monotonic()
                     raw = await self._execute_tool(tc.name, tc.arguments)
-                    tc.result = raw.get("content") or raw.get("stdout") or str(raw)
-                    if raw.get("error"):
-                        tc.error = str(raw["error"])
+                    _dur = (_time.monotonic() - _t0) * 1000
+
+                    # PR 2: Normalize raw dict to canonical ToolResult immediately.
+                    tool_result: ToolResult = tool_result_from_raw_dict(
+                        call_id=tc.id,
+                        tool_name=tc.name,
+                        raw=raw,
+                        duration_ms=_dur,
+                    )
+
+                    # Populate ToolCall fields from the typed result.
+                    tc.duration_ms = tool_result.duration_ms
+                    if tool_result.status == ToolCallStatus.SUCCESS:
+                        tc.result = (
+                            str(tool_result.content)
+                            if not isinstance(tool_result.content, str)
+                            else tool_result.content
+                        )
+                    else:
+                        tc.error = tool_result.error
+
                     obs = f"[{tc.name}] → {_format_result(raw)}"
                     observations.append(obs)
                     turn.observations.append(obs)
@@ -634,8 +678,20 @@ class BaseAgent:
                 schema=turn_schema,
                 temperature=0.3,
             )
-        except Exception:
-            # Graceful fallback — treat raw chat output as a final answer
+            if not isinstance(parsed, dict):
+                raise TypeError(
+                    f"chat_with_schema returned {type(parsed).__name__}, expected dict"
+                )
+        except Exception as _schema_exc:
+            # PR 3: Explicit degraded mode — schema generation failed.
+            # Count and log so operators can observe this through /metrics.
+            BaseAgent._degraded_count += 1
+            logger.warning(
+                f"Agent {self.agent_id}: schema-constrained generation failed "
+                f"(step={turn_number}, total_degraded={BaseAgent._degraded_count}): "
+                f"{type(_schema_exc).__name__}: {_schema_exc} — "
+                "activating degraded plain-text fallback (no tool calls)"
+            )
             raw = await self.llm.chat(messages=messages)
             parsed = {"content": raw, "tool_calls": [], "is_final": True}
 
@@ -1351,7 +1407,8 @@ SOUL_AGENT_DEFINITION = AgentDefinition(
         "NEVER fabricate tool results, log contents, memory metrics, or system state. "
         "If a tool call fails or returns an error, report the error verbatim. "
         "If you do not have access to real data, say so explicitly. "
-        "Do not invent numbers, file paths, agent counts, or process names."
+        "Do not invent numbers, file paths, agent counts, or process names. "
+        "For concrete code or runtime questions, cite inspected files or tool output, or say that specialist inspection is required."
     ),
     tool_permissions=[
         "file_reader",
@@ -1398,7 +1455,10 @@ DEVOPS_AGENT_DEFINITION = AgentDefinition(
         "use mcp_gitnexus_detect_changes before committing to verify your diff scope, and "
         "use mcp_gitnexus_impact to assess blast radius before any deployment action that modifies shared symbols. "
         "If GitNexus is unavailable or returns an error, fall back to git_ops for change inspection. "
-        "NEVER fabricate GitNexus analysis results when the tool call fails."
+        "NEVER fabricate GitNexus analysis results when the tool call fails.\n\n"
+        "## Grounding rule — CRITICAL\n"
+        "For runtime and dependency questions, ground every factual claim in /health, /health/ready, /health/deps, explicit tool output, or an inspected file. "
+        "Never present hypothetical tool output as observed state. If you did not run the tool or inspect the file, say so explicitly."
     ),
     tool_permissions=[
         "git_ops",
@@ -1456,7 +1516,10 @@ MONITOR_AGENT_DEFINITION = AgentDefinition(
         "You are the first line of defence against silent failures. "
         "You are READ-HEAVY — you never modify systems, only observe and report. "
         "When you find an issue: dispatch an alert immediately, record it in memory, "
-        "and suggest a remediation plan for the Self Healer or IT Agent."
+        "and suggest a remediation plan for the Self Healer or IT Agent.\n\n"
+        "## Grounding rule — CRITICAL\n"
+        "Only report live health, metric, or log state that came from a real endpoint, tool result, or inspected file. "
+        "Do not simulate log output, dependency state, or alert history. If data was not collected, say that directly."
     ),
     tool_permissions=[
         "health_check",
@@ -1546,7 +1609,10 @@ CODE_REVIEW_AGENT_DEFINITION = AgentDefinition(
         "use mcp_gitnexus_impact BEFORE flagging a change as high-risk to verify actual blast radius. "
         "Use mcp_gitnexus_context to understand callers and call-sites of any symbol under review. "
         "If GitNexus is unavailable or returns an error, fall back to git_ops and file_reader for manual "
-        "inspection. NEVER fabricate GitNexus analysis results when the tool call fails."
+        "inspection. NEVER fabricate GitNexus analysis results when the tool call fails.\n\n"
+        "## Grounding rule — CRITICAL\n"
+        "Do not claim a file, diff, symbol, or tool result was reviewed unless it was actually inspected in the current run. "
+        "For implementation questions, cite the file you inspected and distinguish observed behavior from inference."
     ),
     tool_permissions=[
         "git_ops",
