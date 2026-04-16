@@ -175,6 +175,15 @@ LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
 MAX_LOG_ENTRIES: int = int(os.getenv("MAX_LOG_ENTRIES", "10000"))
 
 # ---------------------------------------------------------------------------
+# Sprint 2: ReAct runtime feature flags
+# ---------------------------------------------------------------------------
+# Set AGENT_RUNTIME_V2=true to enable the bounded ReAct loop for all agents.
+# Leave unset (default false) to keep legacy single-pass behaviour as rollback.
+AGENT_RUNTIME_V2: bool = os.getenv("AGENT_RUNTIME_V2", "false").lower() == "true"
+# Maximum think/act/observe iterations per message in the v2 ReAct loop.
+AGENT_MAX_STEPS: int = int(os.getenv("AGENT_MAX_STEPS", "8"))
+
+# ---------------------------------------------------------------------------
 # Tool Safety Configuration
 # ---------------------------------------------------------------------------
 # Whitelisted commands for safe_shell tool

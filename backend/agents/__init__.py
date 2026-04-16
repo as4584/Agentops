@@ -19,16 +19,20 @@ from __future__ import annotations
 
 import json
 import re
+import uuid
 from datetime import UTC, datetime
 from typing import Any, cast
 
+from backend.config import AGENT_MAX_STEPS, AGENT_RUNTIME_V2
 from backend.llm import OllamaClient
 from backend.memory import memory_store
 from backend.models import (
     AgentDefinition,
     AgentState,
     AgentStatus,
+    AgentTurn,
     ChangeImpactLevel,
+    ToolCall,
 )
 from backend.skills import build_skills_prompt
 from backend.tasks import TaskStatus, task_tracker
@@ -84,6 +88,18 @@ class BaseAgent:
         """
         Process an incoming message and return a response.
 
+        When ``AGENT_RUNTIME_V2=true`` this dispatches to ``process_message_v2``
+        which runs a bounded ReAct think/act/observe loop.  Otherwise the
+        legacy single-pass path is used (default, keeps rollback available).
+        """
+        if AGENT_RUNTIME_V2:
+            return await self.process_message_v2(message, context)
+        return await self._process_message_legacy(message, context)
+
+    async def _process_message_legacy(self, message: str, context: dict[str, Any] | None = None) -> str:
+        """
+        Legacy single-pass execution path (pre-Sprint 2).
+
         Steps:
         1. Update agent state to ACTIVE
         2. Add message to conversation history
@@ -92,13 +108,6 @@ class BaseAgent:
         5. Parse for tool calls and execute them
         6. Store conversation in memory
         7. Return response
-
-        Args:
-            message: The user/orchestrator message.
-            context: Optional additional context.
-
-        Returns:
-            The agent's response text.
         """
         self.state.status = AgentStatus.ACTIVE
         self.state.last_active = datetime.now(UTC)
@@ -319,7 +328,226 @@ class BaseAgent:
                 lines.append(f"- {tool_def.name}: {tool_def.description} [{tool_def.modification_type.value}]")
         return "\n".join(lines) if lines else "No tools available."
 
-    # ----- Memory Access -----
+    # ----- Sprint 2: ReAct loop -----
+
+    async def process_message_v2(self, message: str, context: dict[str, Any] | None = None) -> str:
+        """
+        Bounded ReAct loop — think / act / observe iterations.
+
+        Each step:
+        1. Assemble context (system prompt + history + observations).
+        2. Ask the model for the next AgentTurn (JSON-schema constrained).
+        3. Validate and execute any requested tool calls.
+        4. Append observations.
+        5. Repeat until ``is_final`` or step budget exhausted.
+
+        The loop runs at most ``AGENT_MAX_STEPS`` iterations (env: AGENT_MAX_STEPS,
+        default 8) to prevent runaway inference costs.
+        """
+        self.state.status = AgentStatus.ACTIVE
+        self.state.last_active = datetime.now(UTC)
+
+        _tid = task_tracker.create_task(
+            agent_id=self.agent_id,
+            action="process_message_v2",
+            detail=message[:120],
+            status=TaskStatus.RUNNING,
+        )
+
+        try:
+            self._conversation_history.append({"role": "user", "content": message})
+
+            observations: list[str] = []
+            all_turns: list[AgentTurn] = []
+
+            for step in range(1, AGENT_MAX_STEPS + 1):
+                turn = await self._executor_turn(
+                    message=message,
+                    observations=observations,
+                    context=context,
+                    turn_number=step,
+                )
+                all_turns.append(turn)
+
+                # Execute tool calls declared in this turn
+                for tc in turn.tool_calls:
+                    raw = await self._execute_tool(tc.name, tc.arguments)
+                    tc.result = raw.get("content") or raw.get("stdout") or str(raw)
+                    if raw.get("error"):
+                        tc.error = str(raw["error"])
+                    obs = f"[{tc.name}] → {_format_result(raw)}"
+                    observations.append(obs)
+                    turn.observations.append(obs)
+                    self._conversation_history.append(
+                        {
+                            "role": "system",
+                            "content": f"Tool {tc.name} (id={tc.id}) returned: {_format_result(raw)}",
+                        }
+                    )
+
+                self._conversation_history.append(
+                    {"role": "assistant", "content": turn.content}
+                )
+
+                logger.info(
+                    f"Agent {self.agent_id} step={step}/{AGENT_MAX_STEPS} "
+                    f"tools={len(turn.tool_calls)} is_final={turn.is_final}"
+                )
+
+                if turn.is_final or not turn.tool_calls:
+                    break
+
+            response = all_turns[-1].content if all_turns else "No response generated."
+
+            memory_store.write(
+                self.memory_namespace,
+                f"conversation_{self.state.total_actions}",
+                {
+                    "message": message,
+                    "response": response[:500],
+                    "turns": len(all_turns),
+                    "timestamp": datetime.now(UTC).isoformat(),
+                },
+            )
+
+            self.state.total_actions += 1
+            self.state.memory_size_bytes = memory_store.get_namespace_size(self.memory_namespace)
+            self.state.status = AgentStatus.IDLE
+            task_tracker.complete_task(_tid, detail=f"OK — {len(all_turns)} turns, {len(observations)} obs")
+            logger.info(f"Agent {self.agent_id} v2 complete: {len(all_turns)} turns")
+            return response
+
+        except Exception as exc:
+            self.state.status = AgentStatus.ERROR
+            self.state.error_count += 1
+            task_tracker.fail_task(_tid, error=str(exc))
+            logger.error(f"Agent {self.agent_id} v2 error: {exc}")
+            return f"Error processing request: {exc}"
+
+    async def _executor_turn(
+        self,
+        message: str,
+        observations: list[str],
+        context: dict[str, Any] | None,
+        turn_number: int,
+    ) -> AgentTurn:
+        """
+        Generate one ReAct turn: ask the model what to do next.
+
+        Uses ``OllamaClient.chat_with_schema()`` for schema-constrained JSON
+        output. Falls back to plain ``chat()`` and wraps the raw text as a
+        final answer if schema generation fails.
+
+        Returns a typed ``AgentTurn`` with validated tool calls.
+        """
+        tools_info = self._build_tools_context()
+        runtime_context = context or {}
+        soul_context = str(runtime_context.get("soul_context") or "").strip()
+        skills_section = build_skills_prompt(self.definition.skills, self.agent_id)
+
+        prompt_sections: list[str] = [self.definition.system_prompt]
+        if soul_context:
+            prompt_sections.append(f"[SOUL CONTEXT]\n{soul_context}\n[/SOUL CONTEXT]")
+        if skills_section:
+            prompt_sections.append(skills_section)
+
+        obs_block = ""
+        if observations:
+            obs_text = "\n".join(observations)
+            obs_block = (
+                f"\n\nObservations so far:\n{obs_text}\n\n"
+                'If you have enough information, set "is_final": true.'
+            )
+
+        base_prompt = "\n\n".join(prompt_sections)
+        system_prompt = (
+            f"{base_prompt}\n\n"
+            f"Available tools:\n{tools_info}\n\n"
+            "Respond ONLY with valid JSON:\n"
+            '{"content": "reasoning or final answer", '
+            '"tool_calls": [{"id": "tc_1", "name": "tool_name", "arguments": {}}], '
+            '"is_final": false}'
+            f"{obs_block}"
+        )
+
+        messages: list[dict[str, Any]] = [{"role": "system", "content": system_prompt}]
+        messages.extend(self._conversation_history[-10:])
+        # First turn injects the user message into history if not already there
+        if turn_number == 1 and not any(
+            m.get("role") == "user" and m.get("content") == message
+            for m in messages
+        ):
+            messages.append({"role": "user", "content": message})
+
+        turn_schema = {
+            "type": "object",
+            "properties": {
+                "content": {"type": "string"},
+                "tool_calls": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "string"},
+                            "name": {"type": "string"},
+                            "arguments": {"type": "object"},
+                        },
+                        "required": ["name"],
+                    },
+                },
+                "is_final": {"type": "boolean"},
+            },
+            "required": ["content"],
+        }
+
+        try:
+            parsed = await self.llm.chat_with_schema(
+                messages=messages,
+                schema=turn_schema,
+                temperature=0.3,
+            )
+        except Exception:
+            # Graceful fallback — treat raw chat output as a final answer
+            raw = await self.llm.chat(messages=messages)
+            parsed = {"content": raw, "tool_calls": [], "is_final": True}
+
+        # Build validated ToolCall objects — skip any tools this agent can't use
+        raw_calls: list[dict[str, Any]] = parsed.get("tool_calls") or []
+        typed_calls: list[ToolCall] = []
+        for rc in raw_calls:
+            tc_name = str(rc.get("name", "")).strip()
+            if not tc_name:
+                continue
+            validation = self._tool_validator.validate(tc_name)
+            if not validation.valid:
+                logger.warning(
+                    f"Agent {self.agent_id}: blocked tool call '{tc_name}': {validation.error_message}"
+                )
+                continue
+            self._tool_call_sequence += 1
+            call_id = str(rc.get("id") or make_tool_call_id(
+                agent_id=self.agent_id,
+                tool_name=tc_name,
+                sequence=self._tool_call_sequence,
+            ))
+            typed_calls.append(
+                ToolCall(
+                    id=call_id,
+                    name=tc_name,
+                    arguments=rc.get("arguments") or {},
+                )
+            )
+
+        is_final = bool(parsed.get("is_final", not typed_calls))
+
+        return AgentTurn(
+            turn_id=str(uuid.uuid4()),
+            role="executor",
+            model_id=self.llm.model,
+            content=parsed.get("content", ""),
+            tool_calls=typed_calls,
+            is_final=is_final,
+        )
 
     def read_memory(self, key: str, default: Any = None) -> Any:
         """Read from this agent's isolated memory namespace."""
