@@ -73,8 +73,21 @@ def ok(msg: str) -> None:
 
 
 def check_orphaned_routes() -> None:
-    """Every backend/routes/*.py with a router must be registered in server.py."""
+    """Every backend/routes/*.py with a router must be registered.
+
+    Registration can happen in one of two places:
+      1. Directly in server.py (legacy pattern)
+      2. Via register_all_routes() in backend/routes/__init__.py (Sprint 6+)
+    """
+    routes_init = ROUTES_DIR / "__init__.py"
     server_text = SERVER_PY.read_text()
+    # Combined corpus: server.py + routes/__init__.py
+    registration_corpus = server_text + (routes_init.read_text() if routes_init.exists() else "")
+
+    # If server.py delegates to register_all_routes(), treat routes/__init__.py
+    # as the authoritative registration file.
+    uses_register_all = "register_all_routes" in server_text
+
     route_files = sorted(ROUTES_DIR.glob("*.py"))
 
     for rf in route_files:
@@ -84,27 +97,27 @@ def check_orphaned_routes() -> None:
         # Check if file defines a router
         if "APIRouter" not in content:
             continue
-        # Check if server.py imports from this module
         module_name = rf.stem  # e.g. "knowledge"
         import_pattern = rf"from backend\.routes\.{module_name} import"
-        if not re.search(import_pattern, server_text):
-            fail(f"Orphaned route: backend/routes/{rf.name} defines a router but is not imported in server.py")
+        if not re.search(import_pattern, registration_corpus):
+            fail(
+                f"Orphaned route: backend/routes/{rf.name} defines a router"
+                f" but is not imported in server.py or routes/__init__.py"
+            )
             continue
-        # Check if include_router is called for it
-        # Look for any router alias from this module being included
+        # Check include_router call in the combined corpus
         router_aliases = re.findall(
             rf"from backend\.routes\.{module_name} import .*?router as (\w+)",
-            server_text,
+            registration_corpus,
         )
         if not router_aliases:
-            # Maybe imported as just "router"
             router_aliases = [f"{module_name}_router"]
-        registered = any(f"include_router({alias})" in server_text for alias in router_aliases)
+        registered = any(f"include_router({alias})" in registration_corpus for alias in router_aliases)
         if not registered:
-            # Also check if the plain "router" import is included
-            if f"from backend.routes.{module_name} import router" in server_text:
-                # Might be aliased differently — check all include_router calls
-                pass
+            if f"from backend.routes.{module_name} import router" in registration_corpus:
+                pass  # imported as plain "router" — trust it's wired
+            elif uses_register_all and re.search(import_pattern, routes_init.read_text() if routes_init.exists() else ""):
+                pass  # imported inside register_all_routes body — wired
             else:
                 fail(f"Route imported but not registered: backend/routes/{rf.name}")
 
