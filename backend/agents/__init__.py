@@ -23,7 +23,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any, cast
 
-from backend.config import AGENT_MAX_STEPS, AGENT_RUNTIME_V2
+from backend.config import AGENT_MAX_STEPS, AGENT_PLANNER_ENABLED, AGENT_RUNTIME_V2, AGENT_VALIDATOR_HIGH_RISK_THRESHOLD
 from backend.llm import OllamaClient
 from backend.memory import memory_store
 from backend.models import (
@@ -32,7 +32,9 @@ from backend.models import (
     AgentStatus,
     AgentTurn,
     ChangeImpactLevel,
+    ExecutionPlan,
     ToolCall,
+    ValidationReport,
 )
 from backend.skills import build_skills_prompt
 from backend.tasks import TaskStatus, task_tracker
@@ -359,6 +361,25 @@ class BaseAgent:
 
             observations: list[str] = []
             all_turns: list[AgentTurn] = []
+            plan: ExecutionPlan | None = None
+
+            # ── Sprint 3: optional planner role ─────────────────────────
+            if AGENT_PLANNER_ENABLED:
+                plan = await self._planner_turn(message=message, context=context)
+                if plan:
+                    self._conversation_history.append(
+                        {
+                            "role": "system",
+                            "content": (
+                                f"Execution plan:\nGoal: {plan.goal}\n"
+                                + "\n".join(f"  {i+1}. {s}" for i, s in enumerate(plan.steps))
+                                + f"\nRisk: {plan.risk_level.value}"
+                            ),
+                        }
+                    )
+                    logger.info(
+                        f"Agent {self.agent_id} plan: {len(plan.steps)} steps, risk={plan.risk_level.value}"
+                    )
 
             for step in range(1, AGENT_MAX_STEPS + 1):
                 turn = await self._executor_turn(
@@ -398,6 +419,28 @@ class BaseAgent:
                     break
 
             response = all_turns[-1].content if all_turns else "No response generated."
+
+            # ── Sprint 3: optional validator role ────────────────────────
+            if AGENT_PLANNER_ENABLED and plan is not None:
+                report = await self._validator_turn(
+                    original_message=message,
+                    response=response,
+                    plan=plan,
+                )
+                if report and not report.passed and report.requires_retry:
+                    logger.warning(
+                        f"Agent {self.agent_id} validator failed (score={report.score:.2f}): "
+                        f"{report.issues} — retry_hint: {report.retry_hint}"
+                    )
+                    # Surface validation failure in the response so the caller can act on it
+                    response = (
+                        f"{response}\n\n[Validation note: {'; '.join(report.issues)}. "
+                        f"Suggestion: {report.retry_hint}]"
+                    )
+                elif report:
+                    logger.info(
+                        f"Agent {self.agent_id} validator passed (score={report.score:.2f})"
+                    )
 
             memory_store.write(
                 self.memory_namespace,
@@ -547,6 +590,191 @@ class BaseAgent:
             content=parsed.get("content", ""),
             tool_calls=typed_calls,
             is_final=is_final,
+        )
+
+    async def _planner_turn(
+        self,
+        message: str,
+        context: dict[str, Any] | None,
+    ) -> ExecutionPlan | None:
+        """
+        Planner role — produce a structured ExecutionPlan before the executor loop.
+
+        Uses the ``planner`` or ``code_planner`` task model from
+        ``DEFAULT_TASK_MODELS`` via the UnifiedModelRouter when available,
+        falling back to ``OllamaClient.chat_with_schema()`` on the same model.
+
+        Returns ``None`` on any failure so the executor loop still runs without a plan.
+        """
+        from backend.llm.unified_registry import DEFAULT_TASK_MODELS, UNIFIED_MODEL_REGISTRY
+
+        tools_info = self._build_tools_context()
+        code_keywords = {"code", "implement", "write", "script", "function", "class", "fix", "refactor", "debug"}
+        is_code_task = any(kw in message.lower() for kw in code_keywords)
+        role_key = "code_planner" if is_code_task else "planner"
+        preferred_model = DEFAULT_TASK_MODELS.get(role_key, self.llm.model)
+
+        plan_schema = {
+            "type": "object",
+            "properties": {
+                "goal": {"type": "string"},
+                "steps": {"type": "array", "items": {"type": "string"}},
+                "required_tools": {"type": "array", "items": {"type": "string"}},
+                "risk_level": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+                "rejected_alternatives": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": ["goal", "steps"],
+        }
+
+        plan_system = (
+            f"{self.definition.system_prompt}\n\n"
+            "You are acting as the PLANNER. Decompose the task into clear execution steps.\n"
+            f"Available tools:\n{tools_info}\n\n"
+            "Respond with a JSON plan. Keep steps concise and actionable."
+        )
+        messages: list[dict[str, Any]] = [
+            {"role": "system", "content": plan_system},
+            {"role": "user", "content": f"Plan this task: {message}"},
+        ]
+
+        parsed: dict[str, Any] | None = None
+
+        # Try preferred model via UnifiedModelRouter if it differs from current llm.model
+        if preferred_model != self.llm.model and preferred_model in UNIFIED_MODEL_REGISTRY:
+            try:
+                from backend.llm.unified_registry import UnifiedModelRouter
+
+                router = UnifiedModelRouter()
+                result = await router.generate(
+                    prompt=message,
+                    system=plan_system,
+                    task=role_key,
+                    model=preferred_model,
+                    temperature=0.3,
+                )
+                import json as _json
+
+                raw_text = result.get("output", "").strip().removeprefix("```json").removesuffix("```").strip()
+                parsed = _json.loads(raw_text)
+            except Exception as exc:
+                logger.warning(f"Agent {self.agent_id} planner (model={preferred_model}) failed: {exc}")
+        else:
+            try:
+                parsed = await self.llm.chat_with_schema(
+                    messages=messages,
+                    schema=plan_schema,
+                    temperature=0.3,
+                )
+            except Exception as exc:
+                logger.warning(f"Agent {self.agent_id} local planner failed: {exc}")
+
+        if not parsed or not isinstance(parsed, dict):
+            return None
+
+        _risk_map = {
+            "LOW": ChangeImpactLevel.LOW,
+            "MEDIUM": ChangeImpactLevel.MEDIUM,
+            "HIGH": ChangeImpactLevel.HIGH,
+            "CRITICAL": ChangeImpactLevel.CRITICAL,
+        }
+        risk = _risk_map.get(str(parsed.get("risk_level", "LOW")).upper(), ChangeImpactLevel.LOW)
+
+        return ExecutionPlan(
+            goal=parsed.get("goal", message[:120]),
+            steps=parsed.get("steps") or [],
+            required_tools=parsed.get("required_tools") or [],
+            risk_level=risk,
+            rejected_alternatives=parsed.get("rejected_alternatives") or [],
+        )
+
+    async def _validator_turn(
+        self,
+        original_message: str,
+        response: str,
+        plan: ExecutionPlan,
+    ) -> ValidationReport | None:
+        """
+        Validator role — assess whether the executor response meets the plan's goal.
+
+        Uses the ``validator_high_risk`` model when ``plan.risk_level`` meets or
+        exceeds ``AGENT_VALIDATOR_HIGH_RISK_THRESHOLD``, otherwise ``validator_routine``.
+
+        Returns ``None`` on failure (non-blocking — executor result is still returned).
+        """
+        from backend.llm.unified_registry import DEFAULT_TASK_MODELS, UNIFIED_MODEL_REGISTRY
+
+        _risk_order = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+        plan_risk_idx = _risk_order.index(plan.risk_level.value) if plan.risk_level.value in _risk_order else 0
+        threshold_idx = _risk_order.index(AGENT_VALIDATOR_HIGH_RISK_THRESHOLD) if AGENT_VALIDATOR_HIGH_RISK_THRESHOLD in _risk_order else 2
+        role_key = "validator_high_risk" if plan_risk_idx >= threshold_idx else "validator_routine"
+        preferred_model = DEFAULT_TASK_MODELS.get(role_key, self.llm.model)
+
+        val_schema = {
+            "type": "object",
+            "properties": {
+                "passed": {"type": "boolean"},
+                "score": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+                "issues": {"type": "array", "items": {"type": "string"}},
+                "recommendations": {"type": "array", "items": {"type": "string"}},
+                "requires_retry": {"type": "boolean"},
+                "retry_hint": {"type": "string"},
+            },
+            "required": ["passed", "score"],
+        }
+
+        val_system = (
+            "You are acting as the VALIDATOR. Assess whether the response correctly addresses "
+            "the original task according to the plan. Be critical but fair.\n"
+            "Respond with a JSON validation report."
+        )
+        val_user = (
+            f"Original task: {original_message}\n\n"
+            f"Plan goal: {plan.goal}\n"
+            f"Plan steps: {', '.join(plan.steps)}\n\n"
+            f"Response to validate:\n{response[:2000]}"
+        )
+        messages: list[dict[str, Any]] = [
+            {"role": "system", "content": val_system},
+            {"role": "user", "content": val_user},
+        ]
+
+        parsed: dict[str, Any] | None = None
+        try:
+            if preferred_model != self.llm.model and preferred_model in UNIFIED_MODEL_REGISTRY:
+                from backend.llm.unified_registry import UnifiedModelRouter
+
+                router = UnifiedModelRouter()
+                result = await router.generate(
+                    prompt=val_user,
+                    system=val_system,
+                    task=role_key,
+                    model=preferred_model,
+                    temperature=0.1,
+                )
+                import json as _json
+
+                raw_text = result.get("output", "").strip().removeprefix("```json").removesuffix("```").strip()
+                parsed = _json.loads(raw_text)
+            else:
+                parsed = await self.llm.chat_with_schema(
+                    messages=messages,
+                    schema=val_schema,
+                    temperature=0.1,
+                )
+        except Exception as exc:
+            logger.warning(f"Agent {self.agent_id} validator (model={preferred_model}) failed: {exc}")
+            return None
+
+        if not parsed or not isinstance(parsed, dict):
+            return None
+
+        return ValidationReport(
+            passed=bool(parsed.get("passed", True)),
+            score=float(parsed.get("score", 1.0)),
+            issues=parsed.get("issues") or [],
+            recommendations=parsed.get("recommendations") or [],
+            requires_retry=bool(parsed.get("requires_retry", False)),
+            retry_hint=str(parsed.get("retry_hint", "")),
         )
 
     def read_memory(self, key: str, default: Any = None) -> Any:

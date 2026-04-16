@@ -184,6 +184,17 @@ AGENT_RUNTIME_V2: bool = os.getenv("AGENT_RUNTIME_V2", "false").lower() == "true
 AGENT_MAX_STEPS: int = int(os.getenv("AGENT_MAX_STEPS", "8"))
 
 # ---------------------------------------------------------------------------
+# Sprint 3: Planner/executor/validator feature flags
+# ---------------------------------------------------------------------------
+# Enable the planner role (generates ExecutionPlan before executor loop) and
+# validator role (produces ValidationReport after executor loop).
+# Requires AGENT_RUNTIME_V2=true to have any effect.
+AGENT_PLANNER_ENABLED: bool = os.getenv("AGENT_PLANNER_ENABLED", "false").lower() == "true"
+# Risk threshold above which the high-risk validator model is used instead of routine.
+# Values: LOW, MEDIUM, HIGH, CRITICAL
+AGENT_VALIDATOR_HIGH_RISK_THRESHOLD: str = os.getenv("AGENT_VALIDATOR_HIGH_RISK_THRESHOLD", "HIGH")
+
+# ---------------------------------------------------------------------------
 # Tool Safety Configuration
 # ---------------------------------------------------------------------------
 # Whitelisted commands for safe_shell tool
