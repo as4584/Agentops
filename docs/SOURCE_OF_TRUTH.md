@@ -1,8 +1,14 @@
 # SOURCE OF TRUTH — Agentop Multi-Agent System
 
-> **Last Updated:** 2026-03-01T22:00:00Z
+> **Last Updated:** 2026-04-16T00:00:00Z
 > **Updated By:** architecture-governor
-> **Version:** 2.2.0
+> **Version:** 2.3.0
+
+> **Deployment Contract:** `AGENTOP_DEPLOYMENT_MODE=operator_only`
+> This system is operated by a single privileged operator on a local or trusted private network.
+> Multi-user RBAC, public sign-up, session auth, and org isolation are NOT part of the current
+> architecture and will not be added in the active sprint program. This is a deliberate architectural
+> decision recorded here as the canonical source of truth.
 
 ---
 

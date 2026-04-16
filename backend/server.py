@@ -43,6 +43,7 @@ from backend.config import (
     OLLAMA_MODEL,
     PROJECT_ROOT,
     RATE_LIMIT_RPM,
+    validate_config,
 )
 from backend.config_gateway import GATEWAY_ENABLED
 from backend.gateway.middleware import GatewayAuthMiddleware
@@ -173,6 +174,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     _start_time = time.time()
     _knowledge_seed_task: asyncio.Task[None] | None = None
+
+    # Fail-fast: validate operator-only config before serving any traffic.
+    _config_errors = validate_config()
+    if _config_errors:
+        for _err in _config_errors:
+            logger.critical(f"[CONFIG] {_err}")
+        raise RuntimeError(
+            f"Startup aborted: {len(_config_errors)} config error(s). See logs above."
+        )
+    logger.info("[CONFIG] Operator-only configuration validated OK.")
 
     # Auto-decrypt .env if only .env.enc exists (secrets at rest)
     _env_path = PROJECT_ROOT / ".env"

@@ -1,5 +1,10 @@
 # Agentop AI Gateway
 
+> **Deployment Contract:** This gateway is an **operator/admin API surface**, not a public end-user SaaS boundary.
+> It is designed for a single privileged operator. Multi-user accounts, session tokens, org isolation,
+> and public sign-up are intentionally out of scope. Default binding is `127.0.0.1` (loopback only).
+> Exposing this gateway on a network interface requires an explicit `AGENTOP_API_SECRET`.
+
 The gateway is a centralized, secure proxy that exposes an **OpenAI-compatible API** (`/v1/*`) over all model providers (local Ollama, OpenRouter, direct OpenAI/Anthropic) with per-API-key authentication, granular ACL, rate limiting, and full audit trails.
 
 ---

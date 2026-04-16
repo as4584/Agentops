@@ -207,6 +207,10 @@ AGENT_STEP_TIMEOUT_SECONDS: float = float(os.getenv("AGENT_STEP_TIMEOUT_SECONDS"
 GITNEXUS_ENABLED: bool = os.getenv("GITNEXUS_ENABLED", "false").lower() == "true"
 # Default indexed repo name (used by planner hints and tools when no repo is specified).
 GITNEXUS_REPO_NAME: str = os.getenv("GITNEXUS_REPO_NAME", "Agentop")
+# Hours after which the GitNexus index is considered stale (0 = never stale).
+GITNEXUS_STALE_HOURS: int = int(os.getenv("GITNEXUS_STALE_HOURS", "24"))
+# Whether the operator expects embeddings to be present in the index.
+GITNEXUS_EXPECT_EMBEDDINGS: bool = os.getenv("GITNEXUS_EXPECT_EMBEDDINGS", "false").lower() == "true"
 
 # ---------------------------------------------------------------------------
 # Tool Safety Configuration
@@ -430,3 +434,137 @@ SANDBOX_ROOT_DIR.mkdir(parents=True, exist_ok=True)
 PLAYBOX_DIR.mkdir(parents=True, exist_ok=True)
 SCHEDULER_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 WEBHOOKS_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+# ---------------------------------------------------------------------------
+# Deployment Mode (Sprint 1 — S1.1)
+# ---------------------------------------------------------------------------
+# The ONLY supported deployment mode for this program is "operator_only".
+# No multi-user, no public SaaS, no RBAC is implemented or planned here.
+# Setting any other value will cause validate_config() to raise.
+AGENTOP_DEPLOYMENT_MODE: str = os.getenv("AGENTOP_DEPLOYMENT_MODE", "operator_only")
+
+_SUPPORTED_DEPLOYMENT_MODES: frozenset[str] = frozenset({"operator_only"})
+
+
+# ---------------------------------------------------------------------------
+# Typed parse helpers (Sprint 1 — S1.1)
+# ---------------------------------------------------------------------------
+
+
+def _parse_positive_int(name: str, raw: str, min_val: int = 0) -> int:
+    """Parse an integer env var and raise a clear ValueError on bad input."""
+    try:
+        value = int(raw)
+    except ValueError:
+        raise ValueError(
+            f"Config error: {name}={raw!r} is not a valid integer."
+        ) from None
+    if value < min_val:
+        raise ValueError(
+            f"Config error: {name}={value} must be >= {min_val}."
+        )
+    return value
+
+
+def _parse_url(name: str, raw: str) -> str:
+    """Parse a URL env var and raise a clear ValueError on bad input."""
+    parsed = urlparse(raw)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError(
+            f"Config error: {name}={raw!r} is not a valid absolute URL (expected http:// or https://)."
+        )
+    return raw
+
+
+def _is_loopback(host: str) -> bool:
+    """Return True if the host string resolves to a loopback address."""
+    return host in {"127.0.0.1", "::1", "localhost"}
+
+
+# ---------------------------------------------------------------------------
+# Configuration Validation (Sprint 1 — S1.1 / S1.2)
+# ---------------------------------------------------------------------------
+
+
+def validate_config() -> list[str]:
+    """Validate the current configuration and return a list of error strings.
+
+    Returns an empty list when the configuration is valid.
+    Collects all errors rather than raising on the first one so the operator
+    gets a complete picture on a single invocation.
+    """
+    errors: list[str] = []
+
+    # --- Deployment mode -------------------------------------------------------
+    if AGENTOP_DEPLOYMENT_MODE not in _SUPPORTED_DEPLOYMENT_MODES:
+        errors.append(
+            f"AGENTOP_DEPLOYMENT_MODE={AGENTOP_DEPLOYMENT_MODE!r} is not supported. "
+            f"Supported values: {sorted(_SUPPORTED_DEPLOYMENT_MODES)}"
+        )
+
+    # --- Numeric bounds --------------------------------------------------------
+    if BACKEND_PORT < 1 or BACKEND_PORT > 65535:
+        errors.append(f"BACKEND_PORT={BACKEND_PORT} is outside the valid range 1–65535.")
+    if RATE_LIMIT_RPM < 0:
+        errors.append(f"RATE_LIMIT_RPM={RATE_LIMIT_RPM} must be >= 0.")
+    if LLM_RATE_LIMIT_RPM < 0:
+        errors.append(f"LLM_RATE_LIMIT_RPM={LLM_RATE_LIMIT_RPM} must be >= 0.")
+    if MAX_CHAT_MESSAGE_LENGTH < 1:
+        errors.append(f"MAX_CHAT_MESSAGE_LENGTH={MAX_CHAT_MESSAGE_LENGTH} must be >= 1.")
+
+    # --- URL sanity ------------------------------------------------------------
+    for name, url in [
+        ("OLLAMA_BASE_URL", OLLAMA_BASE_URL),
+        ("GLMOCR_URL", GLMOCR_URL),
+        ("MCP_GATEWAY_URL", MCP_GATEWAY_URL),
+    ]:
+        parsed = urlparse(url)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            errors.append(f"{name}={url!r} is not a valid absolute URL.")
+
+    # --- Cross-field operator-only safety (Sprint 1 — S1.2) -------------------
+    if AGENTOP_DEPLOYMENT_MODE == "operator_only":
+        # Non-loopback bind + no API secret is an unsafe combination.
+        if not _is_loopback(BACKEND_HOST) and not API_SECRET:
+            errors.append(
+                "UNSAFE: BACKEND_HOST is non-loopback but AGENTOP_API_SECRET is empty. "
+                "Set a strong secret before exposing the server on a network interface."
+            )
+
+        # API docs + non-loopback bind leaks internals.
+        if API_DOCS_ENABLED and not _is_loopback(BACKEND_HOST):
+            errors.append(
+                "UNSAFE: AGENTOP_ENABLE_API_DOCS=true while BACKEND_HOST is non-loopback. "
+                "Disable API docs or restrict binding to loopback before deploying."
+            )
+
+        # Non-local CORS origins require an explicit secret.
+        non_local_cors = [
+            o for o in CORS_ORIGINS
+            if not any(o.startswith(p) for p in ("http://localhost", "https://localhost",
+                                                   "http://127.", "https://127."))
+        ]
+        if non_local_cors and not API_SECRET:
+            errors.append(
+                f"UNSAFE: Non-local CORS origins {non_local_cors} are configured but "
+                "AGENTOP_API_SECRET is empty. Set a secret to protect the API."
+            )
+
+    return errors
+
+
+if __name__ == "__main__":
+    import sys
+
+    _args = sys.argv[1:]
+    if _args and _args[0] == "validate":
+        _errs = validate_config()
+        if _errs:
+            print("Config validation FAILED:")
+            for _e in _errs:
+                print(f"  [ERROR] {_e}")
+            sys.exit(1)
+        else:
+            print("Config validation OK — operator_only defaults are safe.")
+            sys.exit(0)
+

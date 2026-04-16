@@ -1,5 +1,10 @@
 # Agentop — Local-First Multi-Agent Control Center
 
+> **⚠️ OPERATOR-ONLY DEPLOYMENT** — This system is designed for a single privileged operator
+> running on localhost or a trusted private network. There is no multi-user login, session auth,
+> or RBAC. Do not expose port 8000 to untrusted networks without setting `AGENTOP_API_SECRET`
+> and reviewing `docs/GATEWAY.md`. Public SaaS mode is not supported.
+
 > **1,165+ tests. 63% coverage. 21 agents. 54 tools. 4 languages. Zero cloud dependency.**
 
 A production-grade, fully local multi-agent system for orchestrating AI agents over infrastructure, content creation, web generation, and customer support workflows. Built with FastAPI, LangGraph, Ollama, and Next.js — with performance-critical paths in C, Go, and Rust. Runs entirely on your machine.
