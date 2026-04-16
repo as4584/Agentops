@@ -511,6 +511,21 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 # FastAPI Application
 # ---------------------------------------------------------------------------
 
+import contextvars
+
+# ---------------------------------------------------------------------------
+# FastAPI Application
+# ---------------------------------------------------------------------------
+
+# Per-request trace ID — populated by TraceIDMiddleware below.
+_trace_id_ctx: contextvars.ContextVar[str] = contextvars.ContextVar("trace_id", default="")
+
+
+def current_trace_id() -> str:
+    """Return the trace ID for the active request, or empty string outside request context."""
+    return _trace_id_ctx.get()
+
+
 app = FastAPI(
     title="Agentop — Local Multi-Agent Control Center",
     description=(
@@ -523,6 +538,20 @@ app = FastAPI(
     redoc_url="/redoc" if API_DOCS_ENABLED else None,
     openapi_url="/openapi.json" if API_DOCS_ENABLED else None,
 )
+
+
+@app.middleware("http")
+async def trace_id_middleware(request: Request, call_next):  # type: ignore[return]
+    """Attach a unique trace ID to every request and surface it as a response header."""
+    trace_id = request.headers.get("X-Trace-ID") or uuid.uuid4().hex
+    token = _trace_id_ctx.set(trace_id)
+    try:
+        response = await call_next(request)
+    finally:
+        _trace_id_ctx.reset(token)
+    response.headers["X-Trace-ID"] = trace_id
+    return response
+
 
 # CORS — origins driven from CORS_ORIGINS config (env: AGENTOP_CORS_ORIGINS)
 app.add_middleware(
@@ -651,7 +680,7 @@ async def security_middleware(request: Request, call_next):
     is_local = ip in ("127.0.0.1", "::1", "localhost")
     # Health checks remain open for readiness/liveness probes.
     # /ml/webgen/* is a local dev tool (ML Lab viewer) — no external auth needed.
-    skip_auth_paths = {"/health", "/health/deps"}
+    skip_auth_paths = {"/health", "/health/live", "/health/ready", "/health/deps", "/metrics"}
     if path.startswith("/ml/webgen/") or path.startswith("/preview/"):
         skip_auth_paths.add(path)
     # Gateway-managed paths have their own dedicated auth middleware.
@@ -701,6 +730,29 @@ async def security_middleware(request: Request, call_next):
 async def root_redirect() -> RedirectResponse:
     """Redirect bare API root to the dashboard."""
     return RedirectResponse(url="http://localhost:3007", status_code=302)
+
+
+@app.get("/health/live")
+async def health_live() -> JSONResponse:
+    """Kubernetes liveness probe — returns 200 if process is alive."""
+    return JSONResponse({"status": "alive", "timestamp": datetime.utcnow().isoformat()})
+
+
+@app.get("/health/ready")
+async def health_ready() -> JSONResponse:
+    """Kubernetes readiness probe — returns 200 only when orchestrator is up."""
+    if _orchestrator is None:
+        return JSONResponse(
+            {"status": "not_ready", "reason": "orchestrator not initialised"},
+            status_code=503,
+        )
+    return JSONResponse(
+        {
+            "status": "ready",
+            "uptime_seconds": round(time.time() - _start_time, 2),
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    )
 
 
 @app.get("/health")
@@ -779,6 +831,38 @@ async def health_deps() -> dict[str, Any]:
         "status": "healthy" if all_ok else "degraded",
         "dependencies": deps,
         "timestamp": datetime.utcnow().isoformat(),
+    }
+
+
+@app.get("/metrics")
+async def metrics() -> dict[str, Any]:
+    """Prometheus-compatible metrics summary (text-JSON hybrid).
+
+    Returns Prometheus-style gauge/counter names with current values.
+    Suitable for scraping by a Prometheus HTTP target configured with
+    ``format: json`` or for internal dashboards.
+
+    This endpoint is intentionally unauthenticated so that monitoring
+    infrastructure can scrape it without embedding an API token.
+    """
+    from backend.mcp.gitnexus_health import get_gitnexus_health
+
+    gn_state = get_gitnexus_health()
+    tool_log_count = len(logger.get_recent_tool_logs(100_000))
+
+    return {
+        "agentop_uptime_seconds": round(time.time() - _start_time, 2),
+        "agentop_orchestrator_ready": 1 if _orchestrator is not None else 0,
+        "agentop_tool_executions_total": tool_log_count,
+        "agentop_drift_guard_ok": 1 if drift_guard.drift_status.value == "clean" else 0,
+        "agentop_gitnexus_enabled": 1 if gn_state.enabled else 0,
+        "agentop_gitnexus_usable": 1 if gn_state.usable else 0,
+        "agentop_gitnexus_symbol_count": gn_state.symbol_count,
+        "agentop_llm_client_ready": 1 if _llm_client is not None else 0,
+        "_meta": {
+            "generated_at": datetime.utcnow().isoformat(),
+            "deployment_mode": "operator_only",
+        },
     }
 
 
