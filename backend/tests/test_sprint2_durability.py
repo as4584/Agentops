@@ -265,8 +265,8 @@ class TestContextAssemblerFallbackCounter:
             assembler._llm = mock_llm
             assembler._store = mock_store
 
-        health = assembler.health_check()
-        assert health["fallback_active"] is False
+            health = assembler.health_check()
+            assert health["fallback_active"] is False
 
 
 # ===========================================================================
