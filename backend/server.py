@@ -153,7 +153,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     _config_errors = validate_config()
     if _config_errors:
         for _err in _config_errors:
-            logger.critical(f"[CONFIG] {_err}")
+            logger.critical(f"[CONFIG] {_err}")  # type: ignore[attr-defined]
         raise RuntimeError(f"Startup aborted: {len(_config_errors)} config error(s). See logs above.")
     logger.info("[CONFIG] Operator-only configuration validated OK.")
 
@@ -781,7 +781,7 @@ async def health_deps() -> dict[str, Any]:
     try:
         from backend.knowledge.context_assembler import ContextAssembler, validate_embedding_startup
 
-        _ca = ContextAssembler(_llm_client)
+        _ca = ContextAssembler(_llm_client)  # type: ignore[arg-type]
         _ca_health = _ca.health_check()
         qdrant_ok = bool(_ca_health.get("qdrant_available", False))
         qdrant_detail = {
@@ -994,9 +994,9 @@ async def chat(request: ChatRequest) -> ChatResponse:
         resolved_agent_id = routing_meta["agent_id"]
 
     # DeerFlow: open run BEFORE execution so timing is accurate
-    _run_id: str | None = None
+    _run_id_main: str | None = None
     if _execution_recorder:
-        _run_id = _execution_recorder.start_run(
+        _run_id_main = _execution_recorder.start_run(
             agent_id=resolved_agent_id,
             message=request.message,
         )
@@ -1008,16 +1008,16 @@ async def chat(request: ChatRequest) -> ChatResponse:
     )
 
     # DeerFlow: close run + fire async analysis (OpenSpace-inspired, fire-and-forget)
-    if _execution_recorder and _run_id:
+    if _execution_recorder and _run_id_main:
         _execution_recorder.end_run(
-            run_id=_run_id,
+            run_id=_run_id_main,
             agent_id=resolved_agent_id,
             response=result.get("response", ""),
         )
         if _execution_analyzer:
             asyncio.ensure_future(
                 _execution_analyzer.analyze_run(
-                    run_id=_run_id,
+                    run_id=_run_id_main,
                     agent_id=resolved_agent_id,
                     recorder=_execution_recorder,
                 )
