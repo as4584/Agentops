@@ -257,3 +257,68 @@ class TestLegacyDeprecationWarning:
 
         # Second call must not add another warning
         assert warning_count_1 == warning_count_2
+
+
+# ===========================================================================
+# Sprint 2 S2.6 — Agent GitNexus discoverability and fallback guidance
+# ===========================================================================
+
+
+class TestAgentGitNexusDiscoverability:
+    """Privileged agents must reference GitNexus in their system prompts with fallback guidance."""
+
+    def test_code_review_agent_has_gitnexus_fallback_instruction(self):
+        prompt = CODE_REVIEW_AGENT_DEFINITION.system_prompt
+        assert "GitNexus" in prompt
+        assert "unavailable" in prompt.lower() or "fall back" in prompt.lower() or "fallback" in prompt.lower()
+        assert "fabricat" in prompt.lower() or "NEVER fabricate" in prompt or "never fabricate" in prompt.lower()
+
+    def test_devops_agent_has_gitnexus_fallback_instruction(self):
+        prompt = DEVOPS_AGENT_DEFINITION.system_prompt
+        assert "GitNexus" in prompt
+        assert "unavailable" in prompt.lower() or "fall back" in prompt.lower()
+        assert "fabricat" in prompt.lower() or "NEVER fabricate" in prompt
+
+    def test_security_agent_has_gitnexus_fallback_instruction(self):
+        prompt = SECURITY_AGENT_DEFINITION.system_prompt
+        assert "GitNexus" in prompt
+        assert "unavailable" in prompt.lower() or "fall back" in prompt.lower()
+        assert "fabricat" in prompt.lower() or "NEVER fabricate" in prompt
+
+    def test_gitnexus_tools_in_code_review_permissions(self):
+        perms = CODE_REVIEW_AGENT_DEFINITION.tool_permissions
+        assert "mcp_gitnexus_impact" in perms
+        assert "mcp_gitnexus_context" in perms
+        assert "mcp_gitnexus_query" in perms
+
+    def test_gitnexus_tools_in_devops_permissions(self):
+        perms = DEVOPS_AGENT_DEFINITION.tool_permissions
+        assert "mcp_gitnexus_detect_changes" in perms
+
+    def test_gitnexus_tools_in_security_permissions(self):
+        perms = SECURITY_AGENT_DEFINITION.tool_permissions
+        assert "mcp_gitnexus_query" in perms
+
+    def test_gitnexus_usable_returns_bool(self):
+        from backend.agents import _gitnexus_usable
+        result = _gitnexus_usable()
+        assert isinstance(result, bool)
+
+    def test_gitnexus_usable_false_when_disabled(self):
+        from unittest.mock import patch
+        from backend.agents import _gitnexus_usable
+        from backend.mcp import gitnexus_health as gh
+        from backend.models import GitNexusHealthState
+
+        disabled = GitNexusHealthState(enabled=False)
+        with patch.object(gh, "get_gitnexus_health", return_value=disabled):
+            result = _gitnexus_usable()
+        assert result is False
+
+    def test_gitnexus_usable_safe_on_import_error(self):
+        """_gitnexus_usable() must never raise — return False on any error."""
+        from backend.agents import _gitnexus_usable
+        from unittest.mock import patch
+        with patch("backend.mcp.gitnexus_health.get_gitnexus_health", side_effect=Exception("boom")):
+            result = _gitnexus_usable()
+        assert result is False

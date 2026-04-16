@@ -245,6 +245,21 @@ class MCPBridge:
 
         server_name, mcp_tool_name = mapping
 
+        # Sprint 2 S2.5 — fail-closed guard for GitNexus tools.
+        # GitNexus tool calls must be blocked when the subsystem is not usable,
+        # so agents cannot hallucinate results from a stale or missing index.
+        if server_name == "gitnexus":
+            from backend.mcp.gitnexus_health import get_gitnexus_health  # local import avoids circular
+            gn_state = get_gitnexus_health()
+            if not gn_state.usable:
+                reason = gn_state.reason or "GitNexus is not usable (disabled, stale, or index missing)."
+                return _error_result(
+                    agentop_tool_name,
+                    f"GitNexus unavailable — {reason}",
+                )
+
+        server_name, mcp_tool_name = mapping
+
         # Build the docker mcp tools call command.
         # The gateway accepts tool IDs as "{server}_{tool_name}" or optionally with a colon.
         # We try the underscore format first; the bridge handles alternative formats automatically.

@@ -298,3 +298,249 @@ async def test_call_tool_cli_failure_returns_error(monkeypatch):
         result = await bridge.call_tool("mcp_github_list_issues", "devops_agent", {})
 
     assert result["success"] is False
+
+
+# ---------------------------------------------------------------------------
+# Sprint 2 S2.2 — GitNexus health inspection
+# ---------------------------------------------------------------------------
+
+
+import importlib
+import json
+import tempfile
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from unittest.mock import patch
+
+
+def _make_meta(
+    symbols: int = 11724,
+    relationships: int = 31310,
+    embeddings: int = 0,
+    hours_ago: float = 1.0,
+) -> dict:
+    analyzed_at = (datetime.now(tz=timezone.utc) - timedelta(hours=hours_ago)).isoformat()
+    return {
+        "analyzedAt": analyzed_at,
+        "stats": {
+            "symbols": symbols,
+            "relationships": relationships,
+            "embeddings": embeddings,
+        },
+    }
+
+
+class TestGitNexusHealth:
+    def _get_health(self, **patch_cfg):
+        import backend.mcp.gitnexus_health as gh
+        importlib.reload(gh)
+        for k, v in patch_cfg.items():
+            setattr(gh, k, v)
+        return gh.get_gitnexus_health
+
+    def test_disabled_returns_disabled_state(self):
+        from backend.mcp import gitnexus_health as gh
+        with patch.object(gh, "GITNEXUS_ENABLED", False):
+            state = gh.get_gitnexus_health()
+        assert state.enabled is False
+        assert state.usable is False
+        assert "disabled" in state.reason.lower()
+
+    def test_missing_meta_returns_index_not_found(self, tmp_path):
+        from backend.mcp import gitnexus_health as gh
+        with patch.object(gh, "GITNEXUS_ENABLED", True), \
+             patch.object(gh, "_META_PATH", tmp_path / "nonexistent.json"):
+            state = gh.get_gitnexus_health()
+        assert state.enabled is True
+        assert state.index_exists is False
+        assert state.usable is False
+        assert "missing" in state.reason.lower() or "not found" in state.reason.lower()
+
+    def test_malformed_meta_returns_index_not_found(self, tmp_path):
+        from backend.mcp import gitnexus_health as gh
+        bad_file = tmp_path / "meta.json"
+        bad_file.write_text("{ not valid json }", encoding="utf-8")
+        with patch.object(gh, "GITNEXUS_ENABLED", True), \
+             patch.object(gh, "_META_PATH", bad_file):
+            state = gh.get_gitnexus_health()
+        assert state.index_exists is False
+
+    def test_meta_non_object_returns_not_found(self, tmp_path):
+        from backend.mcp import gitnexus_health as gh
+        bad_file = tmp_path / "meta.json"
+        bad_file.write_text("[1, 2, 3]", encoding="utf-8")
+        with patch.object(gh, "GITNEXUS_ENABLED", True), \
+             patch.object(gh, "_META_PATH", bad_file):
+            state = gh.get_gitnexus_health()
+        assert state.index_exists is False
+
+    def test_fresh_meta_is_not_stale(self, tmp_path):
+        from backend.mcp import gitnexus_health as gh
+        meta_file = tmp_path / "meta.json"
+        meta_file.write_text(json.dumps(_make_meta(hours_ago=0.5)), encoding="utf-8")
+        with patch.object(gh, "GITNEXUS_ENABLED", True), \
+             patch.object(gh, "_META_PATH", meta_file), \
+             patch.object(gh, "GITNEXUS_STALE_HOURS", 24):
+            state = gh.get_gitnexus_health()
+        assert state.index_exists is True
+        assert state.stale is False
+
+    def test_old_meta_is_stale(self, tmp_path):
+        from backend.mcp import gitnexus_health as gh
+        meta_file = tmp_path / "meta.json"
+        meta_file.write_text(json.dumps(_make_meta(hours_ago=30.0)), encoding="utf-8")
+        with patch.object(gh, "GITNEXUS_ENABLED", True), \
+             patch.object(gh, "_META_PATH", meta_file), \
+             patch.object(gh, "GITNEXUS_STALE_HOURS", 24):
+            state = gh.get_gitnexus_health()
+        assert state.stale is True
+        assert state.usable is False
+        assert "stale" in state.reason.lower()
+
+    def test_zero_stale_hours_never_stale(self, tmp_path):
+        from backend.mcp import gitnexus_health as gh
+        meta_file = tmp_path / "meta.json"
+        meta_file.write_text(json.dumps(_make_meta(hours_ago=9999.0)), encoding="utf-8")
+        with patch.object(gh, "GITNEXUS_ENABLED", True), \
+             patch.object(gh, "_META_PATH", meta_file), \
+             patch.object(gh, "GITNEXUS_STALE_HOURS", 0):
+            state = gh.get_gitnexus_health()
+        assert state.stale is False
+
+    def test_symbol_and_relationship_counts_populated(self, tmp_path):
+        from backend.mcp import gitnexus_health as gh
+        meta_file = tmp_path / "meta.json"
+        meta_file.write_text(json.dumps(_make_meta(symbols=100, relationships=200)), encoding="utf-8")
+        with patch.object(gh, "GITNEXUS_ENABLED", True), \
+             patch.object(gh, "_META_PATH", meta_file), \
+             patch.object(gh, "GITNEXUS_STALE_HOURS", 0):
+            state = gh.get_gitnexus_health()
+        assert state.symbol_count == 100
+        assert state.relationship_count == 200
+
+    def test_zero_embeddings_state(self, tmp_path):
+        from backend.mcp import gitnexus_health as gh
+        meta_file = tmp_path / "meta.json"
+        meta_file.write_text(json.dumps(_make_meta(embeddings=0)), encoding="utf-8")
+        with patch.object(gh, "GITNEXUS_ENABLED", True), \
+             patch.object(gh, "_META_PATH", meta_file), \
+             patch.object(gh, "GITNEXUS_STALE_HOURS", 0), \
+             patch.object(gh, "GITNEXUS_EXPECT_EMBEDDINGS", True):
+            state = gh.get_gitnexus_health()
+        assert state.embeddings_present is False
+        assert "embeddings" in state.reason.lower()
+
+    def test_embeddings_present_state(self, tmp_path):
+        from backend.mcp import gitnexus_health as gh
+        meta_file = tmp_path / "meta.json"
+        meta_file.write_text(json.dumps(_make_meta(embeddings=5000)), encoding="utf-8")
+        with patch.object(gh, "GITNEXUS_ENABLED", True), \
+             patch.object(gh, "_META_PATH", meta_file), \
+             patch.object(gh, "GITNEXUS_STALE_HOURS", 0), \
+             patch.object(gh, "GITNEXUS_EXPECT_EMBEDDINGS", True):
+            state = gh.get_gitnexus_health()
+        assert state.embeddings_present is True
+        assert "embeddings" not in state.reason.lower()
+
+
+# ---------------------------------------------------------------------------
+# Sprint 2 S2.5 — GitNexus fail-closed dispatch
+# ---------------------------------------------------------------------------
+
+
+class TestGitNexusFailClosed:
+    """GitNexus calls must fail closed when the subsystem is not usable."""
+
+    @pytest.mark.asyncio
+    async def test_gitnexus_call_blocked_when_disabled(self, monkeypatch):
+        monkeypatch.setattr("backend.mcp.MCP_GATEWAY_ENABLED", True)
+        from backend.mcp import gitnexus_health as gh
+        from backend.models import GitNexusHealthState
+
+        disabled_state = GitNexusHealthState(enabled=False, reason="GitNexus is disabled.")
+        with patch.object(gh, "get_gitnexus_health", return_value=disabled_state):
+            bridge = MCPBridge()
+            bridge._initialised = True  # noqa: SLF001
+            bridge._enabled = True  # noqa: SLF001
+            bridge._cli_available = True  # noqa: SLF001
+
+            result = await bridge.call_tool("mcp_gitnexus_query", "code_review_agent", {"query": "auth"})
+
+        assert result["success"] is False
+        assert "GitNexus" in result.get("error", "")
+
+    @pytest.mark.asyncio
+    async def test_gitnexus_call_blocked_when_stale(self, monkeypatch):
+        monkeypatch.setattr("backend.mcp.MCP_GATEWAY_ENABLED", True)
+        from backend.mcp import gitnexus_health as gh
+        from backend.models import GitNexusHealthState
+
+        stale_state = GitNexusHealthState(
+            enabled=True,
+            transport_available=True,
+            index_exists=True,
+            stale=True,
+            reason="Index is stale (48h).",
+        )
+        with patch.object(gh, "get_gitnexus_health", return_value=stale_state):
+            bridge = MCPBridge()
+            bridge._initialised = True  # noqa: SLF001
+            bridge._enabled = True  # noqa: SLF001
+            bridge._cli_available = True  # noqa: SLF001
+
+            result = await bridge.call_tool("mcp_gitnexus_context", "devops_agent", {"name": "foo"})
+
+        assert result["success"] is False
+        assert "GitNexus" in result.get("error", "")
+
+    @pytest.mark.asyncio
+    async def test_non_gitnexus_tool_unaffected_by_gitnexus_health(self, monkeypatch):
+        """A non-GitNexus MCP tool must NOT be blocked by GitNexus health checks."""
+        monkeypatch.setattr("backend.mcp.MCP_GATEWAY_ENABLED", True)
+
+        async def _fake_run(cmd, env, timeout):
+            return {"success": True, "output": json.dumps({"items": []})}
+
+        with patch("backend.mcp._run_docker_mcp", new=_fake_run):
+            bridge = MCPBridge()
+            bridge._initialised = True  # noqa: SLF001
+            bridge._enabled = True  # noqa: SLF001
+            bridge._cli_available = True  # noqa: SLF001
+
+            result = await bridge.call_tool("mcp_github_list_issues", "devops_agent", {"repo": "test"})
+
+        assert result["success"] is True
+
+
+# ---------------------------------------------------------------------------
+# Sprint 2 S2.7 — Parity: declared GitNexus tools vs runtime MCP_TOOL_MAP
+# ---------------------------------------------------------------------------
+
+
+class TestGitNexusToolInventoryParity:
+    """GitNexus tool declarations must remain aligned between MCP_TOOL_MAP and agent permissions."""
+
+    EXPECTED_GITNEXUS_TOOLS = {
+        "mcp_gitnexus_query",
+        "mcp_gitnexus_context",
+        "mcp_gitnexus_impact",
+        "mcp_gitnexus_detect_changes",
+        "mcp_gitnexus_list_repos",
+    }
+
+    def test_all_expected_gitnexus_tools_in_mcp_map(self):
+        for tool_name in self.EXPECTED_GITNEXUS_TOOLS:
+            assert tool_name in MCP_TOOL_MAP, f"{tool_name} missing from MCP_TOOL_MAP"
+
+    def test_gitnexus_tools_map_to_gitnexus_server(self):
+        for tool_name in self.EXPECTED_GITNEXUS_TOOLS:
+            server, _ = MCP_TOOL_MAP[tool_name]
+            assert server == "gitnexus", f"{tool_name} mapped to wrong server: {server}"
+
+    def test_no_public_gitnexus_route_by_arbitrary_name(self):
+        """GitNexus tools must only be in MCP_TOOL_MAP under the 'gitnexus' server.
+        No ad-hoc keys should introduce new public gitnexus surfaces."""
+        gitnexus_in_map = [k for k, v in MCP_TOOL_MAP.items() if v[0] == "gitnexus"]
+        assert set(gitnexus_in_map) == self.EXPECTED_GITNEXUS_TOOLS, (
+            f"Unexpected GitNexus tools in MCP_TOOL_MAP: {set(gitnexus_in_map) - self.EXPECTED_GITNEXUS_TOOLS}"
+        )

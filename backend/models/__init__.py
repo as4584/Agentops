@@ -346,3 +346,54 @@ class SystemStatus(BaseModel):
     recent_logs: list[ToolExecutionRecord] = Field(default_factory=list)
     total_tool_executions: int = 0
     uptime_seconds: float = 0.0
+
+
+# ---------------------------------------------------------------------------
+# Sprint 2 — S2.1: GitNexus Health Model
+# ---------------------------------------------------------------------------
+
+
+class GitNexusHealthState(BaseModel):
+    """Runtime health state for the GitNexus code-intelligence subsystem.
+
+    Produced by reading .gitnexus/meta.json and the current config.
+    All consumers must check `enabled` and `transport_available` before use.
+    """
+
+    enabled: bool = False
+    """Whether GITNEXUS_ENABLED=true in config."""
+
+    transport_available: bool = False
+    """Whether the MCP transport (docker-mcp CLI or socket) is reachable."""
+
+    repo_name: str = ""
+    """Repo name from config (GITNEXUS_REPO_NAME)."""
+
+    index_exists: bool = False
+    """Whether .gitnexus/meta.json exists on disk."""
+
+    symbol_count: int = 0
+    """Number of symbols in the index (0 if missing)."""
+
+    relationship_count: int = 0
+    """Number of relationships in the index (0 if missing)."""
+
+    embeddings_present: bool = False
+    """Whether the index was built with embeddings."""
+
+    last_analyzed_at: str = ""
+    """ISO-8601 timestamp of the last analysis, empty if unknown."""
+
+    stale: bool = False
+    """True when last_analyzed_at is older than GITNEXUS_STALE_HOURS."""
+
+    stale_hours: int = 0
+    """Configured staleness threshold in hours."""
+
+    reason: str = ""
+    """Human-readable reason for degraded/disabled/unavailable states."""
+
+    @property
+    def usable(self) -> bool:
+        """Convenience: True only when the subsystem is fully operational."""
+        return self.enabled and self.transport_available and self.index_exists and not self.stale

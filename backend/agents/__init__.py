@@ -52,6 +52,19 @@ from backend.utils import logger
 from backend.utils.tool_ids import ToolIdRegistry, make_tool_call_id
 from backend.utils.tool_validator import ToolValidator, validator_for_agent
 
+
+def _gitnexus_usable() -> bool:
+    """Return True if the GitNexus subsystem is currently usable.
+
+    Wraps get_gitnexus_health() with a safe fallback so the planner never
+    crashes on import errors or unexpected health states.
+    """
+    try:
+        from backend.mcp.gitnexus_health import get_gitnexus_health  # local to avoid circular
+        return get_gitnexus_health().usable
+    except Exception:
+        return False
+
 # ---------------------------------------------------------------------------
 # Base Agent Class
 # ---------------------------------------------------------------------------
@@ -706,7 +719,7 @@ class BaseAgent:
                 f"GitNexus is available (repo: {GITNEXUS_REPO_NAME}). "
                 "For code-change tasks, add 'mcp_gitnexus_impact' as a required_tool and include "
                 "a step to assess blast-radius BEFORE any code modification steps.\n\n"
-                if GITNEXUS_ENABLED and is_code_task else ""
+                if GITNEXUS_ENABLED and is_code_task and _gitnexus_usable() else ""
             )
             + "Respond with a JSON plan. Keep steps concise and actionable."
         )
@@ -1380,7 +1393,12 @@ DEVOPS_AGENT_DEFINITION = AgentDefinition(
         "You operate conservatively: read-only git operations are always safe; "
         "destructive operations require soul approval and documentation. "
         "Always explain what you are about to do before doing it. "
-        "Log every deployment action and escalate anomalies to the Monitor Agent via the orchestrator."
+        "Log every deployment action and escalate anomalies to the Monitor Agent via the orchestrator.\n\n"
+        "GitNexus code intelligence: When the GitNexus subsystem is available (check /health/deps), "
+        "use mcp_gitnexus_detect_changes before committing to verify your diff scope, and "
+        "use mcp_gitnexus_impact to assess blast radius before any deployment action that modifies shared symbols. "
+        "If GitNexus is unavailable or returns an error, fall back to git_ops for change inspection. "
+        "NEVER fabricate GitNexus analysis results when the tool call fails."
     ),
     tool_permissions=[
         "git_ops",
@@ -1523,7 +1541,12 @@ CODE_REVIEW_AGENT_DEFINITION = AgentDefinition(
         "You are not a linter — you reason about architecture, coupling, invariant violations, and documentation gaps. "
         "Every review must produce: APPROVED, NEEDS_CHANGES, or BLOCKED with a clear rationale. "
         "A change is BLOCKED if it violates any INV-* invariant. "
-        "Always cite the specific invariant or file that is at risk."
+        "Always cite the specific invariant or file that is at risk.\n\n"
+        "GitNexus code intelligence: When the GitNexus subsystem is available (check /health/deps), "
+        "use mcp_gitnexus_impact BEFORE flagging a change as high-risk to verify actual blast radius. "
+        "Use mcp_gitnexus_context to understand callers and call-sites of any symbol under review. "
+        "If GitNexus is unavailable or returns an error, fall back to git_ops and file_reader for manual "
+        "inspection. NEVER fabricate GitNexus analysis results when the tool call fails."
     ),
     tool_permissions=[
         "git_ops",
@@ -1578,7 +1601,12 @@ SECURITY_AGENT_DEFINITION = AgentDefinition(
         "If a tool returns redacted values (e.g. `****`), report them as redacted — do NOT substitute example values. "
         "If findings are only in index/cache files (e.g. `.gitnexus/`, `node_modules/`, `.venv/`), "
         "classify them as FALSE POSITIVES and explain why. "
-        "Your report must map 1-to-1 with tool output — no additions, no fabrications."
+        "Your report must map 1-to-1 with tool output — no additions, no fabrications.\n\n"
+        "GitNexus code intelligence: When the GitNexus subsystem is available (check /health/deps), "
+        "use mcp_gitnexus_query to find where sensitive patterns (secrets, env vars, credentials) appear in the codebase "
+        "before concluding a scan is complete. "
+        "If GitNexus is unavailable or returns an error, fall back to secret_scanner and file_reader. "
+        "NEVER fabricate GitNexus results when the tool call fails — report what the tool actually returned."
     ),
     tool_permissions=[
         "secret_scanner",

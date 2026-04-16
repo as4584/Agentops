@@ -721,6 +721,8 @@ async def health_deps() -> dict[str, Any]:
     """Dependency health check — surfaces status of all external deps."""
     import shutil
 
+    from backend.mcp.gitnexus_health import get_gitnexus_health
+
     # 1. Ollama / LLM
     llm_ok = False
     llm_detail = "client not initialised"
@@ -746,12 +748,30 @@ async def health_deps() -> dict[str, Any]:
     ruff_path = shutil.which("ruff")
     ruff_ok = ruff_path is not None
 
+    # 6. GitNexus code intelligence
+    gn_state = get_gitnexus_health()
+    gn_detail: dict[str, Any] = {
+        "enabled": gn_state.enabled,
+        "index_exists": gn_state.index_exists,
+        "transport_available": gn_state.transport_available,
+        "stale": gn_state.stale,
+        "usable": gn_state.usable,
+        "symbol_count": gn_state.symbol_count,
+        "embeddings_present": gn_state.embeddings_present,
+        "last_analyzed_at": gn_state.last_analyzed_at,
+    }
+    if gn_state.reason:
+        gn_detail["reason"] = gn_state.reason
+    # GitNexus not-enabled is not a degraded dep; only flag ok=False when enabled but broken.
+    gn_ok = (not gn_state.enabled) or gn_state.usable
+
     deps = {
         "ollama": {"ok": llm_ok, "detail": llm_detail},
         "mcp_bridge": {"ok": mcp_status["cli_available"], "detail": mcp_status},
         "ffmpeg": {"ok": ffmpeg_ok, "path": ffmpeg_path},
         "docker": {"ok": docker_ok, "path": docker_path},
         "ruff": {"ok": ruff_ok, "path": ruff_path},
+        "gitnexus": {"ok": gn_ok, "detail": gn_detail},
     }
 
     all_ok = all(d["ok"] for d in deps.values())
