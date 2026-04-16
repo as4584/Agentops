@@ -12,6 +12,7 @@ Governance Note:
 
 from __future__ import annotations
 
+import asyncio
 import json
 from datetime import datetime
 from pathlib import Path
@@ -112,6 +113,17 @@ class MemoryStore:
             store["last_modified"] = datetime.utcnow().isoformat()
             self._save_store(namespace, store)
             logger.info(f"Memory WRITE: ns={namespace}, key={key}")
+
+    async def write_async(self, namespace: str, key: str, value: Any) -> None:
+        """
+        Async-safe write — runs the synchronous write() in the default thread executor
+        so it does not block the event loop while holding the threading lock.
+
+        Sprint 4: use this method from all async agent code (process_message_v2, etc.)
+        instead of calling write() directly to avoid event-loop blocking.
+        """
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, self.write, namespace, key, value)
 
     def delete(self, namespace: str, key: str) -> bool:
         """Delete a key from an agent's namespace."""

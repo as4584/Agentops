@@ -44,16 +44,24 @@ class VectorStore:
     """Qdrant-backed vector store with agent namespace isolation."""
 
     DEFAULT_COLLECTION = "agentop_memory"
-    DEFAULT_DIM = 384  # all-MiniLM-L6-v2 dimension
+    # Sprint 4: default dim reads from config so it stays in sync with the embed model.
+    # Import lazily to avoid circular deps at module load time.
+    @classmethod
+    def _default_dim(cls) -> int:
+        try:
+            from backend.config import QDRANT_DEFAULT_DIM
+            return QDRANT_DEFAULT_DIM
+        except Exception:
+            return 768
 
     def __init__(
         self,
         host: str = "localhost",
         port: int = 6333,
         in_memory: bool = False,
-        default_dim: int = DEFAULT_DIM,
+        default_dim: int | None = None,
     ) -> None:
-        self._dim = default_dim
+        self._dim = default_dim if default_dim is not None else self._default_dim()
         self._collections_initialized: set[str] = set()
 
         if not QDRANT_AVAILABLE:

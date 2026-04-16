@@ -74,6 +74,8 @@ class BaseAgent:
         self._tool_call_sequence: int = 0
         # Optional tool health monitor — set via set_health_monitor()
         self._health_monitor: Any = None
+        # Sprint 4: lazy ContextAssembler for RAG retrieval
+        self._context_assembler: Any = None
         logger.info(f"Agent initialized: {definition.agent_id} (impact={definition.change_impact_level})")
 
     @property
@@ -83,6 +85,16 @@ class BaseAgent:
     @property
     def memory_namespace(self) -> str:
         return self.definition.memory_namespace
+
+    def _get_context_assembler(self) -> Any:
+        """Lazy-init ContextAssembler — avoids import cost when RAG is not needed."""
+        if self._context_assembler is None:
+            try:
+                from backend.knowledge.context_assembler import ContextAssembler
+                self._context_assembler = ContextAssembler(self.llm)
+            except Exception as exc:
+                logger.warning(f"ContextAssembler init failed: {exc}")
+        return self._context_assembler
 
     # ----- Core Execution -----
 
@@ -432,7 +444,6 @@ class BaseAgent:
                         f"Agent {self.agent_id} validator failed (score={report.score:.2f}): "
                         f"{report.issues} — retry_hint: {report.retry_hint}"
                     )
-                    # Surface validation failure in the response so the caller can act on it
                     response = (
                         f"{response}\n\n[Validation note: {'; '.join(report.issues)}. "
                         f"Suggestion: {report.retry_hint}]"
@@ -442,7 +453,8 @@ class BaseAgent:
                         f"Agent {self.agent_id} validator passed (score={report.score:.2f})"
                     )
 
-            memory_store.write(
+            # Sprint 4: async memory write (non-blocking) + Qdrant dual-write
+            await memory_store.write_async(
                 self.memory_namespace,
                 f"conversation_{self.state.total_actions}",
                 {
@@ -452,6 +464,16 @@ class BaseAgent:
                     "timestamp": datetime.now(UTC).isoformat(),
                 },
             )
+            try:
+                assembler = self._get_context_assembler()
+                if assembler is not None and observations:
+                    await assembler.ingest_memory(
+                        agent_id=self.agent_id,
+                        content=f"Q: {message}\nA: {response[:400]}",
+                        metadata={"type": "conversation", "turns": len(all_turns)},
+                    )
+            except Exception as exc:
+                logger.debug(f"Agent {self.agent_id} Qdrant ingest failed (non-fatal): {exc}")
 
             self.state.total_actions += 1
             self.state.memory_size_bytes = memory_store.get_namespace_size(self.memory_namespace)
@@ -502,11 +524,22 @@ class BaseAgent:
                 'If you have enough information, set "is_final": true.'
             )
 
+        # Sprint 4: inject RAG context on turn 1
+        rag_block = ""
+        if turn_number == 1:
+            try:
+                assembler = self._get_context_assembler()
+                if assembler is not None:
+                    rag_block = await assembler.retrieve(query=message, agent_id=self.agent_id, limit=4)
+            except Exception as exc:
+                logger.debug(f"Agent {self.agent_id} RAG retrieve failed: {exc}")
+
         base_prompt = "\n\n".join(prompt_sections)
         system_prompt = (
             f"{base_prompt}\n\n"
             f"Available tools:\n{tools_info}\n\n"
-            "Respond ONLY with valid JSON:\n"
+            + (f"{rag_block}\n\n" if rag_block else "")
+            + "Respond ONLY with valid JSON:\n"
             '{"content": "reasoning or final answer", '
             '"tool_calls": [{"id": "tc_1", "name": "tool_name", "arguments": {}}], '
             '"is_final": false}'
