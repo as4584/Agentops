@@ -566,7 +566,7 @@ class BaseAgent:
                         metadata={"type": "conversation", "turns": len(all_turns)},
                     )
             except Exception as exc:
-                logger.debug(f"Agent {self.agent_id} Qdrant ingest failed (non-fatal): {exc}")
+                logger.debug(f"Agent {self.agent_id} Qdrant ingest failed (non-fatal): {exc}")  # type: ignore[attr-defined]
 
             self.state.total_actions += 1
             self.state.memory_size_bytes = memory_store.get_namespace_size(self.memory_namespace)
@@ -622,7 +622,7 @@ class BaseAgent:
                 if assembler is not None:
                     rag_block = await assembler.retrieve(query=message, agent_id=self.agent_id, limit=4)
             except Exception as exc:
-                logger.debug(f"Agent {self.agent_id} RAG retrieve failed: {exc}")
+                logger.debug(f"Agent {self.agent_id} RAG retrieve failed: {exc}")  # type: ignore[attr-defined]
 
         base_prompt = "\n\n".join(prompt_sections)
         system_prompt = (

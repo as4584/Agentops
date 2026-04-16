@@ -1,0 +1,9 @@
+# Coverage config for ML pipeline CI only.
+# Restricts measurement to backend/ml so --cov-fail-under=80 is not
+# diluted by unrelated modules imported transitively during test collection.
+
+[coverage:run]
+source = backend/ml
+
+[coverage:report]
+show_missing = true

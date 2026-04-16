@@ -123,8 +123,8 @@ def _format_dependency_health_reply(snapshot: dict[str, Any]) -> str:
     docker = deps.get("docker") or {}
     ruff = deps.get("ruff") or {}
     gitnexus = deps.get("gitnexus") or {}
-    gitnexus_detail = gitnexus.get("detail") if isinstance(gitnexus.get("detail"), dict) else {}
-    mcp_detail = mcp_bridge.get("detail") if isinstance(mcp_bridge.get("detail"), dict) else {}
+    gitnexus_detail: dict[str, Any] = gitnexus.get("detail") if isinstance(gitnexus.get("detail"), dict) else {}  # type: ignore[assignment]
+    mcp_detail: dict[str, Any] = mcp_bridge.get("detail") if isinstance(mcp_bridge.get("detail"), dict) else {}  # type: ignore[assignment]
 
     gitnexus_reason = gitnexus_detail.get("reason") or ""
     gitnexus_reason_suffix = f" Reason: {gitnexus_reason}" if gitnexus_reason else ""

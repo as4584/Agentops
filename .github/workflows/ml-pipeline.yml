@@ -50,7 +50,8 @@ jobs:
             -x --tb=short -q \
             --cov=backend/ml \
             --cov-report=term-missing \
-            --cov-fail-under=80
+            --cov-fail-under=80 \
+            --cov-config=.coveragerc-ml
 
   # ── Data Validation ──────────────────────────────────────────────────
   data-validation:
