@@ -28,6 +28,15 @@ jobs:
       - name: Config validation — operator-only contract
         run: python -m backend.config validate
 
+      - name: Runtime inventory — generate
+        run: python scripts/generate_runtime_inventory.py
+
+      - name: Architecture drift — verify invariants
+        run: python scripts/verify_architecture_drift.py
+
+      - name: Release evidence — compile
+        run: python scripts/generate_release_evidence.py
+
       - name: Ruff — lint
         run: ruff check .
 

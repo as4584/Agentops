@@ -1,0 +1,360 @@
+{
+  "generated_at": "2026-04-16T05:55:06.773232+00:00",
+  "deployment_mode": "operator_only",
+  "gitnexus_repo": "Agentop",
+  "native_tools": [
+    "alert_dispatch",
+    "browser_click",
+    "browser_close",
+    "browser_control",
+    "browser_open",
+    "browser_screenshot",
+    "browser_select",
+    "browser_snapshot",
+    "browser_type",
+    "browser_upload",
+    "db_query",
+    "doc_updater",
+    "document_ocr",
+    "file_reader",
+    "folder_analyzer",
+    "git_ops",
+    "health_check",
+    "hf_create_soul_id",
+    "hf_log_evidence",
+    "hf_login",
+    "hf_navigate",
+    "hf_poll_result",
+    "hf_submit_video",
+    "k8s_control",
+    "log_tail",
+    "process_restart",
+    "safe_shell",
+    "sandbox_exec",
+    "secret_scanner",
+    "system_info",
+    "webhook_send"
+  ],
+  "native_tool_count": 31,
+  "mcp_tools": [
+    "mcp_docker_get_container_logs",
+    "mcp_docker_inspect_container",
+    "mcp_docker_list_containers",
+    "mcp_docker_list_images",
+    "mcp_docker_restart_container",
+    "mcp_fetch_get",
+    "mcp_filesystem_get_file_info",
+    "mcp_filesystem_list_directory",
+    "mcp_filesystem_read_file",
+    "mcp_filesystem_search_files",
+    "mcp_filesystem_write_file",
+    "mcp_github_create_issue",
+    "mcp_github_get_file_contents",
+    "mcp_github_get_pull_request",
+    "mcp_github_list_issues",
+    "mcp_github_list_pull_requests",
+    "mcp_github_search_code",
+    "mcp_github_search_repositories",
+    "mcp_gitnexus_context",
+    "mcp_gitnexus_detect_changes",
+    "mcp_gitnexus_impact",
+    "mcp_gitnexus_list_repos",
+    "mcp_gitnexus_query",
+    "mcp_slack_get_channel_history",
+    "mcp_slack_list_channels",
+    "mcp_slack_post_message",
+    "mcp_sqlite_describe_table",
+    "mcp_sqlite_list_tables",
+    "mcp_sqlite_read_query",
+    "mcp_time_convert_time",
+    "mcp_time_get_current_time"
+  ],
+  "mcp_tool_count": 31,
+  "mcp_tools_by_server": {
+    "docker": [
+      "mcp_docker_get_container_logs",
+      "mcp_docker_inspect_container",
+      "mcp_docker_list_containers",
+      "mcp_docker_list_images",
+      "mcp_docker_restart_container"
+    ],
+    "fetch": [
+      "mcp_fetch_get"
+    ],
+    "filesystem": [
+      "mcp_filesystem_get_file_info",
+      "mcp_filesystem_list_directory",
+      "mcp_filesystem_read_file",
+      "mcp_filesystem_search_files",
+      "mcp_filesystem_write_file"
+    ],
+    "github": [
+      "mcp_github_create_issue",
+      "mcp_github_get_file_contents",
+      "mcp_github_get_pull_request",
+      "mcp_github_list_issues",
+      "mcp_github_list_pull_requests",
+      "mcp_github_search_code",
+      "mcp_github_search_repositories"
+    ],
+    "gitnexus": [
+      "mcp_gitnexus_context",
+      "mcp_gitnexus_detect_changes",
+      "mcp_gitnexus_impact",
+      "mcp_gitnexus_list_repos",
+      "mcp_gitnexus_query"
+    ],
+    "slack": [
+      "mcp_slack_get_channel_history",
+      "mcp_slack_list_channels",
+      "mcp_slack_post_message"
+    ],
+    "sqlite": [
+      "mcp_sqlite_describe_table",
+      "mcp_sqlite_list_tables",
+      "mcp_sqlite_read_query"
+    ],
+    "time": [
+      "mcp_time_convert_time",
+      "mcp_time_get_current_time"
+    ]
+  },
+  "gitnexus_tools": [
+    "mcp_gitnexus_context",
+    "mcp_gitnexus_detect_changes",
+    "mcp_gitnexus_impact",
+    "mcp_gitnexus_list_repos",
+    "mcp_gitnexus_query"
+  ],
+  "gitnexus_health": {
+    "enabled": false,
+    "usable": false,
+    "index_exists": false,
+    "symbol_count": 0,
+    "embeddings_present": false,
+    "stale": false,
+    "reason": "GitNexus is disabled (GITNEXUS_ENABLED=false)."
+  },
+  "agent_tool_permissions": {
+    "it_agent": [
+      "safe_shell",
+      "file_reader",
+      "system_info",
+      "doc_updater",
+      "folder_analyzer",
+      "health_check",
+      "log_tail",
+      "document_ocr",
+      "mcp_filesystem_read_file",
+      "mcp_filesystem_list_directory",
+      "mcp_docker_list_containers",
+      "mcp_docker_get_container_logs",
+      "mcp_time_get_current_time"
+    ],
+    "cs_agent": [
+      "file_reader",
+      "system_info",
+      "doc_updater",
+      "mcp_filesystem_read_file",
+      "mcp_filesystem_list_directory",
+      "mcp_time_get_current_time"
+    ],
+    "soul_core": [
+      "file_reader",
+      "system_info",
+      "doc_updater",
+      "alert_dispatch",
+      "mcp_github_search_repositories",
+      "mcp_github_list_issues",
+      "mcp_filesystem_read_file",
+      "mcp_filesystem_list_directory",
+      "mcp_time_get_current_time"
+    ],
+    "devops_agent": [
+      "git_ops",
+      "safe_shell",
+      "file_reader",
+      "health_check",
+      "doc_updater",
+      "folder_analyzer",
+      "mcp_github_search_repositories",
+      "mcp_github_get_file_contents",
+      "mcp_github_list_issues",
+      "mcp_github_create_issue",
+      "mcp_github_list_pull_requests",
+      "mcp_github_get_pull_request",
+      "mcp_docker_list_containers",
+      "mcp_docker_get_container_logs",
+      "mcp_docker_inspect_container",
+      "mcp_time_get_current_time",
+      "k8s_control",
+      "browser_control",
+      "mcp_gitnexus_query",
+      "mcp_gitnexus_context",
+      "mcp_gitnexus_impact",
+      "mcp_gitnexus_detect_changes",
+      "mcp_gitnexus_list_repos"
+    ],
+    "monitor_agent": [
+      "health_check",
+      "log_tail",
+      "system_info",
+      "alert_dispatch",
+      "file_reader",
+      "mcp_fetch_get",
+      "mcp_docker_list_containers",
+      "mcp_docker_get_container_logs",
+      "mcp_docker_inspect_container",
+      "mcp_time_get_current_time"
+    ],
+    "self_healer_agent": [
+      "process_restart",
+      "health_check",
+      "log_tail",
+      "alert_dispatch",
+      "system_info",
+      "mcp_docker_list_containers",
+      "mcp_docker_get_container_logs",
+      "mcp_docker_restart_container",
+      "mcp_docker_inspect_container"
+    ],
+    "code_review_agent": [
+      "git_ops",
+      "file_reader",
+      "doc_updater",
+      "alert_dispatch",
+      "folder_analyzer",
+      "mcp_github_search_repositories",
+      "mcp_github_get_file_contents",
+      "mcp_github_search_code",
+      "mcp_filesystem_read_file",
+      "mcp_filesystem_list_directory",
+      "mcp_gitnexus_query",
+      "mcp_gitnexus_context",
+      "mcp_gitnexus_impact",
+      "mcp_gitnexus_detect_changes",
+      "mcp_gitnexus_list_repos"
+    ],
+    "security_agent": [
+      "secret_scanner",
+      "file_reader",
+      "health_check",
+      "alert_dispatch",
+      "system_info",
+      "folder_analyzer",
+      "mcp_github_search_code",
+      "mcp_github_get_file_contents",
+      "mcp_filesystem_read_file",
+      "mcp_filesystem_search_files",
+      "mcp_gitnexus_query",
+      "mcp_gitnexus_context",
+      "mcp_gitnexus_impact",
+      "mcp_gitnexus_detect_changes",
+      "mcp_gitnexus_list_repos"
+    ],
+    "data_agent": [
+      "db_query",
+      "file_reader",
+      "system_info",
+      "doc_updater",
+      "alert_dispatch",
+      "folder_analyzer",
+      "document_ocr",
+      "mcp_sqlite_read_query",
+      "mcp_sqlite_list_tables",
+      "mcp_sqlite_describe_table",
+      "mcp_filesystem_read_file"
+    ],
+    "comms_agent": [
+      "webhook_send",
+      "file_reader",
+      "alert_dispatch",
+      "doc_updater",
+      "mcp_slack_post_message",
+      "mcp_slack_list_channels",
+      "mcp_slack_get_channel_history",
+      "mcp_fetch_get",
+      "mcp_time_get_current_time"
+    ],
+    "prompt_engineer": [
+      "file_reader",
+      "system_info",
+      "mcp_filesystem_read_file",
+      "mcp_time_get_current_time"
+    ],
+    "token_optimizer": [
+      "file_reader",
+      "system_info",
+      "mcp_filesystem_read_file",
+      "mcp_time_get_current_time"
+    ],
+    "curriculum_advisor": [
+      "file_reader",
+      "system_info",
+      "mcp_filesystem_read_file",
+      "mcp_time_get_current_time"
+    ],
+    "vocabulary_coach": [
+      "file_reader",
+      "system_info",
+      "mcp_filesystem_read_file",
+      "mcp_time_get_current_time"
+    ],
+    "career_intel": [
+      "file_reader",
+      "system_info",
+      "mcp_filesystem_read_file",
+      "mcp_fetch_get",
+      "mcp_time_get_current_time"
+    ],
+    "accreditation_advisor": [
+      "file_reader",
+      "system_info",
+      "doc_updater",
+      "mcp_filesystem_read_file",
+      "mcp_time_get_current_time"
+    ],
+    "pedagogy_agent": [
+      "file_reader",
+      "system_info",
+      "doc_updater",
+      "mcp_filesystem_read_file",
+      "mcp_time_get_current_time"
+    ],
+    "higgsfield_agent": [
+      "hf_login",
+      "hf_navigate",
+      "hf_create_soul_id",
+      "hf_submit_video",
+      "hf_poll_result",
+      "hf_log_evidence",
+      "file_reader",
+      "db_query",
+      "alert_dispatch",
+      "doc_updater"
+    ],
+    "higgsfield_research_agent": [
+      "file_reader",
+      "db_query",
+      "doc_updater",
+      "alert_dispatch"
+    ],
+    "ocr_agent": [
+      "document_ocr",
+      "file_reader",
+      "folder_analyzer",
+      "system_info",
+      "alert_dispatch",
+      "log_tail"
+    ],
+    "knowledge_agent": [
+      "file_reader",
+      "system_info",
+      "doc_updater",
+      "log_tail",
+      "mcp_filesystem_read_file",
+      "mcp_filesystem_list_directory",
+      "mcp_filesystem_search_files"
+    ]
+  }
+}
