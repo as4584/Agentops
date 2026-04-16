@@ -16,6 +16,6 @@ sqlalchemy>=2.0.0
 playwright>=1.40.0
 rank-bm25>=0.2.2
 anthropic>=0.87.0
-pypdf>=4.0.0
+pypdf>=6.10.1  # CVE-2026-40260, GHSA-jj6c-8h6c-hppx
 glmocr[server]>=0.1.0
 discord.py>=2.3.0
