@@ -6,7 +6,12 @@
  * No direct backend mutation.
  */
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api/proxy';
+// In the browser, always use the Next.js proxy so we avoid direct cross-origin
+// backend calls and keep auth/header handling on the server side.
+export const API_BASE =
+  typeof window === 'undefined'
+    ? process.env.NEXT_PUBLIC_API_URL || '/api/proxy'
+    : '/api/proxy';
 
 export interface AgentDefinition {
   agent_id: string;

@@ -32,7 +32,7 @@ const PERSONAS = {
     accent: 'rgba(26,130,255,0.10)',
     icon: IconBrain,
     defaultModel: 'lex',
-    chatAgent: 'soul_core',
+    chatAgent: 'auto',
   },
   dev: {
     agentIds: ['code_review_agent', 'devops_agent'],
