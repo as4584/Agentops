@@ -272,13 +272,14 @@ DEFAULT_TASK_MODELS: dict[str, str] = {
     "qa_review": "claude-sonnet",
     "web_generation": "lex-webgen-v1",
     "general": OLLAMA_MODEL,
-    # Sprint 1: explicit role-based keys for the ReAct runtime
+    # Sprint 1: explicit role-based keys for the ReAct runtime.
+    # All defaults are local Ollama models — local-first principle (no external API calls).
     "router": "qwen2.5:3b",
-    "planner": "gemma-3-27b-it:free",
-    "code_planner": "qwen3-coder:free",
+    "planner": "qwen2.5",
+    "code_planner": "qwen2.5-coder:7b",
     "executor": "qwen2.5-coder:7b",
     "validator_routine": "llama3.2",
-    "validator_high_risk": "deepseek-r1:free",
+    "validator_high_risk": "deepseek-r1:7b",
     "retrieval_rewrite": "llama3.2:1b",
 }
 

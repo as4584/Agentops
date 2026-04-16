@@ -160,7 +160,8 @@ def test_mcp_tool_map_has_all_expected_groups():
 
 
 def test_mcp_tool_map_total_count():
-    assert len(MCP_TOOL_MAP) == 26
+    # 26 original MCP tools + 5 GitNexus tools added in Sprint 5
+    assert len(MCP_TOOL_MAP) == 31
 
 
 def test_mcp_tool_map_all_values_are_two_tuples():

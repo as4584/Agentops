@@ -122,7 +122,7 @@ class MemoryStore:
         Sprint 4: use this method from all async agent code (process_message_v2, etc.)
         instead of calling write() directly to avoid event-loop blocking.
         """
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, self.write, namespace, key, value)
 
     def delete(self, namespace: str, key: str) -> bool:
