@@ -198,6 +198,14 @@ AGENT_PLANNER_ENABLED: bool = os.getenv("AGENT_PLANNER_ENABLED", "false").lower(
 AGENT_VALIDATOR_HIGH_RISK_THRESHOLD: str = os.getenv("AGENT_VALIDATOR_HIGH_RISK_THRESHOLD", "HIGH")
 
 # ---------------------------------------------------------------------------
+# GitNexus Code Intelligence (Sprint 5)
+# ---------------------------------------------------------------------------
+# Enable GitNexus MCP tools for code_review_agent, security_agent, devops_agent.
+GITNEXUS_ENABLED: bool = os.getenv("GITNEXUS_ENABLED", "false").lower() == "true"
+# Default indexed repo name (used by planner hints and tools when no repo is specified).
+GITNEXUS_REPO_NAME: str = os.getenv("GITNEXUS_REPO_NAME", "Agentop")
+
+# ---------------------------------------------------------------------------
 # Tool Safety Configuration
 # ---------------------------------------------------------------------------
 # Whitelisted commands for safe_shell tool

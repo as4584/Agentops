@@ -23,7 +23,14 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any, cast
 
-from backend.config import AGENT_MAX_STEPS, AGENT_PLANNER_ENABLED, AGENT_RUNTIME_V2, AGENT_VALIDATOR_HIGH_RISK_THRESHOLD
+from backend.config import (
+    AGENT_MAX_STEPS,
+    AGENT_PLANNER_ENABLED,
+    AGENT_RUNTIME_V2,
+    AGENT_VALIDATOR_HIGH_RISK_THRESHOLD,
+    GITNEXUS_ENABLED,
+    GITNEXUS_REPO_NAME,
+)
 from backend.llm import OllamaClient
 from backend.memory import memory_store
 from backend.models import (
@@ -663,7 +670,13 @@ class BaseAgent:
             f"{self.definition.system_prompt}\n\n"
             "You are acting as the PLANNER. Decompose the task into clear execution steps.\n"
             f"Available tools:\n{tools_info}\n\n"
-            "Respond with a JSON plan. Keep steps concise and actionable."
+            + (
+                f"GitNexus is available (repo: {GITNEXUS_REPO_NAME}). "
+                "For code-change tasks, add 'mcp_gitnexus_impact' as a required_tool and include "
+                "a step to assess blast-radius BEFORE any code modification steps.\n\n"
+                if GITNEXUS_ENABLED and is_code_task else ""
+            )
+            + "Respond with a JSON plan. Keep steps concise and actionable."
         )
         messages: list[dict[str, Any]] = [
             {"role": "system", "content": plan_system},
@@ -1348,6 +1361,12 @@ DEVOPS_AGENT_DEFINITION = AgentDefinition(
         "k8s_control",
         # Browser worker pod
         "browser_control",
+        # GitNexus code intelligence (Sprint 5)
+        "mcp_gitnexus_query",
+        "mcp_gitnexus_context",
+        "mcp_gitnexus_impact",
+        "mcp_gitnexus_detect_changes",
+        "mcp_gitnexus_list_repos",
     ],
     memory_namespace="devops_agent",
     allowed_actions=[
@@ -1475,6 +1494,12 @@ CODE_REVIEW_AGENT_DEFINITION = AgentDefinition(
         "mcp_github_search_code",
         "mcp_filesystem_read_file",
         "mcp_filesystem_list_directory",
+        # GitNexus code intelligence (Sprint 5)
+        "mcp_gitnexus_query",
+        "mcp_gitnexus_context",
+        "mcp_gitnexus_impact",
+        "mcp_gitnexus_detect_changes",
+        "mcp_gitnexus_list_repos",
     ],
     memory_namespace="code_review_agent",
     allowed_actions=[
@@ -1517,6 +1542,12 @@ SECURITY_AGENT_DEFINITION = AgentDefinition(
         "mcp_github_get_file_contents",
         "mcp_filesystem_read_file",
         "mcp_filesystem_search_files",
+        # GitNexus code intelligence (Sprint 5)
+        "mcp_gitnexus_query",
+        "mcp_gitnexus_context",
+        "mcp_gitnexus_impact",
+        "mcp_gitnexus_detect_changes",
+        "mcp_gitnexus_list_repos",
     ],
     memory_namespace="security_agent",
     allowed_actions=[

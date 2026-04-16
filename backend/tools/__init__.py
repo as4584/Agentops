@@ -455,6 +455,98 @@ TOOL_REGISTRY: dict[str, ToolDefinition] = {
         modification_type=ModificationType.STATE_MODIFY,
         requires_doc_update=False,
     ),
+    # ── GitNexus MCP Server — Code Intelligence (Sprint 5) ───
+    # Restricted to: code_review_agent, security_agent, devops_agent
+    # Requires GITNEXUS_ENABLED=true and a running GitNexus MCP server.
+    "mcp_gitnexus_query": ToolDefinition(
+        name="mcp_gitnexus_query",
+        description=(
+            "[MCP/GitNexus] Process-grouped code intelligence. "
+            "Returns execution flows and code paths related to a concept or symbol. "
+            "Use for understanding how a feature works end-to-end."
+        ),
+        modification_type=ModificationType.READ_ONLY,
+        requires_doc_update=False,
+        parameters={
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Natural language concept or symbol to search for"},
+                "repo": {"type": "string", "description": "Indexed repo name (default: Agentop)"},
+            },
+            "required": ["query"],
+        },
+    ),
+    "mcp_gitnexus_context": ToolDefinition(
+        name="mcp_gitnexus_context",
+        description=(
+            "[MCP/GitNexus] 360-degree symbol view. "
+            "Returns categorised references, callers, callees, and process participation for a symbol. "
+            "Use before refactoring or reviewing a specific function/class."
+        ),
+        modification_type=ModificationType.READ_ONLY,
+        requires_doc_update=False,
+        parameters={
+            "type": "object",
+            "properties": {
+                "symbol": {"type": "string", "description": "Function, class, or method name"},
+                "repo": {"type": "string", "description": "Indexed repo name (default: Agentop)"},
+            },
+            "required": ["symbol"],
+        },
+    ),
+    "mcp_gitnexus_impact": ToolDefinition(
+        name="mcp_gitnexus_impact",
+        description=(
+            "[MCP/GitNexus] Symbol blast-radius analysis. "
+            "Returns what breaks at depth 1/2/3 if a symbol changes, with confidence scores. "
+            "Use to assess risk before any code change."
+        ),
+        modification_type=ModificationType.READ_ONLY,
+        requires_doc_update=False,
+        parameters={
+            "type": "object",
+            "properties": {
+                "symbol": {"type": "string", "description": "Symbol whose change impact to analyse"},
+                "repo": {"type": "string", "description": "Indexed repo name (default: Agentop)"},
+                "depth": {"type": "integer", "description": "Traversal depth (1–3, default 2)", "default": 2},
+            },
+            "required": ["symbol"],
+        },
+        idempotent=True,
+    ),
+    "mcp_gitnexus_detect_changes": ToolDefinition(
+        name="mcp_gitnexus_detect_changes",
+        description=(
+            "[MCP/GitNexus] Git-diff impact analysis. "
+            "Returns what the current working-tree changes affect across the codebase. "
+            "Use at PR review time to understand the full blast radius of staged changes."
+        ),
+        modification_type=ModificationType.READ_ONLY,
+        requires_doc_update=False,
+        parameters={
+            "type": "object",
+            "properties": {
+                "repo": {"type": "string", "description": "Indexed repo name (default: Agentop)"},
+            },
+            "required": [],
+        },
+        idempotent=True,
+    ),
+    "mcp_gitnexus_list_repos": ToolDefinition(
+        name="mcp_gitnexus_list_repos",
+        description=(
+            "[MCP/GitNexus] List all repos indexed in the GitNexus knowledge graph. "
+            "Use to discover available repo names before calling other GitNexus tools."
+        ),
+        modification_type=ModificationType.READ_ONLY,
+        requires_doc_update=False,
+        parameters={
+            "type": "object",
+            "properties": {},
+            "required": [],
+        },
+        idempotent=True,
+    ),
 }
 
 

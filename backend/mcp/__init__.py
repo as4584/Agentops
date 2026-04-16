@@ -89,6 +89,12 @@ MCP_TOOL_MAP: dict[str, tuple[str, str]] = {
     "mcp_slack_post_message": ("slack", "post_message"),
     "mcp_slack_list_channels": ("slack", "list_channels"),
     "mcp_slack_get_channel_history": ("slack", "get_channel_history"),
+    # GitNexus MCP Server (code intelligence — Sprint 5)
+    "mcp_gitnexus_query": ("gitnexus", "query"),
+    "mcp_gitnexus_context": ("gitnexus", "context"),
+    "mcp_gitnexus_impact": ("gitnexus", "impact"),
+    "mcp_gitnexus_detect_changes": ("gitnexus", "detect_changes"),
+    "mcp_gitnexus_list_repos": ("gitnexus", "list_repos"),
 }
 
 
