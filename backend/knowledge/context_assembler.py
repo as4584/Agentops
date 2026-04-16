@@ -45,6 +45,22 @@ def get_vector_store() -> VectorStore:
     return _vector_store
 
 
+# Separate fallback singleton — only created when Qdrant is unavailable.
+_fallback_store: Any = None
+
+
+def _get_fallback_store(llm_client: Any) -> Any:
+    """Return the KnowledgeVectorStore singleton for fallback retrieval."""
+    global _fallback_store
+    if _fallback_store is None:
+        try:
+            from backend.knowledge import KnowledgeVectorStore
+            _fallback_store = KnowledgeVectorStore(llm_client)
+        except Exception as exc:
+            logger.warning(f"ContextAssembler: failed to init fallback KnowledgeVectorStore: {exc}")
+    return _fallback_store
+
+
 class ContextAssembler:
     """
     Unified RAG retrieval service for any Agentop agent.
@@ -61,6 +77,43 @@ class ContextAssembler:
     def __init__(self, llm_client: OllamaClient) -> None:
         self._llm = llm_client
         self._store = get_vector_store()
+        if not QDRANT_AVAILABLE:
+            logger.warning(
+                "ContextAssembler: qdrant-client not installed. "
+                "All retrieval will use JSON KnowledgeVectorStore fallback. "
+                "Install qdrant-client and run Qdrant to enable vector memory."
+            )
+        elif self._store._client is None:
+            logger.warning(
+                f"ContextAssembler: Qdrant client not connected (host={QDRANT_HOST}:{QDRANT_PORT}). "
+                "Retrieval will fall back to JSON KnowledgeVectorStore until Qdrant is reachable."
+            )
+
+    def health_check(self) -> dict[str, Any]:
+        """
+        Return the current health state of the vector retrieval backend.
+
+        Used by server lifespan and monitoring routes to surface Qdrant status.
+
+        Returns a dict with keys:
+            qdrant_available (bool): qdrant-client is installed and client is connected.
+            fallback_active (bool): retrieval is operating on JSON KnowledgeVectorStore.
+            host (str): configured Qdrant host:port.
+            in_memory (bool): whether in-memory mode is active.
+            collections (list[str]): known initialized collection names.
+        """
+        connected = bool(QDRANT_AVAILABLE and self._store._client is not None)
+        try:
+            collections = list(self._store._collections_initialized) if connected else []
+        except Exception:
+            collections = []
+        return {
+            "qdrant_available": connected,
+            "fallback_active": not connected,
+            "host": f"{QDRANT_HOST}:{QDRANT_PORT}",
+            "in_memory": QDRANT_IN_MEMORY,
+            "collections": collections,
+        }
 
     async def retrieve(
         self,
@@ -198,11 +251,20 @@ class ContextAssembler:
         return "Retrieved context:\n" + "\n\n".join(lines)
 
     async def _fallback_retrieve(self, query: str, limit: int) -> str:
-        """Fall back to JSON KnowledgeVectorStore when Qdrant is unavailable."""
-        try:
-            from backend.knowledge import KnowledgeVectorStore
+        """
+        Fall back to JSON KnowledgeVectorStore when Qdrant is unavailable.
 
-            kv = KnowledgeVectorStore(self._llm)
+        Logs a WARNING on every call so operators can see that RAG is degraded.
+        This is intentionally noisy — silence here would hide a misconfiguration.
+        """
+        logger.warning(
+            "ContextAssembler: Qdrant unavailable — using JSON KnowledgeVectorStore fallback. "
+            "Set QDRANT_IN_MEMORY=true for tests or point QDRANT_HOST to a running instance."
+        )
+        try:
+            kv = _get_fallback_store(self._llm)
+            if kv is None:
+                return ""
             results = await kv.search(query=query, top_k=limit)
             if not results:
                 return ""

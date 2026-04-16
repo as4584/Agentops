@@ -395,6 +395,25 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         f"MCP Gateway: enabled={mcp_status['enabled']}, cli={mcp_status['cli_available']}, tools={mcp_status['discovered_tools']}/{mcp_status['declared_tool_count']}"
     )
 
+    # ── Qdrant vector store health check ────────────────────────────────────
+    try:
+        from backend.knowledge.context_assembler import ContextAssembler, get_vector_store
+        _vs = get_vector_store()
+        _ca_health = ContextAssembler(_llm_client).health_check()
+        if _ca_health["qdrant_available"]:
+            logger.info(
+                f"Qdrant connected: host={_ca_health['host']} "
+                f"in_memory={_ca_health['in_memory']} — vector retrieval active"
+            )
+        else:
+            logger.warning(
+                f"Qdrant NOT connected (host={_ca_health['host']}). "
+                "ContextAssembler will use JSON KnowledgeVectorStore fallback. "
+                "Start Qdrant with: docker run -p 6333:6333 qdrant/qdrant"
+            )
+    except Exception as _exc:
+        logger.warning(f"Qdrant startup health check failed: {_exc}")
+
     # Optional startup prewarm so the first semantic retrieval does not pay
     # indexing cost at request time.
     if KNOWLEDGE_SEED_ON_STARTUP and _orchestrator is not None:
