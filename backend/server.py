@@ -435,6 +435,20 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as _exc:
         logger.warning(f"Qdrant startup health check failed: {_exc}")
 
+    # ── Embedding config startup validation (Sprint 5) ───────────────────────
+    # Validates that QDRANT_EMBED_MODEL and QDRANT_DEFAULT_DIM are consistent.
+    # Logs warnings for mismatches — does NOT abort startup (graceful degradation).
+    try:
+        from backend.knowledge.context_assembler import validate_embedding_startup
+        _embed_warnings = validate_embedding_startup()
+        if _embed_warnings:
+            for _warn in _embed_warnings:
+                logger.warning(f"[EMBEDDING_CONFIG] {_warn}")
+        else:
+            logger.info("[EMBEDDING_CONFIG] Embedding config OK")
+    except Exception as _exc:
+        logger.warning(f"Embedding config validation failed: {_exc}")
+
     # Optional startup prewarm so the first semantic retrieval does not pay
     # indexing cost at request time.
     if KNOWLEDGE_SEED_ON_STARTUP and _orchestrator is not None:
@@ -827,6 +841,32 @@ async def health_deps() -> dict[str, Any]:
     # GitNexus not-enabled is not a degraded dep; only flag ok=False when enabled but broken.
     gn_ok = (not gn_state.enabled) or gn_state.usable
 
+    # 7. Qdrant vector store + embedding config (Sprint 5)
+    qdrant_ok = False
+    qdrant_detail: dict[str, Any] = {"ok": False}
+    embed_config_ok = False
+    embed_detail: dict[str, Any] = {}
+    try:
+        from backend.knowledge.context_assembler import ContextAssembler, validate_embedding_startup
+        _ca = ContextAssembler(_llm_client)
+        _ca_health = _ca.health_check()
+        qdrant_ok = bool(_ca_health.get("qdrant_available", False))
+        qdrant_detail = {
+            "connected": qdrant_ok,
+            "host": _ca_health.get("host", ""),
+            "in_memory": _ca_health.get("in_memory", False),
+            "fallback_count": _ca_health.get("fallback_count", 0),
+        }
+        _embed_warns = validate_embedding_startup()
+        embed_config_ok = len(_embed_warns) == 0
+        embed_detail = {
+            "ok": embed_config_ok,
+            "warnings": _embed_warns,
+        }
+    except Exception as _dep_exc:
+        qdrant_detail = {"connected": False, "error": str(_dep_exc)[:100]}
+        embed_detail = {"ok": False, "error": str(_dep_exc)[:100]}
+
     deps = {
         "ollama": {"ok": llm_ok, "detail": llm_detail},
         "mcp_bridge": {"ok": mcp_status["cli_available"], "detail": mcp_status},
@@ -834,9 +874,14 @@ async def health_deps() -> dict[str, Any]:
         "docker": {"ok": docker_ok, "path": docker_path},
         "ruff": {"ok": ruff_ok, "path": ruff_path},
         "gitnexus": {"ok": gn_ok, "detail": gn_detail},
+        "qdrant": {"ok": qdrant_ok, "detail": qdrant_detail},
+        "embedding_config": {"ok": embed_config_ok, "detail": embed_detail},
     }
 
-    all_ok = all(d["ok"] for d in deps.values())
+    # Qdrant not-connected is expected in local dev — it triggers JSON fallback.
+    # Only flag the overall status as degraded for hard failures (ollama, ruff).
+    _hard_deps = {k: v for k, v in deps.items() if k not in ("qdrant", "embedding_config")}
+    all_ok = all(d["ok"] for d in _hard_deps.values())
     return {
         "status": "healthy" if all_ok else "degraded",
         "dependencies": deps,
