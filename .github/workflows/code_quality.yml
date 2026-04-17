@@ -37,7 +37,7 @@ jobs:
       - name: Ruff lint (JSON)
         run: |
           ruff check . --output-format=json \
-            --exclude .venv,node_modules,htmlcov \
+            --extend-exclude .venv,htmlcov \
             > reports/quality/ruff.json || true
 
       - name: Mypy type coverage

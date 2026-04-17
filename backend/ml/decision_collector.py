@@ -23,6 +23,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from backend.agents import ALL_AGENT_DEFINITIONS
 from backend.config import PROJECT_ROOT
 from backend.utils import logger
 
@@ -32,27 +33,7 @@ TRAINING_DIR.mkdir(parents=True, exist_ok=True)
 DPO_DIR.mkdir(parents=True, exist_ok=True)
 
 # Valid agent IDs for validation
-VALID_AGENTS: frozenset[str] = frozenset(
-    {
-        "soul_core",
-        "devops_agent",
-        "monitor_agent",
-        "self_healer_agent",
-        "code_review_agent",
-        "security_agent",
-        "data_agent",
-        "comms_agent",
-        "cs_agent",
-        "it_agent",
-        "knowledge_agent",
-        "ocr_agent",
-        "prompt_engineer",
-        "token_optimizer",
-        "career_intel",
-        "higgsfield_agent",
-        "BLOCKED",
-    }
-)
+VALID_AGENTS: frozenset[str] = frozenset({*ALL_AGENT_DEFINITIONS.keys(), "BLOCKED"})
 
 VALID_TOOLS: frozenset[str] = frozenset(
     {

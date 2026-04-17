@@ -107,3 +107,8 @@ class TestRuntimeInventory:
                 continue
             agent_gn = [t for t in tools if t.startswith(gitnexus_prefix)]
             assert not agent_gn, f"Unapproved agent '{agent}' holds GitNexus tools: {agent_gn}"
+
+    def test_router_registry_alignment_present(self, inv):
+        assert inv["router_registry_aligned"] is True
+        assert inv["auto_routable_agent_count"] == inv["registered_agent_count"]
+        assert set(inv["auto_routable_agents"]) == set(inv["registered_agents"])

@@ -19,7 +19,7 @@ from typing import Any
 def _cache_key(*args: Any) -> str:
     """Deterministic MD5 key from arbitrary args."""
     serialized = json.dumps(args, sort_keys=True, default=str)
-    return hashlib.md5(serialized.encode("utf-8")).hexdigest()
+    return hashlib.md5(serialized.encode("utf-8"), usedforsecurity=False).hexdigest()
 
 
 class EmbeddingCache:

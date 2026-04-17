@@ -39,6 +39,20 @@ class TestArchitectureDriftInvariants:
         _check_gitnexus_agent_permissions(failures)
         assert not failures, f"GitNexus agent permissions invariant failed: {failures}"
 
+    def test_router_registry_alignment_invariant(self):
+        from scripts.verify_architecture_drift import _check_router_registry_alignment
+
+        failures: list[str] = []
+        _check_router_registry_alignment(failures)
+        assert not failures, f"Router registry alignment invariant failed: {failures}"
+
+    def test_knowledge_rag_convergence_invariant(self):
+        from scripts.verify_architecture_drift import _check_knowledge_rag_convergence
+
+        failures: list[str] = []
+        _check_knowledge_rag_convergence(failures)
+        assert not failures, f"Knowledge RAG convergence invariant failed: {failures}"
+
     def test_verify_all_passes(self):
         from scripts.verify_architecture_drift import verify_all
 
@@ -100,3 +114,27 @@ class TestArchitectureDriftInvariants:
         from scripts.verify_architecture_drift import _APPROVED_GITNEXUS_AGENTS
 
         assert _APPROVED_GITNEXUS_AGENTS == frozenset({"code_review_agent", "devops_agent", "security_agent"})
+
+    def test_drift_detected_when_router_registry_is_out_of_sync(self):
+        from unittest.mock import patch
+
+        import backend.orchestrator.lex_router as lr
+        from scripts.verify_architecture_drift import _check_router_registry_alignment
+
+        failures: list[str] = []
+        with patch.object(lr, "VALID_AGENTS", {"soul_core"}):
+            _check_router_registry_alignment(failures)
+        assert failures
+
+    def test_drift_detected_when_knowledge_path_uses_legacy_store(self):
+        from unittest.mock import patch
+
+        from scripts.verify_architecture_drift import _check_knowledge_rag_convergence
+
+        orchestrator_source = "self._knowledge_store.search(message)\n"
+        route_source = "from backend.knowledge import KnowledgeVectorStore\n"
+
+        with patch("pathlib.Path.read_text", side_effect=[orchestrator_source, route_source]):
+            failures: list[str] = []
+            _check_knowledge_rag_convergence(failures)
+        assert failures

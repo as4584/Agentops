@@ -405,3 +405,20 @@
 - **Risk Assessment:** MEDIUM
 - **Impacted Subsystems:** Repo layout, backend API surface, orchestration governance, frontend QA pipeline, CI workflows
 - **Documentation Updated:** YES
+
+### 2026-04-17T03:48:00Z — Sprint 7: Knowledge RAG convergence + router-registry alignment
+
+- **Agent:** GitHub Copilot
+- **Files Modified:**
+  - `backend/orchestrator/lex_router.py` — router registry alignment, preserved 12-agent general auto-route baseline, added explicit specialist routing
+  - `backend/orchestrator/__init__.py` — knowledge-agent live path migrated to `ContextAssembler`, Qdrant doc seeding wired into startup/reindex, business-profile ingestion/search converged
+  - `backend/routes/knowledge.py`, `backend/server.py` — `/knowledge` routes and startup wiring moved to `ContextAssembler` + Qdrant seeding
+  - `backend/knowledge/context_assembler.py`, `backend/knowledge/doc_seed.py`, `scripts/seed_knowledge_base.py` — structured retrieval, business-profile support, deterministic markdown seeding utility
+  - `backend/ml/decision_collector.py` — routing decision validation aligned with the full agent registry
+  - `scripts/generate_runtime_inventory.py`, `scripts/verify_architecture_drift.py`, `scripts/generate_release_evidence.py` — new router/alignment inventory fields and Sprint 7 release gates
+  - `backend/tests/test_lex_router.py`, `backend/tests/test_orchestrator_routing.py`, `backend/tests/test_runtime_inventory.py`, `backend/tests/test_architecture_drift.py`, `backend/tests/test_sprint7_convergence.py` — regression coverage for the converged routing and retrieval paths
+  - `reports/runtime_inventory.json`, `reports/release_evidence.json`, `CLAUDE.md`, `docs/CHANGE_LOG.md`
+- **Reason:** Converge live knowledge retrieval on the Qdrant-first `ContextAssembler` path, formalize project-doc seeding, and ensure the router’s declared valid agents match the registry without regressing the existing 12-agent baseline.
+- **Risk Assessment:** MEDIUM
+- **Impacted Subsystems:** Auto-routing, knowledge retrieval, business-profile intake, startup/reindex flows, release evidence, runtime inventory
+- **Documentation Updated:** YES

@@ -341,7 +341,7 @@ class TestV2RuntimeToolResult:
     def _make_agent(self, agent_id: str = "security_agent"):
         from backend.agents import create_agent
 
-        mock_llm = AsyncMock()
+        mock_llm = MagicMock()
         return create_agent(agent_id, mock_llm)
 
     @pytest.mark.asyncio
@@ -421,7 +421,7 @@ class TestExplicitDegradedBehavior:
     def _make_agent(self, agent_id: str = "security_agent"):
         from backend.agents import create_agent
 
-        mock_llm = AsyncMock()
+        mock_llm = MagicMock()
         return create_agent(agent_id, mock_llm)
 
     @pytest.mark.asyncio

@@ -276,7 +276,7 @@ def _enforce_domain(url: str) -> None:
 
 def _item_id(url: str) -> str:
     """Stable short hash for deduplication."""
-    return hashlib.sha1(url.encode()).hexdigest()[:12]
+    return hashlib.sha1(url.encode(), usedforsecurity=False).hexdigest()[:12]
 
 
 def _is_high_relevance(title: str, summary: str) -> bool:

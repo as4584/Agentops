@@ -46,6 +46,14 @@ def _make_proc(returncode: int = 0, stdout: bytes = b"ok", stderr: bytes = b"") 
     return proc
 
 
+def _raise_async(exception: Exception):
+    async def _raiser(*args, **kwargs):
+        del args, kwargs
+        raise exception
+
+    return _raiser
+
+
 # ---------------------------------------------------------------------------
 # Tool Registry
 # ---------------------------------------------------------------------------
@@ -138,11 +146,8 @@ class TestSafeShell:
         assert result["return_code"] == 0
 
     async def test_subprocess_timeout(self):
-        async def _slow_communicate():
-            raise TimeoutError()
-
-        mock_proc = AsyncMock()
-        mock_proc.communicate.side_effect = TimeoutError()
+        mock_proc = MagicMock()
+        mock_proc.communicate.return_value = object()
 
         with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
             with patch("asyncio.wait_for", side_effect=TimeoutError()):
@@ -151,7 +156,7 @@ class TestSafeShell:
         assert "timed out" in result["stderr"].lower()
 
     async def test_subprocess_exception(self):
-        with patch("asyncio.create_subprocess_exec", side_effect=OSError("not found")):
+        with patch("asyncio.create_subprocess_exec", new=_raise_async(OSError("not found"))):
             result = await safe_shell("ls .", "agent")
         assert result["blocked"] is False
         assert "not found" in result["stderr"]
@@ -339,7 +344,7 @@ class TestGitOps:
         assert result["return_code"] == 0
 
     async def test_subprocess_exception(self):
-        with patch("asyncio.create_subprocess_exec", side_effect=OSError("git not found")):
+        with patch("asyncio.create_subprocess_exec", new=_raise_async(OSError("git not found"))):
             result = await git_ops("status", "agent")
         assert result["return_code"] == -1
 
@@ -628,11 +633,8 @@ class TestProcessRestart:
         assert result["success"] is True
 
     async def test_timeout_returns_failure(self):
-        async def _slow():
-            raise TimeoutError()
-
-        mock_proc = AsyncMock()
-        mock_proc.communicate.side_effect = TimeoutError()
+        mock_proc = MagicMock()
+        mock_proc.communicate.return_value = object()
 
         with patch("asyncio.create_subprocess_exec", return_value=mock_proc):
             with patch("asyncio.wait_for", side_effect=TimeoutError()):
@@ -641,7 +643,7 @@ class TestProcessRestart:
         assert "timed out" in result["error"].lower()
 
     async def test_subprocess_exception(self):
-        with patch("asyncio.create_subprocess_exec", side_effect=OSError("pkill missing")):
+        with patch("asyncio.create_subprocess_exec", new=_raise_async(OSError("pkill missing"))):
             result = await process_restart("backend", "agent", confirm=True, reason="unit test")
         assert result["success"] is False
 

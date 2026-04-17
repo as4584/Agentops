@@ -16,13 +16,15 @@ import asyncio
 import json
 import os
 import tempfile
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from threading import Lock
 from typing import Any
 
 from backend.config import MEMORY_DIR
 from backend.utils import logger
+
+UTC_TZ = timezone.utc  # noqa: UP017
 
 
 def _atomic_write_json(path: Path, data: Any) -> None:
@@ -134,7 +136,7 @@ class MemoryStore:
             if "data" not in store:
                 store["data"] = {}
             store["data"][key] = value
-            store["last_modified"] = datetime.utcnow().isoformat()
+            store["last_modified"] = datetime.now(UTC_TZ).isoformat()
             self._save_store(namespace, store)
             logger.info(f"Memory WRITE: ns={namespace}, key={key}")
 
@@ -156,7 +158,7 @@ class MemoryStore:
             store = self._load_store(namespace)
             if key in store.get("data", {}):
                 del store["data"][key]
-                store["last_modified"] = datetime.utcnow().isoformat()
+                store["last_modified"] = datetime.now(UTC_TZ).isoformat()
                 self._save_store(namespace, store)
                 logger.info(f"Memory DELETE: ns={namespace}, key={key}")
                 return True
@@ -176,7 +178,7 @@ class MemoryStore:
                 data = json.loads(events_file.read_text())
             except (json.JSONDecodeError, FileNotFoundError):
                 data = {"events": []}
-            event["timestamp"] = datetime.utcnow().isoformat()
+            event["timestamp"] = datetime.now(UTC_TZ).isoformat()
             data["events"].append(event)
             _atomic_write_json(events_file, data)
             logger.info(f"Shared event appended: {event.get('type', 'unknown')}")
@@ -244,7 +246,7 @@ class MemoryStore:
                 "from_agent": from_agent,
                 "to_agent": to_agent,
                 "payload": payload,
-                "created": datetime.utcnow().isoformat(),
+                "created": datetime.now(UTC_TZ).isoformat(),
                 "ttl_seconds": ttl_seconds,
             }
             data["handoffs"].append(entry)
@@ -271,12 +273,14 @@ class MemoryStore:
             except (json.JSONDecodeError, FileNotFoundError):
                 return []
 
-            now = datetime.utcnow()
+            now = datetime.now(UTC_TZ)
             alive: list[dict[str, Any]] = []
             matched: list[dict[str, Any]] = []
 
             for entry in data.get("handoffs", []):
                 created = datetime.fromisoformat(entry["created"])
+                if created.tzinfo is None:
+                    created = created.replace(tzinfo=UTC_TZ)
                 age = (now - created).total_seconds()
                 if age > entry.get("ttl_seconds", 300):
                     continue  # expired — prune
@@ -304,8 +308,8 @@ class MemoryStore:
                 return json.loads(store_file.read_text())
             except json.JSONDecodeError:
                 logger.warning(f"Corrupted store for namespace {namespace}, resetting")
-                return {"data": {}, "created": datetime.utcnow().isoformat()}
-        return {"data": {}, "created": datetime.utcnow().isoformat()}
+                return {"data": {}, "created": datetime.now(UTC_TZ).isoformat()}
+        return {"data": {}, "created": datetime.now(UTC_TZ).isoformat()}
 
     def _save_store(self, namespace: str, store: dict[str, Any]) -> None:
         """Save the JSON store for a namespace atomically."""

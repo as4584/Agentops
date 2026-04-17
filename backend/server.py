@@ -22,7 +22,7 @@ import uuid
 from collections import defaultdict
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket
@@ -81,6 +81,8 @@ from backend.websocket.hub import handle_ws_connection, ws_hub
 from deerflow.execution import ExecutionAnalyzer, ExecutionRecorder
 from deerflow.tools.health import ToolHealthMonitor
 from deerflow.tools.repair import ToolRepairEngine
+
+UTC_TZ = timezone.utc  # noqa: UP017
 
 # ---------------------------------------------------------------------------
 # Application State (module-level singletons)
@@ -190,7 +192,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Wire knowledge vector store to REST routes
     if hasattr(_orchestrator, "_knowledge_store"):
-        set_knowledge_store(_orchestrator._knowledge_store)
+        set_knowledge_store(_orchestrator._knowledge_store, _llm_client)
 
     # DeerFlow observability fabric — recorder, analyzer, tool health monitor
     _execution_recorder = ExecutionRecorder(base_dir=PROJECT_ROOT / "data" / "agents")
@@ -691,7 +693,7 @@ async def root_redirect() -> RedirectResponse:
 @app.get("/health/live")
 async def health_live() -> JSONResponse:
     """Kubernetes liveness probe — returns 200 if process is alive."""
-    return JSONResponse({"status": "alive", "timestamp": datetime.utcnow().isoformat()})
+    return JSONResponse({"status": "alive", "timestamp": datetime.now(UTC_TZ).isoformat()})
 
 
 @app.get("/health/ready")
@@ -706,7 +708,7 @@ async def health_ready() -> JSONResponse:
         {
             "status": "ready",
             "uptime_seconds": round(time.time() - _start_time, 2),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC_TZ).isoformat(),
         }
     )
 
@@ -720,7 +722,7 @@ async def health_check() -> dict[str, Any]:
         "llm_available": llm_available,
         "drift_status": drift_guard.drift_status.value,
         "uptime_seconds": round(time.time() - _start_time, 2),
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC_TZ).isoformat(),
     }
 
 
@@ -818,7 +820,7 @@ async def health_deps() -> dict[str, Any]:
     return {
         "status": "healthy" if all_ok else "degraded",
         "dependencies": deps,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC_TZ).isoformat(),
     }
 
 
@@ -855,7 +857,7 @@ async def metrics() -> dict[str, Any]:
         # the JSON KnowledgeVectorStore fallback is used instead of Qdrant.
         "agentop_qdrant_fallback_total": _qdrant_fallback_count(),
         "_meta": {
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": datetime.now(UTC_TZ).isoformat(),
             "deployment_mode": "operator_only",
         },
     }
@@ -981,7 +983,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
                 agent_id=grounded_reply.agent_id,
                 message=grounded_reply.message,
                 drift_status=DriftStatus.GREEN,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC_TZ),
             )
 
     # ── Lex Router: auto-resolve agent when agent_id is "auto" ───────
@@ -1030,7 +1032,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
         agent_id=resolved_agent_id,
         message=result.get("response", ""),
         drift_status=DriftStatus(result.get("drift_status", "GREEN")),
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(UTC_TZ),
     )
 
 
@@ -1311,7 +1313,7 @@ async def stream_activity():
     async def event_generator():
         try:
             # Send initial connection event
-            yield f'event: connected\ndata: {{"status": "ok", "timestamp": "{datetime.utcnow().isoformat()}"}}\n\n'
+            yield f'event: connected\ndata: {{"status": "ok", "timestamp": "{datetime.now(UTC_TZ).isoformat()}"}}\n\n'
             while True:
                 try:
                     # Wait for next event with timeout for heartbeat
@@ -1319,7 +1321,7 @@ async def stream_activity():
                     yield event.to_sse()
                 except TimeoutError:
                     # Send heartbeat to keep connection alive
-                    yield f'event: heartbeat\ndata: {{"timestamp": "{datetime.utcnow().isoformat()}"}}\n\n'
+                    yield f'event: heartbeat\ndata: {{"timestamp": "{datetime.now(UTC_TZ).isoformat()}"}}\n\n'
         except asyncio.CancelledError:
             pass
         finally:
@@ -1976,7 +1978,7 @@ async def soul_reflect(trigger: str = "manual") -> dict[str, Any]:
     if not _orchestrator:
         raise HTTPException(status_code=503, detail="Orchestrator not initialized")
     reflection = await _orchestrator.soul_reflect(trigger=trigger)
-    return {"reflection": reflection, "trigger": trigger, "timestamp": datetime.utcnow().isoformat()}
+    return {"reflection": reflection, "trigger": trigger, "timestamp": datetime.now(UTC_TZ).isoformat()}
 
 
 @app.get("/soul/goals")

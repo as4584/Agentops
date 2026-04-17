@@ -1,0 +1,47 @@
+{
+  "generated_at": "2026-04-17T09:28:17.105346+00:00",
+  "overall_score": 48.2,
+  "grade": "F",
+  "dimensions": {
+    "lint": {
+      "score": 100.0,
+      "meta": {
+        "error_count": 0
+      }
+    },
+    "type_safety": {
+      "score": 0.0,
+      "meta": {
+        "error": "[Errno 2] No such file or directory: 'reports/quality/mypy/summary.json'"
+      }
+    },
+    "complexity": {
+      "score": 88.3,
+      "meta": {
+        "avg_complexity": 2.95,
+        "max_complexity": 35,
+        "sample_size": 4897
+      }
+    },
+    "maintainability": {
+      "score": 52.5,
+      "meta": {
+        "avg_mi": 52.49,
+        "sample_size": 274
+      }
+    },
+    "security": {
+      "score": 0.0,
+      "meta": {
+        "high": 0,
+        "medium": 36,
+        "low": 3767
+      }
+    }
+  },
+  "thresholds": {
+    "block_merge": 60,
+    "warn": 75,
+    "healthy": 85
+  }
+}

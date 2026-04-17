@@ -39,7 +39,7 @@ def _get_lock(namespace: str) -> asyncio.Lock:
 
 def content_id(content: str, prefix: str = "chunk") -> str:
     """Generate a deterministic MD5-based ID for a piece of content."""
-    md5 = hashlib.md5(content.encode("utf-8")).hexdigest()
+    md5 = hashlib.md5(content.encode("utf-8"), usedforsecurity=False).hexdigest()
     return f"{prefix}-{md5}"
 
 

@@ -326,7 +326,7 @@ cd frontend && npm install && npm run dev
 - [ ] **OpenClaw Gateway** — 40% complete (firewall ✅, lex-v2 ✅, Discord 40%, Telegram/Slack ❌)
 - [ ] **Animation Salvage Lab** (`animation_salvage_lab/`) has docs but no Python agent
 - [ ] **MCP Gateway** requires Docker CLI — graceful degradation needs integration test
-- [ ] **Knowledge Vector Store** — no scripts to seed the vector DB from project docs
+- [x] **~~Knowledge Vector Store~~** — project docs now seed into Qdrant via `scripts/seed_knowledge_base.py` and `backend/knowledge/doc_seed.py`
 - [ ] **Demo Videos** — OpenScreen skill is defined but no recorded demos exist yet in `output/demos/`
 - [ ] **ML Learning Lab** — golden eval set needs seeding with canonical test cases
 - [ ] **lex-v3** — larger training corpus (currently 5,624 examples across 186 files), boundary-specific hard negatives

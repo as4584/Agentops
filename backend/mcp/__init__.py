@@ -36,7 +36,7 @@ from __future__ import annotations
 import asyncio
 import json
 import shutil
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from backend.config import (
@@ -46,6 +46,8 @@ from backend.config import (
     PROJECT_ROOT,
 )
 from backend.utils import logger
+
+UTC_TZ = timezone.utc  # noqa: UP017
 
 # ---------------------------------------------------------------------------
 # MCP tool name → (docker-mcp server name, mcp tool name)
@@ -274,7 +276,7 @@ class MCPBridge:
             timeout=MCP_TOOL_TIMEOUT,
         )
 
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(UTC_TZ).isoformat()
 
         if result["success"]:
             logger.info(f"MCPBridge: {agent_id} called {gateway_tool_id} → success")
@@ -400,5 +402,5 @@ def _error_result(tool_name: str, message: str) -> dict[str, Any]:
         "success": False,
         "error": message,
         "tool": tool_name,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC_TZ).isoformat(),
     }

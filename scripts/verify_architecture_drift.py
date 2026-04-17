@@ -89,12 +89,48 @@ def _check_deployment_mode(failures: list[str]) -> None:
         )
 
 
+def _check_router_registry_alignment(failures: list[str]) -> None:
+    """INV: Auto-router must know every registered agent ID."""
+    from backend.agents import ALL_AGENT_DEFINITIONS
+    from backend.orchestrator.lex_router import VALID_AGENTS
+
+    registered = frozenset(ALL_AGENT_DEFINITIONS)
+    routed = frozenset(VALID_AGENTS)
+    if routed != registered:
+        failures.append(
+            "DRIFT: lex_router VALID_AGENTS does not match ALL_AGENT_DEFINITIONS. "
+            f"Missing={sorted(registered - routed)} Extra={sorted(routed - registered)}"
+        )
+
+
+def _check_knowledge_rag_convergence(failures: list[str]) -> None:
+    """INV: live knowledge retrieval must use ContextAssembler, not direct store searches."""
+    root = Path(__file__).resolve().parent.parent
+    orchestrator_source = (root / "backend" / "orchestrator" / "__init__.py").read_text(encoding="utf-8")
+    route_source = (root / "backend" / "routes" / "knowledge.py").read_text(encoding="utf-8")
+
+    if "self._knowledge_store.search(" in orchestrator_source:
+        failures.append("DRIFT: knowledge agent still calls KnowledgeVectorStore.search directly.")
+    if "self._knowledge_store.search_business_profiles(" in orchestrator_source:
+        failures.append("DRIFT: business-profile retrieval still bypasses ContextAssembler.")
+    if "self._knowledge_store.rebuild_index(" in orchestrator_source or "self._knowledge_store.ensure_index(" in orchestrator_source:
+        failures.append("DRIFT: knowledge reindex/startup seed still rebuilds the legacy KnowledgeVectorStore.")
+    if "retrieve_records(" not in orchestrator_source:
+        failures.append("DRIFT: knowledge agent path is not using ContextAssembler.retrieve_records().")
+    if "ContextAssembler" not in route_source or "retrieve_records(" not in route_source:
+        failures.append("DRIFT: /knowledge search route is not using ContextAssembler retrieval.")
+    if "seed_docs_to_qdrant(" not in route_source:
+        failures.append("DRIFT: /knowledge reindex route is not using Qdrant doc seeding.")
+
+
 def verify_all() -> list[str]:
     """Run all drift checks and return a list of failures (empty = clean)."""
     failures: list[str] = []
     _check_deployment_mode(failures)
     _check_gitnexus_tool_parity(failures)
     _check_gitnexus_agent_permissions(failures)
+    _check_router_registry_alignment(failures)
+    _check_knowledge_rag_convergence(failures)
     return failures
 
 

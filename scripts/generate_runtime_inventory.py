@@ -28,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from backend.config import AGENTOP_DEPLOYMENT_MODE, GITNEXUS_REPO_NAME
 from backend.mcp import MCP_TOOL_MAP
 from backend.mcp.gitnexus_health import get_gitnexus_health
+from backend.orchestrator.lex_router import VALID_AGENTS
 from backend.tools import TOOL_REGISTRY
 
 _REPORTS_DIR = Path(__file__).resolve().parent.parent / "reports"
@@ -61,6 +62,7 @@ def _build_agent_permissions() -> dict[str, list[str]]:
 
 def generate_inventory() -> dict:
     gn_state = get_gitnexus_health()
+    agent_permissions = _build_agent_permissions()
     return {
         "generated_at": datetime.now(tz=timezone.utc).isoformat(),
         "deployment_mode": AGENTOP_DEPLOYMENT_MODE,
@@ -80,7 +82,12 @@ def generate_inventory() -> dict:
             "stale": gn_state.stale,
             "reason": gn_state.reason,
         },
-        "agent_tool_permissions": _build_agent_permissions(),
+        "agent_tool_permissions": agent_permissions,
+        "registered_agents": sorted(agent_permissions),
+        "registered_agent_count": len(agent_permissions),
+        "auto_routable_agents": sorted(VALID_AGENTS),
+        "auto_routable_agent_count": len(VALID_AGENTS),
+        "router_registry_aligned": frozenset(VALID_AGENTS) == frozenset(agent_permissions),
     }
 
 

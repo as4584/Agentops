@@ -40,8 +40,27 @@ def _run_check(name: str, cmd: list[str]) -> dict:
         return {"name": name, "passed": False, "exit_code": -1, "output": str(exc)[:200]}
 
 
+def _run_invariant_check(name: str, check_fn) -> dict:
+    failures: list[str] = []
+    try:
+        check_fn(failures)
+        return {
+            "name": name,
+            "passed": not failures,
+            "exit_code": 0 if not failures else 1,
+            "output": "\n".join(failures[:10]) if failures else "OK",
+        }
+    except Exception as exc:
+        return {"name": name, "passed": False, "exit_code": -1, "output": str(exc)[:200]}
+
+
 def main() -> int:
     stdout_only = "--stdout" in sys.argv
+
+    from scripts.verify_architecture_drift import (
+        _check_knowledge_rag_convergence,
+        _check_router_registry_alignment,
+    )
 
     checks = [
         _run_check(
@@ -52,6 +71,8 @@ def main() -> int:
             "architecture_drift",
             [sys.executable, "scripts/verify_architecture_drift.py"],
         ),
+        _run_invariant_check("router_registry_alignment", _check_router_registry_alignment),
+        _run_invariant_check("knowledge_rag_convergence", _check_knowledge_rag_convergence),
     ]
 
     all_passed = all(c["passed"] for c in checks)
@@ -68,6 +89,8 @@ def main() -> int:
                 "gitnexus_usable": inv.get("gitnexus_health", {}).get("usable"),
                 "agent_count": len(inv.get("agent_tool_permissions", {})),
                 "deployment_mode": inv.get("deployment_mode"),
+                "auto_routable_agent_count": inv.get("auto_routable_agent_count"),
+                "router_registry_aligned": inv.get("router_registry_aligned"),
             }
         except Exception:
             pass

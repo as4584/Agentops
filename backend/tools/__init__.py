@@ -45,7 +45,7 @@ import shutil
 import sqlite3
 import urllib.error
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -70,6 +70,8 @@ from backend.ocr import OCR_EXTENSIONS
 from backend.ocr import extract_text as ocr_extract_text
 from backend.ocr import is_supported as ocr_supported
 from backend.utils import logger
+
+UTC_TZ = timezone.utc  # noqa: UP017
 
 
 # MCP Bridge — imported lazily to avoid circular imports at module load time
@@ -956,7 +958,7 @@ async def system_info(agent_id: str) -> dict[str, Any]:
             "disk_total_gb": round(disk.total / (1024**3), 2),
             "disk_used_gb": round(disk.used / (1024**3), 2),
             "disk_free_gb": round(disk.free / (1024**3), 2),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC_TZ).isoformat(),
         }
         logger.info(f"system_info retrieved by {agent_id}")
         return info
@@ -1148,7 +1150,7 @@ async def alert_dispatch(
         "title": title,
         "message": message,
         "source_agent": agent_id,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC_TZ).isoformat(),
     }
     _ms.append_shared_event(event)
     logger.info(f"alert_dispatch [{level_normalised}] by {agent_id}: {title}")

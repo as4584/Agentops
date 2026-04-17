@@ -7,11 +7,13 @@ These models form the contract between subsystems.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
+
+UTC_TZ = timezone.utc  # noqa: UP017
 
 # ---------------------------------------------------------------------------
 # Enumerations
@@ -124,7 +126,7 @@ class ToolDefinition(BaseModel):
 class ToolExecutionRecord(BaseModel):
     """Log record for a tool execution."""
 
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC_TZ))
     tool_name: str
     agent_id: str
     modification_type: ModificationType
@@ -181,7 +183,7 @@ class AgentTurn(BaseModel):
     tool_calls: list[ToolCall] = Field(default_factory=list, description="Structured tool calls parsed from this turn")
     observations: list[str] = Field(default_factory=list, description="Tool execution results observed after this turn")
     is_final: bool = Field(default=False, description="True when the agent signals task complete")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC_TZ))
 
 
 class ExecutionPlan(BaseModel):
@@ -229,7 +231,7 @@ class ModelRolePolicy(BaseModel):
 class ChangeLogEntry(BaseModel):
     """Structured entry for CHANGE_LOG.md."""
 
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC_TZ))
     agent_id: str = Field(..., description="Agent responsible for the change")
     files_modified: list[str] = Field(default_factory=list)
     reason: str = Field(..., description="Description of change")
@@ -246,7 +248,7 @@ class ChangeLogEntry(BaseModel):
 class DriftEvent(BaseModel):
     """A detected drift event."""
 
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC_TZ))
     invariant_id: str = Field(..., description="Which invariant was violated")
     description: str = Field(..., description="What happened")
     severity: ChangeImpactLevel = Field(..., description="Severity of the drift")
@@ -259,7 +261,7 @@ class DriftReport(BaseModel):
     status: DriftStatus = DriftStatus.GREEN
     pending_updates: list[str] = Field(default_factory=list)
     violations: list[DriftEvent] = Field(default_factory=list)
-    last_check: datetime = Field(default_factory=datetime.utcnow)
+    last_check: datetime = Field(default_factory=lambda: datetime.now(UTC_TZ))
 
 
 # ---------------------------------------------------------------------------
@@ -282,7 +284,7 @@ class ChatResponse(BaseModel):
     message: str
     tool_calls: list[ToolExecutionRecord] = Field(default_factory=list)
     drift_status: DriftStatus = DriftStatus.GREEN
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC_TZ))
 
 
 class IntakeStartRequest(BaseModel):

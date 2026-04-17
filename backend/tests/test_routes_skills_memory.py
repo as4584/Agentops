@@ -75,7 +75,8 @@ def app(mock_registry):
 
 @pytest.fixture()
 def client(app):
-    return TestClient(app)
+    with TestClient(app) as test_client:
+        yield test_client
 
 
 # ---------------------------------------------------------------------------
@@ -100,8 +101,8 @@ def test_list_skills_returns_empty_list_when_no_skills(monkeypatch):
 
     application = FastAPI()
     application.include_router(skills_router)
-    c = TestClient(application)
-    assert c.get("/skills").json() == []
+    with TestClient(application) as c:
+        assert c.get("/skills").json() == []
 
 
 # ---------------------------------------------------------------------------
@@ -199,8 +200,8 @@ def memory_app(tmp_path, monkeypatch):
 
 def test_memory_overview_empty(memory_app):
     app, _store = memory_app
-    c = TestClient(app)
-    response = c.get("/memory")
+    with TestClient(app) as c:
+        response = c.get("/memory")
     assert response.status_code == 200
     body = response.json()
     assert "namespaces" in body
@@ -211,16 +212,16 @@ def test_memory_overview_empty(memory_app):
 def test_memory_overview_with_data(memory_app):
     app, store = memory_app
     store.write("test_agent", "key1", "value1")
-    c = TestClient(app)
-    body = c.get("/memory").json()
+    with TestClient(app) as c:
+        body = c.get("/memory").json()
     assert "test_agent" in body["namespaces"]
 
 
 def test_memory_namespace_returns_data(memory_app):
     app, store = memory_app
     store.write("soul_core", "trust_score", 0.95)
-    c = TestClient(app)
-    response = c.get("/memory/soul_core")
+    with TestClient(app) as c:
+        response = c.get("/memory/soul_core")
     assert response.status_code == 200
     body = response.json()
     assert body["namespace"] == "soul_core"
@@ -230,6 +231,6 @@ def test_memory_namespace_returns_data(memory_app):
 
 def test_memory_namespace_not_found(memory_app):
     app, _store = memory_app
-    c = TestClient(app)
-    response = c.get("/memory/does_not_exist")
+    with TestClient(app) as c:
+        response = c.get("/memory/does_not_exist")
     assert response.status_code == 404

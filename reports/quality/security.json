@@ -1,13 +1,13 @@
 {
   "errors": [],
-  "generated_at": "2026-04-17T09:21:50Z",
+  "generated_at": "2026-04-17T09:27:17Z",
   "metrics": {
     "_totals": {
-      "CONFIDENCE.HIGH": 3741,
+      "CONFIDENCE.HIGH": 3737,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 66,
       "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 4,
+      "SEVERITY.HIGH": 0,
       "SEVERITY.LOW": 3767,
       "SEVERITY.MEDIUM": 36,
       "SEVERITY.UNDEFINED": 0,
@@ -757,11 +757,11 @@
       "skipped_tests": 0
     },
     "backend/knowledge/vendor/cache.py": {
-      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 1,
+      "SEVERITY.HIGH": 0,
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
@@ -783,11 +783,11 @@
       "skipped_tests": 0
     },
     "backend/knowledge/vendor/storage.py": {
-      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 1,
+      "SEVERITY.HIGH": 0,
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
@@ -1238,11 +1238,11 @@
       "skipped_tests": 0
     },
     "backend/news/intel_scraper.py": {
-      "CONFIDENCE.HIGH": 7,
+      "CONFIDENCE.HIGH": 6,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 1,
+      "SEVERITY.HIGH": 0,
       "SEVERITY.LOW": 5,
       "SEVERITY.MEDIUM": 1,
       "SEVERITY.UNDEFINED": 0,
@@ -1979,11 +1979,11 @@
       "skipped_tests": 0
     },
     "backend/tests/mock_ollama.py": {
-      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 1,
+      "SEVERITY.HIGH": 0,
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
@@ -4633,46 +4633,6 @@
       "test_name": "try_except_continue"
     },
     {
-      "code": "21     serialized = json.dumps(args, sort_keys=True, default=str)\n22     return hashlib.md5(serialized.encode(\"utf-8\")).hexdigest()\n23 \n",
-      "col_offset": 11,
-      "end_col_offset": 50,
-      "filename": "backend/knowledge/vendor/cache.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 327,
-        "link": "https://cwe.mitre.org/data/definitions/327.html"
-      },
-      "issue_severity": "HIGH",
-      "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
-      "line_number": 22,
-      "line_range": [
-        22
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b324_hashlib.html",
-      "test_id": "B324",
-      "test_name": "hashlib"
-    },
-    {
-      "code": "41     \"\"\"Generate a deterministic MD5-based ID for a piece of content.\"\"\"\n42     md5 = hashlib.md5(content.encode(\"utf-8\")).hexdigest()\n43     return f\"{prefix}-{md5}\"\n",
-      "col_offset": 10,
-      "end_col_offset": 46,
-      "filename": "backend/knowledge/vendor/storage.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 327,
-        "link": "https://cwe.mitre.org/data/definitions/327.html"
-      },
-      "issue_severity": "HIGH",
-      "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
-      "line_number": 42,
-      "line_range": [
-        42
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b324_hashlib.html",
-      "test_id": "B324",
-      "test_name": "hashlib"
-    },
-    {
       "code": "106                 )\n107             except Exception:\n108                 pass\n109 \n",
       "col_offset": 12,
       "end_col_offset": 20,
@@ -6219,26 +6179,6 @@
       "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b405-import-xml-etree",
       "test_id": "B405",
       "test_name": "blacklist"
-    },
-    {
-      "code": "278     \"\"\"Stable short hash for deduplication.\"\"\"\n279     return hashlib.sha1(url.encode()).hexdigest()[:12]\n280 \n",
-      "col_offset": 11,
-      "end_col_offset": 37,
-      "filename": "backend/news/intel_scraper.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 327,
-        "link": "https://cwe.mitre.org/data/definitions/327.html"
-      },
-      "issue_severity": "HIGH",
-      "issue_text": "Use of weak SHA1 hash for security. Consider usedforsecurity=False",
-      "line_number": 279,
-      "line_range": [
-        279
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b324_hashlib.html",
-      "test_id": "B324",
-      "test_name": "hashlib"
     },
     {
       "code": "464     try:\n465         root = ET.fromstring(xml_text)\n466     except ET.ParseError as exc:\n",
@@ -8710,26 +8650,6 @@
       "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html",
       "test_id": "B101",
       "test_name": "assert_used"
-    },
-    {
-      "code": "185 \n186     seed = int(hashlib.md5(text.encode()).hexdigest()[:8], 16)\n187     # Deterministic pseudo-random vector based on input hash\n",
-      "col_offset": 15,
-      "end_col_offset": 41,
-      "filename": "backend/tests/mock_ollama.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 327,
-        "link": "https://cwe.mitre.org/data/definitions/327.html"
-      },
-      "issue_severity": "HIGH",
-      "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
-      "line_number": 186,
-      "line_range": [
-        186
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b324_hashlib.html",
-      "test_id": "B324",
-      "test_name": "hashlib"
     },
     {
       "code": "48     msg = A2UIMessage(**_base_msg())\n49     assert msg.op == \"render\"\n50     assert msg.component == \"status_card\"\n",

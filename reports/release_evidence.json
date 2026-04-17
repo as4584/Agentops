@@ -1,0 +1,39 @@
+{
+  "generated_at": "2026-04-17T03:48:06.105414+00:00",
+  "all_passed": true,
+  "checks": [
+    {
+      "name": "config_validation",
+      "passed": true,
+      "exit_code": 0,
+      "output": "Config validation OK \u2014 operator_only defaults are safe."
+    },
+    {
+      "name": "architecture_drift",
+      "passed": true,
+      "exit_code": 0,
+      "output": "Architecture drift check PASSED \u2014 all invariants satisfied.\n[2026-04-16 23:48:01,820] INFO \u2014 DriftGuard initialized \u2014 governance layer active\n[2026-04-16 23:48:01,889] INFO \u2014 MemoryStore initialized\n[2026-04-16 23:48:03,992] INFO \u2014 C fast_route loaded \u2014 keyword routing at ~0.01ms"
+    },
+    {
+      "name": "router_registry_alignment",
+      "passed": true,
+      "exit_code": 0,
+      "output": "OK"
+    },
+    {
+      "name": "knowledge_rag_convergence",
+      "passed": true,
+      "exit_code": 0,
+      "output": "OK"
+    }
+  ],
+  "inventory_summary": {
+    "native_tool_count": 31,
+    "mcp_tool_count": 31,
+    "gitnexus_usable": false,
+    "agent_count": 21,
+    "deployment_mode": "operator_only",
+    "auto_routable_agent_count": 21,
+    "router_registry_aligned": true
+  }
+}

@@ -12,8 +12,11 @@ Node contracts tested:
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
+
+UTC_TZ = timezone.utc  # noqa: UP017
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -40,6 +43,10 @@ def _make_orchestrator() -> Any:
     orch._knowledge_store = MagicMock()
     orch._knowledge_store.search = AsyncMock(return_value=[])
     orch._knowledge_store.search_business_profiles = AsyncMock(return_value=[])
+    orch._context_assembler = MagicMock()
+    orch._context_assembler.retrieve_records = AsyncMock(return_value=[])
+    orch._context_assembler.search_business_profiles = AsyncMock(return_value=[])
+    orch._context_assembler.health_check.return_value = {"fallback_active": False}
 
     return orch
 
@@ -284,6 +291,33 @@ def test_executor_returns_error_when_agent_process_message_raises() -> None:
     assert "LLM timeout" in result["response"]
 
 
+def test_knowledge_executor_uses_context_assembler_not_legacy_store() -> None:
+    """Knowledge-agent execution should read through ContextAssembler."""
+    orch = _make_orchestrator()
+    orch._context_assembler.retrieve_records = AsyncMock(
+        return_value=[
+            {
+                "path": "docs/SOURCE_OF_TRUTH.md",
+                "chunk_index": 0,
+                "text": "Source of truth content",
+                "score": 0.98,
+            }
+        ]
+    )
+
+    state = _base_state(target_agent="knowledge_agent", message="Where is the source of truth?")
+
+    result = asyncio.run(orch._agent_executor_node(state))
+
+    orch._context_assembler.retrieve_records.assert_called_once_with(
+        "Where is the source of truth?",
+        agent_id="knowledge_agent",
+        limit=4,
+    )
+    orch._knowledge_store.search.assert_not_called()
+    assert result["response"] == "mock knowledge response"
+
+
 # ---------------------------------------------------------------------------
 # _governance_check_node — drift reporting
 # ---------------------------------------------------------------------------
@@ -296,7 +330,7 @@ def test_governance_check_appends_drift_status() -> None:
     orch = _make_orchestrator()
     state = _base_state(governance_notes=["Routed to knowledge_agent"])
 
-    mock_report = DriftReport(last_check=__import__("datetime").datetime.utcnow())
+    mock_report = DriftReport(last_check=datetime.now(UTC_TZ))
     mock_report.status = DriftStatus.GREEN
 
     with patch("backend.orchestrator.drift_guard") as mock_guard:
@@ -315,7 +349,7 @@ def test_governance_check_includes_violations() -> None:
     orch = _make_orchestrator()
     state = _base_state(governance_notes=[])
 
-    mock_report = DriftReport(last_check=__import__("datetime").datetime.utcnow())
+    mock_report = DriftReport(last_check=datetime.now(UTC_TZ))
     mock_report.status = DriftStatus.RED
     mock_report.violations = [
         DriftEvent(
@@ -342,7 +376,7 @@ def test_governance_check_preserves_existing_notes() -> None:
     orch = _make_orchestrator()
     state = _base_state(governance_notes=["Routed to soul_core", "Extra note"])
 
-    mock_report = DriftReport(last_check=__import__("datetime").datetime.utcnow())
+    mock_report = DriftReport(last_check=datetime.now(UTC_TZ))
     mock_report.status = DriftStatus.GREEN
 
     with patch("backend.orchestrator.drift_guard") as mock_guard:

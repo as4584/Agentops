@@ -13,21 +13,33 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from backend.knowledge import KnowledgeVectorStore
+from backend.knowledge.context_assembler import ContextAssembler
+from backend.knowledge.doc_seed import seed_docs_to_qdrant
 
 router = APIRouter(prefix="/knowledge", tags=["knowledge"])
 
 _store: KnowledgeVectorStore | None = None
+_assembler: ContextAssembler | None = None
+_llm_client: Any = None
 
 
-def set_knowledge_store(store: KnowledgeVectorStore | None) -> None:
-    global _store
+def set_knowledge_store(store: KnowledgeVectorStore | None, llm_client: Any | None = None) -> None:
+    global _assembler, _llm_client, _store
     _store = store
+    _llm_client = llm_client
+    _assembler = ContextAssembler(llm_client) if llm_client is not None else None
 
 
 def _require_store() -> KnowledgeVectorStore:
     if _store is None:
         raise HTTPException(status_code=503, detail="Knowledge store unavailable")
     return _store
+
+
+def _require_assembler() -> ContextAssembler:
+    if _assembler is None:
+        raise HTTPException(status_code=503, detail="Knowledge retrieval unavailable")
+    return _assembler
 
 
 class SearchRequest(BaseModel):
@@ -44,24 +56,31 @@ class SearchResult(BaseModel):
 
 @router.get("/stats")
 async def knowledge_stats() -> dict[str, Any]:
-    """Return index statistics (chunk count, file count, signature)."""
-    store = _require_store()
-    return store.stats()
+    """Return active knowledge retrieval backend stats."""
+    assembler = _require_assembler()
+    health = assembler.health_check()
+    legacy_stats = _store.stats() if _store is not None else {}
+    return {
+        "backend": "context_assembler",
+        **health,
+        "legacy_chunks": legacy_stats.get("chunks", 0),
+        "legacy_business_profile_vectors": legacy_stats.get("business_profile_vectors", 0),
+    }
 
 
 @router.post("/search", response_model=list[SearchResult])
 async def knowledge_search(req: SearchRequest) -> list[dict[str, Any]]:
     """Semantic search over the project knowledge index."""
-    store = _require_store()
-    results = await store.search(req.query, top_k=req.top_k)
-    return results
+    assembler = _require_assembler()
+    return await assembler.retrieve_records(req.query, agent_id="knowledge_agent", limit=req.top_k)
 
 
 @router.post("/reindex")
 async def knowledge_reindex() -> dict[str, Any]:
-    """Force rebuild vector index from project docs."""
-    store = _require_store()
-    stats = await store.rebuild_index()
+    """Force reseed Qdrant from project docs."""
+    if _llm_client is None:
+        raise HTTPException(status_code=503, detail="LLM client unavailable")
+    stats = await seed_docs_to_qdrant(_llm_client, force_rebuild=True)
     return {"status": "ok", "stats": stats}
 
 
@@ -71,5 +90,5 @@ async def knowledge_search_get(
     top_k: int = Query(default=5, ge=1, le=20),
 ) -> list[dict[str, Any]]:
     """GET variant for browser / curl convenience."""
-    store = _require_store()
-    return await store.search(q, top_k=top_k)
+    assembler = _require_assembler()
+    return await assembler.retrieve_records(q, agent_id="knowledge_agent", limit=top_k)

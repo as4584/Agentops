@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-16T20:46:54.472311+00:00",
+  "generated_at": "2026-04-17T03:48:00.842535+00:00",
   "deployment_mode": "operator_only",
   "gitnexus_repo": "Agentop",
   "native_tools": [
@@ -356,5 +356,54 @@
       "mcp_filesystem_list_directory",
       "mcp_filesystem_search_files"
     ]
-  }
+  },
+  "registered_agents": [
+    "accreditation_advisor",
+    "career_intel",
+    "code_review_agent",
+    "comms_agent",
+    "cs_agent",
+    "curriculum_advisor",
+    "data_agent",
+    "devops_agent",
+    "higgsfield_agent",
+    "higgsfield_research_agent",
+    "it_agent",
+    "knowledge_agent",
+    "monitor_agent",
+    "ocr_agent",
+    "pedagogy_agent",
+    "prompt_engineer",
+    "security_agent",
+    "self_healer_agent",
+    "soul_core",
+    "token_optimizer",
+    "vocabulary_coach"
+  ],
+  "registered_agent_count": 21,
+  "auto_routable_agents": [
+    "accreditation_advisor",
+    "career_intel",
+    "code_review_agent",
+    "comms_agent",
+    "cs_agent",
+    "curriculum_advisor",
+    "data_agent",
+    "devops_agent",
+    "higgsfield_agent",
+    "higgsfield_research_agent",
+    "it_agent",
+    "knowledge_agent",
+    "monitor_agent",
+    "ocr_agent",
+    "pedagogy_agent",
+    "prompt_engineer",
+    "security_agent",
+    "self_healer_agent",
+    "soul_core",
+    "token_optimizer",
+    "vocabulary_coach"
+  ],
+  "auto_routable_agent_count": 21,
+  "router_registry_aligned": true
 }

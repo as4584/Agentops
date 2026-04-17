@@ -126,6 +126,8 @@ export default function StudioPage() {
     font_name: 'Arial',
   });
   const pollRef = useRef<NodeJS.Timeout | null>(null);
+  const activeJobId = activeJob?.id;
+  const activeJobStatus = activeJob?.status;
 
   // Load jobs on mount
   useEffect(() => {
@@ -134,11 +136,11 @@ export default function StudioPage() {
 
   // Poll active job while processing
   useEffect(() => {
-    if (activeJob && ['transcribing', 'exporting'].includes(activeJob.status)) {
-      pollRef.current = setInterval(() => pollJob(activeJob.id), 2000);
+    if (activeJobId && ['transcribing', 'exporting'].includes(activeJobStatus ?? '')) {
+      pollRef.current = setInterval(() => pollJob(activeJobId), 2000);
     }
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [activeJob?.id, activeJob?.status]);
+  }, [activeJobId, activeJobStatus]);
 
   // Sync edited segments when transcript loads
   useEffect(() => {

@@ -183,7 +183,7 @@ def _make_embed_response(text: str) -> dict[str, Any]:
     """Build a mock /api/embed response — deterministic 384-dim vector."""
     import hashlib
 
-    seed = int(hashlib.md5(text.encode()).hexdigest()[:8], 16)
+    seed = int(hashlib.md5(text.encode(), usedforsecurity=False).hexdigest()[:8], 16)
     # Deterministic pseudo-random vector based on input hash
     vec = [(((seed * (i + 1) * 6364136223846793005) >> 33) % 10000) / 10000.0 - 0.5 for i in range(384)]
     return {

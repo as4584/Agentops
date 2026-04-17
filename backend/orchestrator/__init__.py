@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any, TypedDict
 
 from langgraph.graph import END, StateGraph
@@ -29,6 +29,8 @@ from backend.agents import ALL_AGENT_DEFINITIONS, SoulAgent, create_agent
 from backend.agents.gatekeeper_agent import GatekeeperAgent, GatekeeperResult
 from backend.config import A2A_MAX_DEPTH
 from backend.knowledge import KnowledgeVectorStore
+from backend.knowledge.context_assembler import ContextAssembler
+from backend.knowledge.doc_seed import seed_docs_to_qdrant
 from backend.llm import OllamaClient
 from backend.memory import memory_store
 from backend.middleware import drift_guard
@@ -46,6 +48,8 @@ from backend.orchestrator.agent_factory import AgentFactory as AgentFactory
 from backend.tasks import TaskStatus, task_tracker
 from backend.utils import logger
 from backend.utils.tool_ids import ToolIdRegistry
+
+UTC_TZ = timezone.utc  # noqa: UP017
 
 # ---------------------------------------------------------------------------
 # Orchestrator State Schema
@@ -133,6 +137,7 @@ class AgentOrchestrator:
         self._agents: dict[str, Any] = {}
         self._gatekeeper = GatekeeperAgent()
         self._knowledge_store = KnowledgeVectorStore(llm_client)
+        self._context_assembler = ContextAssembler(llm_client)
         self._knowledge_agent_id = "knowledge_agent"
         self._intake_namespace = "social_intake"
         self._factory = agent_factory
@@ -270,7 +275,7 @@ class AgentOrchestrator:
         return {
             "target_agent": resolved_target,
             "governance_notes": governance_notes,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC_TZ).isoformat(),
         }
 
     async def _agent_executor_node(self, state: OrchestratorState) -> dict[str, Any]:
@@ -294,9 +299,9 @@ class AgentOrchestrator:
             agent = self._agents[target]
             if isinstance(agent, _BaseAgent):
                 try:
-                    _t0 = datetime.now(UTC)
+                    _t0 = datetime.now(UTC_TZ)
                     response = await agent.process_message(message, context)
-                    _duration_ms = (datetime.now(UTC) - _t0).total_seconds() * 1000
+                    _duration_ms = (datetime.now(UTC_TZ) - _t0).total_seconds() * 1000
                     memory_store.append_shared_event(
                         {
                             "type": "AGENT_RESPONSE",
@@ -326,7 +331,7 @@ class AgentOrchestrator:
         # ── Knowledge agent: vector-store RAG path ───────────────────────
 
         self._agent_state.status = AgentStatus.ACTIVE
-        self._agent_state.last_active = datetime.utcnow()
+        self._agent_state.last_active = datetime.now(UTC_TZ)
 
         _tid = task_tracker.create_task(
             agent_id=self._knowledge_agent_id,
@@ -337,14 +342,26 @@ class AgentOrchestrator:
 
         try:
             business_id = str(context.get("business_id", "")).strip()
-            retrieved = await self._knowledge_store.search(message, top_k=4)
+            retrieved = await self._context_assembler.retrieve_records(
+                message,
+                agent_id=self._knowledge_agent_id,
+                limit=4,
+            )
             profile_hits: list[dict[str, Any]] = []
             if business_id:
-                profile_hits = await self._knowledge_store.search_business_profiles(
+                profile_hits = await self._context_assembler.search_business_profiles(
                     query=message,
                     business_id=business_id,
-                    top_k=4,
+                    limit=4,
                 )
+
+            logger.info(
+                "Knowledge retrieval via ContextAssembler",
+                event_type="knowledge_context_assembler",
+                fallback_active=self._context_assembler.health_check().get("fallback_active", False),
+                retrieved_chunks=len(retrieved),
+                business_profile_hits=len(profile_hits),
+            )
 
             context_blocks = []
             for i, item in enumerate(profile_hits, start=1):
@@ -374,9 +391,9 @@ class AgentOrchestrator:
                 {
                     "question": message,
                     "response_preview": response[:400],
-                    "sources": [item["path"] for item in retrieved],
+                    "sources": [item["path"] for item in retrieved if item.get("path")],
                     "business_id": business_id or None,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC_TZ).isoformat(),
                 },
             )
             self._agent_state.total_actions += 1
@@ -471,7 +488,7 @@ class AgentOrchestrator:
             "tool_id_registry": ToolIdRegistry(),
             "drift_status": DriftStatus.GREEN.value,
             "governance_notes": [],
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC_TZ).isoformat(),
             "error": None,
         }
 
@@ -484,7 +501,7 @@ class AgentOrchestrator:
                 "response": final_state.get("response", ""),
                 "drift_status": final_state.get("drift_status", DriftStatus.GREEN.value),
                 "governance_notes": final_state.get("governance_notes", []),
-                "timestamp": final_state.get("timestamp", datetime.utcnow().isoformat()),
+                "timestamp": final_state.get("timestamp", datetime.now(UTC_TZ).isoformat()),
                 "error": final_state.get("error"),
             }
 
@@ -495,7 +512,7 @@ class AgentOrchestrator:
                 "response": f"System error: {e}",
                 "drift_status": drift_guard.drift_status.value,
                 "governance_notes": [f"ORCHESTRATOR ERROR: {e}"],
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC_TZ).isoformat(),
                 "error": str(e),
             }
 
@@ -660,7 +677,7 @@ class AgentOrchestrator:
             depth=depth,
             purpose=purpose,
             payload=payload,
-            created_at=datetime.now(UTC).isoformat(),
+            created_at=datetime.now(UTC_TZ).isoformat(),
         )
 
         memory_store.append_shared_event(
@@ -751,11 +768,11 @@ class AgentOrchestrator:
         On execution failure the result has ``acked=False`` and ``error`` set;
         the envelope is still persisted so callers can retry.
         """
-        from datetime import UTC, datetime
+        from datetime import datetime
 
         from backend.models import A2ADispatchResult
 
-        t0 = datetime.now(UTC)
+        t0 = datetime.now(UTC_TZ)
         # 1. Validate + persist envelope (raises ValueError on bad args)
         envelope = self.send_agent_message(
             from_agent=from_agent,
@@ -797,8 +814,8 @@ class AgentOrchestrator:
             )
 
         # 4. Record ack event
-        ack_at = datetime.now(UTC).isoformat()
-        duration_ms = (datetime.now(UTC) - t0).total_seconds() * 1000
+        ack_at = datetime.now(UTC_TZ).isoformat()
+        duration_ms = (datetime.now(UTC_TZ) - t0).total_seconds() * 1000
         memory_store.append_shared_event(
             {
                 "type": "A2A_ACK",
@@ -826,31 +843,12 @@ class AgentOrchestrator:
         )
 
     async def reindex_knowledge(self) -> dict[str, Any]:
-        """Force rebuild the local vector DB and return index stats."""
-        stats = await self._knowledge_store.rebuild_index()
-        return {
-            "agent_id": self._knowledge_agent_id,
-            "chunks": stats["chunks"],
-            "index_size_bytes": stats["file_size_bytes"],
-            "index_size_mb": round(stats["file_size_bytes"] / (1024 * 1024), 4),
-            "business_profile_vectors": stats["business_profile_vectors"],
-            "business_profiles_size_bytes": stats["business_profiles_size_bytes"],
-            "business_profiles_size_mb": round(stats["business_profiles_size_bytes"] / (1024 * 1024), 4),
-        }
+        """Force reseed Qdrant knowledge docs and return index stats."""
+        return await seed_docs_to_qdrant(self.llm_client, force_rebuild=True)
 
     async def ensure_knowledge_index(self, force_rebuild: bool = False) -> dict[str, Any]:
-        """Load/build the local vector DB and return index stats."""
-        await self._knowledge_store.ensure_index(force_rebuild=force_rebuild)
-        stats = self._knowledge_store.stats()
-        return {
-            "agent_id": self._knowledge_agent_id,
-            "chunks": stats["chunks"],
-            "index_size_bytes": stats["file_size_bytes"],
-            "index_size_mb": round(stats["file_size_bytes"] / (1024 * 1024), 4),
-            "business_profile_vectors": stats["business_profile_vectors"],
-            "business_profiles_size_bytes": stats["business_profiles_size_bytes"],
-            "business_profiles_size_mb": round(stats["business_profiles_size_bytes"] / (1024 * 1024), 4),
-        }
+        """Ensure Qdrant doc seed exists and return index stats."""
+        return await seed_docs_to_qdrant(self.llm_client, force_rebuild=force_rebuild)
 
     def get_agent_memory_usage(self) -> list[dict[str, Any]]:
         """Return per-agent memory usage in bytes and megabytes for all agents."""
@@ -890,7 +888,7 @@ class AgentOrchestrator:
             "current_question_index": 0,
             "answers": {},
             "completed": False,
-            "updated_at": datetime.utcnow().isoformat(),
+            "updated_at": datetime.now(UTC_TZ).isoformat(),
         }
 
     async def start_intake(self, business_id: str) -> dict[str, Any]:
@@ -936,7 +934,7 @@ class AgentOrchestrator:
         state_answers = dict(state.get("answers", {}))
         state_answers[question_key] = clean_answer
         state["answers"] = state_answers
-        await self._knowledge_store.upsert_business_answer(
+        await self._context_assembler.ingest_business_profile(
             business_id=business_id,
             field=question_key,
             answer=clean_answer,
@@ -945,7 +943,7 @@ class AgentOrchestrator:
         next_idx = idx + 1
         state["current_question_index"] = next_idx
         state["completed"] = next_idx >= len(INTAKE_QUESTIONS)
-        state["updated_at"] = datetime.utcnow().isoformat()
+        state["updated_at"] = datetime.now(UTC_TZ).isoformat()
         memory_store.write(self._intake_namespace, business_id, state)
 
         return self.get_intake_status(business_id)
@@ -990,10 +988,10 @@ class AgentOrchestrator:
             f"Business profile context: {json.dumps(answers, ensure_ascii=False)}"
         )
 
-        profile_hits = await self._knowledge_store.search_business_profiles(
+        profile_hits = await self._context_assembler.search_business_profiles(
             query=semantic_query,
             business_id=business_id,
-            top_k=6,
+            limit=6,
         )
 
         answer_lines: list[str] = [f"- {k}: {v}" for k, v in answers.items()]
@@ -1077,8 +1075,8 @@ class AgentOrchestrator:
             "cta": str(parsed.get("cta") or defaults["cta"]),
         }
 
-        generated_at = datetime.utcnow().isoformat()
-        memory_key = f"campaign_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+        generated_at = datetime.now(UTC_TZ).isoformat()
+        memory_key = f"campaign_{datetime.now(UTC_TZ).strftime('%Y%m%d%H%M%S')}"
         memory_store.write(
             self._knowledge_agent_id,
             memory_key,

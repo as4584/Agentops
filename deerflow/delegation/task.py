@@ -238,11 +238,12 @@ class TaskDelegator:
         )
 
         try:
-            return await self._orch.process_message(
+            response = await self._orch.process_message(
                 agent_id=parent_agent,
                 message=prompt,
                 context={"_delegation_synthesis": True},
-            ).get("response", "")  # type: ignore[union-attr]
+            )
+            return response.get("response", "")
         except Exception:
             # Fallback: just concatenate
             return " | ".join(f"{o.agent_id}: {'ok' if o.success else 'fail'}" for o in outcomes)
