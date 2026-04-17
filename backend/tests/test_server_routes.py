@@ -7,12 +7,14 @@ This avoids the complex lifespan and tests the business logic of each handler.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 import backend.server as server_module
+
+UTC_TZ = timezone.utc  # noqa: UP017
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -21,21 +23,11 @@ import backend.server as server_module
 
 @pytest.fixture()
 def mock_orchestrator():
-    orch = MagicMock()
-    orch.get_all_agent_definitions.return_value = []
-    orch.get_agent_states.return_value = []
-    orch.get_agent_memory_usage.return_value = []
-    orch.get_drift_report.return_value = MagicMock(
-        status=MagicMock(value="GREEN"),
-        pending_updates=[],
-        violations=[],
-        last_check=datetime.utcnow().isoformat(),
-    )
-    orch.soul_get_goals.return_value = []
-    orch.soul_reflect = AsyncMock(return_value="reflection text")
-    orch.soul_set_goal.return_value = {"id": "goal-1", "title": "test", "description": "", "priority": "MEDIUM"}
-    orch.start_intake = AsyncMock(
-        return_value={
+    async def _soul_reflect() -> str:
+        return "reflection text"
+
+    async def _start_intake(_business_id: str) -> dict[str, object]:
+        return {
             "business_id": "biz-1",
             "current_question_index": 0,
             "total_questions": 10,
@@ -43,9 +35,9 @@ def mock_orchestrator():
             "question": "What is your business?",
             "completed": False,
         }
-    )
-    orch.submit_intake_answer = AsyncMock(
-        return_value={
+
+    async def _submit_intake_answer(_business_id: str, _answer: str) -> dict[str, object]:
+        return {
             "business_id": "biz-1",
             "current_question_index": 1,
             "total_questions": 10,
@@ -54,7 +46,41 @@ def mock_orchestrator():
             "next_question": "Next question?",
             "answers": {"q1": "answer"},
         }
+
+    async def _generate_campaign(*args, **kwargs) -> dict[str, object]:
+        del args, kwargs
+        return {
+            "business_id": "biz-1",
+            "platform": "tiktok",
+            "objective": "brand_awareness",
+            "format_type": "short",
+            "duration_seconds": 30,
+            "generated_at": datetime.now(UTC_TZ).isoformat(),
+            "campaign": {"script": "..."},
+        }
+
+    async def _reindex_knowledge() -> dict[str, int]:
+        return {"chunks": 10, "index_size_bytes": 1024}
+
+    async def _process_message(*args, **kwargs) -> dict[str, str]:
+        del args, kwargs
+        return {"response": "OK", "drift_status": "GREEN"}
+
+    orch = MagicMock()
+    orch.get_all_agent_definitions.return_value = []
+    orch.get_agent_states.return_value = []
+    orch.get_agent_memory_usage.return_value = []
+    orch.get_drift_report.return_value = MagicMock(
+        status=MagicMock(value="GREEN"),
+        pending_updates=[],
+        violations=[],
+        last_check=datetime.now(UTC_TZ).isoformat(),
     )
+    orch.soul_get_goals.return_value = []
+    orch.soul_reflect = _soul_reflect
+    orch.soul_set_goal.return_value = {"id": "goal-1", "title": "test", "description": "", "priority": "MEDIUM"}
+    orch.start_intake = _start_intake
+    orch.submit_intake_answer = _submit_intake_answer
     orch.get_intake_status.return_value = {
         "business_id": "biz-1",
         "current_question_index": 1,
@@ -64,27 +90,23 @@ def mock_orchestrator():
         "next_question": "Next question?",
         "answers": {},
     }
-    orch.generate_campaign = AsyncMock(
-        return_value={
-            "business_id": "biz-1",
-            "platform": "tiktok",
-            "objective": "brand_awareness",
-            "format_type": "short",
-            "duration_seconds": 30,
-            "generated_at": datetime.utcnow().isoformat(),
-            "campaign": {"script": "..."},
-        }
-    )
-    orch.reindex_knowledge = AsyncMock(return_value={"chunks": 10, "index_size_bytes": 1024})
-    orch.process_message = AsyncMock(return_value={"response": "OK", "drift_status": "GREEN"})
+    orch.generate_campaign = _generate_campaign
+    orch.reindex_knowledge = _reindex_knowledge
+    orch.process_message = AsyncMock(side_effect=_process_message)
     return orch
 
 
 @pytest.fixture()
 def mock_llm():
+    async def _is_available() -> bool:
+        return False
+
+    async def _list_models() -> list[str]:
+        return []
+
     llm = MagicMock()
-    llm.is_available = AsyncMock(return_value=False)
-    llm.list_models = AsyncMock(return_value=[])
+    llm.is_available = _is_available
+    llm.list_models = _list_models
     return llm
 
 
@@ -135,7 +157,7 @@ class TestSystemStatus:
             status=DriftStatus.GREEN,
             pending_updates=[],
             violations=[],
-            last_check=datetime.utcnow(),
+            last_check=datetime.now(UTC_TZ),
         )
         mock_orchestrator.get_drift_report.return_value = dr
 
@@ -901,7 +923,10 @@ class TestDriftAndLogEndpoints:
             from backend.models import DriftReport, DriftStatus
 
             mock_drift.check_invariants.return_value = DriftReport(
-                status=DriftStatus.GREEN, pending_updates=[], violations=[], last_check=datetime.utcnow()
+                status=DriftStatus.GREEN,
+                pending_updates=[],
+                violations=[],
+                last_check=datetime.now(UTC_TZ),
             )
             result = await server_module.drift_status()
         assert result.status == DriftStatus.GREEN
