@@ -33,17 +33,33 @@ def score_lint(ruff_path: Path) -> tuple[float, dict[str, object]]:
 
 
 def score_type_safety(mypy_dir: Path) -> tuple[float, dict[str, object]]:
-    """Lower any% → higher score. Reads mypy JSON summary."""
-    summary_path = mypy_dir / "json" / "summary.json"
-    if not summary_path.exists():
-        # Try flat summary.json (mypy --json-report writes here)
-        summary_path = mypy_dir / "summary.json"
-    summary: dict[str, object] = json.loads(summary_path.read_text())
-    precision: dict[str, object] = summary.get("precision", {})  # type: ignore[assignment]
-    # any_str_pct = percentage of expressions typed as Any
-    any_pct: float = float(precision.get("any_str_pct", 0))  # type: ignore[arg-type]
+    """
+    Lower any% → higher score.
+    Reads mypy --any-exprs-report output (any-exprs.txt).
+    Format: <module>   <Anys>   <Exprs>   <Coverage%>
+    """
+    any_exprs = mypy_dir / "any-exprs.txt"
+    if not any_exprs.exists():
+        raise FileNotFoundError(f"any-exprs.txt not found in {mypy_dir}")
+
+    total_anys = 0
+    total_exprs = 0
+    for line in any_exprs.read_text().splitlines()[2:]:  # skip header + dashes
+        parts = line.split()
+        if len(parts) >= 3:
+            try:
+                total_anys += int(parts[-3])
+                total_exprs += int(parts[-2])
+            except ValueError:
+                continue
+
+    any_pct = (total_anys / max(total_exprs, 1)) * 100
     score = max(0.0, 100.0 - any_pct)
-    return round(score, 1), {"any_pct": round(any_pct, 2)}
+    return round(score, 1), {
+        "any_pct": round(any_pct, 2),
+        "total_anys": total_anys,
+        "total_exprs": total_exprs,
+    }
 
 
 def score_complexity(radon_path: Path) -> tuple[float, dict[str, object]]:

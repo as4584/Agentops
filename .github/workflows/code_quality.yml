@@ -44,10 +44,9 @@ jobs:
         run: |
           mypy backend \
             --ignore-missing-imports \
-            --json-report reports/quality/mypy \
+            --any-exprs-report reports/quality/mypy \
             --no-error-summary \
-            --no-pretty \
-            --quiet || true
+            --no-pretty || true
 
       - name: Radon cyclomatic complexity
         run: |

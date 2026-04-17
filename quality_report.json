@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-04-17T09:28:17.105346+00:00",
-  "overall_score": 48.2,
-  "grade": "F",
+  "generated_at": "2026-04-17T09:32:12.886568+00:00",
+  "overall_score": 71.1,
+  "grade": "C",
   "dimensions": {
     "lint": {
       "score": 100.0,
@@ -10,9 +10,11 @@
       }
     },
     "type_safety": {
-      "score": 0.0,
+      "score": 91.6,
       "meta": {
-        "error": "[Errno 2] No such file or directory: 'reports/quality/mypy/summary.json'"
+        "any_pct": 8.35,
+        "total_anys": 16540,
+        "total_exprs": 198058
       }
     },
     "complexity": {
