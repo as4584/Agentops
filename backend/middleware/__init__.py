@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Awaitable, Callable
-from datetime import datetime
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +44,8 @@ from backend.models import (
     ToolExecutionRecord,
 )
 from backend.utils import logger
+
+UTC_TZ = timezone.utc  # noqa: UP017
 
 
 class DriftGuard:
@@ -190,7 +192,7 @@ class DriftGuard:
         - INV-5: Pending documentation updates
         - Other structural integrity checks
         """
-        report = DriftReport(last_check=datetime.utcnow())
+        report = DriftReport(last_check=datetime.now(UTC_TZ))
 
         # Check for pending documentation updates
         if self._pending_updates:
@@ -235,16 +237,60 @@ class DriftGuard:
 
     def _check_documentation_updated(self, agent_id: str, tool_name: str) -> bool:
         """
-        Check if documentation has been updated for a structural change.
-        Looks for a recent entry in CHANGE_LOG.md matching this agent.
+        Check if documentation has been updated for a structural change (INV-5).
+
+        Parses the ISO-8601 section headers written by ``append_change_log()``
+        (``### <timestamp>``) and looks for an entry that:
+          1. Was written within the last 10 minutes (recency guard), and
+          2. Contains ``agent_id`` in its body.
+
+        Falls back to the old substring check when the file has no parseable
+        timestamps (e.g. legacy changelog format) so existing entries are never
+        silently invalidated.
+
+        Returns True if a qualifying recent entry is found, False otherwise.
+        Does not raise — malformed input produces False.
         """
+        recency_window = timedelta(minutes=10)
+        # Regex matches the timestamp headers written by append_change_log().
+        section_re = re.compile(r"^### (.+)$", re.MULTILINE)
+
         try:
             if not CHANGE_LOG_PATH.exists():
                 return False
-            content = CHANGE_LOG_PATH.read_text()
-            # Check for an entry within the last section matching the agent
-            # This is a simplified check — in production, parse structured entries
+            content = CHANGE_LOG_PATH.read_text(encoding="utf-8")
+
+            sections = section_re.split(content)
+            # sections = [pre, ts1, body1, ts2, body2, ...]
+            # Iterate paired (timestamp, body) chunks.
+            parsed_any_timestamp = False
+            now = datetime.now(UTC)
+            i = 1
+            while i + 1 < len(sections):
+                raw_ts = sections[i].strip()
+                body = sections[i + 1]
+                i += 2
+                try:
+                    entry_time = datetime.fromisoformat(raw_ts)
+                    # Ensure timezone-aware for comparison.
+                    if entry_time.tzinfo is None:
+                        entry_time = entry_time.replace(tzinfo=UTC)
+                    parsed_any_timestamp = True
+                    if now - entry_time <= recency_window and agent_id in body:
+                        return True
+                except ValueError:
+                    # Non-timestamp header (e.g. a Markdown heading) — skip.
+                    continue
+
+            if parsed_any_timestamp:
+                # Timestamps were found but none were recent enough.
+                return False
+
+            # No parseable timestamps → legacy changelog format.
+            # Fall back to the original substring check so pre-existing entries
+            # are not suddenly invalidated.
             return agent_id in content and tool_name in content
+
         except Exception:
             return False
 

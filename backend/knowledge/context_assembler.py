@@ -18,6 +18,7 @@ Usage::
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -168,6 +169,9 @@ class ContextAssembler:
             "qdrant_available": connected,
             "fallback_active": not connected,
             "fallback_count": ContextAssembler._fallback_count,
+            # Counts search/upsert calls that returned empty because the client was None.
+            # Non-zero while Qdrant is down even if no retrieval queries were made.
+            "vector_store_fallback_count": VectorStore._silent_fallback_count,
             "host": f"{QDRANT_HOST}:{QDRANT_PORT}",
             "in_memory": QDRANT_IN_MEMORY,
             "collections": collections,
@@ -238,6 +242,59 @@ class ContextAssembler:
 
         return self._format_results(results, limit)
 
+    async def retrieve_records(
+        self,
+        query: str,
+        agent_id: str,
+        limit: int = 5,
+    ) -> list[dict[str, Any]]:
+        """Return structured retrieval hits for programmatic callers."""
+        if not query.strip():
+            return []
+
+        try:
+            query_vec = await self._llm.embed(query)
+        except Exception as exc:
+            logger.warning(f"ContextAssembler embed failed: {exc}")
+            return await self._fallback_records(query, limit)
+
+        if not query_vec:
+            return await self._fallback_records(query, limit)
+
+        if not QDRANT_AVAILABLE or self._store._client is None:
+            return await self._fallback_records(query, limit)
+
+        results: list[dict[str, Any]] = []
+
+        try:
+            agent_hits = self._store.search(
+                query_vector=query_vec,
+                limit=limit,
+                collection=agent_id,
+                agent_namespace=agent_id,
+            )
+            results.extend(agent_hits)
+        except Exception as exc:
+            logger.debug(f"ContextAssembler: agent collection '{agent_id}' search failed: {exc}")
+
+        for coll in self.GLOBAL_COLLECTIONS:
+            if coll == agent_id:
+                continue
+            try:
+                global_hits = self._store.search(
+                    query_vector=query_vec,
+                    limit=max(2, limit // 2),
+                    collection=coll,
+                )
+                results.extend(global_hits)
+            except Exception as exc:
+                logger.debug(f"ContextAssembler: global collection '{coll}' search failed: {exc}")
+
+        if not results:
+            return await self._fallback_records(query, limit)
+
+        return self._normalise_results(results, limit)
+
     async def ingest_memory(
         self,
         agent_id: str,
@@ -283,19 +340,129 @@ class ContextAssembler:
             logger.warning(f"ContextAssembler.ingest_memory failed for {agent_id}: {exc}")
             return False
 
-    def _format_results(self, results: list[dict[str, Any]], limit: int) -> str:
-        """Sort, deduplicate, and format retrieved results into a context block."""
+    async def ingest_business_profile(self, business_id: str, field: str, answer: str) -> bool:
+        """Store a business intake answer in Qdrant and the JSON fallback store."""
+        content = answer.strip()
+        if not content:
+            return False
+
+        fallback_ok = False
+        kv = _get_fallback_store(self._llm)
+        if kv is not None:
+            try:
+                await kv.upsert_business_answer(business_id=business_id, field=field, answer=content)
+                fallback_ok = True
+            except Exception as exc:
+                logger.debug(f"ContextAssembler business profile fallback write failed: {exc}")
+
+        if not QDRANT_AVAILABLE or self._store._client is None:
+            return fallback_ok
+
+        try:
+            text = f"Business {business_id} | {field}: {content}"
+            vec = await self._llm.embed(text)
+            if not vec:
+                return fallback_ok
+            self._store.ensure_collection("business_profiles", dim=len(vec))
+            self._store.upsert(
+                vectors=[vec],
+                payloads=[{"business_id": business_id, "field": field, "text": text}],
+                ids=[hashlib.sha256(f"{business_id}:{field}".encode()).hexdigest()],
+                collection="business_profiles",
+            )
+            logger.debug("ContextAssembler.ingest_business_profile: business_id=%s field=%s", business_id, field)
+            return True
+        except Exception as exc:
+            logger.warning(f"ContextAssembler.ingest_business_profile failed for {business_id}:{field}: {exc}")
+            return fallback_ok
+
+    async def search_business_profiles(
+        self,
+        query: str,
+        business_id: str,
+        limit: int = 4,
+    ) -> list[dict[str, Any]]:
+        """Retrieve semantic business-profile matches with Qdrant-first fallback."""
+        if not query.strip() or not business_id.strip():
+            return []
+
+        try:
+            query_vec = await self._llm.embed(query)
+        except Exception as exc:
+            logger.warning(f"ContextAssembler business profile embed failed: {exc}")
+            query_vec = []
+
+        if query_vec and QDRANT_AVAILABLE and self._store._client is not None:
+            try:
+                hits = self._store.search(
+                    query_vector=query_vec,
+                    limit=limit,
+                    collection="business_profiles",
+                    filters={"business_id": business_id},
+                )
+                results = [
+                    {
+                        "business_id": hit.get("payload", {}).get("business_id", business_id),
+                        "field": hit.get("payload", {}).get("field"),
+                        "text": hit.get("payload", {}).get("text", ""),
+                        "score": float(hit.get("score", 0.0)),
+                    }
+                    for hit in hits
+                    if hit.get("payload", {}).get("text")
+                ]
+                if results:
+                    return results[:limit]
+            except Exception as exc:
+                logger.debug(f"ContextAssembler business profile Qdrant search failed: {exc}")
+
+        kv = _get_fallback_store(self._llm)
+        if kv is None:
+            return []
+        try:
+            return await kv.search_business_profiles(query=query, business_id=business_id, top_k=limit)
+        except Exception as exc:
+            logger.debug(f"ContextAssembler business profile fallback failed: {exc}")
+            return []
+
+    def _normalise_results(self, results: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+        """Sort, deduplicate, and normalize raw vector hits."""
         results.sort(key=lambda r: r.get("score", 0.0), reverse=True)
         seen: set[str] = set()
-        lines: list[str] = []
-        for r in results[:limit]:
-            payload = r.get("payload", {})
-            content = payload.get("content") or payload.get("text") or payload.get("answer") or ""
-            if not content or content in seen:
+        normalised: list[dict[str, Any]] = []
+
+        for result in results:
+            payload = result.get("payload", {})
+            text = payload.get("content") or payload.get("text") or payload.get("answer") or ""
+            if not text:
                 continue
-            seen.add(content)
-            source = payload.get("source") or payload.get("file_path") or ""
-            score = r.get("score", 0.0)
+            path = payload.get("source") or payload.get("file_path") or payload.get("path") or ""
+            chunk_index = payload.get("chunk_index", payload.get("chunk_idx", 0))
+            dedupe_key = f"{path}::{text[:200]}"
+            if dedupe_key in seen:
+                continue
+            seen.add(dedupe_key)
+            normalised.append(
+                {
+                    "path": str(path),
+                    "chunk_index": int(chunk_index)
+                    if isinstance(chunk_index, (int, float, str)) and str(chunk_index).isdigit()
+                    else 0,
+                    "text": text,
+                    "score": float(result.get("score", 0.0)),
+                }
+            )
+            if len(normalised) >= limit:
+                break
+
+        return normalised
+
+    def _format_results(self, results: list[dict[str, Any]], limit: int) -> str:
+        """Sort, deduplicate, and format retrieved results into a context block."""
+        lines: list[str] = []
+        for result in self._normalise_results(results, limit):
+            content = result["text"]
+            source = result["path"]
+            score = result["score"]
             header = f"[score={score:.2f}{f', src={source}' if source else ''}]"
             lines.append(f"{header}\n{content[:400]}")
 
@@ -303,14 +470,8 @@ class ContextAssembler:
             return ""
         return "Retrieved context:\n" + "\n\n".join(lines)
 
-    async def _fallback_retrieve(self, query: str, limit: int) -> str:
-        """
-        Fall back to JSON KnowledgeVectorStore when Qdrant is unavailable.
-
-        Increments the class-level ``_fallback_count`` counter so operators can
-        see fallback activation via ``health_check()`` and the ``/metrics`` endpoint.
-        Logs a WARNING on every call — intentionally noisy to surface misconfigurations.
-        """
+    async def _fallback_records(self, query: str, limit: int) -> list[dict[str, Any]]:
+        """Return structured fallback hits from KnowledgeVectorStore."""
         ContextAssembler._fallback_count += 1
         logger.warning(
             "ContextAssembler: Qdrant unavailable — using JSON KnowledgeVectorStore fallback "
@@ -321,16 +482,35 @@ class ContextAssembler:
         try:
             kv = _get_fallback_store(self._llm)
             if kv is None:
-                return ""
+                return []
             results = await kv.search(query=query, top_k=limit)
-            if not results:
-                return ""
-            lines = [
-                f"[score={r.get('score', 0.0):.2f}]\n{r.get('text', r.get('content', ''))[:400]}"
-                for r in results[:limit]
-                if r.get("text") or r.get("content")
+            return [
+                {
+                    "path": str(result.get("path", "")),
+                    "chunk_index": int(result.get("chunk_index", 0)),
+                    "text": str(result.get("text", result.get("content", ""))),
+                    "score": float(result.get("score", 0.0)),
+                }
+                for result in results[:limit]
+                if result.get("text") or result.get("content")
             ]
-            return "Retrieved context:\n" + "\n\n".join(lines) if lines else ""
         except Exception as exc:
             logger.debug(f"ContextAssembler fallback failed: {exc}")
+            return []
+
+    async def _fallback_retrieve(self, query: str, limit: int) -> str:
+        """
+        Fall back to JSON KnowledgeVectorStore when Qdrant is unavailable.
+
+        Increments the class-level ``_fallback_count`` counter so operators can
+        see fallback activation via ``health_check()`` and the ``/metrics`` endpoint.
+        Logs a WARNING on every call — intentionally noisy to surface misconfigurations.
+        """
+        results = await self._fallback_records(query, limit)
+        if not results:
             return ""
+        lines = []
+        for result in results:
+            source_suffix = f", src={result['path']}" if result["path"] else ""
+            lines.append(f"[score={result['score']:.2f}{source_suffix}]\n{result['text'][:400]}")
+        return "Retrieved context:\n" + "\n\n".join(lines)

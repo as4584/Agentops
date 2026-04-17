@@ -26,6 +26,7 @@ from typing import Any
 
 import httpx
 
+from backend.agents import ALL_AGENT_DEFINITIONS
 from backend.config import OLLAMA_BASE_URL
 from backend.utils import logger
 
@@ -68,7 +69,7 @@ except Exception:
     _fast_router = None  # type: ignore[assignment]
 
 # ── Valid agent IDs ──────────────────────────────────────────────────────
-VALID_AGENTS: set[str] = {
+GENERAL_AUTO_ROUTE_AGENTS: set[str] = {
     "soul_core",
     "devops_agent",
     "monitor_agent",
@@ -82,6 +83,76 @@ VALID_AGENTS: set[str] = {
     "knowledge_agent",
     "ocr_agent",
 }
+
+VALID_AGENTS: set[str] = set(ALL_AGENT_DEFINITIONS.keys())
+
+_SPECIALIST_EXPLICIT_MAP: list[tuple[list[str], str]] = [
+    (
+        [
+            "prompt engineer",
+            "rewrite this prompt",
+            "optimize this prompt",
+            "optimise this prompt",
+            "fix this prompt",
+            # Natural-language phrases a user would say without knowing the agent name
+            "make this prompt better",
+            "improve my prompt",
+            "help me write a prompt",
+            "write a better prompt",
+            "craft a prompt",
+            "better prompt for",
+            "prompt for llm",
+            "prompt for ai",
+        ],
+        "prompt_engineer",
+    ),
+    (
+        [
+            "token optimizer",
+            "token optimiser",
+            "compress this prompt",
+            "reduce token count",
+            "context window budget",
+            # Natural-language phrases
+            "too many tokens",
+            "reduce tokens",
+            "shorten the prompt",
+            "compress context",
+            "trim my prompt",
+            "prompt too long",
+            "running out of context",
+            "context limit",
+        ],
+        "token_optimizer",
+    ),
+    (
+        ["curriculum advisor", "course sequence", "studio 1", "studio 2", "prerequisite", "bseai curriculum"],
+        "curriculum_advisor",
+    ),
+    (
+        ["vocabulary coach", "spell book", "define this term", "terminology precision", "precise vocabulary"],
+        "vocabulary_coach",
+    ),
+    (
+        ["career intel", "job description analysis", "skills gap", "resume positioning", "interview positioning"],
+        "career_intel",
+    ),
+    (["accreditation advisor", "abet", "msche", "accreditation matrix", "student outcomes"], "accreditation_advisor"),
+    (
+        ["pedagogy agent", "learning objectives", "bloom's taxonomy", "lesson plan", "assessment design"],
+        "pedagogy_agent",
+    ),
+    (
+        [
+            "higgsfield research",
+            "video failure pattern",
+            "prompt recommendation for higgsfield",
+            "research higgsfield failures",
+        ],
+        "higgsfield_research_agent",
+    ),
+    (["higgsfield", "soul id", "video generation", "character lock"], "higgsfield_agent"),
+]
 
 # ── Keyword Fallback ─────────────────────────────────────────────────────
 _KEYWORD_MAP: list[tuple[list[str], str]] = [
@@ -106,6 +177,15 @@ _KEYWORD_MAP: list[tuple[list[str], str]] = [
 ]
 
 
+def _specialist_route(message: str) -> str:
+    """Route explicit specialist requests without perturbing the 12-agent baseline."""
+    msg_lower = message.lower()
+    for keywords, agent_id in _SPECIALIST_EXPLICIT_MAP:
+        if any(keyword in msg_lower for keyword in keywords):
+            return agent_id
+    return ""
+
+
 def _keyword_route(message: str) -> str:
     """Keyword-based routing fallback. Returns agent_id."""
     msg_lower = message.lower()
@@ -122,13 +202,15 @@ def _keyword_route(message: str) -> str:
 
 # ── Lex LLM Router ──────────────────────────────────────────────────────
 
-_ROUTER_SYSTEM_PROMPT = (
-    "You are Lex, the OpenClaw router for Agentop. "
-    "Given a user message, respond with ONLY a JSON object:\n"
-    '{"agent_id": "<agent>", "confidence": <0.0-1.0>, "reasoning": "<brief>"}\n\n'
-    "Available agents: " + ", ".join(sorted(VALID_AGENTS)) + "\n"
-    "Choose the single best agent. Respond with valid JSON only."
-)
+
+def _router_system_prompt(allowed_agents: set[str]) -> str:
+    return (
+        "You are Lex, the OpenClaw router for Agentop. "
+        "Given a user message, respond with ONLY a JSON object:\n"
+        '{"agent_id": "<agent>", "confidence": <0.0-1.0>, "reasoning": "<brief>"}\n\n'
+        "Available agents: " + ", ".join(sorted(allowed_agents)) + "\n"
+        "Choose the single best agent. Respond with valid JSON only."
+    )
 
 
 def _parse_lex_response(text: str) -> dict[str, Any] | None:
@@ -154,17 +236,19 @@ async def _lex_route(
     *,
     model: str | None = None,
     temperature: float | None = None,
+    allowed_agents: set[str] | None = None,
 ) -> tuple[str, float]:
     """Query the lex model for routing. Returns (agent_id, confidence)."""
     _model = model or _effective_router_model()
     _temp = temperature if temperature is not None else 0.1
+    _allowed = allowed_agents or VALID_AGENTS
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.post(
                 f"{OLLAMA_BASE_URL}/api/generate",
                 json={
                     "model": _model,
-                    "system": _ROUTER_SYSTEM_PROMPT,
+                    "system": _router_system_prompt(_allowed),
                     "prompt": message,
                     "stream": False,
                     "options": {"temperature": _temp, "num_predict": 256},
@@ -175,7 +259,7 @@ async def _lex_route(
             response_text = data.get("response", "")
 
         decision = _parse_lex_response(response_text)
-        if decision and decision.get("agent_id") in VALID_AGENTS:
+        if decision and decision.get("agent_id") in _allowed:
             confidence = float(decision.get("confidence", 0.5))
             return decision["agent_id"], confidence
 
@@ -228,15 +312,23 @@ async def resolve_agent(message: str) -> dict[str, Any]:
         c_result = _fast_router.route(message)
         if c_result["matched"] and c_result["confidence"] >= 0.85:
             agent_id = c_result["agent_id"]
-            if agent_id in VALID_AGENTS:
+            if agent_id in GENERAL_AUTO_ROUTE_AGENTS:
                 logger.info(f"[LexRouter] C fast-routed to {agent_id} (confidence={c_result['confidence']:.2f})")
                 result = {"agent_id": agent_id, "method": "c_fast", "confidence": c_result["confidence"]}
                 _record_decision(message, result, _t0)
                 return result
 
+    # ── Stage 1.5: explicit specialist routing ───────────────────────
+    specialist_agent = _specialist_route(message)
+    if specialist_agent:
+        logger.info(f"[LexRouter] Specialist-routed to {specialist_agent}")
+        result = {"agent_id": specialist_agent, "method": "specialist_keyword", "confidence": 0.9}
+        _record_decision(message, result, _t0)
+        return result
+
     # ── Stage 2: LLM routing via Ollama (~800ms) ────────────────────
     if mode == "lex" or mode == "hybrid":
-        agent_id, confidence = await _lex_route(message)
+        agent_id, confidence = await _lex_route(message, allowed_agents=GENERAL_AUTO_ROUTE_AGENTS)
         if agent_id:
             logger.info(f"[LexRouter] Routed to {agent_id} (confidence={confidence:.2f})")
             result = {"agent_id": agent_id, "method": "lex", "confidence": confidence}
@@ -262,7 +354,7 @@ async def lex_route_with_override(
     temperature: float | None = None,
 ) -> tuple[str, float]:
     """Public: route via LLM with optional model/temperature override."""
-    return await _lex_route(message, model=model, temperature=temperature)
+    return await _lex_route(message, model=model, temperature=temperature, allowed_agents=GENERAL_AUTO_ROUTE_AGENTS)
 
 
 def keyword_route(message: str) -> str:

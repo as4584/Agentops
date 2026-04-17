@@ -221,3 +221,37 @@ class TestVectorStoreNoQdrant:
 
     def test_list_collections_returns_empty(self, disabled_store: VectorStore) -> None:
         assert disabled_store.list_collections() == []
+
+    # ── Fallback observability tests ─────────────────────────────────
+
+    def test_upsert_increments_silent_fallback_count(
+        self, disabled_store: VectorStore, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """upsert() with _client=None must increment the class-level counter."""
+        monkeypatch.setattr(VectorStore, "_silent_fallback_count", 0)
+        disabled_store.upsert([[0.1, 0.2]], [{"x": 1}])
+        assert VectorStore._silent_fallback_count == 1
+
+    def test_search_increments_silent_fallback_count(
+        self, disabled_store: VectorStore, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """search() with _client=None must increment the class-level counter."""
+        monkeypatch.setattr(VectorStore, "_silent_fallback_count", 0)
+        disabled_store.search([0.1] * 4)
+        assert VectorStore._silent_fallback_count == 1
+
+    def test_upsert_emits_warning(self, disabled_store: VectorStore, caplog: pytest.LogCaptureFixture) -> None:
+        """upsert() with _client=None must log a WARNING mentioning fallback."""
+        import logging
+
+        with caplog.at_level(logging.WARNING, logger="agentop"):
+            disabled_store.upsert([[0.1, 0.2]], [{"x": 1}])
+        assert any("upsert skipped" in r.message for r in caplog.records)
+
+    def test_search_emits_warning(self, disabled_store: VectorStore, caplog: pytest.LogCaptureFixture) -> None:
+        """search() with _client=None must log a WARNING mentioning fallback."""
+        import logging
+
+        with caplog.at_level(logging.WARNING, logger="agentop"):
+            disabled_store.search([0.1] * 4)
+        assert any("search skipped" in r.message for r in caplog.records)

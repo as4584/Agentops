@@ -42,7 +42,7 @@ def make_agent(agent_id: str = "code_review_agent", llm: OllamaClient | None = N
 
 def stub_assembler() -> Any:
     """Return a mock ContextAssembler that does nothing (no Qdrant, no embed calls)."""
-    m = AsyncMock()
+    m = MagicMock()
     m.retrieve = AsyncMock(return_value="")
     m.ingest_memory = AsyncMock(return_value=True)
     return m
@@ -523,7 +523,7 @@ class TestQdrantRetrieval:
         if not QDRANT_AVAILABLE:
             pytest.skip("qdrant-client not installed")
 
-        mock_llm = AsyncMock()
+        mock_llm = MagicMock()
         mock_llm.embed = AsyncMock(return_value=[0.1] * 768)
         mock_llm.model = "test"
 
@@ -579,7 +579,7 @@ class TestQdrantRetrieval:
 
         rag_content = "Retrieved context:\n[score=0.92]\nINV-3 must never be violated."
 
-        mock_assembler = AsyncMock()
+        mock_assembler = MagicMock()
         mock_assembler.retrieve = AsyncMock(return_value=rag_content)
         mock_assembler.ingest_memory = AsyncMock(return_value=True)
 
@@ -631,7 +631,7 @@ class TestQdrantRetrieval:
 
         from backend.knowledge.context_assembler import ContextAssembler
 
-        mock_llm = AsyncMock()
+        mock_llm = MagicMock()
         mock_llm.embed = AsyncMock(return_value=[])  # empty → triggers fallback
 
         ca = ContextAssembler(mock_llm)
@@ -642,3 +642,105 @@ class TestQdrantRetrieval:
         assert any("fallback" in r.message.lower() or "unavailable" in r.message.lower() for r in caplog.records), (
             "ContextAssembler must log WARNING when using fallback path"
         )
+
+
+# ---------------------------------------------------------------------------
+# _handle_tool_calls() legacy-isolation: v2 mode warning
+# ---------------------------------------------------------------------------
+
+
+class TestHandleToolCallsLegacyIsolation:
+    """
+    Verify that _handle_tool_calls() emits the v2-mode warning on first
+    invocation when AGENT_RUNTIME_V2=True, and still executes the tool.
+    """
+
+    @pytest.mark.asyncio
+    async def test_v2_mode_warning_fires_on_method_entry(self, monkeypatch):
+        """
+        When AGENT_RUNTIME_V2=True, calling _handle_tool_calls() must:
+        1. Add agent_id to BaseAgent._legacy_tool_warned.
+        2. Execute any [TOOL:...] patterns present in the response.
+        3. Only warn once per agent (idempotent).
+        """
+        from backend.agents import BaseAgent, create_agent
+        from backend.llm import OllamaClient
+
+        monkeypatch.setattr("backend.agents.AGENT_RUNTIME_V2", True)
+        # Reset the warning set so this test is isolated.
+        BaseAgent._legacy_tool_warned.clear()
+
+        agent = create_agent("code_review_agent", OllamaClient())
+        # Patch _execute_tool to avoid real tool dispatch.
+        agent._execute_tool = AsyncMock(return_value="mocked result")  # type: ignore[method-assign]
+
+        response = "[TOOL:file_reader(path=backend/config.py)]"
+        result = await agent._handle_tool_calls(response)
+
+        # Warning must have been recorded for this agent.
+        assert "code_review_agent" in BaseAgent._legacy_tool_warned
+
+        # The tool must still have been executed.
+        agent._execute_tool.assert_called_once()
+        assert "mocked result" in result
+
+    @pytest.mark.asyncio
+    async def test_v2_mode_warning_fires_even_without_matches(self, monkeypatch):
+        """
+        When AGENT_RUNTIME_V2=True, the warning fires on method entry even when
+        the response has no [TOOL:...] patterns.
+        """
+        from backend.agents import BaseAgent, create_agent
+        from backend.llm import OllamaClient
+
+        monkeypatch.setattr("backend.agents.AGENT_RUNTIME_V2", True)
+        BaseAgent._legacy_tool_warned.clear()
+
+        agent = create_agent("data_agent", OllamaClient())
+        agent._execute_tool = AsyncMock(return_value="unused")  # type: ignore[method-assign]
+
+        await agent._handle_tool_calls("No tools here, just text.")
+        assert "data_agent" in BaseAgent._legacy_tool_warned
+        # No tool dispatch should have occurred.
+        agent._execute_tool.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_v2_mode_warning_fires_only_once(self, monkeypatch):
+        """Idempotency: calling _handle_tool_calls multiple times only warns once."""
+        from backend.agents import BaseAgent, create_agent
+        from backend.llm import OllamaClient
+
+        monkeypatch.setattr("backend.agents.AGENT_RUNTIME_V2", True)
+        BaseAgent._legacy_tool_warned.clear()
+
+        agent = create_agent("it_agent", OllamaClient())
+        agent._execute_tool = AsyncMock(return_value="ok")  # type: ignore[method-assign]
+
+        await agent._handle_tool_calls("text")
+        await agent._handle_tool_calls("text again")
+
+        # Still only one entry in the set.
+        assert list(BaseAgent._legacy_tool_warned).count("it_agent") == 1
+
+    @pytest.mark.asyncio
+    async def test_legacy_mode_warning_only_on_matches(self, monkeypatch):
+        """
+        When AGENT_RUNTIME_V2=False, the warning fires only when actual
+        [TOOL:...] matches are found — not for plain-text responses.
+        """
+        from backend.agents import BaseAgent, create_agent
+        from backend.llm import OllamaClient
+
+        monkeypatch.setattr("backend.agents.AGENT_RUNTIME_V2", False)
+        BaseAgent._legacy_tool_warned.clear()
+
+        agent = create_agent("monitor_agent", OllamaClient())
+        agent._execute_tool = AsyncMock(return_value="ok")  # type: ignore[method-assign]
+
+        # No [TOOL:...] → no warning, no dispatch.
+        await agent._handle_tool_calls("plain response without tool syntax")
+        assert "monitor_agent" not in BaseAgent._legacy_tool_warned
+
+        # Now trigger with an actual tool call.
+        await agent._handle_tool_calls("[TOOL:health_check(target=localhost:8000)]")
+        assert "monitor_agent" in BaseAgent._legacy_tool_warned

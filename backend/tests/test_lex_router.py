@@ -15,9 +15,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from backend.orchestrator.lex_router import (
+    GENERAL_AUTO_ROUTE_AGENTS,
     VALID_AGENTS,
     _keyword_route,
     _parse_lex_response,
+    _specialist_route,
     resolve_agent,
 )
 
@@ -271,8 +273,8 @@ class TestKeywordRouteBoundary:
         result = _keyword_route("dep sec")
         assert result == "soul_core"
 
-    def test_all_12_agents_reachable(self):
-        """Every agent in VALID_AGENTS must be reachable via keywords."""
+    def test_general_agents_reachable(self):
+        """The existing 12-agent keyword baseline must stay intact."""
         reachable = set()
         test_msgs = [
             "deploy the build via docker",  # devops
@@ -290,7 +292,7 @@ class TestKeywordRouteBoundary:
         ]
         for msg in test_msgs:
             reachable.add(_keyword_route(msg))
-        assert reachable == VALID_AGENTS
+        assert reachable == GENERAL_AUTO_ROUTE_AGENTS
 
     def test_empty_string_returns_soul_core(self):
         assert _keyword_route("") == "soul_core"
@@ -392,8 +394,8 @@ class TestResolveAgentAdvanced:
 
     @patch("backend.orchestrator.lex_router._fast_router", None)
     @patch("backend.orchestrator.lex_router.LLM_ROUTER_MODE", "keyword")
-    async def test_all_agents_reachable_in_keyword_mode(self):
-        """Every agent must be reachable in keyword-only mode."""
+    async def test_general_agents_reachable_in_keyword_mode(self):
+        """The 12 general agents remain reachable in keyword-only mode."""
         reachable = set()
         test_msgs = [
             "deploy build docker",
@@ -412,7 +414,31 @@ class TestResolveAgentAdvanced:
         for msg in test_msgs:
             result = await resolve_agent(msg)
             reachable.add(result["agent_id"])
-        assert reachable == VALID_AGENTS
+        assert reachable == GENERAL_AUTO_ROUTE_AGENTS
+
+    @patch("backend.orchestrator.lex_router._fast_router", None)
+    @patch("backend.orchestrator.lex_router.LLM_ROUTER_MODE", "hybrid")
+    async def test_specialist_agent_routes_are_explicit_and_stable(self):
+        specialist_messages = {
+            "prompt_engineer": "rewrite this prompt for claude sonnet",
+            "token_optimizer": "reduce token count and context window budget",
+            "curriculum_advisor": "what is the bseai course sequence and prerequisite path",
+            "vocabulary_coach": "define this term from the spell book with precise vocabulary",
+            "career_intel": "analyze this job description and identify the skills gap",
+            "accreditation_advisor": "build an ABET accreditation matrix for these outcomes",
+            "pedagogy_agent": "design learning objectives using bloom's taxonomy",
+            "higgsfield_agent": "create a higgsfield soul id and start video generation",
+            "higgsfield_research_agent": "research higgsfield failures and recommend prompt changes",
+        }
+
+        for expected_agent, message in specialist_messages.items():
+            result = await resolve_agent(message)
+            assert result["agent_id"] == expected_agent
+            assert result["method"] == "specialist_keyword"
+
+    async def test_valid_agents_matches_full_registry(self):
+        assert GENERAL_AUTO_ROUTE_AGENTS < VALID_AGENTS
+        assert len(VALID_AGENTS) == 21
 
     @patch("backend.orchestrator.lex_router._fast_router", None)
     @patch("backend.orchestrator.lex_router.LLM_ROUTER_MODE", "keyword")
@@ -434,3 +460,79 @@ class TestResolveAgentAdvanced:
             result = await resolve_agent("DROP TABLE users;")
             assert result["blocked"] is True
             assert "reason" in result
+
+
+# ── _specialist_route: natural-language trigger coverage ─────────────
+
+
+class TestSpecialistRoute:
+    """Covers both the canonical exact phrases and the new natural-language triggers."""
+
+    # ── prompt_engineer ──────────────────────────────────────────────
+
+    def test_exact_prompt_engineer_phrase(self):
+        assert _specialist_route("prompt engineer") == "prompt_engineer"
+
+    def test_rewrite_this_prompt(self):
+        assert _specialist_route("rewrite this prompt for gpt-4") == "prompt_engineer"
+
+    def test_optimize_this_prompt(self):
+        assert _specialist_route("optimize this prompt to be shorter") == "prompt_engineer"
+
+    def test_make_this_prompt_better(self):
+        assert _specialist_route("can you make this prompt better?") == "prompt_engineer"
+
+    def test_improve_my_prompt(self):
+        assert _specialist_route("improve my prompt for claude") == "prompt_engineer"
+
+    def test_help_me_write_a_prompt(self):
+        assert _specialist_route("help me write a prompt for summarisation") == "prompt_engineer"
+
+    def test_write_a_better_prompt(self):
+        assert _specialist_route("write a better prompt for this task") == "prompt_engineer"
+
+    def test_craft_a_prompt(self):
+        assert _specialist_route("craft a prompt for extracting entities") == "prompt_engineer"
+
+    def test_better_prompt_for(self):
+        assert _specialist_route("I need a better prompt for classification") == "prompt_engineer"
+
+    # ── token_optimizer ──────────────────────────────────────────────
+
+    def test_exact_token_optimizer_phrase(self):
+        assert _specialist_route("token optimizer") == "token_optimizer"
+
+    def test_compress_this_prompt(self):
+        assert _specialist_route("compress this prompt") == "token_optimizer"
+
+    def test_reduce_token_count(self):
+        assert _specialist_route("how do I reduce token count in my prompt?") == "token_optimizer"
+
+    def test_too_many_tokens(self):
+        assert _specialist_route("too many tokens in this request") == "token_optimizer"
+
+    def test_reduce_tokens(self):
+        assert _specialist_route("I need to reduce tokens") == "token_optimizer"
+
+    def test_shorten_the_prompt(self):
+        assert _specialist_route("please shorten the prompt to fit the window") == "token_optimizer"
+
+    def test_trim_my_prompt(self):
+        assert _specialist_route("trim my prompt please") == "token_optimizer"
+
+    def test_prompt_too_long(self):
+        assert _specialist_route("the prompt too long for the model") == "token_optimizer"
+
+    def test_context_limit(self):
+        assert _specialist_route("hitting the context limit again") == "token_optimizer"
+
+    # ── non-matching messages return empty string ────────────────────
+
+    def test_unrelated_message_returns_empty(self):
+        assert _specialist_route("deploy the service to production") == ""
+
+    def test_empty_message_returns_empty(self):
+        assert _specialist_route("") == ""
+
+    def test_case_insensitive_match(self):
+        assert _specialist_route("MAKE THIS PROMPT BETTER") == "prompt_engineer"

@@ -45,6 +45,10 @@ class VectorStore:
 
     DEFAULT_COLLECTION = "agentop_memory"
 
+    # Class-level counter: calls that silently returned empty because _client is None.
+    # Exposed via ContextAssembler.health_check() so operators can observe Qdrant outages.
+    _silent_fallback_count: int = 0
+
     # Sprint 4: default dim reads from config so it stays in sync with the embed model.
     # Import lazily to avoid circular deps at module load time.
     @classmethod
@@ -110,6 +114,13 @@ class VectorStore:
     ) -> int:
         """Insert or update vectors with payloads. Returns count upserted."""
         if not self._client:
+            # Qdrant is not connected — increment counter so operators can observe this via /metrics.
+            VectorStore._silent_fallback_count += 1
+            logger.warning(
+                f"[VectorStore] upsert skipped — Qdrant client not connected "
+                f"(silent_fallback_count={VectorStore._silent_fallback_count}). "
+                "Start Qdrant or set QDRANT_IN_MEMORY=true."
+            )
             return 0
         coll = collection or self.DEFAULT_COLLECTION
         self.ensure_collection(coll, dim=len(vectors[0]) if vectors else self._dim)
@@ -135,6 +146,13 @@ class VectorStore:
     ) -> list[dict[str, Any]]:
         """Semantic search with optional agent namespace filtering."""
         if not self._client:
+            # Qdrant is not connected — increment counter so operators can observe this via /metrics.
+            VectorStore._silent_fallback_count += 1
+            logger.warning(
+                f"[VectorStore] search skipped — Qdrant client not connected "
+                f"(silent_fallback_count={VectorStore._silent_fallback_count}). "
+                "Start Qdrant or set QDRANT_IN_MEMORY=true."
+            )
             return []
         coll = collection or self.DEFAULT_COLLECTION
         self.ensure_collection(coll, dim=len(query_vector))
