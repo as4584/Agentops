@@ -37,6 +37,11 @@ from backend.ml.vector_store import QDRANT_AVAILABLE, VectorStore
 
 logger = logging.getLogger(__name__)
 
+# Lazy imports to avoid circular dependency at module load time.
+# Both are resolved inside __init__ after the base assembler is fully constructed.
+from backend.knowledge.bm25_index import BM25Index  # noqa: E402
+from backend.knowledge.retrieval_engine import RetrievalEngine  # noqa: E402
+
 # Module-level singleton — shared across all agents in the same process.
 _vector_store: VectorStore | None = None
 
@@ -147,6 +152,16 @@ class ContextAssembler:
                 "Retrieval will fall back to JSON KnowledgeVectorStore until Qdrant is reachable."
             )
 
+        # Sprint 2: BM25 sparse index + hybrid RRF retrieval.
+        # load() is a no-op if the persisted index doesn't exist yet;
+        # call build_bm25_from_qdrant() once after doc_seed to populate it.
+        self._bm25   = BM25Index()
+        self._engine = RetrievalEngine(
+            context_assembler=self,
+            bm25_index=self._bm25,
+        )
+        self._bm25.load()
+
     def health_check(self) -> dict[str, Any]:
         """
         Return the current health state of the vector retrieval backend.
@@ -176,6 +191,97 @@ class ContextAssembler:
             "in_memory": QDRANT_IN_MEMORY,
             "collections": collections,
         }
+
+    async def search(
+        self,
+        query: str,
+        top_k: int = 10,
+        agent_scope: str | None = None,
+        source_prefix: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """
+        Hybrid public search API — delegates to RetrievalEngine (RRF merge).
+        Falls back to dense-only when BM25 index is absent.
+        Returns normalised hit dicts compatible with retrieve_records().
+        """
+        return await self._engine.retrieve(
+            query=query,
+            agent_scope=agent_scope,
+            corpus_filter=source_prefix,
+            top_k=top_k,
+        )
+
+    async def build_bm25_from_qdrant(
+        self,
+        collection: str = "knowledge_agent",
+        force_rebuild: bool = True,
+    ) -> int:
+        """
+        Pull all chunks from Qdrant and rebuild the BM25 index.
+        Call once after doc_seed.py runs, or when the corpus changes.
+        Returns the number of chunks indexed.
+        """
+        chunks = await self._fetch_all_chunks_from_qdrant(collection=collection)
+        self._bm25.build(chunks, force_rebuild=force_rebuild)
+        return self._bm25.chunk_count
+
+    async def _fetch_all_chunks_from_qdrant(
+        self,
+        collection: str = "knowledge_agent",
+        batch_sz: int = 500,
+    ) -> list[dict[str, Any]]:
+        """
+        Scroll all points from Qdrant and map to BM25 chunk schema.
+        Uses raw Qdrant client scroll — VectorStore has no scroll wrapper.
+        """
+        if not QDRANT_AVAILABLE or self._store._client is None:
+            logger.warning(
+                "[ContextAssembler] Qdrant unavailable — BM25 rebuild skipped"
+            )
+            return []
+
+        chunks: list[dict[str, Any]] = []
+        offset = None
+
+        while True:
+            try:
+                results, next_offset = self._store._client.scroll(
+                    collection_name=collection,
+                    limit=batch_sz,
+                    offset=offset,
+                    with_payload=True,
+                    with_vectors=False,
+                )
+            except Exception as exc:
+                logger.warning(
+                    f"[ContextAssembler] Qdrant scroll failed: {exc}"
+                )
+                break
+
+            for point in results:
+                p = point.payload or {}
+                chunks.append({
+                    "chunk_id":     str(point.id),
+                    "text":         p.get("text", ""),
+                    "source":       p.get("source", p.get("file_path", "")),
+                    "section":      p.get("section", ""),
+                    "agent_scope":  p.get("agent_scope", ["all"]),
+                    "last_indexed": p.get("last_indexed", ""),
+                })
+
+            if next_offset is None:
+                break
+            offset = next_offset
+
+        logger.info(
+            f"[ContextAssembler] Fetched {len(chunks)} chunks "
+            f"from Qdrant collection '{collection}' for BM25 rebuild"
+        )
+        return chunks
+
+    def retrieval_health(self) -> dict[str, Any]:
+        """Delegate to RetrievalEngine health — for /health/deps."""
+        return self._engine.retrieval_health()
 
     async def retrieve(
         self,
