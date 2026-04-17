@@ -5,10 +5,11 @@ Qdrant doc seeding helpers for knowledge-agent retrieval.
 from __future__ import annotations
 
 import hashlib
+import uuid
 from pathlib import Path
 from typing import Any
 
-from backend.config import DOCS_DIR
+from backend.config import DOCS_DIR, QDRANT_EMBED_MODEL
 from backend.knowledge.context_assembler import get_vector_store
 from backend.ml.vector_store import QDRANT_AVAILABLE
 from backend.utils import logger
@@ -49,9 +50,17 @@ async def seed_docs_to_qdrant(
 
     Running this twice without ``force_rebuild`` is idempotent because IDs are
     stable per relative path and chunk index.
+    Uses ``QDRANT_EMBED_MODEL`` (nomic-embed-text, 768-dim) for embeddings,
+    not the generation LLM client, to stay consistent with the Qdrant collection
+    vector dimensions.
     """
+    from backend.llm import OllamaClient
+
     docs_root = (docs_dir or DOCS_DIR).resolve()
     store = get_vector_store()
+
+    # Use the dedicated embedding model, not the generation LLM.
+    embed_client = OllamaClient(model=QDRANT_EMBED_MODEL)
 
     if not docs_root.is_dir():
         return {
@@ -102,7 +111,7 @@ async def seed_docs_to_qdrant(
         ids: list[str] = []
 
         for idx, chunk in enumerate(chunks):
-            vec = await llm_client.embed(chunk)
+            vec = await embed_client.embed(chunk)
             if not vec:
                 continue
             vectors.append(vec)
@@ -114,7 +123,7 @@ async def seed_docs_to_qdrant(
                     "chunk_index": idx,
                 }
             )
-            ids.append(hashlib.sha256(f"{rel_path}:{idx}".encode()).hexdigest())
+            ids.append(str(uuid.UUID(hex=hashlib.sha256(f"{rel_path}:{idx}".encode()).hexdigest()[:32])))
 
         if not vectors:
             continue
@@ -130,6 +139,7 @@ async def seed_docs_to_qdrant(
                 agent_namespace=agent_namespace,
             )
 
+    await embed_client.close()
     stored_chunks = store.count(collection)
     return {
         "agent_id": agent_namespace,

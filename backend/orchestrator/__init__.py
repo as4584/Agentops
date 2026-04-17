@@ -85,6 +85,8 @@ class OrchestratorState(TypedDict):
     # Metadata
     timestamp: str  # Processing timestamp
     error: str | None  # Error message if any
+    # knowledge_agent structured result — present only when agent_id == "knowledge_agent"
+    knowledge_result: dict[str, Any] | None
 
 
 INTAKE_QUESTIONS: list[tuple[str, str]] = [
@@ -414,9 +416,32 @@ class AgentOrchestrator:
                 }
             )
 
+            # ── Structured output contract (required by Sprint 2 hybrid retrieval) ──
+            citations = list(dict.fromkeys(
+                item["path"] for item in retrieved if item.get("path")
+            ))
+            scores = [item.get("score", 0.0) for item in retrieved]
+            confidence = round(sum(scores) / len(scores), 4) if scores else 0.0
+            stale_chunks = [
+                {"path": item["path"], "score": item.get("score", 0.0)}
+                for item in retrieved
+                if item.get("score", 1.0) < 0.5
+            ]
+
             return {
                 "response": response,
                 "error": None,
+                "knowledge_result": {
+                    "answer": response,
+                    "citations": citations,
+                    "confidence": confidence,
+                    "stale_chunks": stale_chunks,
+                    "agent_scope": {
+                        "agent_id": self._knowledge_agent_id,
+                        "chunks_retrieved": len(retrieved),
+                        "collection": "knowledge_agent",
+                    },
+                },
             }
 
         except Exception as e:
@@ -490,12 +515,14 @@ class AgentOrchestrator:
             "governance_notes": [],
             "timestamp": datetime.now(UTC_TZ).isoformat(),
             "error": None,
+            "knowledge_result": None,
         }
 
         try:
             # Run the state machine
             final_state = await self._compiled_graph.ainvoke(initial_state)  # type: ignore[arg-type]
 
+            kr = final_state.get("knowledge_result") or {}
             return {
                 "agent_id": agent_id,
                 "response": final_state.get("response", ""),
@@ -503,6 +530,12 @@ class AgentOrchestrator:
                 "governance_notes": final_state.get("governance_notes", []),
                 "timestamp": final_state.get("timestamp", datetime.now(UTC_TZ).isoformat()),
                 "error": final_state.get("error"),
+                # Structured fields — populated only for knowledge_agent
+                "answer": kr.get("answer"),
+                "citations": kr.get("citations"),
+                "confidence": kr.get("confidence"),
+                "stale_chunks": kr.get("stale_chunks"),
+                "agent_scope": kr.get("agent_scope"),
             }
 
         except Exception as e:
