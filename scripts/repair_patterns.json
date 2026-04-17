@@ -1,0 +1,105 @@
+{
+  "version": "1.1",
+  "patterns": [
+    {
+      "id": "legacy_kvs_import",
+      "description": "Direct KnowledgeVectorStore import after ContextAssembler convergence",
+      "detect": "from\\s+\\S+\\s+import\\s+KnowledgeVectorStore|import KnowledgeVectorStore",
+      "fix_cmd": ["python", "scripts/fix_kvs_imports.py"],
+      "safe": true,
+      "severity": "critical",
+      "added_sprint": 8,
+      "rationale": "Sprint 7 converged knowledge on ContextAssembler. Any new KVS import is drift."
+    },
+    {
+      "id": "legacy_v1_runtime_call",
+      "description": "Direct call to process_message_v1 after V2 cutover",
+      "detect": "process_message_v1",
+      "fix_cmd": ["python", "scripts/fix_v1_calls.py"],
+      "safe": false,
+      "severity": "critical",
+      "added_sprint": 8,
+      "rationale": "V1 calls require logic review — not mechanical. Opens issue, never auto-repairs."
+    },
+    {
+      "id": "regex_tool_call",
+      "description": "Legacy [TOOL:...] regex pattern instead of typed tool calls",
+      "detect": "\\[TOOL:",
+      "fix_cmd": null,
+      "safe": false,
+      "severity": "critical",
+      "added_sprint": 8,
+      "rationale": "Pre-migration tool call format. Requires typed model replacement — needs human."
+    },
+    {
+      "id": "silent_qdrant_fallback",
+      "description": "Qdrant fallback without WARNING log",
+      "detect": "except.*Exception.*:\\s*\\n\\s*(return|yield|pass)",
+      "fix_cmd": null,
+      "safe": false,
+      "severity": "critical",
+      "added_sprint": 8,
+      "rationale": "Silent fallback. Needs human to verify correct log level and fallback intent."
+    },
+    {
+      "id": "datetime_utcfromtimestamp",
+      "description": "Deprecated utcfromtimestamp()",
+      "detect": "utcfromtimestamp",
+      "fix_cmd": ["python", "scripts/fix_datetime_deprecated.py"],
+      "safe": true,
+      "severity": "high",
+      "added_sprint": 8,
+      "rationale": "Deprecated alongside utcnow(). Mechanical replacement."
+    },
+    {
+      "id": "asyncmock_bare",
+      "description": "Bare AsyncMock without pytest-asyncio fixture",
+      "detect": "AsyncMock\\(\\)",
+      "fix_cmd": ["python", "scripts/fix_asyncmock.py"],
+      "safe": true,
+      "severity": "medium",
+      "added_sprint": 8,
+      "rationale": "Causes runtime warnings in full test suite. Mechanical fixture replacement."
+    },
+    {
+      "id": "router_hardcoded_agent_list",
+      "description": "Hardcoded agent list instead of registry-derived VALID_AGENTS",
+      "detect": "VALID_AGENTS\\s*=\\s*\\[",
+      "fix_cmd": null,
+      "safe": false,
+      "severity": "high",
+      "added_sprint": 8,
+      "rationale": "Sprint 7 fixed this once. If it reappears it means registry drift — needs human."
+    },
+    {
+      "id": "gitnexus_ungated_call",
+      "description": "GitNexus tool call without health check gate",
+      "detect": "gitnexus\\.run|gitnexus_client\\.call",
+      "fix_cmd": null,
+      "safe": false,
+      "severity": "high",
+      "added_sprint": 8,
+      "rationale": "GitNexus runtime integration was missing at audit. Any new call needs gate verification."
+    },
+    {
+      "id": "raw_dict_process_message",
+      "description": "process_message called with raw dict instead of typed model",
+      "detect": "process_message\\(\\{",
+      "fix_cmd": null,
+      "safe": false,
+      "severity": "high",
+      "added_sprint": 8,
+      "rationale": "Typed models exist but are not enforced. Needs human to wire correct model."
+    },
+    {
+      "id": "json_knowledge_rebuild",
+      "description": "Legacy JSON knowledge index rebuild instead of Qdrant seed",
+      "detect": "rebuild_knowledge_index|build_json_index",
+      "fix_cmd": ["python", "scripts/fix_knowledge_rebuild.py"],
+      "safe": true,
+      "severity": "high",
+      "added_sprint": 8,
+      "rationale": "Orchestrator reindex path was a live seam in Sprint 7. Mechanical redirect to seed path."
+    }
+  ]
+}
