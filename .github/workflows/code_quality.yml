@@ -1,0 +1,104 @@
+name: Code Quality Audit
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 9 * * 1" # Weekly Monday baseline
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality Scorecard
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install radon vulture bandit
+
+      - name: Create reports directory
+        run: mkdir -p reports/quality
+
+      # ── Layer 1: Static analysis ───────────────────────────────
+      - name: Ruff lint (JSON)
+        run: |
+          ruff check . --output-format=json \
+            --exclude .venv,node_modules,htmlcov \
+            > reports/quality/ruff.json || true
+
+      - name: Mypy type coverage
+        run: |
+          mypy backend \
+            --ignore-missing-imports \
+            --json-report reports/quality/mypy \
+            --no-error-summary \
+            --no-pretty \
+            --quiet || true
+
+      - name: Radon cyclomatic complexity
+        run: |
+          radon cc backend scripts deerflow -j \
+            > reports/quality/complexity.json
+
+      - name: Radon maintainability index
+        run: |
+          radon mi backend scripts deerflow -j \
+            > reports/quality/maintainability.json
+
+      - name: Bandit security scan
+        run: |
+          bandit -r backend scripts \
+            -f json -q \
+            -o reports/quality/security.json || true
+
+      # ── Layer 2: Aggregate scorecard ──────────────────────────
+      - name: Generate quality scorecard
+        run: |
+          python scripts/quality_scorecard.py \
+            --reports reports/quality \
+            --output quality_report.json
+
+      # ── Layer 3: Trend tracking + regression detection ────────
+      - name: Update quality trend
+        run: |
+          python scripts/quality_trend.py \
+            --report quality_report.json \
+            --threshold 5
+
+      # ── Layer 4: Hotspot report ───────────────────────────────
+      - name: Generate hotspot report
+        run: |
+          python scripts/quality_hotspots.py \
+            --top 10 \
+            --output reports/quality/hotspots.json
+
+      # ── Layer 5: Hard gate ────────────────────────────────────
+      - name: Quality gate
+        run: |
+          python scripts/quality_gate.py \
+            --report quality_report.json
+
+      # ── Artifacts ─────────────────────────────────────────────
+      - name: Upload quality reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports-${{ github.sha }}
+          path: |
+            quality_report.json
+            reports/quality/
+          retention-days: 30

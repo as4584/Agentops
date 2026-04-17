@@ -41,6 +41,9 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.4.0",
     "mypy>=1.10.0",
+    "radon>=6.0.1",
+    "vulture>=2.11",
+    "bandit>=1.7.9",
 ]
 
 [tool.ruff]
