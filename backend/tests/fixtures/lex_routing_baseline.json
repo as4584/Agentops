@@ -1,0 +1,52 @@
+{
+  "restart ollama": {
+    "agent_id": "self_healer_agent",
+    "confidence": 0.92,
+    "method": "c_fast"
+  },
+  "deploy to production": {
+    "agent_id": "devops_agent",
+    "confidence": 0.92,
+    "method": "c_fast"
+  },
+  "scan for open ports": {
+    "agent_id": "security_agent",
+    "confidence": 0.8,
+    "method": "keyword"
+  },
+  "fix lint errors": {
+    "agent_id": "self_healer_agent",
+    "confidence": 0.88,
+    "method": "c_fast"
+  },
+  "what does the corpus say about VLAN 10": {
+    "agent_id": "knowledge_agent",
+    "confidence": 0.88,
+    "method": "c_fast"
+  },
+  "send incident alert to ops team": {
+    "agent_id": "comms_agent",
+    "confidence": 0.8,
+    "method": "keyword"
+  },
+  "review the PR before merge": {
+    "agent_id": "code_review_agent",
+    "confidence": 0.88,
+    "method": "c_fast"
+  },
+  "tail backend logs": {
+    "agent_id": "monitor_agent",
+    "confidence": 0.8,
+    "method": "keyword"
+  },
+  "check database schema": {
+    "agent_id": "data_agent",
+    "confidence": 0.9,
+    "method": "c_fast"
+  },
+  "help with billing issue": {
+    "agent_id": "cs_agent",
+    "confidence": 0.8,
+    "method": "keyword"
+  }
+}

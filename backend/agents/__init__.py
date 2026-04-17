@@ -2437,18 +2437,14 @@ ALL_AGENT_DEFINITIONS: dict[str, AgentDefinition] = {
     "security_agent": SECURITY_AGENT_DEFINITION,
     "data_agent": DATA_AGENT_DEFINITION,
     "comms_agent": COMMS_AGENT_DEFINITION,
-    "prompt_engineer": PROMPT_ENGINEER_DEFINITION,
-    "token_optimizer": TOKEN_OPTIMIZER_DEFINITION,
-    "curriculum_advisor": CURRICULUM_ADVISOR_DEFINITION,
-    "vocabulary_coach": VOCABULARY_COACH_DEFINITION,
-    "career_intel": CAREER_INTEL_DEFINITION,
-    "accreditation_advisor": ACCREDITATION_ADVISOR_DEFINITION,
-    "pedagogy_agent": PEDAGOGY_AGENT_DEFINITION,
-    "higgsfield_agent": HIGGSFIELD_AGENT_DEFINITION,
-    "higgsfield_research_agent": HIGGSFIELD_RESEARCH_AGENT_DEFINITION,
-    "ocr_agent": OCR_AGENT_DEFINITION,
     "knowledge_agent": KNOWLEDGE_AGENT_DEFINITION,
 }
+
+assert set(ALL_AGENT_DEFINITIONS.keys()) == {
+    "soul_core", "it_agent", "cs_agent", "devops_agent",
+    "monitor_agent", "self_healer_agent", "code_review_agent",
+    "security_agent", "data_agent", "comms_agent", "knowledge_agent",
+}, "ALL_AGENT_DEFINITIONS roster drift detected"
 
 
 def create_agent(

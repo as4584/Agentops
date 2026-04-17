@@ -274,7 +274,7 @@ class TestKeywordRouteBoundary:
         assert result == "soul_core"
 
     def test_general_agents_reachable(self):
-        """The existing 12-agent keyword baseline must stay intact."""
+        """All 10 canonical auto-route agents reachable via keyword fallback."""
         reachable = set()
         test_msgs = [
             "deploy the build via docker",  # devops
@@ -287,8 +287,6 @@ class TestKeywordRouteBoundary:
             "customer support ticket complaint",  # cs
             "cpu memory disk network process",  # it
             "search docs knowledge documentation",  # knowledge
-            "reflect goal trust purpose soul",  # soul_core
-            "ocr extract text from pdf document",  # ocr_agent
         ]
         for msg in test_msgs:
             reachable.add(_keyword_route(msg))
@@ -373,11 +371,13 @@ class TestResolveAgentAdvanced:
 
     @patch("backend.orchestrator.lex_router._fast_router", None)
     @patch("backend.orchestrator.lex_router.LLM_ROUTER_MODE", "hybrid")
-    async def test_llm_timeout_propagates_exception(self):
+    async def test_llm_timeout_falls_back_to_soul_core(self):
+        """Sprint 1: exceptions from _lex_route are now caught and routed to soul_core."""
         with patch("backend.orchestrator.lex_router._lex_route", new_callable=AsyncMock) as mock_lex:
             mock_lex.side_effect = Exception("Connection timeout")
-            with pytest.raises(Exception, match="Connection timeout"):
-                await resolve_agent("restart process")
+            result = await resolve_agent("restart process")
+        assert result["agent_id"] == "soul_core"
+        assert result["method"] == "fallback_soul_core"
 
     @patch("backend.orchestrator.lex_router.LLM_ROUTER_MODE", "hybrid")
     async def test_c_router_not_matched_proceeds_to_llm(self):
@@ -395,7 +395,7 @@ class TestResolveAgentAdvanced:
     @patch("backend.orchestrator.lex_router._fast_router", None)
     @patch("backend.orchestrator.lex_router.LLM_ROUTER_MODE", "keyword")
     async def test_general_agents_reachable_in_keyword_mode(self):
-        """The 12 general agents remain reachable in keyword-only mode."""
+        """All 10 canonical auto-route agents remain reachable in keyword-only mode."""
         reachable = set()
         test_msgs = [
             "deploy build docker",
@@ -408,8 +408,6 @@ class TestResolveAgentAdvanced:
             "customer support ticket",
             "cpu disk network",
             "search docs knowledge",
-            "reflect goal soul",
-            "ocr extract text from pdf",
         ]
         for msg in test_msgs:
             result = await resolve_agent(msg)
@@ -436,9 +434,12 @@ class TestResolveAgentAdvanced:
             assert result["agent_id"] == expected_agent
             assert result["method"] == "specialist_keyword"
 
-    async def test_valid_agents_matches_full_registry(self):
+    async def test_valid_agents_matches_canonical_roster(self):
+        """Sprint 1: VALID_AGENTS is the canonical 11, GENERAL_AUTO_ROUTE is the 10 non-soul agents."""
         assert GENERAL_AUTO_ROUTE_AGENTS < VALID_AGENTS
-        assert len(VALID_AGENTS) == 21
+        assert len(VALID_AGENTS) == 11
+        assert "soul_core" not in GENERAL_AUTO_ROUTE_AGENTS
+        assert len(GENERAL_AUTO_ROUTE_AGENTS) == 10
 
     @patch("backend.orchestrator.lex_router._fast_router", None)
     @patch("backend.orchestrator.lex_router.LLM_ROUTER_MODE", "keyword")

@@ -26,7 +26,6 @@ from typing import Any
 
 import httpx
 
-from backend.agents import ALL_AGENT_DEFINITIONS
 from backend.config import OLLAMA_BASE_URL
 from backend.utils import logger
 
@@ -69,8 +68,12 @@ except Exception:
     _fast_router = None  # type: ignore[assignment]
 
 # ── Valid agent IDs ──────────────────────────────────────────────────────
-GENERAL_AUTO_ROUTE_AGENTS: set[str] = {
+# Canonical 11 — hardcoded here to decouple routing from agent module loading.
+# Any change to this set requires a matching change in ALL_AGENT_DEFINITIONS.
+VALID_AGENTS: set[str] = {
     "soul_core",
+    "it_agent",
+    "cs_agent",
     "devops_agent",
     "monitor_agent",
     "self_healer_agent",
@@ -78,13 +81,37 @@ GENERAL_AUTO_ROUTE_AGENTS: set[str] = {
     "security_agent",
     "data_agent",
     "comms_agent",
-    "cs_agent",
-    "it_agent",
     "knowledge_agent",
-    "ocr_agent",
 }
 
-VALID_AGENTS: set[str] = set(ALL_AGENT_DEFINITIONS.keys())
+# soul_core only receives escalations — never a direct LLM routing target
+GENERAL_AUTO_ROUTE_AGENTS: set[str] = VALID_AGENTS - {"soul_core"}
+
+# Retired agents — used in migration assertions and roster enforcement tests
+RETIRED_AGENTS: set[str] = {
+    "token_optimizer",
+    "vocabulary_coach",
+    "career_intel",
+    "accreditation_advisor",
+    "pedagogy_agent",
+    "higgsfield_agent",
+    "higgsfield_research_agent",
+    "ocr_agent",
+    "prompt_engineer",
+    "curriculum_advisor",
+}
+
+# Defensive import-time guard
+_retired_overlap = VALID_AGENTS & RETIRED_AGENTS
+if _retired_overlap:
+    raise RuntimeError(f"FATAL: Retired agent IDs in VALID_AGENTS: {_retired_overlap}")
+
+# ── High-risk agents requiring >= 0.8 LLM confidence ────────────────────────
+_HIGH_RISK_AGENTS: frozenset[str] = frozenset({
+    "security_agent",
+    "self_healer_agent",
+    "code_review_agent",
+})
 
 _SPECIALIST_EXPLICIT_MAP: list[tuple[list[str], str]] = [
     (
@@ -169,12 +196,109 @@ _KEYWORD_MAP: list[tuple[list[str], str]] = [
     (["customer", "support", "ticket", "help desk", "complaint"], "cs_agent"),
     (["cpu", "memory", "disk", "network", "uptime", "process", "system info", "infrastructure"], "it_agent"),
     (["search", "docs", "knowledge", "documentation", "source of truth"], "knowledge_agent"),
-    (
-        ["ocr", "pdf", "scan", "extract text", "document extract", "image to text", "read pdf", "parse document"],
-        "ocr_agent",
-    ),
     (["reflect", "goal", "trust", "purpose", "mission", "remember", "soul"], "soul_core"),
 ]
+
+# ── Specialist keyword map (precision overrides) ─────────────────────────────
+# Multi-word phrases precise enough to override C-router single-keyword matches.
+# Priority order: first match in SPECIALIST_PRIORITY_ORDER wins.
+SPECIALIST_KEYWORD_MAP: dict[str, list[str]] = {
+    "knowledge_agent": [
+        "source of truth", "source_of_truth", "what does the corpus",
+        "corpus say", "docs say", "documentation say",
+        "knowledge base", "search the docs",
+    ],
+    "cs_agent": [
+        "i need help with", "help with my account", "billing issue",
+        "my account", "account problem", "subscription", "invoice",
+        "refund", "customer support", "user account",
+        "access issue", "login problem", "password reset",
+    ],
+    "comms_agent": [
+        "notification", "incident notification", "send notification",
+        "incident alert", "notify the team", "send an incident",
+        "alert the team", "stakeholder", "send to slack",
+        "post to slack", "incident report",
+    ],
+    "code_review_agent": [
+        "review the diff", "review this diff", "review the code",
+        "code review", "review before merge", "review the pr",
+        "check the diff", "review these changes", "review this pr",
+    ],
+    "self_healer_agent": [
+        "lint errors", "ruff lint", "fix lint errors", "fix the lint",
+        "ruff fix", "ruff check", "ruff format", "fix type errors",
+        "mypy errors", "fix imports", "fix the imports",
+        "clean pycache", "clear pycache",
+        "pod crashlooping", "pod crash", "rollout restart",
+        "auto-remediate", "auto remediate", "self heal",
+        "restart and fix", "fix and restart",
+    ],
+    "it_agent": [
+        "kubernetes", "kubectl", "k8s", "pod running", "pod status",
+        "port 11434", "port 8000", "port 3007",
+        "vlan", "dns lookup", "nameserver", "traceroute",
+        "vm", "hypervisor",
+    ],
+    "security_agent": [
+        "scan for secrets", "scan for credentials", "hardcoded credentials",
+        "secret scan", "cve", "vulnerability scan", "audit security",
+        "security audit", "owasp",
+    ],
+    "data_agent": [
+        "database schema", "schema drift", "check schema",
+        "migrate the database", "sqlite query",
+        "data validation", "table structure",
+    ],
+    "monitor_agent": [
+        "tail logs", "tail the logs", "watch logs",
+        "set up alerting", "alert me if", "alert when",
+        "grafana", "prometheus", "latency spike",
+        "response time", "error rate",
+    ],
+    "devops_agent": [
+        "deploy to", "deploy the", "run the pipeline",
+        "ci pipeline", "cd pipeline", "build and deploy",
+        "pipeline failed", "pipeline passing", "helm chart",
+        "docker build", "docker push", "staging deploy",
+        "production deploy", "rollback", "blue green",
+    ],
+    "soul_core": [
+        "reflect on", "our mission", "our purpose", "trust score",
+        "goal arbitration", "goal tracking",
+    ],
+}
+
+# Order matters: first match wins.
+SPECIALIST_PRIORITY_ORDER: list[str] = [
+    "knowledge_agent",    # corpus queries — distinctive phrases
+    "cs_agent",           # account + billing — distinctive
+    "comms_agent",        # outbound send intent — must beat devops 'incident'
+    "code_review_agent",  # review intent — must beat devops 'merge'
+    "self_healer_agent",  # fix + remediate — must beat code_review 'lint'
+    "it_agent",           # infra + port — must beat self_healer 'restart'
+    "security_agent",     # scan + CVE — distinctive
+    "data_agent",         # schema + database — distinctive
+    "monitor_agent",      # observe + alert setup
+    "devops_agent",       # deploy + pipeline — broad, placed last
+    "soul_core",          # fallback only
+]
+
+
+def _specialist_keyword_route(message: str) -> tuple[str, float] | None:
+    """Priority-ordered keyword match against SPECIALIST_KEYWORD_MAP.
+
+    Returns (agent_id, confidence) or None if no match.
+    First match in SPECIALIST_PRIORITY_ORDER wins, giving precise
+    multi-word phrases priority over C-router single-keyword matches.
+    """
+    msg_lower = message.lower()
+    for agent_id in SPECIALIST_PRIORITY_ORDER:
+        for kw in SPECIALIST_KEYWORD_MAP.get(agent_id, []):
+            if kw in msg_lower:
+                logger.info(f"[LexRouter] specialist_keyword: '{kw}' -> {agent_id}")
+                return agent_id, 0.88
+    return None
 
 
 def _specialist_route(message: str) -> str:
@@ -303,6 +427,7 @@ async def resolve_agent(message: str) -> dict[str, Any]:
                 "confidence": 1.0,
                 "blocked": True,
                 "reason": "Red line violation",
+                "reasoning": "Red line violation detected by C fast router",
             }
             _record_decision(message, result, _t0)
             return result
@@ -313,8 +438,32 @@ async def resolve_agent(message: str) -> dict[str, Any]:
         if c_result["matched"] and c_result["confidence"] >= 0.85:
             agent_id = c_result["agent_id"]
             if agent_id in GENERAL_AUTO_ROUTE_AGENTS:
+                # Allow precise specialist keywords to override C router
+                sk = _specialist_keyword_route(message)
+                if sk and sk[0] != agent_id:
+                    sk_agent, sk_conf = sk
+                    logger.info(
+                        f"[LexRouter] Specialist override: C→{agent_id} "
+                        f"overridden by specialist keyword → {sk_agent}"
+                    )
+                    result = {
+                        "agent_id": sk_agent,
+                        "method": "keyword",
+                        "confidence": sk_conf,
+                        "reasoning": (
+                            f"Specialist keyword overrode C router "
+                            f"({agent_id} → {sk_agent})"
+                        ),
+                    }
+                    _record_decision(message, result, _t0)
+                    return result
                 logger.info(f"[LexRouter] C fast-routed to {agent_id} (confidence={c_result['confidence']:.2f})")
-                result = {"agent_id": agent_id, "method": "c_fast", "confidence": c_result["confidence"]}
+                result = {
+                    "agent_id": agent_id,
+                    "method": "c_fast",
+                    "confidence": c_result["confidence"],
+                    "reasoning": f"C fast router matched keyword for {agent_id}",
+                }
                 _record_decision(message, result, _t0)
                 return result
 
@@ -322,28 +471,103 @@ async def resolve_agent(message: str) -> dict[str, Any]:
     specialist_agent = _specialist_route(message)
     if specialist_agent:
         logger.info(f"[LexRouter] Specialist-routed to {specialist_agent}")
-        result = {"agent_id": specialist_agent, "method": "specialist_keyword", "confidence": 0.9}
+        result = {
+            "agent_id": specialist_agent,
+            "method": "specialist_keyword",
+            "confidence": 0.9,
+            "reasoning": f"Specialist keyword match for {specialist_agent}",
+        }
         _record_decision(message, result, _t0)
         return result
 
     # ── Stage 2: LLM routing via Ollama (~800ms) ────────────────────
     if mode == "lex" or mode == "hybrid":
-        agent_id, confidence = await _lex_route(message, allowed_agents=GENERAL_AUTO_ROUTE_AGENTS)
+        import asyncio as _asyncio
+        try:
+            agent_id, confidence = await _asyncio.wait_for(
+                _lex_route(message, allowed_agents=GENERAL_AUTO_ROUTE_AGENTS),
+                timeout=1.2,
+            )
+        except (_asyncio.TimeoutError, Exception) as _exc:
+            logger.warning(f"[LexRouter] _lex_route failed: {_exc} — falling back to soul_core")
+            result = {
+                "agent_id": "soul_core",
+                "method": "fallback_soul_core",
+                "confidence": 0.0,
+                "reasoning": f"LLM router exception: {type(_exc).__name__}",
+            }
+            _record_decision(message, result, _t0)
+            return result
         if agent_id:
+            # ── Confidence threshold guards ──────────────────────────
+            if confidence < 0.5:
+                logger.info(
+                    f"[LexRouter] Confidence {confidence:.2f} < 0.5 "
+                    f"— escalating to soul_core"
+                )
+                result = {
+                    "agent_id": "soul_core",
+                    "method": "low_confidence_escalation",
+                    "confidence": confidence,
+                    "reasoning": (
+                        f"Confidence {confidence:.2f} below threshold 0.5 "
+                        f"for {agent_id} — escalating"
+                    ),
+                }
+                _record_decision(message, result, _t0)
+                return result
+            if agent_id in _HIGH_RISK_AGENTS and confidence < 0.8:
+                logger.info(
+                    f"[LexRouter] High-risk agent {agent_id} at "
+                    f"confidence {confidence:.2f} < 0.8 — escalating"
+                )
+                result = {
+                    "agent_id": "soul_core",
+                    "method": "high_risk_escalation",
+                    "confidence": confidence,
+                    "reasoning": (
+                        f"High-risk agent {agent_id} requires >= 0.8 "
+                        f"confidence, got {confidence:.2f}"
+                    ),
+                }
+                _record_decision(message, result, _t0)
+                return result
             logger.info(f"[LexRouter] Routed to {agent_id} (confidence={confidence:.2f})")
-            result = {"agent_id": agent_id, "method": "lex", "confidence": confidence}
+            result = {
+                "agent_id": agent_id,
+                "method": "lex",
+                "confidence": confidence,
+                "reasoning": f"LLM router selected {agent_id}",
+            }
             _record_decision(message, result, _t0)
             return result
         if mode == "lex":
             # Strict mode: fall back to soul rather than keyword
-            result = {"agent_id": "soul_core", "method": "lex_fallback", "confidence": 0.0}
+            result = {
+                "agent_id": "soul_core",
+                "method": "lex_fallback",
+                "confidence": 0.0,
+                "reasoning": "LLM router failed in strict mode — escalating",
+            }
             _record_decision(message, result, _t0)
             return result
 
     # ── Stage 3: Python keyword fallback ─────────────────────────────
-    agent_id = _keyword_route(message)
-    logger.info(f"[LexRouter] Keyword routed to {agent_id}")
-    result = {"agent_id": agent_id, "method": "keyword", "confidence": 0.8}
+    sk = _specialist_keyword_route(message)
+    if sk:
+        agent_id, confidence = sk
+        reasoning = f"Specialist keyword matched {agent_id}"
+    else:
+        agent_id = _keyword_route(message)
+        confidence = 0.8
+        reasoning = f"Python keyword fallback matched {agent_id}"
+    logger.info(f"[LexRouter] Keyword routed to {agent_id} (confidence={confidence:.2f})")
+    result = {
+        "agent_id": agent_id,
+        "method": "keyword",
+        "confidence": confidence,
+        "reasoning": reasoning,
+    }
     _record_decision(message, result, _t0)
     return result
 
