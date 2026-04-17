@@ -1,0 +1,96 @@
+name: Regression Gate
+
+on:
+  pull_request:
+    branches: ["**"]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  regression:
+    name: Regression baseline + eval + drift + release evidence
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" --quiet --root-user-action=ignore
+
+      # ── 1. Regression baseline ──────────────────────────────────────────
+      - name: Regression baseline suite
+        run: |
+          python -m pytest backend/tests/test_regression_matrix.py \
+            --no-cov -q --tb=short \
+            -W error::DeprecationWarning -W error::RuntimeWarning
+
+      # ── 2. Sprint eval suite ────────────────────────────────────────────
+      - name: Sprint eval — run against golden set
+        run: |
+          python scripts/eval_expanded.py \
+            --golden-set data/training/baselines/sprint7_baseline.json \
+            --output reports/eval_results.json
+        continue-on-error: false  # hard failure if eval runner errors
+
+      # ── 3. LLM judge gate (≥ 90 % pass rate) ───────────────────────────
+      - name: LLM judge gate — check pass rate ≥ 90 %
+        run: |
+          python - <<'EOF'
+          import json, sys
+          from pathlib import Path
+          p = Path("reports/eval_results.json")
+          if not p.exists():
+              print("eval_results.json missing — skipping judge gate")
+              sys.exit(0)
+          data = json.loads(p.read_text())
+          total = data.get("total", 0)
+          passed = data.get("passed", 0)
+          rate = passed / total if total else 0.0
+          print(f"Eval pass rate: {passed}/{total} = {rate:.1%}")
+          if rate < 0.90:
+              print(f"FAIL: pass rate {rate:.1%} < 90% threshold")
+              sys.exit(1)
+          print("PASS: eval gate cleared")
+          EOF
+
+      # ── 4. Architecture drift check ─────────────────────────────────────
+      - name: Architecture drift — verify invariants
+        run: python scripts/verify_architecture_drift.py
+
+      # ── 5. Release evidence ──────────────────────────────────────────────
+      - name: Release evidence — compile and assert all passed
+        run: python scripts/generate_release_evidence.py --assert-all-passed
+
+      # ── 6. Failure classification report ────────────────────────────────
+      - name: Classify any failures
+        if: failure()
+        run: |
+          python scripts/classify_failures.py \
+            --input reports/eval_results.json \
+            --junit reports/junit.xml \
+            --output reports/failure_classes.json || true
+          if [ -f reports/failure_classes.json ]; then
+            python -c "
+          import json
+          data = json.loads(open('reports/failure_classes.json').read())
+          for cls, items in data.items():
+              if items:
+                  print(f'  [{cls.upper()}] {len(items)} failure(s)')
+                  for f in items[:5]:
+                      print(f'    - {f}')
+          "
+          fi
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-reports
+          path: reports/
+          retention-days: 14

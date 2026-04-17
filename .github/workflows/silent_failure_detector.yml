@@ -1,0 +1,39 @@
+name: Silent Failure Detector
+
+on:
+  pull_request:
+    branches: ["**"]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  silent-failures:
+    name: Qdrant fallback loudness + GitNexus fail-closed
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" --quiet --root-user-action=ignore
+
+      # ── Qdrant fallback observability + GitNexus fail-closed ───────────
+      - name: Silent failure detector suite
+        run: |
+          python -m pytest backend/tests/test_silent_failures.py \
+            --no-cov -q --tb=short \
+            -W error::DeprecationWarning -W error::RuntimeWarning
+
+      # ── Fallback counter observable via /health/deps ────────────────────
+      - name: VectorStore fallback counter integration check
+        run: |
+          python -m pytest backend/tests/test_ml_vector_store.py \
+            -k "fallback_observability or Fallback" \
+            --no-cov -q --tb=short \
+            -W error::DeprecationWarning -W error::RuntimeWarning
