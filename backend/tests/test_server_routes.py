@@ -23,10 +23,10 @@ UTC_TZ = timezone.utc  # noqa: UP017
 
 @pytest.fixture()
 def mock_orchestrator():
-    async def _soul_reflect() -> str:
+    async def _soul_reflect(trigger: str = "manual") -> str:  # noqa: ARG001
         return "reflection text"
 
-    async def _start_intake(_business_id: str) -> dict[str, object]:
+    async def _start_intake(business_id: str = "") -> dict[str, object]:  # noqa: ARG001
         return {
             "business_id": "biz-1",
             "current_question_index": 0,
@@ -36,7 +36,7 @@ def mock_orchestrator():
             "completed": False,
         }
 
-    async def _submit_intake_answer(_business_id: str, _answer: str) -> dict[str, object]:
+    async def _submit_intake_answer(business_id: str = "", answer: str = "") -> dict[str, object]:  # noqa: ARG001
         return {
             "business_id": "biz-1",
             "current_question_index": 1,

@@ -220,11 +220,16 @@ def main(argv: list[str] | None = None) -> int:
     if args.output:
         out_path = Path(args.output)
         out_path.parent.mkdir(parents=True, exist_ok=True)
+        blocking_count = sum(len(classified[c]) for c in blocking_on if c in classified)
         out_path.write_text(
             json.dumps(
                 {
                     "total": total,
-                    "blocking": sum(len(classified[c]) for c in blocking_on if c in classified),
+                    "blocking": blocking_count,
+                    "has_blocking": blocking_count > 0,
+                    # alias used by auto_repair.yml
+                    "failure_classes": classified,
+                    # legacy key — kept for backwards compatibility
                     "classes": classified,
                     "descriptions": FAILURE_CLASSES,
                 },

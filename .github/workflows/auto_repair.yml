@@ -1,0 +1,163 @@
+name: Auto Repair
+
+# Triggered whenever any CI workflow completes with a failure.
+# Catches, classifies, and — for safe deterministic classes — auto-repairs.
+# For non-repairable failures it opens a GitHub issue and notifies.
+
+on:
+  workflow_run:
+    workflows:
+      - "CI Gate"
+      - "Regression Gate"
+      - "Silent Failure Detector"
+      - "Registry Parity"
+    types: [completed]
+
+permissions:
+  contents: write      # push repair commits
+  issues: write        # open issues when repair fails
+  actions: read        # download artifacts from triggering run
+
+jobs:
+  repair:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout branch that failed
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" --quiet --root-user-action=ignore
+
+      # ── 1. Collect the logs from the failed run ────────────────────────
+      - name: Download failure artifacts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ci_logs/
+        continue-on-error: true   # artifact may not exist for all failures
+
+      # ── 2. Re-run the full suite to capture a fresh JUnit XML ─────────
+      - name: Capture fresh failure report
+        run: |
+          mkdir -p reports
+          pytest backend/tests/ deerflow/tests/ \
+            --ignore=backend/tests/test_scheduler_routes.py \
+            -o "addopts=" \
+            -x --tb=short -q --no-cov \
+            --junit-xml=reports/junit_repair.xml \
+            2>&1 | tee ci_logs/pytest_repair.log || true
+
+      # ── 3. Classify every failure ─────────────────────────────────────
+      - name: Classify failures
+        id: classify
+        run: |
+          python scripts/classify_failures.py \
+            --junit reports/junit_repair.xml \
+            --output reports/failure_classes.json
+          echo "report=$(cat reports/failure_classes.json | python3 -c "
+          import json,sys; d=json.load(sys.stdin)
+          print('blocking=true' if d.get('has_blocking') else 'blocking=false')
+          ")" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+
+      # ── 4. Attempt mechanical auto-repair ─────────────────────────────
+      - name: Attempt auto-repair
+        id: repair
+        run: |
+          python scripts/auto_repair.py \
+            --report reports/failure_classes.json \
+            --branch "${{ github.event.workflow_run.head_branch }}" \
+            --output reports/repair_result.json
+        continue-on-error: true
+
+      # ── 5. Commit and push if repair touched files ────────────────────
+      - name: Commit repair if needed
+        if: steps.repair.outcome == 'success'
+        run: |
+          git config user.name "agentop-ci"
+          git config user.email "ci@agentop.local"
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m "fix(ci): auto-repair ${{ github.event.workflow_run.head_branch }} [skip ci]"
+            git push origin "${{ github.event.workflow_run.head_branch }}"
+            echo "REPAIR_COMMITTED=true" >> "$GITHUB_ENV"
+          else
+            echo "REPAIR_COMMITTED=false" >> "$GITHUB_ENV"
+          fi
+
+      # ── 6. Open GitHub issue when auto-repair cannot fix it ───────────
+      - name: Open issue for human review
+        if: steps.repair.outcome != 'success' || env.REPAIR_COMMITTED != 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let report = { failure_classes: {}, summary: "No report generated" };
+            try {
+              report = JSON.parse(fs.readFileSync('reports/failure_classes.json', 'utf8'));
+            } catch (e) {}
+
+            const hasRepairResult = fs.existsSync('reports/repair_result.json');
+            let repairResult = {};
+            if (hasRepairResult) {
+              try { repairResult = JSON.parse(fs.readFileSync('reports/repair_result.json', 'utf8')); }
+              catch (e) {}
+            }
+
+            const branch = '${{ github.event.workflow_run.head_branch }}';
+            const workflow = '${{ github.event.workflow_run.name }}';
+            const runUrl = '${{ github.event.workflow_run.html_url }}';
+
+            const classes = report.failure_classes || {};
+            const classLines = Object.entries(classes)
+              .filter(([, v]) => Array.isArray(v) && v.length > 0)
+              .map(([k, v]) => `**${k}** (${v.length}): ${v.slice(0,3).join(', ')}`)
+              .join('\n');
+
+            const body = [
+              `## CI Failure — Human Review Required`,
+              ``,
+              `**Branch:** \`${branch}\``,
+              `**Workflow:** ${workflow}`,
+              `**Run:** ${runUrl}`,
+              ``,
+              `### Failure Classes`,
+              classLines || '_No classification available_',
+              ``,
+              `### Auto-Repair Outcome`,
+              repairResult.repaired === false
+                ? `Auto-repair attempted but could not fix: ${repairResult.reason || 'unknown'}`
+                : `Auto-repair did not run or produced no changes.`,
+              ``,
+              `> Fix, push to \`${branch}\`, and close this issue.`,
+            ].join('\n');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `CI failure (${workflow}) — ${branch}`,
+              labels: ['ci-failure', 'needs-human'],
+              body,
+            });
+
+      # ── 7. Upload all repair artefacts ────────────────────────────────
+      - name: Upload repair reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repair-reports-${{ github.run_id }}
+          path: reports/
+          retention-days: 14
