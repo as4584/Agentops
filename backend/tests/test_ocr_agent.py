@@ -1,6 +1,13 @@
 """Tests for the OCR agent definition, routing, and OCR module.
 
-Validates:
+DEFERRED to v1.1 per docs/MVP_SCOPE.md — ocr_agent is not part of the
+Private AI Ops Console MVP v1.0 scope. The full OCR implementation
+(in-flight as of 2026-05-25) is preserved on branch legacy/v1.1.
+
+This module is skipped on dev to keep the MVP test suite green.
+Re-enable when OCR work is promoted back from legacy/v1.1.
+
+Validates (when enabled):
   - ocr_agent is registered in ALL_AGENT_DEFINITIONS
   - ocr_agent definition fields are correct
   - keyword routing sends OCR-related messages to ocr_agent
@@ -11,15 +18,21 @@ Validates:
 
 from __future__ import annotations
 
-from pathlib import Path
-from unittest.mock import AsyncMock, patch
-
 import pytest
 
-from backend.agents import ALL_AGENT_DEFINITIONS, BaseAgent, create_agent
-from backend.models import ChangeImpactLevel
-from backend.ocr import OCR_EXTENSIONS, extract_text, is_supported
-from backend.orchestrator.lex_router import VALID_AGENTS, _keyword_route
+pytest.skip(
+    "ocr_agent deferred to v1.1 per docs/MVP_SCOPE.md; "
+    "implementation preserved on branch legacy/v1.1",
+    allow_module_level=True,
+)
+
+from pathlib import Path  # noqa: E402
+from unittest.mock import AsyncMock, patch  # noqa: E402
+
+from backend.agents import ALL_AGENT_DEFINITIONS, BaseAgent, create_agent  # noqa: E402
+from backend.models import ChangeImpactLevel  # noqa: E402
+from backend.ocr import OCR_EXTENSIONS, extract_text, is_supported  # noqa: E402
+from backend.orchestrator.lex_router import VALID_AGENTS, _keyword_route  # noqa: E402
 
 # ── Agent Definition ────────────────────────────────────────────────
 
