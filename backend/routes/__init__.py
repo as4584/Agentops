@@ -21,6 +21,8 @@ def register_all_routes(app: FastAPI, gateway_enabled: bool = False) -> None:
     """
     from backend.orchestrator.openclaw_bridge import router as openclaw_router
     from backend.routes.a2ui import router as a2ui_router
+    from backend.routes.actions import audit_router as actions_audit_router
+    from backend.routes.actions import router as actions_router
     from backend.routes.agent_control import a2a_router
     from backend.routes.agent_control import router as agent_control_router
     from backend.routes.agent_factory import router as agent_factory_router
@@ -80,6 +82,8 @@ def register_all_routes(app: FastAPI, gateway_enabled: bool = False) -> None:
     app.include_router(network_router)
     app.include_router(news_router)
     app.include_router(studio_router)
+    app.include_router(actions_router)
+    app.include_router(actions_audit_router)
 
     if gateway_enabled:
         from backend.routes.gateway import router as gateway_router
