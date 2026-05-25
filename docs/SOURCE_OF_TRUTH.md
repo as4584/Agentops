@@ -1,8 +1,8 @@
-# SOURCE OF TRUTH — Agentop Multi-Agent System
+# SOURCE OF TRUTH — Agentop
 
-> **Last Updated:** 2026-04-16T00:00:00Z
-> **Updated By:** architecture-governor
-> **Version:** 2.3.0
+> **Last Updated:** 2026-05-25T00:00:00Z
+> **Updated By:** product-lead
+> **Version:** 2.4.0
 
 > **Deployment Contract:** `AGENTOP_DEPLOYMENT_MODE=operator_only`
 > This system is operated by a single privileged operator on a local or trusted private network.
@@ -12,7 +12,38 @@
 
 ---
 
-## 1. High-Level Architecture
+## 0. Product Frame — MVP v1.0 (canonical)
+
+**Product name:** Agentop Ops Console.
+
+**Positioning:** A private, local AI ops console that helps a small technical team
+investigate incidents, search internal runbooks, and execute approved fixes — without
+sending internal systems or docs to public AI tools.
+
+**Single workflow:** `Ask → Retrieve → Inspect → Propose → Approve → Act → Summarize`.
+
+**MVP agents (in product story):** `knowledge_agent`, `monitor_agent`, `devops_agent`,
+`security_agent`.
+
+**MVP tool surface:** `file_reader`, `log_tail`, `health_check`, `db_query`, `git_ops`,
+Docker read tools (via MCP), `process_restart` (approval-gated — the **only** state-modifying
+remediation in the MVP path).
+
+**Out-of-scope for v1.0 (kept in repo as labs/deferred):** content production pipeline,
+WebGen V1 & V2, browser automation as a headline feature, comms/cs/it agents,
+`self_healer` autonomous remediation, `soul_core` as a user-facing concept, OpenClaw
+Discord/Telegram/Slack bridges, social/marketing language.
+
+**Authoritative reference:** [MVP_SCOPE.md](./MVP_SCOPE.md). Any narrative or marketing
+surface that contradicts MVP_SCOPE.md is wrong and must be corrected.
+
+**Legacy snapshot:** The full v1.1 architecture (everything beyond MVP v1.0) is preserved
+on git branch `legacy/v1.1`. Sections 1–N below describe the **v1.1 reference architecture**
+and are retained for engineering continuity. They are no longer the product story.
+
+---
+
+## 1. High-Level Architecture (v1.1 reference — preserved)
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐

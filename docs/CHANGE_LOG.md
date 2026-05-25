@@ -23,6 +23,23 @@
 
 ## Entries
 
+### [2026-05-25T00:00:00Z]
+- **Agent:** product-lead
+- **Files Modified:**
+  - `docs/MVP_SCOPE.md` (new — Week 1 deliverable)
+  - `README.md` (rewrote intro + added MVP v1.0 section; renamed "Engineering Journey" → "Engineering History")
+  - `docs/SOURCE_OF_TRUTH.md` (added §0 Product Frame; bumped to v2.4.0; demoted §1+ to "v1.1 reference")
+  - `docs/CHANGE_LOG.md` (this entry)
+- **Reason:** Narrow the product story to a single workflow — the Private AI Ops Console MVP v1.0
+  — and preserve the full v1.1 multi-agent platform surface on git branch `legacy/v1.1` for
+  engineering continuity. All buyer-facing surfaces must now lead with the ops-console framing
+  defined in `docs/MVP_SCOPE.md`. Documentation-only change; no runtime behavior modified.
+- **Risk Assessment:** LOW (documentation only, no code paths altered, no agents added/removed)
+- **Impacted Subsystems:** product narrative, repo front page, governance documentation
+- **Documentation Updated:** YES
+- **Legacy Snapshot:** `legacy/v1.1` (commit d4d10d1) — full pre-narrowing in-flight state
+  preserved locally; push to origin pending GitHub auth configuration.
+
 ### 2026-03-04T22:00:00Z — Security Hardening (4-sprint remediation)
 - **Agent:** GitHub Copilot
 - **Files Modified:**

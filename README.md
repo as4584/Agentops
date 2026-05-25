@@ -1,20 +1,64 @@
-# Agentop — Local-First Multi-Agent Control Center
+# Agentop — Private AI Ops Console
 
-> **⚠️ OPERATOR-ONLY DEPLOYMENT** — This system is designed for a single privileged operator
-> running on localhost or a trusted private network. There is no multi-user login, session auth,
-> or RBAC. Do not expose port 8000 to untrusted networks without setting `AGENTOP_API_SECRET`
-> and reviewing `docs/GATEWAY.md`. Public SaaS mode is not supported.
+> **A private, local AI ops console that helps a small technical team investigate incidents,
+> search internal runbooks, and execute approved fixes — without sending internal systems or
+> docs to public AI tools.**
 
-> **1,165+ tests. 63% coverage. 21 agents. 54 tools. 4 languages. Zero cloud dependency.**
+Agentop Ops Console is a private AI workspace for solo operators and small technical teams
+(MSPs, internal IT, boutique devops, security consultants). The operator connects their
+runbooks, docs, logs, and selected system tools. The console then answers operational
+questions grounded in their own environment, inspects state through read-only diagnostics,
+proposes a next step, and executes bounded remediation actions only with explicit operator
+approval. Every session produces a clean incident summary and a full audit trail.
 
-A production-grade, fully local multi-agent system for orchestrating AI agents over infrastructure, content creation, web generation, and customer support workflows. Built with FastAPI, LangGraph, Ollama, and Next.js — with performance-critical paths in C, Go, and Rust. Runs entirely on your machine.
+It is **local-first, operator-only, and intentionally narrow** — not a generic AI chatbot,
+not a coding assistant, not a multi-tenant platform.
 
 [![CI Gate](https://github.com/as4584/Agentops/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/as4584/Agentops/actions/workflows/ci.yml)
 [![ML Pipeline](https://github.com/as4584/Agentops/actions/workflows/ml-pipeline.yml/badge.svg)](https://github.com/as4584/Agentops/actions/workflows/ml-pipeline.yml)
 
 ---
 
-## Engineering Journey
+## What it does (MVP v1.0)
+
+One workflow, end-to-end:
+
+**Ask → Retrieve → Inspect → Propose → Approve → Act → Summarize**
+
+1. **Ask** — operator types an incident or question into the console.
+2. **Retrieve** — `knowledge_agent` searches connected runbooks/docs with cited sources.
+3. **Inspect** — `monitor_agent` runs read-only diagnostics: `log_tail`, `health_check`,
+   `db_query`, `git_ops`, Docker read tools, `file_reader`.
+4. **Propose** — the console suggests the next step grounded in retrieval + inspection.
+5. **Approve** — operator reviews a single approval-gated remediation (`process_restart`)
+   in the dashboard before any state change.
+6. **Act** — `devops_agent` executes the approved action.
+7. **Summarize** — every session writes a persisted incident summary + audit trail.
+
+**MVP agents:** `knowledge_agent`, `monitor_agent`, `devops_agent`, `security_agent`
+**MVP action surface:** one approval-gated remediation, everything else read-only.
+
+For the full in/out scope, cut list, and dashboard plan see
+[docs/MVP_SCOPE.md](docs/MVP_SCOPE.md).
+
+---
+
+## Deployment contract
+
+> **OPERATOR-ONLY.** This system is designed for a single privileged operator running on
+> localhost or a trusted private network. There is no multi-user login, session auth, or
+> RBAC. Do not expose port 8000 to untrusted networks without setting `AGENTOP_API_SECRET`
+> and reviewing [docs/GATEWAY.md](docs/GATEWAY.md). Public SaaS mode is not supported.
+
+---
+
+## Engineering History
+
+> The sections below document the v1.1 engineering work that produced the broader
+> multi-agent platform (content pipeline, webgen, ML lab, browser, polyglot router).
+> Those subsystems remain in the repo as **labs** but are **not part of the MVP v1.0
+> ops-console product story**. The complete v1.1 surface is preserved on branch
+> `legacy/v1.1` for historical reference.
 
 This section documents the incremental engineering work that brought Agentop from prototype to production-grade. Every change was test-driven, CI-validated, and merged only when green.
 
