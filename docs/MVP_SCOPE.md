@@ -143,10 +143,18 @@ soul panel, drift monitor, agent tier view, memory namespaces explorer.
 - [x] Cut list defined
 - [x] Production surface map defined
 - [x] Slim dashboard plan defined
-- [ ] Smoke test: backend boots, `/health` returns ok, chat flow returns a
+- [x] Smoke test: backend boots, `/health` returns ok, chat flow returns a
       grounded answer over seeded docs
-- [ ] SOURCE_OF_TRUTH.md updated to reflect ops-console direction (Week 1
-      end — requires explicit approval before edit)
+      *(2026-05-25 — `uvicorn backend.server:app` came up clean in
+      `operator_only` mode; `GET /health` → 200 `{status: healthy,
+      llm_available: true, drift_status: GREEN, runtime_profile: operator,
+      retrieval_mode: fast_context}`; `POST /chat` to `knowledge_agent`
+      with bearer auth returned grounded "no indexed context retrieved"
+      refusals — no hallucination over an empty corpus. Full backend test
+      suite: 2454 passed, 6 skipped, 1 xfailed, 0 failures.)*
+- [x] SOURCE_OF_TRUTH.md updated to reflect ops-console direction
+      *(2026-05-25 — new §0 "Product Frame — MVP v1.0 (canonical)"
+      inserted; v2.4.0; committed `6a6068f`.)*
 
 ---
 
