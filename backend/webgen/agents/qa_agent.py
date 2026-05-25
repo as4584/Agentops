@@ -80,6 +80,29 @@ class WebQAAgent(WebAgentBase):
         project.advance(SiteStatus.QA_PASS)
         return project
 
+    async def run_precheck(self, project: SiteProject) -> SiteProject:
+        """Pre-build: validate PageSpec completeness before HTML generation.
+
+        Checks that every planned page has a title, purpose, and at least one
+        section spec, and that SEO/AEO strategy profiles are attached.
+        Does NOT advance the project status — the status remains PLANNED.
+        """
+        issues: list[str] = []
+        for page in project.pages:
+            if not page.title:
+                issues.append(f"[{page.slug}] missing page title")
+            if not page.purpose:
+                issues.append(f"[{page.slug}] missing page purpose")
+            if not page.sections:
+                issues.append(f"[{page.slug}] no sections planned")
+            if not page.seo.title and not page.seo.meta_description:
+                issues.append(f"[{page.slug}] SEO strategy not populated")
+        if issues:
+            logger.warning(f"[{self.name}] Precheck found {len(issues)} spec issue(s): {issues[:5]}")
+        else:
+            logger.info(f"[{self.name}] Precheck passed: {len(project.pages)} pages ready for build")
+        return project
+
     def _check_page(self, page: PageSpec) -> list[str]:
         """Run structural checks on a single page."""
         issues = []

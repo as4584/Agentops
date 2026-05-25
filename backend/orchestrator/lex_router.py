@@ -2,31 +2,33 @@
 Lex Router — LLM-based intent classification for automatic agent routing.
 =========================================================================
 When agent_id is ``"auto"`` the orchestrator delegates to this module,
-which uses the locally fine-tuned *lex* model (via Ollama) to classify
+which uses the locally fine-tuned gemma3:4b model (via Ollama) to classify
 the user message and select the best agent.
 
 Falls back to keyword-based heuristics when:
   - Ollama is unreachable
-  - The lex model is not pulled
+  - The gemma3:4b model is not pulled
   - LLM_ROUTER_MODE is set to "keyword"
 
 Environment:
   LLM_ROUTER_MODE  — "lex" | "keyword" | "hybrid" (default: "hybrid")
-    lex     → always use the LLM router
+    lex     → always use the LLM router (gemma3:4b)
     keyword → always use the keyword fallback
     hybrid  → try LLM first, fall back to keyword on failure
 """
 
 from __future__ import annotations
 
+from functools import lru_cache
 import json
 import os
 import re
+import time
 from typing import Any
 
 import httpx
 
-from backend.config import OLLAMA_BASE_URL
+from backend.config import OLLAMA_BASE_URL, OLLAMA_KEEPALIVE, PROJECT_ROOT
 from backend.utils import logger
 
 LLM_ROUTER_MODE: str = os.getenv("LLM_ROUTER_MODE", "hybrid")
@@ -44,19 +46,31 @@ def _get_collector():  # noqa: ANN202
     return _decision_collector
 
 
-LEX_ROUTER_MODEL: str = os.getenv("LEX_ROUTER_MODEL", "lex")
+LEX_ROUTER_MODEL: str = os.getenv("LEX_ROUTER_MODEL", "lex-v3")
+MODEL_REGISTRY_PATH = PROJECT_ROOT / "data" / "models" / "registry.json"
 
 
-# Sprint 3: prefer the role-based router model from the registry when set.
-# Falls back to LEX_ROUTER_MODEL (the fine-tuned lex model) if the env is unset.
-def _effective_router_model() -> str:
-    """Return the active router model, preferring DEFAULT_TASK_MODELS['router'] when available."""
+@lru_cache(maxsize=1)
+def _active_model_cached(cache_bucket: int) -> str:
+    del cache_bucket
     try:
-        from backend.llm.unified_registry import DEFAULT_TASK_MODELS
-
-        return DEFAULT_TASK_MODELS.get("router", LEX_ROUTER_MODEL)
+        payload = json.loads(MODEL_REGISTRY_PATH.read_text(encoding="utf-8"))
+        active = payload.get("active")
+        if isinstance(active, str) and active.strip():
+            return active.strip()
     except Exception:
-        return LEX_ROUTER_MODEL
+        pass
+    return LEX_ROUTER_MODEL
+
+
+def _active_model() -> str:
+    """Return the active promoted router model with a short-lived cache."""
+    return _active_model_cached(int(time.time() // 30))
+
+
+def _effective_router_model() -> str:
+    """Return the active router model used for Lex auto-routing."""
+    return _active_model()
 
 
 # ── C-accelerated pre-filter (optional, degrades to Python keywords) ─────
@@ -82,6 +96,7 @@ VALID_AGENTS: set[str] = {
     "data_agent",
     "comms_agent",
     "knowledge_agent",
+    "coding_agent",
 }
 
 # soul_core only receives escalations — never a direct LLM routing target
@@ -186,8 +201,13 @@ _KEYWORD_MAP: list[tuple[list[str], str]] = [
     (
         ["deploy", "ci", "cd", "pipeline", "build", "release", "merge", "branch", "docker", "container", "git"],
         "devops_agent",
-    ),
-    (["monitor", "health", "log", "alert", "metric", "status", "watch", "tail"], "monitor_agent"),
+    ),    (
+        ["build an app", "build me an app", "create an app", "full stack", "fullstack",
+         "write a script", "write me a script", "code this", "implement", "code a",
+         "react component", "python script", "fastapi", "nextjs", "next.js",
+         "build an api", "create an api", "rest api", "graphql"],
+        "coding_agent",
+    ),    (["monitor", "health", "log", "alert", "metric", "status", "watch", "tail", "slow"], "monitor_agent"),
     (["restart", "fix", "heal", "recover", "crash", "down", "broken", "failed", "zombie"], "self_healer_agent"),
     (["review", "diff", "code quality", "refactor", "lint", "smell"], "code_review_agent"),
     (["security", "secret", "vulnerability", "cve", "scan", "audit", "leak", "password", "token"], "security_agent"),
@@ -210,20 +230,23 @@ SPECIALIST_KEYWORD_MAP: dict[str, list[str]] = {
     ],
     "cs_agent": [
         "i need help with", "help with my account", "billing issue",
-        "my account", "account problem", "subscription", "invoice",
+        "my account", "account problem", "subscription",
         "refund", "customer support", "user account",
         "access issue", "login problem", "password reset",
+        "can't log in", "cannot log in",
     ],
     "comms_agent": [
         "notification", "incident notification", "send notification",
-        "incident alert", "notify the team", "send an incident",
+        "notify the team", "send an incident",
         "alert the team", "stakeholder", "send to slack",
         "post to slack", "incident report",
+        "notify the on-call",
     ],
     "code_review_agent": [
         "review the diff", "review this diff", "review the code",
         "code review", "review before merge", "review the pr",
         "check the diff", "review these changes", "review this pr",
+        "coding standards", "naming conventions", "code quality",
     ],
     "self_healer_agent": [
         "lint errors", "ruff lint", "fix lint errors", "fix the lint",
@@ -233,17 +256,22 @@ SPECIALIST_KEYWORD_MAP: dict[str, list[str]] = {
         "pod crashlooping", "pod crash", "rollout restart",
         "auto-remediate", "auto remediate", "self heal",
         "restart and fix", "fix and restart",
+        "unresponsive", "attempt fault remediation",
     ],
     "it_agent": [
         "kubernetes", "kubectl", "k8s", "pod running", "pod status",
-        "port 11434", "port 8000", "port 3007",
-        "vlan", "dns lookup", "nameserver", "traceroute",
-        "vm", "hypervisor",
+        "port 11434", "port 6333", "port 3007",
+        "vlan", "dns lookup", "dns resolution", "nameserver", "traceroute",
+        "vm", "hypervisor", "open ports", "port reachable",
+        "check dns", "fastapi backend responding",
+        "service listening", "qdrant service",
     ],
     "security_agent": [
         "scan for secrets", "scan for credentials", "hardcoded credentials",
         "secret scan", "cve", "vulnerability scan", "audit security",
         "security audit", "owasp",
+        "sql injection", "vulnerabilities", "vulnerability",
+        "security incident",
     ],
     "data_agent": [
         "database schema", "schema drift", "check schema",
@@ -255,6 +283,8 @@ SPECIALIST_KEYWORD_MAP: dict[str, list[str]] = {
         "set up alerting", "alert me if", "alert when",
         "grafana", "prometheus", "latency spike",
         "response time", "error rate",
+        "fastapi backend responding", "health check", "is still responding",
+        "system is slow", "slow performance",
     ],
     "devops_agent": [
         "deploy to", "deploy the", "run the pipeline",
@@ -263,9 +293,25 @@ SPECIALIST_KEYWORD_MAP: dict[str, list[str]] = {
         "docker build", "docker push", "staging deploy",
         "production deploy", "rollback", "blue green",
     ],
+    "coding_agent": [
+        "build me an app", "build an app", "create an app", "make me an app",
+        "full stack app", "fullstack app",
+        "write me a script", "write a script", "write me a function",
+        "build me an api", "build an api", "create an api",
+        "react component", "next.js page", "fastapi endpoint",
+        "implement the", "implement this", "code this up",
+        "sqlalchemy model", "prisma schema",
+    ],
     "soul_core": [
         "reflect on", "our mission", "our purpose", "trust score",
         "goal arbitration", "goal tracking",
+        "purpose of this project", "purpose of the project",
+        "where we are going", "what are we building",
+        "understand our", "what is our goal", "our vision",
+        "our direction", "project purpose", "what agentop is",
+        "what should we prioritize", "what to prioritize",
+        "summarize all active agent", "active agent work",
+        "what have agents", "overall progress",
     ],
 }
 
@@ -280,6 +326,7 @@ SPECIALIST_PRIORITY_ORDER: list[str] = [
     "security_agent",     # scan + CVE — distinctive
     "data_agent",         # schema + database — distinctive
     "monitor_agent",      # observe + alert setup
+    "coding_agent",       # full-stack build intent — must beat devops 'build'
     "devops_agent",       # deploy + pipeline — broad, placed last
     "soul_core",          # fallback only
 ]
@@ -375,6 +422,7 @@ async def _lex_route(
                     "system": _router_system_prompt(_allowed),
                     "prompt": message,
                     "stream": False,
+                    "keep_alive": OLLAMA_KEEPALIVE,  # configurable retention (OLLAMA_KEEPALIVE env; default 10m)
                     "options": {"temperature": _temp, "num_predict": 256},
                 },
             )
@@ -416,6 +464,27 @@ async def resolve_agent(message: str) -> dict[str, Any]:
 
     mode = LLM_ROUTER_MODE.lower()
     _t0 = _time.monotonic()
+
+    # ── Stage -1: WebGen intent pre-check ────────────────────────────
+    # If the message is clearly a "build/make/create a website" request, route to
+    # devops_agent (webgen interceptor in server.py will catch it before the agent
+    # runs). This prevents soul_core / knowledge_agent from stealing website requests.
+    _WEBGEN_INTENT_RE = re.compile(
+        r'\b(make|build|create|generate|design|develop|spin\s+up)\b'
+        r'(?:\s+(?:me|us|a|an|the|my|our))?\s*'
+        r'(?:[\w\s&\'\-]{0,40}?)\s*'
+        r'(?:website|web\s*site|web\s*app|landing\s*page|homepage|site\b)',
+        re.IGNORECASE,
+    )
+    if _WEBGEN_INTENT_RE.search(message):
+        result = {
+            "agent_id": "devops_agent",
+            "method": "webgen_intent",
+            "confidence": 0.95,
+            "reasoning": "WebGen intent detected — interceptor will route to pipeline",
+        }
+        _record_decision(message, result, _t0)
+        return result
 
     # ── Stage 0: C red-line check (blocks dangerous requests) ────────
     if _fast_router and _fast_router.available:

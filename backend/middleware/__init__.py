@@ -24,7 +24,10 @@ from __future__ import annotations
 
 import re
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from pathlib import Path
 from typing import Any
 

@@ -23,7 +23,10 @@ import asyncio
 import json
 import logging
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from pathlib import Path
 from typing import Any
 

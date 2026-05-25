@@ -13,9 +13,12 @@ Alert thresholds:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 
 from backend.gateway.auth import DB_PATH, _get_conn
 

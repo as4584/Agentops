@@ -17,7 +17,10 @@ Target: Opus-level routing quality via DPO on the lex-v2 3B router.
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from pathlib import Path
 from typing import Any
 

@@ -38,7 +38,10 @@ import random
 import re
 import urllib.parse
 import xml.etree.ElementTree as ET
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from typing import Any
 
 from backend.config import PROJECT_ROOT

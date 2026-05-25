@@ -18,7 +18,10 @@ import time
 import traceback
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from enum import Enum
 from pathlib import Path
 from typing import Any

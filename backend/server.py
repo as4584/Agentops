@@ -17,6 +17,7 @@ from __future__ import annotations
 import asyncio
 import contextvars
 import os
+import re
 import time
 import uuid
 from collections import defaultdict
@@ -25,12 +26,13 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request, WebSocket
+from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, RedirectResponse, StreamingResponse
 
 from backend.auth import verify_api_request
 from backend.config import (
+    ACTIVE_RUNTIME_PROFILE,
     API_DOCS_ENABLED,
     API_SECRET,
     BACKEND_HOST,
@@ -41,9 +43,11 @@ from backend.config import (
     LLM_MONTHLY_BUDGET,
     LLM_RATE_LIMIT_RPM,
     MAX_CHAT_MESSAGE_LENGTH,
+    NEWS_INTEL_ENABLED,
     OLLAMA_MODEL,
     PROJECT_ROOT,
     RATE_LIMIT_RPM,
+    RETRIEVAL_MODE,
     validate_config,
 )
 from backend.config_gateway import GATEWAY_ENABLED
@@ -54,6 +58,15 @@ from backend.llm import OllamaClient
 from backend.mcp import mcp_bridge
 from backend.memory import memory_store
 from backend.middleware import drift_guard
+from backend.model_preferences import (
+    EDITABLE_TEAM_AGENT_MAP,
+    build_model_preferences_response,
+    load_agent_model_overrides,
+    load_team_model_preferences,
+    resolve_model_selection,
+    save_agent_model_overrides,
+    save_team_model_preferences,
+)
 from backend.models import (
     CampaignGenerateRequest,
     CampaignGenerateResponse,
@@ -65,6 +78,7 @@ from backend.models import (
     IntakeStartRequest,
     IntakeStartResponse,
     IntakeStatusResponse,
+    OrdoTrace,
     SystemStatus,
 )
 from backend.orchestrator import AgentOrchestrator
@@ -77,6 +91,7 @@ from backend.security_middleware import SecurityHeadersMiddleware, TieredRateLim
 from backend.tasks import task_tracker
 from backend.tools import execute_tool, get_tool_definitions
 from backend.utils import logger
+from backend.utils.chat_failure_log import write_chat_failure
 from backend.websocket.hub import handle_ws_connection, ws_hub
 from deerflow.execution import ExecutionAnalyzer, ExecutionRecorder
 from deerflow.tools.health import ToolHealthMonitor
@@ -112,8 +127,87 @@ def _qdrant_fallback_count() -> int:
 
 # Simple in-memory rate limiter (per-IP, sliding window)
 _rate_buckets: dict[str, list[float]] = defaultdict(list)
-# Per-agent model overrides set from the dashboard UI
-_agent_model_overrides: dict[str, str] = {}
+# Per-agent model overrides set from the dashboard UI — persisted to disk
+_agent_model_overrides: dict[str, str] = load_agent_model_overrides()
+_team_model_preferences: dict[str, str] = load_team_model_preferences(_agent_model_overrides)
+
+# Discord/OpenClaw bot status — module-level so /discord/status can read it
+_discord_bot_task: "asyncio.Task[None] | None" = None
+_discord_last_message_at: str | None = None
+_discord_last_routed_agent: str | None = None
+
+
+def _set_discord_last_message(agent_id: str | None) -> None:
+    """Called by the Discord bot when it routes a message to an agent."""
+    global _discord_last_message_at, _discord_last_routed_agent
+    from datetime import datetime as _dt
+    _discord_last_message_at = _dt.now(UTC_TZ).isoformat()
+    _discord_last_routed_agent = agent_id
+
+
+def _resolve_chat_model_selection(agent_id: str, request_model: str | None) -> dict[str, Any]:
+    return resolve_model_selection(
+        agent_id=agent_id,
+        request_model=request_model,
+        team_models=_team_model_preferences,
+        agent_overrides=_agent_model_overrides,
+        fallback_model=OLLAMA_MODEL,
+    )
+
+
+def _merge_model_execution(
+    result: dict[str, Any],
+    selection: dict[str, Any],
+) -> dict[str, Any]:
+    execution = dict(result.get("model_execution") or {})
+    selected_model = str(
+        execution.get("selected_model")
+        or selection.get("selected_model")
+        or selection.get("requested_model")
+        or ""
+    )
+    answering_model = str(
+        execution.get("answering_model")
+        or selection.get("requested_model")
+        or selected_model
+    )
+    runtime_model = str(execution.get("runtime_model") or answering_model or selected_model)
+    execution_role = execution.get("execution_role")
+    model_source = str(execution.get("model_source") or selection.get("model_source") or "fallback")
+    return {
+        "selected_model": selected_model or None,
+        "answering_model": answering_model or None,
+        "runtime_model": runtime_model or None,
+        "execution_role": execution_role or None,
+        "model_source": model_source or None,
+        "model_used": answering_model or None,
+    }
+
+
+def _emit_llm_response_event(
+    agent_id: str,
+    message: str,
+    model_meta: dict[str, Any],
+    routing_method: str | None,
+) -> None:
+    task_tracker.emit_activity(
+        "llm_response",
+        {
+            "agent_id": agent_id,
+            "detail": message[:120],
+            "model": model_meta.get("answering_model"),
+            "selected_model": model_meta.get("selected_model"),
+            "answering_model": model_meta.get("answering_model"),
+            "runtime_model": model_meta.get("runtime_model"),
+            "execution_role": model_meta.get("execution_role"),
+            "model_source": model_meta.get("model_source"),
+            "routing_method": routing_method,
+            "timestamp": datetime.now(UTC_TZ).isoformat(),
+        },
+    )
+# Count of /chat requests currently being processed by the LLM executor.
+# Scheduler jobs check this before dispatching to avoid competing with live users.
+_active_user_requests: int = 0
 
 
 def _rate_limit(request: Request) -> None:
@@ -191,8 +285,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     set_mcp_orchestrator(_orchestrator)
 
     # Wire knowledge vector store to REST routes
-    if hasattr(_orchestrator, "_knowledge_store"):
-        set_knowledge_store(_orchestrator._knowledge_store, _llm_client)
+    set_knowledge_store(None, _llm_client)
 
     # DeerFlow observability fabric — recorder, analyzer, tool health monitor
     _execution_recorder = ExecutionRecorder(base_dir=PROJECT_ROOT / "data" / "agents")
@@ -211,6 +304,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     async def _scheduler_dispatch(agent_id: str, message: str, context: dict[str, Any]) -> dict[str, Any]:
         if not _orchestrator:
             raise RuntimeError("Orchestrator not initialized")
+        # Skip scheduled task if a user request is currently holding the LLM.
+        # This prevents background jobs from queuing behind live chat requests and
+        # causing user-visible timeouts due to Ollama's single-request serialization.
+        if _active_user_requests > 0:
+            logger.info(
+                f"Scheduler: skipping {agent_id} — {_active_user_requests} user request(s) in flight",
+                event_type="scheduler_skipped_busy",
+                agent_id=agent_id,
+            )
+            return {"skipped": True, "reason": "user_request_in_flight", "agent_id": agent_id}
         return await _orchestrator.process_message(agent_id=agent_id, message=message, context=context)
 
     scheduler.set_dispatcher(_scheduler_dispatch)
@@ -233,8 +336,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # ── Social Media Manager — 24/7 analytics polling jobs ──────────────────
     # Only register if at least one platform token is configured
     _tiktok_ready = bool(os.getenv("TIKTOK_ACCESS_TOKEN"))
-    _meta_ready = bool(os.getenv("META_PAGE_ACCESS_TOKEN"))
-    _ig_ready = bool(os.getenv("INSTAGRAM_BUSINESS_ID"))
+    _meta_ready = bool(os.getenv("FACEBOOK_PAGE_ACCESS_TOKEN") or os.getenv("META_PAGE_ACCESS_TOKEN"))
+    _ig_ready = bool(os.getenv("INSTAGRAM_BUSINESS_ACCOUNT_ID") or os.getenv("INSTAGRAM_BUSINESS_ID"))
     _upload_hour = os.getenv("UPLOAD_HOUR_UTC", "18")
 
     if _tiktok_ready:
@@ -291,15 +394,22 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # HTML pages in isolated Playwright contexts (strict domain allowlist),
     # writes to data/agents/knowledge_agent/news_intel/, and fires events for
     # HIGH_RELEVANCE items → SecurityEventWatcher → Discord #security.
-    from backend.news.intel_scraper import NewsIntelWatcher as _NewsIntelWatcher
+    # Set NEWS_INTEL_ENABLED=false in .env to skip on low-RAM dev machines.
+    if NEWS_INTEL_ENABLED:
+        from backend.news.intel_scraper import NewsIntelWatcher as _NewsIntelWatcher
 
-    _news_watcher = _NewsIntelWatcher(memory_store)
-    asyncio.ensure_future(_news_watcher.run())
-    logger.info(
-        "NewsIntelWatcher started — scraping every 6h: Google, Anthropic, OpenAI, "
-        "DeepSeek, Qwen, ByteDance, ModelScope, ArXiv, SecurityWeek, CISA + more",
-        event_type="news_intel_init",
-    )
+        _news_watcher = _NewsIntelWatcher(memory_store)
+        asyncio.ensure_future(_news_watcher.run())
+        logger.info(
+            "NewsIntelWatcher started — scraping every 6h: Google, Anthropic, OpenAI, "
+            "DeepSeek, Qwen, ByteDance, ModelScope, ArXiv, SecurityWeek, CISA + more",
+            event_type="news_intel_init",
+        )
+    else:
+        logger.info(
+            "NewsIntelWatcher disabled (NEWS_INTEL_ENABLED=false) — skipping background browser scraper",
+            event_type="news_intel_init",
+        )
 
     # Weekly synthesis — knowledge_agent reads the scraped data and writes a summary
     scheduler.add_cron_job(
@@ -394,7 +504,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         else:
             logger.warning(
                 f"Qdrant NOT connected (host={_ca_health['host']}). "
-                "ContextAssembler will use JSON KnowledgeVectorStore fallback. "
+                "ContextAssembler will stay Qdrant-only unless JSON fallback is explicitly enabled. "
                 "Start Qdrant with: docker run -p 6333:6333 qdrant/qdrant"
             )
     except Exception as _exc:
@@ -467,12 +577,26 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     _ws_emitter_task = asyncio.create_task(_ws_task_event_emitter())
     logger.info("WebSocket hub started (heartbeat + task emitter)")
 
+    # ── A2UI session GC — purge canvas state for idle sessions ─────────────
+    # Runs every 30 minutes; removes sessions that haven't emitted in A2UI_SESSION_TTL_SECONDS.
+    from backend.a2ui.bus import get_a2ui_bus as _get_a2ui_bus
+
+    async def _a2ui_gc_loop() -> None:
+        while True:
+            await asyncio.sleep(1800)  # 30 minutes
+            purged = _get_a2ui_bus().gc_stale_sessions()
+            if purged:
+                logger.info(f"A2UI GC: purged {purged} stale session(s)")
+
+    _a2ui_gc_task = asyncio.create_task(_a2ui_gc_loop())
+    logger.info("A2UI GC task started (30-min interval)")
+
     # ── Discord Bot (optional — runs alongside backend) ─────────────────
-    _discord_task: asyncio.Task[None] | None = None
+    global _discord_bot_task
     if os.getenv("DISCORD_BOT_TOKEN"):
         from backend.discord_bot import start_bot as _start_discord_bot
 
-        _discord_task = asyncio.create_task(_start_discord_bot())
+        _discord_bot_task = asyncio.create_task(_start_discord_bot())
         logger.info("Discord bot starting in background")
     else:
         logger.info("Discord bot disabled (DISCORD_BOT_TOKEN not set)")
@@ -480,11 +604,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield  # Application runs here
 
     # Shutdown
-    if _discord_task is not None and not _discord_task.done():
-        _discord_task.cancel()
-        await asyncio.gather(_discord_task, return_exceptions=True)
+    if _discord_bot_task is not None and not _discord_bot_task.done():
+        _discord_bot_task.cancel()
+        await asyncio.gather(_discord_bot_task, return_exceptions=True)
     _ws_heartbeat_task.cancel()
     _ws_emitter_task.cancel()
+    _a2ui_gc_task.cancel()
     if _knowledge_seed_task is not None and not _knowledge_seed_task.done():
         _knowledge_seed_task.cancel()
         await asyncio.gather(_knowledge_seed_task, return_exceptions=True)
@@ -604,6 +729,28 @@ async def catchall_exception_handler(request: Request, exc: Exception) -> JSONRe
     """
     request_id = str(uuid.uuid4())[:8]
     logger.error(f"Unhandled exception [{request_id}] {request.method} {request.url.path}: {type(exc).__name__}: {exc}")
+
+    # Persist failure record for /chat so it can be used as training negatives
+    if request.url.path == "/chat":
+        try:
+            body_bytes = await request.body()
+            import json as _json_fc
+            _body = _json_fc.loads(body_bytes) if body_bytes else {}
+        except Exception:
+            _body = {}
+        write_chat_failure(
+            request_id=request_id,
+            user_message=_body.get("message", ""),
+            chosen_agent=_body.get("agent_id"),
+            selected_model=_body.get("model"),
+            last_live_step=None,
+            ordo_trace=None,
+            error_class=type(exc).__name__,
+            error_detail=str(exc),
+            route_path="/chat",
+            pipeline_stage="unhandled_exception",
+        )
+
     return JSONResponse(
         status_code=500,
         content={"error": "Internal server error", "request_id": request_id},
@@ -716,13 +863,22 @@ async def health_ready() -> JSONResponse:
 @app.get("/health")
 async def health_check() -> dict[str, Any]:
     """Basic health check endpoint."""
-    llm_available = await _llm_client.is_available() if _llm_client else False
+    try:
+        llm_available = (
+            await asyncio.wait_for(_llm_client.is_available(), timeout=3.0)
+            if _llm_client
+            else False
+        )
+    except (asyncio.TimeoutError, Exception):
+        llm_available = False
     return {
         "status": "healthy",
         "llm_available": llm_available,
         "drift_status": drift_guard.drift_status.value,
         "uptime_seconds": round(time.time() - _start_time, 2),
         "timestamp": datetime.now(UTC_TZ).isoformat(),
+        "runtime_profile": ACTIVE_RUNTIME_PROFILE,
+        "retrieval_mode": RETRIEVAL_MODE,
     }
 
 
@@ -845,7 +1001,7 @@ async def metrics() -> dict[str, Any]:
         "agentop_uptime_seconds": round(time.time() - _start_time, 2),
         "agentop_orchestrator_ready": 1 if _orchestrator is not None else 0,
         "agentop_tool_executions_total": tool_log_count,
-        "agentop_drift_guard_ok": 1 if drift_guard.drift_status.value == "clean" else 0,
+        "agentop_drift_guard_ok": 1 if drift_guard.drift_status == DriftStatus.GREEN else 0,
         "agentop_gitnexus_enabled": 1 if gn_state.enabled else 0,
         "agentop_gitnexus_usable": 1 if gn_state.usable else 0,
         "agentop_gitnexus_symbol_count": gn_state.symbol_count,
@@ -878,12 +1034,69 @@ async def system_status() -> SystemStatus:
         recent_logs=logger.get_recent_tool_logs(50),
         total_tool_executions=len(logger.get_recent_tool_logs(10000)),
         uptime_seconds=round(time.time() - _start_time, 2),
+        runtime_profile=ACTIVE_RUNTIME_PROFILE,
+        retrieval_mode=RETRIEVAL_MODE,
     )
 
 
 # ---------------------------------------------------------------------------
 # Agent Endpoints
 # ---------------------------------------------------------------------------
+
+
+@app.get("/discord/status")
+async def discord_status() -> dict[str, Any]:
+    """Live status of the Discord/OpenClaw bridge bot."""
+    token_set = bool(os.getenv("DISCORD_BOT_TOKEN"))
+    task_alive = (
+        _discord_bot_task is not None
+        and not _discord_bot_task.done()
+    )
+    pid: int | None = None
+    pid_alive = False
+    pid_file = PROJECT_ROOT / ".discord_bot.pid"
+    if pid_file.exists():
+        try:
+            pid = int(pid_file.read_text(encoding="utf-8").strip())
+            os.kill(pid, 0)   # signal 0 = check if process alive, no-op
+            pid_alive = True
+        except (ProcessLookupError, PermissionError, ValueError):
+            pid_alive = False
+    connected = token_set and (task_alive or pid_alive)
+    return {
+        "enabled": token_set,
+        "connected": connected,
+        "token_set": token_set,
+        "last_message_at": _discord_last_message_at,
+        "last_routed_agent": _discord_last_routed_agent,
+        "pid": pid,
+    }
+
+
+@app.get("/discord/channel-history")
+async def discord_channel_history(
+    channel: str = "news-intel",
+    limit: int = 20,
+) -> dict[str, Any]:
+    """Return recent posts logged to a Discord channel by the Agentop bot.
+
+    Orchad uses this to answer questions like 'what's in #intel-news?'
+    Channel names: news-intel, security-alerts, content-report, comment-farm.
+    """
+    try:
+        from backend.discord_bot import get_discord_post_history as _gdph
+
+        records = await asyncio.wait_for(
+            asyncio.to_thread(_gdph, channel_name=channel, limit=limit),
+            timeout=3.0,
+        )
+        # Normalise field names — log saves 'title', older code expected 'headline'
+        for r in records:
+            if "headline" not in r and "title" in r:
+                r["headline"] = r["title"]
+        return {"channel": channel, "count": len(records), "posts": records}
+    except Exception as _exc:
+        return {"channel": channel, "count": 0, "posts": [], "error": str(_exc)}
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -950,6 +1163,112 @@ async def chat(request: ChatRequest) -> ChatResponse:
                 detail="Message contains disallowed content",
             )
 
+    # ── Fast-path: live data queries that don't need an LLM call ────────────
+    # Detects common status/info queries and returns instant formatted responses
+    # using live data from the orchestrator, task tracker, and tool registry.
+    _msg_q = request.message.lower().strip()
+
+    def _quick_reply(text: str, agent: str = "monitor_agent") -> ChatResponse:
+        return ChatResponse(
+            agent_id=agent,
+            message=text,
+            drift_status=DriftStatus.GREEN,
+            timestamp=datetime.now(UTC_TZ),
+            ordo_trace=None,
+            conversation_id=None,
+            run_id=None,
+            message_id=None,
+            sources=[],
+            model_used=None,
+            routing_method="fast_path",
+        )
+
+    _AGENT_STATUS_RE = re.compile(
+        r'\b(what|which|list|show|get|tell me|status of)[\w\s]*(agent|agents)\b'
+        r'|(who.?s\s*(running|active|online|alive))'
+        r'|(agent\s*(list|status|state))'
+        r'|(running\s*agents)',
+        re.IGNORECASE,
+    )
+    _TASK_STATUS_RE = re.compile(
+        r'\b(show|list|get|what|open|pending|current|active|queued)\b[\w\s]*(task|tasks|job|jobs|work)\b',
+        re.IGNORECASE,
+    )
+    _HEALTH_RE = re.compile(
+        r'\b(check\s*health|system\s*health|is\s*everything\s*(ok|fine|good|running|working|up)'
+        r'|are\s*(all\s*)?services\s*(up|ok|running)'
+        r'|health\s*status|everything\s*(ok|good|fine)'
+        r'|system\s*status|how\s*(is|are)[\w\s]*(system|everything|things)\s*(doing|running)?)\b',
+        re.IGNORECASE,
+    )
+    _TOOL_LIST_RE = re.compile(
+        r'\b(list|show|get|what|available)\b[\w\s]*(tool|tools)\b',
+        re.IGNORECASE,
+    )
+    _SKILL_LIST_RE = re.compile(
+        r'\b(list|show|get|what)\b[\w\s]*(skill|skills)\b',
+        re.IGNORECASE,
+    )
+
+    if _orchestrator and _AGENT_STATUS_RE.search(request.message):
+        _states = _orchestrator.get_agent_states()
+        _active = [s for s in _states if s.status == "ACTIVE"]
+        _idle = [s for s in _states if s.status == "IDLE"]
+        _lines = ["**Agent Status**\n"]
+        for s in _states:
+            _icon = "🟢" if s.status == "ACTIVE" else "⚪"
+            _last = f" — last active {s.last_active.strftime('%H:%M:%S')}" if s.last_active else ""
+            _lines.append(f"{_icon} `{s.agent_id}` ({s.status}){_last}")
+        _lines.append(f"\n{len(_active)} active · {len(_idle)} idle · {len(_states)} total")
+        return _quick_reply("\n".join(_lines))
+
+    if _TASK_STATUS_RE.search(request.message):
+        _recent_tasks = task_tracker.get_tasks(20)
+        if not _recent_tasks:
+            return _quick_reply("**Tasks** — No active or recent tasks.")
+        _lines = ["**Recent Tasks**\n"]
+        for t in _recent_tasks[:15]:
+            _icon = {"RUNNING": "🔄", "DONE": "✅", "FAILED": "❌", "PENDING": "⏳", "COMPLETED": "✅", "QUEUED": "⏳"}.get(
+                t.get("status", "?"), "•"
+            )
+            _detail = t.get("detail", "") or ""
+            _lines.append(f"{_icon} `{t.get('agent_id', '?')}` — {_detail[:60]}")
+        return _quick_reply("\n".join(_lines))
+
+    if _HEALTH_RE.search(request.message):
+        _up = round(time.time() - _start_time)
+        _llm_ok = await _llm_client.is_available() if _llm_client else False
+        _drift = _orchestrator.get_drift_report().status.value if _orchestrator else "UNKNOWN"
+        _drift_icon = {"GREEN": "🟢", "YELLOW": "🟡", "RED": "🔴"}.get(_drift, "•")
+        _states = _orchestrator.get_agent_states() if _orchestrator else []
+        _active_count = sum(1 for s in _states if s.status == "ACTIVE")
+        return _quick_reply(
+            f"**System Health**\n\n"
+            f"{'✅' if _llm_ok else '❌'} Ollama: {'online' if _llm_ok else 'offline'}\n"
+            f"{_drift_icon} Drift Guard: {_drift}\n"
+            f"⏱ Uptime: {_up // 60}m {_up % 60}s\n"
+            f"🤖 Agents: {len(_states)} registered, {_active_count} active\n"
+            f"🛠 Tools: {len(logger.get_recent_tool_logs(10000))} executions logged"
+        )
+
+    if _TOOL_LIST_RE.search(request.message):
+        from backend.tools import get_tool_definitions
+        _tools = get_tool_definitions()
+        _lines = [f"**Available Tools** ({len(_tools)} native + 26 MCP via Docker)\n"]
+        for t in _tools:
+            _lines.append(f"• `{t.name}` — {t.description[:60]}")
+        return _quick_reply("\n".join(_lines))
+
+    if _SKILL_LIST_RE.search(request.message):
+        from backend.skills.registry import SkillRegistry
+        _reg = SkillRegistry()
+        _skills = _reg.list_skills()
+        _enabled = [s for s in _skills if (s.get("enabled", True) if isinstance(s, dict) else getattr(s, "enabled", True))]
+        _lines = [f"**Skills** ({len(_enabled)}/{len(_skills)} enabled)\n"]
+        for s in _enabled[:20]:
+            _lines.append(f"• `{s.get('id', s.get('skill_id', '?'))}` — {s.get('name', s.get('skill_name', '?'))}")
+        return _quick_reply("\n".join(_lines), agent="knowledge_agent")
+
     grounded_kind = detect_grounded_chat_query(request.message)
     if grounded_kind:
         deps_snapshot = await health_deps() if grounded_kind == "dependency_health" else None
@@ -984,6 +1303,13 @@ async def chat(request: ChatRequest) -> ChatResponse:
                 message=grounded_reply.message,
                 drift_status=DriftStatus.GREEN,
                 timestamp=datetime.now(UTC_TZ),
+                ordo_trace=None,
+                conversation_id=None,
+                run_id=None,
+                message_id=None,
+                sources=[],
+                model_used=None,
+                routing_method="direct",
             )
 
     # ── Lex Router: auto-resolve agent when agent_id is "auto" ───────
@@ -995,6 +1321,812 @@ async def chat(request: ChatRequest) -> ChatResponse:
         routing_meta = await resolve_agent(request.message)
         resolved_agent_id = routing_meta["agent_id"]
 
+    # ── WebGen intent: route any "build/make/create X website" to the pipeline ──
+    import re as _re_wg
+    _WEBGEN_RE = _re_wg.compile(
+        r'\b(make|build|create|generate|design|develop|spin\s+up|code)\b'
+        r'(?:\s+(?:me|us|a|an|the|my|our|their|one))?\s*'
+        r'(?:[\w\s&\'\-]{0,40}?)\s*'
+        r'(?:website|web\s*site|web\s*app|landing\s*page|homepage|web\s*page|site\b)',
+        _re_wg.IGNORECASE,
+    )
+    # ── Agent-name guard: if the user names any agent, skip direct webgen ──
+    # Source: 11 valid agent IDs from copilot-instructions.md
+    _AGENT_NAME_RE = _re_wg.compile(
+        r'\b(soul[\s_]core|devops[\s_]agent|monitor[\s_]agent|self[\s_]healer[\s_]?agent|'
+        r'code[\s_]review[\s_]agent|security[\s_]agent|data[\s_]agent|comms[\s_]agent|'
+        r'cs[\s_]agent|it[\s_]agent|knowledge[\s_]agent|ocr[\s_]agent|'
+        r'(soul|devops|monitor|security|data|comms|cs|it|knowledge|ocr)\s+agent|'
+        r'\w[\w\s]{1,30}agent(?!\s*(?:website|web|app|page|site)))\b',
+        _re_wg.IGNORECASE,
+    )
+    # ── Clone intent: URL + clone/copy/remake verb → webgen pipeline ──
+    _CLONE_INTENT_RE = _re_wg.compile(
+        r'\b(clone|copy|remake|rebuild|reverse[\s\-]?engineer)\b[\s\S]*https?://',
+        _re_wg.IGNORECASE,
+    )
+    # Also match the reverse order: URL then clone verb
+    _CLONE_INTENT_REV_RE = _re_wg.compile(
+        r'https?://[\S]+[\s\S]*\b(clone|copy|remake|rebuild|reverse[\s\-]?engineer)\b',
+        _re_wg.IGNORECASE,
+    )
+    _msg_lower = request.message.lower()
+    _is_webgen_intent = (
+        _WEBGEN_RE.search(request.message)
+        or _CLONE_INTENT_RE.search(request.message)
+        or _CLONE_INTENT_REV_RE.search(request.message)
+    )
+    # Fire the webgen interceptor for the orchestrator surfaces (auto, soul_core/Orchad).
+    # The Orchad chat panel posts agent_id="soul_core" directly, so previously this
+    # branch was skipped and website requests fell through to a plain LLM reply.
+    _ORCHESTRATOR_AGENTS = {"auto", "soul_core", "orchad"}
+    if (
+        request.agent_id in _ORCHESTRATOR_AGENTS
+        and _is_webgen_intent
+        and not _AGENT_NAME_RE.search(request.message)
+    ):
+        try:
+            from backend.routes.webgen_builder import GenerateSiteRequest, _run_generate_site
+            from backend.webgen.site_store import WebgenRunStore
+            from backend.webgen.models import WebgenRunState, WebgenRunStatus
+            import re as _re
+
+            # ── Clone URL detection — "clone https://example.com" / "copy https://..." ──
+            _clone_url: str | None = None
+            _url_match = _re_wg.search(r'https?://[^\s"\']+', request.message)
+            _clone_intent = bool(_re_wg.search(r'\b(clone|copy|remake|rebuild|reverse[\s\-]?engineer|like)\b', request.message, _re_wg.IGNORECASE))
+            if _url_match and (_clone_intent or _CLONE_INTENT_RE.search(request.message) or _CLONE_INTENT_REV_RE.search(request.message)):
+                _clone_url = _url_match.group(0).rstrip('.,;)')
+
+            # Best-effort business name extraction from natural language
+            _biz_name = "Business"
+            # Pattern 1: "make/build a [NAME] website" → extract NAME
+            _m1 = _re_wg.search(
+                r'\b(?:make|build|create|generate|design)\b\s+(?:me\s+)?(?:(?:a|an|the|my|our)\s+)?'
+                r'([\w][\w\s&\'\-]{1,39}?)\s+'
+                r'(?:website|web\s*site|web\s*app|landing\s*page|homepage|site\b)',
+                request.message,
+                _re_wg.IGNORECASE,
+            )
+            if _m1:
+                _biz_name = _m1.group(1).strip()
+            else:
+                # Pattern 2: "for a/the [NAME]" at natural break
+                _m2 = _re_wg.search(
+                    r'(?:for\s+(?:a|the|my|our)\s+|for\s+)([a-zA-Z0-9][\w\s&\'\-]{1,39}?)(?:\s+(?:and|to|using|https?)|\s*$|\s*[,.])',
+                    request.message,
+                    _re_wg.IGNORECASE,
+                )
+                if _m2:
+                    _biz_name = _m2.group(1).strip()
+                else:
+                    # Pattern 3: fallback — grab word(s) after "website"
+                    _m3 = _re_wg.search(r'website\s+(?:for\s+)?([\w][\w\s&\'\-]{1,39})', request.message, _re_wg.IGNORECASE)
+                    if _m3:
+                        _biz_name = _m3.group(1).strip()
+
+            _wg_payload = GenerateSiteRequest(
+                business_name=_biz_name,
+                description=request.message[:300],
+                tone="professional",
+                clone_url=_clone_url,
+            )
+
+            # ── Run pipeline async so /chat returns immediately ──
+            _wg_run_id = str(uuid.uuid4())[:12]
+            _wg_run_store = WebgenRunStore()
+            _initial_run = WebgenRunState(
+                run_id=_wg_run_id,
+                business_name=_biz_name,
+                clone_url=_clone_url or "",
+                current_phase="clone_recon" if _clone_url else "planning",
+                total=8 if _clone_url else 6,
+            )
+            _wg_run_store.save(_initial_run)
+
+            async def _run_webgen_bg(payload: GenerateSiteRequest, run_id: str, biz_name: str, clone_url_: str | None) -> None:
+                _rs = _wg_run_store
+                try:
+                    result = await _run_generate_site(payload, run_id=run_id, run_store=_rs)
+                    _run = _rs.load(run_id)
+                    if _run:
+                        _run.status = WebgenRunStatus.COMPLETED
+                        _run.project_id = result.get("project_id", "")
+                        _run.project_slug = result.get("project_slug", "")
+                        _run.current_phase = "export"
+                        _rs.save(_run)
+                    task_tracker.emit_activity("WEBGEN_COMPLETE", {
+                        "run_id": run_id,
+                        "project_id": result.get("project_id", ""),
+                        "project_slug": result.get("project_slug", ""),
+                        "preview_file": result.get("preview_file", ""),
+                        "pages": result.get("pages", []),
+                        "business_name": biz_name,
+                        "clone_url": clone_url_ or "",
+                        "status": "success",
+                        "timestamp": datetime.now(UTC_TZ).isoformat(),
+                    })
+                except Exception as exc:
+                    logger.warning(f"[WebGen] Background pipeline failed: {exc}")
+                    _run = _rs.load(run_id)
+                    if _run:
+                        _run.status = WebgenRunStatus.FAILED
+                        _run.error = str(exc)[:300]
+                        _rs.save(_run)
+                    task_tracker.emit_activity("WEBGEN_COMPLETE", {
+                        "run_id": run_id,
+                        "status": "failed",
+                        "error": str(exc)[:300],
+                        "timestamp": datetime.now(UTC_TZ).isoformat(),
+                    })
+
+            asyncio.create_task(_run_webgen_bg(_wg_payload, _wg_run_id, _biz_name, _clone_url))
+
+            return ChatResponse(
+                agent_id="webgen",
+                message=(
+                    f"Building website for **{_biz_name}**…\n\n"
+                    + (f"Cloning from: {_clone_url}\n" if _clone_url else "")
+                    + f"Run ID: `{_wg_run_id}`\n\n"
+                    "Follow progress in the live activity stream. "
+                    "The result will appear automatically when the build completes."
+                ),
+                drift_status=DriftStatus.GREEN,
+                timestamp=datetime.now(UTC_TZ),
+                ordo_trace=None,
+                conversation_id=None,
+                run_id=_wg_run_id,
+                message_id=None,
+                sources=[],
+                model_used=None,
+                routing_method="webgen_intent",
+            )
+        except Exception as _wg_exc:
+            logger.warning(f"[WebGen] Pipeline failed, falling through to agent: {_wg_exc}")
+
+    # ── Discord channel query intent ─────────────────────────────────────────
+    # Intercepts questions like "what's in #intel-news?" or "show discord news"
+    # and returns the durable post history log directly — no Ollama needed.
+    _DISCORD_CHANNEL_QUERY_RE = _re_wg.compile(
+        r'\b(?:what(?:\'s| is| was| has)|show|get|fetch|read|list|tell me|summarize|latest)\b'
+        r'.{0,40}'
+        r'\b(?:intel.?news|news.?intel|discord.*news|security.?alerts?|content.?report|comment.?farm'
+        r'|#intel|#news|discord\s+channel|posted\s+to\s+discord|in\s+discord)\b',
+        _re_wg.IGNORECASE,
+    )
+    if (
+        _DISCORD_CHANNEL_QUERY_RE.search(request.message)
+        and request.agent_id in _ORCHESTRATOR_AGENTS
+        and not _is_webgen_intent
+    ):
+        try:
+            from backend.discord_bot import get_discord_post_history as _gdph
+
+            # Detect which channel they're asking about
+            _disc_channel = "news-intel"
+            if _re_wg.search(r'security.?alert', request.message, _re_wg.IGNORECASE):
+                _disc_channel = "security-alerts"
+            elif _re_wg.search(r'content.?report', request.message, _re_wg.IGNORECASE):
+                _disc_channel = "content-report"
+            elif _re_wg.search(r'comment.?farm', request.message, _re_wg.IGNORECASE):
+                _disc_channel = "comment-farm"
+
+            _disc_records = await asyncio.wait_for(
+                asyncio.to_thread(_gdph, channel_name=_disc_channel, limit=10),
+                timeout=3.0,
+            )
+
+            if _disc_records:
+                _disc_lines = []
+                for _r in _disc_records[:8]:
+                    _t = _r.get("title") or _r.get("headline") or _r.get("content", "")[:100]
+                    _cat = _r.get("category", "")
+                    _url = _r.get("source_url", "")
+                    _ts = (_r.get("timestamp") or _r.get("logged_at", ""))[:10]
+                    _line = f"• [{_cat}] {_t}" if _cat else f"• {_t}"
+                    if _url:
+                        _line += f" ({_url})"
+                    if _ts:
+                        _line += f" — {_ts}"
+                    _disc_lines.append(_line)
+                _disc_response = (
+                    f"Here's what's been posted to **#{_disc_channel}** by the Agentop bot:\n\n"
+                    + "\n".join(_disc_lines)
+                )
+            else:
+                _disc_response = (
+                    f"No posts found in **#{_disc_channel}** yet. "
+                    "The news intel poller runs hourly — check back after the next poll cycle, "
+                    "or trigger `/news` in Discord to push items now."
+                )
+
+            _disc_conv_id = task_tracker.create_or_attach_conversation(
+                agent_id="comms_agent",
+                conversation_id=request.conversation_id,
+            )
+            task_tracker.append_message(_disc_conv_id, "user", request.message, "comms_agent", None)
+            task_tracker.append_message(_disc_conv_id, "assistant", _disc_response, "comms_agent", None)
+            return ChatResponse(
+                agent_id="comms_agent",
+                message=_disc_response,
+                drift_status=DriftStatus.GREEN,
+                timestamp=datetime.now(UTC_TZ),
+                ordo_trace=None,
+                conversation_id=_disc_conv_id,
+                routing_method="discord_channel_query",
+            )
+        except Exception as _disc_exc:
+            logger.warning(f"[DiscordChannelQuery] Failed: {_disc_exc}")
+            # Fall through to full orchestrator
+
+    # ── Content pipeline intent: split into lightweight text path and heavy media path ──
+    #
+    # HEAVY path  — explicit video/media keywords only. Routes into ContentPipeline
+    #               (long-running, blocks workers if subprocess not async).
+    # LIGHTWEIGHT path — text, news, caption, carousel, plain "post". Returns quickly
+    #                    via the lightweight social handler below. Does NOT enter
+    #                    ContentPipeline so it cannot cause 504s on plain social requests.
+    #
+    # Both only fire on orchestrator surfaces and only when no agent name is mentioned.
+    _HEAVY_MEDIA_INTENT_RE = _re_wg.compile(
+        r'\b(?:make|create|produce|generate|do)\b\s*'
+        r'(?:me\s+)?(?:a|an|the|some)?\s*'
+        r'(tiktok\s+video|tik\s*tok\s+video|reel|reels|short(?:\s+video)?|shorts|'
+        r'youtube\s*short|avatar\s+video|talking[- ]head|lip[- ]sync|'
+        r'video(?:\s+clip)?|clip)\b',
+        _re_wg.IGNORECASE,
+    )
+    _LIGHTWEIGHT_SOCIAL_INTENT_RE = _re_wg.compile(
+        r'\b(?:make|create|produce|generate|post|publish|draft|write|do)\b\s*'
+        r'(?:me\s+)?(?:a|an|the|some)?\s*'
+        r'(?:(?:news\s+)?post|caption|carousel|ig\s+post|instagram\s+post|'
+        r'piece\s+of\s+content|social\s+post|text\s+post)\b',
+        _re_wg.IGNORECASE,
+    )
+    _heavy_media_match = _HEAVY_MEDIA_INTENT_RE.search(request.message) if request.agent_id in _ORCHESTRATOR_AGENTS else None
+    _lightweight_social_match = (
+        _LIGHTWEIGHT_SOCIAL_INTENT_RE.search(request.message)
+        if request.agent_id in _ORCHESTRATOR_AGENTS and not _heavy_media_match
+        else None
+    )
+
+    # ── Numeric continuation path — "1"…"5" follow-ups continuing a Social draft ──
+    _LW_SOCIAL_CONTINUATION_RE = _re_wg.compile(r'^\s*[1-5]\s*$')
+    _lw_continuation_match = (
+        _LW_SOCIAL_CONTINUATION_RE.match(request.message)
+        if request.agent_id in _ORCHESTRATOR_AGENTS
+        and not _lightweight_social_match
+        and not _heavy_media_match
+        and request.conversation_id
+        else None
+    )
+    if _lw_continuation_match and not _is_webgen_intent:
+        try:
+            _lw_choice = request.message.strip()
+            _lw_history = task_tracker.get_messages(
+                request.conversation_id,  # type: ignore[arg-type]
+                limit=20,
+            )
+            # Find the last assistant message that contained numbered suggestions
+            _lw_suggestion_msg: str | None = None
+            for _lw_hist_item in reversed(_lw_history):
+                if (
+                    _lw_hist_item.get("role") == "assistant"
+                    and _re_wg.search(r'[1-5][\.\)]\s', _lw_hist_item.get("content", ""))
+                    and "reply with a number" in _lw_hist_item.get("content", "").lower()
+                ):
+                    _lw_suggestion_msg = _lw_hist_item["content"]
+                    break
+            if _lw_suggestion_msg:
+                # Extract the chosen option text
+                _lw_option_re = _re_wg.compile(
+                    rf'(?:^|\n)\s*{_re_wg.escape(_lw_choice)}[\.\)]\s+(.+?)(?=\n\s*[1-5][\.\)]|\Z)',
+                    _re_wg.DOTALL | _re_wg.MULTILINE,
+                )
+                _lw_option_m = _lw_option_re.search(_lw_suggestion_msg)
+                _lw_option_text = _lw_option_m.group(1).strip() if _lw_option_m else f"option {_lw_choice}"
+                _lw_continuation_prompt = (
+                    f"The user chose option {_lw_choice} from the suggestions you just provided.\n"
+                    f"Option {_lw_choice}: {_lw_option_text}\n\n"
+                    f"Now write the FULL ready-to-post carousel (5–7 slides) for this topic. "
+                    f"Each slide: bold headline + 1–2 sentence body. "
+                    f"Output the content only — no preamble or explanations."
+                )
+            else:
+                # No prior suggestion found — fall through to full orchestrator
+                raise ValueError("No prior suggestion message found for continuation")
+
+            _lw_cont_selection = _resolve_chat_model_selection("comms_agent", request.model)
+            _lw_cont_ctx: dict[str, Any] = {
+                **dict(request.context),
+                "lightweight_social": True,
+                "_model_selection": _lw_cont_selection,
+                **(({"model": _lw_cont_selection.get("requested_model")}) if _lw_cont_selection.get("requested_model") else {}),
+            }
+            _lw_cont_result = await _orchestrator.process_message(
+                agent_id="comms_agent",
+                message=_lw_continuation_prompt,
+                context=_lw_cont_ctx,
+            )
+            _lw_cont_raw = _lw_cont_result.get("response", "")
+            try:
+                import json as _json_c
+                _lw_cont_parsed = _json_c.loads(_lw_cont_raw)
+                _lw_cont_response = _lw_cont_parsed.get("content") or _lw_cont_raw
+            except Exception:
+                _lw_cont_response = _lw_cont_raw
+            if isinstance(_lw_cont_response, str):
+                _lw_cont_response = _lw_cont_response.replace("\\n", "\n")
+
+            _lw_cont_ordo_raw = _lw_cont_result.get("ordo_trace")
+            _lw_cont_ordo = OrdoTrace(**_lw_cont_ordo_raw) if isinstance(_lw_cont_ordo_raw, dict) else None
+            _lw_cont_model_meta = _merge_model_execution(_lw_cont_result, _lw_cont_selection)
+            _lw_cont_message_meta = {
+                **_lw_cont_model_meta,
+                "routing_method": "lightweight_social",
+            }
+
+            _lw_cont_conv_id = task_tracker.create_or_attach_conversation(
+                agent_id="comms_agent",
+                conversation_id=request.conversation_id,
+            )
+            task_tracker.append_message(
+                _lw_cont_conv_id,
+                "user",
+                request.message,
+                "comms_agent",
+                None,
+                message_meta=_lw_cont_message_meta,
+            )
+            task_tracker.append_message(
+                _lw_cont_conv_id,
+                "assistant",
+                _lw_cont_response,
+                "comms_agent",
+                None,
+                ordo_trace=_lw_cont_ordo_raw if isinstance(_lw_cont_ordo_raw, dict) else None,
+                message_meta=_lw_cont_message_meta,
+            )
+            _emit_llm_response_event(
+                agent_id="comms_agent",
+                message=_lw_cont_response,
+                model_meta=_lw_cont_model_meta,
+                routing_method="lightweight_social",
+            )
+            return ChatResponse(
+                agent_id="comms_agent",
+                message=_lw_cont_response,
+                drift_status=DriftStatus.GREEN,
+                timestamp=datetime.now(UTC_TZ),
+                ordo_trace=_lw_cont_ordo,
+                conversation_id=_lw_cont_conv_id,
+                run_id=None,
+                message_id=None,
+                sources=[],
+                selected_model=_lw_cont_model_meta.get("selected_model"),
+                answering_model=_lw_cont_model_meta.get("answering_model"),
+                runtime_model=_lw_cont_model_meta.get("runtime_model"),
+                execution_role=_lw_cont_model_meta.get("execution_role"),
+                model_source=_lw_cont_model_meta.get("model_source"),
+                model_used=_lw_cont_model_meta.get("model_used"),
+                routing_method="lightweight_social",
+            )
+        except Exception as _lw_cont_exc:
+            logger.warning(f"[LightweightSocialContinuation] Failed, falling through: {_lw_cont_exc}")
+        # Fall through only on error
+
+    # Lightweight social path — text/news/caption posts, dispatches to comms_agent
+    if (
+        _lightweight_social_match
+        and not _is_webgen_intent
+        and not _AGENT_NAME_RE.search(request.message)
+    ):
+        try:
+            from backend.routes.news import get_latest_news as _gln  # type: ignore[attr-defined]
+
+            _lw_topic_m = _re_wg.search(r'\babout\s+(.+?)(?:[.?!]|$)', request.message, _re_wg.IGNORECASE)
+            _lw_topic = _lw_topic_m.group(1).strip() if _lw_topic_m else None
+
+            # Collect news items — prefer Discord-posted news if "discord" mentioned
+            _lw_news_lines: list[str] = []
+            _wants_discord_news = bool(_re_wg.search(r'\bdiscord\b', request.message, _re_wg.IGNORECASE))
+            if _wants_discord_news:
+                try:
+                    from backend.discord_bot import get_discord_post_history as _gdph
+                    _disc_posts = await asyncio.wait_for(
+                        asyncio.to_thread(_gdph, event_type="DISCORD_NEWS_POSTED", limit=5),
+                        timeout=3.0,
+                    )
+                    for _dp in _disc_posts[:5]:
+                        # log saves 'title'; fall back through 'headline' and 'content'
+                        _headline = _dp.get("title") or _dp.get("headline") or _dp.get("content", "")[:120]
+                        if _headline:
+                            _lw_news_lines.append(f"• {_headline}")
+                except Exception:
+                    pass
+
+            if not _lw_news_lines:
+                try:
+                    _lw_result = await asyncio.wait_for(
+                        _gln(limit=5, high_relevance_only=False, topic=_lw_topic),
+                        timeout=5.0,
+                    )
+                    _lw_items = _lw_result.get("items", []) if isinstance(_lw_result, dict) else _lw_result
+                    for _it in _lw_items[:5]:
+                        _title = _it.get("title", "")
+                        _summary = _it.get("summary", "")
+                        if _title:
+                            _lw_news_lines.append(f"• {_title}" + (f" — {_summary[:100]}" if _summary else ""))
+                except Exception:
+                    pass
+
+            # Detect content format (carousel vs caption vs post)
+            _lw_format = "Instagram carousel"
+            if _re_wg.search(r'\bcaption\b', request.message, _re_wg.IGNORECASE):
+                _lw_format = "Instagram caption"
+            elif _re_wg.search(r'\bpost\b', request.message, _re_wg.IGNORECASE):
+                _lw_format = "social media post"
+
+            if _lw_news_lines:
+                _news_block = "\n\nNews items to use:\n" + "\n".join(_lw_news_lines)
+                _enriched_msg = (
+                    f"Write a {_lw_format} based on the following request: {request.message}"
+                    f"{_news_block}\n\n"
+                    f"Format: produce ready-to-post copy only. "
+                    f"For a carousel, write 5–7 slides each with a bold headline and 1–2 sentence body. "
+                    f"For a caption, write the full caption with hashtags. "
+                    f"Do not explain what you are doing — just output the content."
+                )
+            else:
+                # No live news — surface suggestions and offer to write
+                _enriched_msg = (
+                    f"The user wants to: {request.message}\n\n"
+                    f"No live news items are loaded right now. Do the following:\n"
+                    f"1. Suggest 4–5 recent article topics or trending themes (AI, tech, business, or relevant niche) "
+                    f"that would make great {_lw_format} content.\n"
+                    f"2. After each suggestion write a one-line 'Slide 1 hook' showing what the opening slide could say.\n"
+                    f"3. End with exactly this line: "
+                    f"'Reply with a number (1–5) and I'll write the full carousel instantly.'\n"
+                    f"Keep it concise — no extra commentary or explanations."
+                )
+
+            task_tracker.emit_activity("LIGHTWEIGHT_SOCIAL", {
+                "topic": _lw_topic or request.message[:100],
+                "format": _lw_format,
+                "news_items": len(_lw_news_lines),
+                "timestamp": datetime.now(UTC_TZ).isoformat(),
+            })
+
+            # Dispatch directly to comms_agent — bypass soul_core
+            # Resolve the model: explicit request.model > persisted comms_agent override
+            _lw_selection = _resolve_chat_model_selection("comms_agent", request.model)
+            _lw_model: str | None = _lw_selection.get("requested_model")
+            _lw_ctx: dict[str, Any] = {
+                **dict(request.context),
+                "lightweight_social": True,
+                "_model_selection": _lw_selection,
+                **(({"model": _lw_model}) if _lw_model else {}),
+            }
+            _LW_TIMEOUT_SENTINEL = "Error: Agent executor timed out. Please try again."
+
+            async def _lw_call(
+                msg: str,
+                override_model: str | None,
+                selection: dict[str, Any],
+            ) -> dict[str, Any]:
+                _ctx = {
+                    **_lw_ctx,
+                    "_model_selection": selection,
+                    **(({"model": override_model}) if override_model else {}),
+                }
+                return await _orchestrator.process_message(
+                    agent_id="comms_agent",
+                    message=msg,
+                    context=_ctx,
+                )
+
+            _lw_result_agent = await _lw_call(_enriched_msg, _lw_model, _lw_selection)
+            _lw_response_raw = _lw_result_agent.get("response", "")
+
+            # Retry once on step-1 timeout with a simplified prompt and fallback model
+            if _lw_response_raw == _LW_TIMEOUT_SENTINEL:
+                _lw_fallback_model: str | None = None
+                if _lw_model:
+                    from backend.llm.unified_registry import UNIFIED_MODEL_REGISTRY as _UMR
+                    _lw_spec = _UMR.get(_lw_model)
+                    _lw_fallback_model = (
+                        _lw_spec.fallback_chain[0] if _lw_spec and _lw_spec.fallback_chain else None
+                    )
+                _lw_fallback_model = _lw_fallback_model or "llama3.2:1b"
+                _lw_simple_msg = (
+                    f"Write a brief {_lw_format} about: "
+                    + ("; ".join(ln.lstrip("• ") for ln in _lw_news_lines[:3]) if _lw_news_lines else request.message)
+                )
+                _lw_retry_selection = {
+                    **_lw_selection,
+                    "requested_model": _lw_fallback_model,
+                }
+                _lw_retry_result = await _lw_call(_lw_simple_msg, _lw_fallback_model, _lw_retry_selection)
+                _lw_retry_raw = _lw_retry_result.get("response", "")
+                if _lw_retry_raw and _lw_retry_raw != _LW_TIMEOUT_SENTINEL:
+                    _lw_result_agent = _lw_retry_result
+                    _lw_response_raw = _lw_retry_raw
+                    _lw_model = _lw_fallback_model
+                else:
+                    _lw_response_raw = (
+                        "The social content agent timed out. "
+                        "Try selecting a lighter model (e.g. llama3.2:1b) in the Social card and retry."
+                    )
+
+            # comms_agent may return schema-constrained JSON — extract "content" field if present
+            try:
+                import json as _json
+                _lw_parsed = _json.loads(_lw_response_raw)
+                _lw_response = _lw_parsed.get("content") or _lw_response_raw
+            except Exception:
+                _lw_response = _lw_response_raw
+            # Replace literal \n sequences with real newlines
+            if isinstance(_lw_response, str):
+                _lw_response = _lw_response.replace("\\n", "\n")
+
+            # Forward Ordo trace from the orchestrator result
+            _lw_ordo_raw = _lw_result_agent.get("ordo_trace")
+            _lw_ordo = OrdoTrace(**_lw_ordo_raw) if isinstance(_lw_ordo_raw, dict) else None
+            _lw_model_meta = _merge_model_execution(_lw_result_agent, _lw_selection)
+            _lw_message_meta = {
+                **_lw_model_meta,
+                "routing_method": "lightweight_social",
+            }
+
+            _lw_conv_id = task_tracker.create_or_attach_conversation(
+                agent_id="comms_agent",
+                conversation_id=request.conversation_id,
+            )
+            task_tracker.append_message(
+                _lw_conv_id,
+                "user",
+                request.message,
+                "comms_agent",
+                None,
+                message_meta=_lw_message_meta,
+            )
+            task_tracker.append_message(
+                _lw_conv_id,
+                "assistant",
+                _lw_response,
+                "comms_agent",
+                None,
+                ordo_trace=_lw_ordo_raw if isinstance(_lw_ordo_raw, dict) else None,
+                message_meta=_lw_message_meta,
+            )
+            _emit_llm_response_event(
+                agent_id="comms_agent",
+                message=_lw_response,
+                model_meta=_lw_model_meta,
+                routing_method="lightweight_social",
+            )
+            return ChatResponse(
+                agent_id="comms_agent",
+                message=_lw_response,
+                drift_status=DriftStatus.GREEN,
+                timestamp=datetime.now(UTC_TZ),
+                ordo_trace=_lw_ordo,
+                conversation_id=_lw_conv_id,
+                run_id=None,
+                message_id=None,
+                sources=[],
+                selected_model=_lw_model_meta.get("selected_model"),
+                answering_model=_lw_model_meta.get("answering_model"),
+                runtime_model=_lw_model_meta.get("runtime_model"),
+                execution_role=_lw_model_meta.get("execution_role"),
+                model_source=_lw_model_meta.get("model_source"),
+                model_used=_lw_model_meta.get("model_used"),
+                routing_method="lightweight_social",
+            )
+        except Exception as _lw_exc:
+            logger.warning(f"[LightweightSocial] Failed, falling through to orchestrator: {_lw_exc}")
+        # Fall through only on error
+
+    _content_match = _heavy_media_match  # alias for the block below
+    if (
+        _content_match
+        and not _is_webgen_intent  # webgen wins if both match
+        and not _AGENT_NAME_RE.search(request.message)
+    ):
+        try:
+            from backend.content.job_store import job_store as _job_store
+            from backend.content.pipeline import ContentPipeline as _ContentPipeline
+            from backend.content.video_job import JobStatus as _JobStatus, VideoJob as _VideoJob
+            from backend.llm import OllamaClient as _OllamaClient
+
+            # Best-effort topic extraction: text after "about" or after the content noun.
+            _topic = ""
+            _topic_m = _re_wg.search(r'\babout\s+(.+?)(?:[.?!]|$)', request.message, _re_wg.IGNORECASE)
+            if _topic_m:
+                _topic = _topic_m.group(1).strip()
+            else:
+                _topic_m = _re_wg.search(r'\bon\s+(.+?)(?:[.?!]|$)', request.message, _re_wg.IGNORECASE)
+                if _topic_m:
+                    _topic = _topic_m.group(1).strip()
+            if not _topic:
+                _topic = request.message[:200]
+
+            _platform_token = _content_match.group(1).lower().replace(" ", "")
+            _platforms_map = {
+                "tiktokvideo": ["tiktok"], "tiktokvideo": ["tiktok"],
+                "reel": ["instagram"], "reels": ["instagram"],
+                "short": ["youtube_shorts"], "shorts": ["youtube_shorts"],
+                "shortvideo": ["youtube_shorts"],
+                "youtubeshort": ["youtube_shorts"],
+                "avatarvideo": ["instagram", "tiktok", "youtube_shorts"],
+                "talkingheat": ["instagram", "tiktok", "youtube_shorts"],
+                "videoclip": ["instagram", "tiktok", "youtube_shorts"],
+                "video": ["instagram", "tiktok", "youtube_shorts"],
+                "clip": ["instagram", "tiktok", "youtube_shorts"],
+            }
+            _targets = _platforms_map.get(_platform_token, ["instagram", "tiktok", "youtube_shorts"])
+
+            _job = _VideoJob(
+                topic=_topic,
+                status=_JobStatus.IDEA_APPROVED,
+                platform_targets=_targets,
+                source="orchad_chat",
+            )
+            _job_store.save(_job)
+
+            _content_run_id = _job.job_id
+
+            async def _run_content_bg(_jid: str) -> None:
+                try:
+                    pipeline = _ContentPipeline(_OllamaClient())
+                    # Bound to 30 minutes. subprocess calls inside agents are wrapped
+                    # in asyncio.to_thread() so the event loop stays responsive.
+                    results = await asyncio.wait_for(pipeline.run_full(), timeout=1800)
+                    task_tracker.emit_activity("CONTENT_PIPELINE_COMPLETE", {
+                        "job_id": _jid,
+                        "results": results,
+                        "status": "success",
+                        "timestamp": datetime.now(UTC_TZ).isoformat(),
+                    })
+                except asyncio.TimeoutError:
+                    logger.warning(f"[Content] Pipeline timed out after 30 min for job {_jid}")
+                    task_tracker.emit_activity("CONTENT_PIPELINE_COMPLETE", {
+                        "job_id": _jid,
+                        "status": "failed",
+                        "error": "Pipeline timed out after 30 minutes",
+                        "timestamp": datetime.now(UTC_TZ).isoformat(),
+                    })
+                except Exception as exc:
+                    logger.warning(f"[Content] Background pipeline failed: {exc}")
+                    task_tracker.emit_activity("CONTENT_PIPELINE_COMPLETE", {
+                        "job_id": _jid,
+                        "status": "failed",
+                        "error": str(exc)[:300],
+                        "timestamp": datetime.now(UTC_TZ).isoformat(),
+                    })
+
+            asyncio.create_task(_run_content_bg(_content_run_id))
+
+            return ChatResponse(
+                agent_id="content_pipeline",
+                message=(
+                    f"Spinning up content for **{_topic}**\n\n"
+                    f"Targets: {', '.join(_targets)}\n"
+                    f"Job ID: `{_content_run_id}`\n\n"
+                    "Watch the activity stream — script → voice → video → QA → publish."
+                ),
+                drift_status=DriftStatus.GREEN,
+                timestamp=datetime.now(UTC_TZ),
+                ordo_trace=None,
+                conversation_id=None,
+                run_id=_content_run_id,
+                message_id=None,
+                sources=[],
+                model_used=None,
+                routing_method="content_intent",
+            )
+        except Exception as _ct_exc:
+            logger.warning(f"[Content] Pipeline failed, falling through to agent: {_ct_exc}")
+
+    # ── Discord intent ──────────────────────────────────────────────────────────
+    # Matches both forms:
+    #   (a) "discord (bot)? (post|send|…) <text>"  — discord first
+    #   (b) "(post|send|…) <text> (to|from|on|via|in) discord"  — discord last
+    #   (c) "make a post using … from discord / from the discord bot"
+    _DISCORD_INTENT_RE = _re_wg.compile(
+        r'(?:'
+        r'\b(?:tell|have|ask|use)?\s*(?:the\s+)?discord(?:\s+bot)?\s+(?:to\s+)?(post|send|announce|message|say|drop|share)\b\s+(.+)'
+        r'|'
+        r'\b(post|send|share|announce|publish|drop)\b(.+?)\b(?:to|from|on|via|in|using)\b\s*(?:the\s+)?discord(?:\s+bot)?\b'
+        r'|'
+        r'\bmake\b.{0,30}\bpost\b(.+?)\b(?:from|using|via)\b\s*(?:the\s+)?discord(?:\s+bot)?\b'
+        r')',
+        _re_wg.IGNORECASE | _re_wg.DOTALL,
+    )
+    _disc_match = _DISCORD_INTENT_RE.search(request.message) if request.agent_id in _ORCHESTRATOR_AGENTS else None
+    if _disc_match and not _AGENT_NAME_RE.search(request.message):
+        try:
+            from backend import discord_bot as _discord_bot_mod
+
+            # group(2) = text after verb for form (a)
+            # group(4) = text between verb and "discord" for form (b)
+            # group(5) = text between "post" and "from discord" for form (c)
+            # Fall back to full message if no capture matched
+            _disc_text = (
+                _disc_match.group(2) or _disc_match.group(4) or _disc_match.group(5) or request.message
+            ).strip().strip('"\'')
+            _bot = getattr(_discord_bot_mod, "_bot_instance", None)
+            _content_channel_id = getattr(_discord_bot_mod, "CONTENT_CHANNEL_ID", None)
+
+            if _bot is None or _content_channel_id is None:
+                _disc_msg = (
+                    "Discord bridge not active — set `DISCORD_BOT_TOKEN` and "
+                    "`DISCORD_CONTENT_CHANNEL_ID` in `.env`, then restart the backend."
+                )
+                _disc_status = "skipped"
+            else:
+                # The discord bot runs in its OWN event loop (spawned by start_bot()).
+                # We must dispatch into that loop via run_coroutine_threadsafe — NOT
+                # asyncio.create_task() which would run in FastAPI's loop and hang on
+                # discord.py awaits that are bound to the bot's loop.
+                def _post_to_discord_thread(text: str, channel_id: int) -> None:
+                    import concurrent.futures as _cf
+                    try:
+                        bot_loop = _bot.loop  # type: ignore[attr-defined]
+                        if bot_loop is None or not bot_loop.is_running():
+                            logger.warning("[Discord] Bot loop not running — cannot post")
+                            return
+
+                        async def _do_send() -> None:
+                            ch = _bot.get_channel(channel_id)
+                            if ch is None:
+                                logger.warning(f"[Discord] Channel {channel_id} not found")
+                                return
+                            await ch.send(text)
+                            task_tracker.emit_activity("DISCORD_POST", {
+                                "channel_id": channel_id,
+                                "text": text[:200],
+                                "status": "success",
+                                "timestamp": datetime.now(UTC_TZ).isoformat(),
+                            })
+
+                        fut = asyncio.run_coroutine_threadsafe(_do_send(), bot_loop)
+                        fut.result(timeout=10)  # wait up to 10s in background thread
+                    except Exception as exc:
+                        logger.warning(f"[Discord] Post failed: {exc}")
+
+                # Fire-and-forget in a thread so we don't block FastAPI's event loop
+                asyncio.get_event_loop().run_in_executor(
+                    None, _post_to_discord_thread, _disc_text, _content_channel_id
+                )
+                _disc_msg = f"Posting to Discord #content channel:\n\n> {_disc_text[:400]}"
+                _disc_status = "queued"
+
+            return ChatResponse(
+                agent_id="comms_agent",
+                message=_disc_msg,
+                drift_status=DriftStatus.GREEN,
+                timestamp=datetime.now(UTC_TZ),
+                ordo_trace=None,
+                conversation_id=None,
+                run_id=None,
+                message_id=None,
+                sources=[],
+                model_used=None,
+                routing_method=f"discord_intent_{_disc_status}",
+            )
+        except Exception as _disc_exc:
+            logger.warning(f"[Discord] Intent handling failed, falling through: {_disc_exc}")
+
+    # ── Model override: inject selected model into agent context ─────
+    chat_context: dict[str, Any] = dict(request.context)
+    if routing_meta:
+        chat_context["routing"] = routing_meta
+    _resolved_selection = _resolve_chat_model_selection(resolved_agent_id, request.model)
+    chat_context["_model_selection"] = _resolved_selection
+    if _resolved_selection.get("requested_model"):
+        chat_context["model"] = _resolved_selection["requested_model"]
+
     # DeerFlow: open run BEFORE execution so timing is accurate
     _run_id_main: str | None = None
     if _execution_recorder:
@@ -1003,11 +2135,62 @@ async def chat(request: ChatRequest) -> ChatResponse:
             message=request.message,
         )
 
-    result = await _orchestrator.process_message(
-        agent_id=resolved_agent_id,
-        message=request.message,
-        context={**request.context, "routing": routing_meta} if routing_meta else request.context,
-    )
+    from backend.config import CHAT_REQUEST_TIMEOUT_SECONDS as _CHAT_TIMEOUT
+    _chat_request_id = str(uuid.uuid4())[:8]
+    global _active_user_requests
+    _active_user_requests += 1
+    try:
+        result = await asyncio.wait_for(
+            _orchestrator.process_message(
+                agent_id=resolved_agent_id,
+                message=request.message,
+                context=chat_context,
+            ),
+            timeout=_CHAT_TIMEOUT,
+        )
+    except asyncio.TimeoutError:
+        raise HTTPException(
+            status_code=504,
+            detail=(
+                f"Agent timed out after {int(_CHAT_TIMEOUT)}s — Ollama may be busy with another request. "
+                f"Try again in a moment. [ref:{_chat_request_id}]"
+            ),
+        )
+    except ConnectionError as _conn_exc:
+        # Ollama is unreachable — surface a structured 503 rather than 500
+        write_chat_failure(
+            request_id=_chat_request_id,
+            user_message=request.message,
+            chosen_agent=resolved_agent_id,
+            selected_model=_resolved_selection.get("selected_model"),
+            last_live_step=None,
+            ordo_trace=None,
+            error_class="ConnectionError",
+            error_detail=str(_conn_exc),
+            route_path="/chat",
+            pipeline_stage="llm_connect",
+        )
+        raise HTTPException(
+            status_code=503,
+            detail=f"LLM service unavailable — Ollama may not be running. [ref:{_chat_request_id}]",
+        )
+    except Exception as _orch_exc:
+        # Unexpected orchestrator failure — log it and re-raise so the catchall fires
+        write_chat_failure(
+            request_id=_chat_request_id,
+            user_message=request.message,
+            chosen_agent=resolved_agent_id,
+            selected_model=_resolved_selection.get("selected_model"),
+            last_live_step=None,
+            ordo_trace=None,
+            error_class=type(_orch_exc).__name__,
+            error_detail=str(_orch_exc),
+            route_path="/chat",
+            pipeline_stage="orchestrator",
+        )
+        raise
+    finally:
+        _active_user_requests -= 1
 
     # DeerFlow: close run + fire async analysis (OpenSpace-inspired, fire-and-forget)
     if _execution_recorder and _run_id_main:
@@ -1028,20 +2211,74 @@ async def chat(request: ChatRequest) -> ChatResponse:
     if result.get("error") and not result.get("response"):
         raise HTTPException(status_code=400, detail=result["error"])
 
-    return ChatResponse(
+    _ordo_raw = result.get("ordo_trace")
+    _ordo = OrdoTrace(**_ordo_raw) if isinstance(_ordo_raw, dict) else None
+    _routing_method = routing_meta.get("method") if routing_meta else ("direct" if request.agent_id != "auto" else None)
+    _model_meta = _merge_model_execution(result, _resolved_selection)
+    _message_meta = {
+        **_model_meta,
+        "routing_method": _routing_method,
+    }
+
+    # ── Persist conversation and messages ────────────────────────────
+    _conv_id = task_tracker.create_or_attach_conversation(
         agent_id=resolved_agent_id,
-        message=result.get("response", ""),
-        drift_status=DriftStatus(result.get("drift_status", "GREEN")),
-        timestamp=datetime.now(UTC_TZ),
+        conversation_id=request.conversation_id,
+    )
+    task_tracker.append_message(
+        conversation_id=_conv_id,
+        role="user",
+        content=request.message,
+        agent_id=resolved_agent_id,
+        run_id=_run_id_main,
+        message_meta=_message_meta,
+    )
+    _assistant_msg = result.get("response", "")
+    _msg_id = task_tracker.append_message(
+        conversation_id=_conv_id,
+        role="assistant",
+        content=_assistant_msg,
+        agent_id=resolved_agent_id,
+        run_id=_run_id_main,
+        ordo_trace=_ordo_raw if isinstance(_ordo_raw, dict) else None,
+        message_meta=_message_meta,
+    )
+    _emit_llm_response_event(
+        agent_id=resolved_agent_id,
+        message=_assistant_msg,
+        model_meta=_model_meta,
+        routing_method=_routing_method,
     )
 
+    return ChatResponse(
+        agent_id=resolved_agent_id,
+        message=_assistant_msg,
+        drift_status=DriftStatus(result.get("drift_status", "GREEN")),
+        timestamp=datetime.now(UTC_TZ),
+        ordo_trace=_ordo,
+        conversation_id=_conv_id,
+        run_id=_run_id_main,
+        message_id=_msg_id,
+        sources=result.get("sources") or [],
+        selected_model=_model_meta.get("selected_model"),
+        answering_model=_model_meta.get("answering_model"),
+        runtime_model=_model_meta.get("runtime_model"),
+        execution_role=_model_meta.get("execution_role"),
+        model_source=_model_meta.get("model_source"),
+        model_used=_model_meta.get("model_used"),
+        routing_method=_routing_method,
+    )
 
 @app.get("/agents")
-async def list_agents() -> list[dict[str, Any]]:
-    """Return all registered agents for the dashboard."""
+async def list_agents(include_factory: bool = False) -> list[dict[str, Any]]:
+    """Return the canonical production agent roster.
+
+    Pass ``?include_factory=true`` to also include dynamically created
+    factory/debug agents (operator-only surface).
+    """
     if not _orchestrator:
         return []
-    return [d.model_dump() for d in _orchestrator.get_all_agent_definitions()]
+    return [d.model_dump() for d in _orchestrator.get_all_agent_definitions(include_factory=include_factory)]
 
 
 @app.get("/agents/{agent_id}")
@@ -1050,7 +2287,7 @@ async def get_agent(agent_id: str) -> dict[str, Any]:
     if not _orchestrator:
         raise HTTPException(status_code=503, detail="Orchestrator not initialized")
 
-    all_defs = {d.agent_id: d for d in _orchestrator.get_all_agent_definitions()}
+    all_defs = {d.agent_id: d for d in _orchestrator.get_all_agent_definitions(include_factory=True)}
     definition = all_defs.get(agent_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found")
@@ -1069,7 +2306,68 @@ async def set_agent_model(agent_id: str, body: dict[str, Any]) -> dict[str, Any]
     model_id = body.get("model_id", "")
     if model_id:
         _agent_model_overrides[agent_id] = model_id
+        save_agent_model_overrides(_agent_model_overrides)
     return {"agent_id": agent_id, "model_id": _agent_model_overrides.get(agent_id, "")}
+
+
+@app.get("/model-preferences")
+async def get_model_preferences() -> dict[str, Any]:
+    """Return the canonical team model state for the Command screen."""
+    return build_model_preferences_response(
+        team_models=_team_model_preferences,
+        agent_overrides=_agent_model_overrides,
+        fallback_model=OLLAMA_MODEL,
+    )
+
+
+@app.patch("/model-preferences/teams/{team_id}")
+async def set_team_model_preference(team_id: str, body: dict[str, Any]) -> dict[str, Any]:
+    """Persist a shared team model preference and fan it out to mapped agents."""
+    if team_id not in EDITABLE_TEAM_AGENT_MAP:
+        raise HTTPException(status_code=404, detail=f"Team '{team_id}' is not editable")
+
+    model_id = str(body.get("model_id", "")).strip()
+    if not model_id:
+        raise HTTPException(status_code=400, detail="model_id is required")
+
+    _team_model_preferences[team_id] = model_id
+    save_team_model_preferences(_team_model_preferences)
+    for agent_id in EDITABLE_TEAM_AGENT_MAP[team_id]:
+        _agent_model_overrides[agent_id] = model_id
+    save_agent_model_overrides(_agent_model_overrides)
+
+    response = build_model_preferences_response(
+        team_models=_team_model_preferences,
+        agent_overrides=_agent_model_overrides,
+        fallback_model=OLLAMA_MODEL,
+    )
+    return response["teams"][team_id]
+
+
+# ── Conversation history routes ──────────────────────────────────────────
+
+
+@app.get("/conversations/active")
+async def get_active_conversation(agent_id: str = "orchad") -> dict[str, Any]:
+    """Return the most recently active conversation for *agent_id*.
+
+    Used by OrchestrationHub to seed its chat history on mount instead of
+    relying solely on localStorage.
+    """
+    conv = task_tracker.get_active_conversation(agent_id)
+    if not conv:
+        return {"conversation_id": None, "messages": []}
+    messages = task_tracker.get_messages(conv["conversation_id"])
+    return {**conv, "messages": messages}
+
+
+@app.get("/conversations/{conversation_id}/messages")
+async def get_conversation_messages(
+    conversation_id: str,
+    limit: int = 100,
+) -> list[dict[str, Any]]:
+    """Return messages for a conversation oldest-first (up to *limit*)."""
+    return task_tracker.get_messages(conversation_id, limit=limit)
 
 
 @app.post("/intake/start", response_model=IntakeStartResponse)
@@ -1346,7 +2644,7 @@ async def stream_activity():
 @app.get("/models/registry")
 async def list_model_registry() -> dict[str, Any]:
     """Return the compact unified model registry for the UI model switcher."""
-    from backend.llm.unified_registry import UNIFIED_MODEL_REGISTRY
+    from backend.llm.unified_registry import ModelProvider, UNIFIED_MODEL_REGISTRY, UnifiedModelRouter
 
     available: list[str] = []
     if _llm_client:
@@ -1354,20 +2652,32 @@ async def list_model_registry() -> dict[str, Any]:
             available = await _llm_client.list_models()
         except Exception:
             pass
-    models = [
-        {
-            "model_id": spec.model_id,
-            "display_name": spec.display_name,
-            "provider": spec.provider.value,
-            "context_window": spec.context_window,
-            "input_cost_per_m": spec.input_cost_per_m,
-            "output_cost_per_m": spec.output_cost_per_m,
-            "supports_tools": spec.supports_tools,
-            "best_for": spec.best_for,
-            "available_locally": spec.model_id in available,
-        }
-        for spec in UNIFIED_MODEL_REGISTRY.values()
-    ]
+    models = []
+    for spec in UNIFIED_MODEL_REGISTRY.values():
+        runtime_model_id: str | None = None
+        available_locally = False
+        if spec.provider == ModelProvider.OLLAMA:
+            for candidate in UnifiedModelRouter._local_model_candidates(spec.model_id):
+                runtime_model_id = UnifiedModelRouter._match_ollama_model_name(candidate, available)
+                if runtime_model_id:
+                    available_locally = True
+                    break
+        models.append(
+            {
+                "model_id": spec.model_id,
+                "display_name": spec.display_name,
+                "provider": spec.provider.value,
+                "context_window": spec.context_window,
+                "input_cost_per_m": spec.input_cost_per_m,
+                "output_cost_per_m": spec.output_cost_per_m,
+                "supports_tools": spec.supports_tools,
+                "best_for": spec.best_for,
+                "available_locally": available_locally,
+                "runtime_model_id": runtime_model_id,
+                "role": spec.role or None,
+                "alias_of": spec.alias_of,
+            }
+        )
     return {"models": models, "agent_overrides": _agent_model_overrides}
 
 
@@ -1486,8 +2796,36 @@ async def llm_stats() -> dict[str, Any]:
         except Exception:
             pass
 
+    # ── Local (Ollama) token counts — captured from every OllamaClient call ──
+    import os as _os
+    from backend.llm import OllamaClient as _OllamaClient
+    local_counts = _OllamaClient.get_token_counts()
+
+    # Cloud router counts (from LLMRouter if available)
+    cloud_tokens_in = router_stats.get("tokens_in", 0)
+    cloud_tokens_out = router_stats.get("tokens_out", 0)
+
+    # Aggregate: local + cloud
+    total_in = local_counts["tokens_in"] + cloud_tokens_in
+    total_out = local_counts["tokens_out"] + cloud_tokens_out
+
+    # ── Configured API key status (boolean only — no values exposed) ──
+    api_keys_configured = {
+        "openrouter": bool(_os.getenv("OPENROUTER_API_KEY", "")),
+        "elevenlabs": bool(_os.getenv("ELEVENLABS_API_KEY", "")),
+        "fal": bool(_os.getenv("FAL_KEY", "")),
+        "tiktok": bool(_os.getenv("TIKTOK_CLIENT_KEY", "") or _os.getenv("TIKTOK_ACCESS_TOKEN", "")),
+        "github": bool(_os.getenv("GITHUB_TOKEN", "")),
+        "facebook": bool(_os.getenv("FACEBOOK_APP_SECRET", "")),
+    }
+
     return {
-        "stats": router_stats,
+        "stats": {
+            **router_stats,
+            # Merge in local request count so total_requests is accurate
+            "total_requests": router_stats.get("total_requests", 0) + local_counts["requests"],
+            "local_requests": router_stats.get("local_requests", 0) + local_counts["requests"],
+        },
         "cost_log": cost_log,
         "circuit_states": circuit_states,
         "budget": {
@@ -1497,11 +2835,55 @@ async def llm_stats() -> dict[str, Any]:
             "percent_used": round((router_stats.get("estimated_cost_usd", 0) / max(LLM_MONTHLY_BUDGET, 0.01)) * 100, 1),
         },
         "tokens": {
-            "total_in": router_stats.get("tokens_in", 0),
-            "total_out": router_stats.get("tokens_out", 0),
-            "total": router_stats.get("tokens_in", 0) + router_stats.get("tokens_out", 0),
+            "total_in": total_in,
+            "total_out": total_out,
+            "total": total_in + total_out,
+            "local_in": local_counts["tokens_in"],
+            "local_out": local_counts["tokens_out"],
+            "local_total": local_counts["total"],
+            "cloud_in": cloud_tokens_in,
+            "cloud_out": cloud_tokens_out,
+            "cloud_total": cloud_tokens_in + cloud_tokens_out,
         },
+        "api_keys": api_keys_configured,
     }
+
+
+@app.get("/llm/openrouter/balance")
+async def openrouter_balance() -> dict[str, Any]:
+    """
+    Fetch the real OpenRouter account credit balance.
+    Calls https://openrouter.ai/api/v1/credits — returns actual money in the account.
+    """
+    import os as _os
+    import httpx
+
+    api_key = _os.getenv("OPENROUTER_API_KEY", "")
+    if not api_key:
+        return {"error": "OPENROUTER_API_KEY not configured", "configured": False}
+
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            r = await client.get(
+                "https://openrouter.ai/api/v1/credits",
+                headers={"Authorization": f"Bearer {api_key}"},
+            )
+        if r.status_code != 200:
+            return {"error": f"OpenRouter returned {r.status_code}", "configured": True}
+        data = r.json().get("data", r.json())
+        total_credits = data.get("total_credits", data.get("limit", None))
+        total_usage = data.get("total_usage", data.get("usage", 0.0))
+        remaining = (total_credits - total_usage) if total_credits is not None else None
+        return {
+            "configured": True,
+            "total_credits_usd": total_credits,
+            "total_usage_usd": round(float(total_usage), 6),
+            "remaining_usd": round(float(remaining), 6) if remaining is not None else None,
+            "percent_used": round((float(total_usage) / max(float(total_credits), 0.0001)) * 100, 1)
+            if total_credits else None,
+        }
+    except Exception as exc:
+        return {"error": str(exc), "configured": True}
 
 
 @app.get("/llm/capacity")
@@ -1768,6 +3150,54 @@ async def list_projects() -> dict[str, Any]:
     }
 
 
+@app.delete("/projects/{project_id}")
+async def delete_project(project_id: str, project_type: str = "webgen", _auth: None = Depends(_verify_auth)) -> dict[str, Any]:
+    """
+    Permanently delete a project and all its files.
+    - webgen: removes output/webgen/{project_id}/ directory
+    - content: removes backend/memory/content_jobs/{project_id}.json
+    - webgen_project: removes backend/memory/webgen_projects/{project_id}.json
+    """
+    import shutil as _shutil
+
+    # Validate project_id to prevent path traversal
+    if not project_id or "/" in project_id or ".." in project_id or project_id.startswith("."):
+        raise HTTPException(status_code=400, detail="Invalid project_id")
+
+    if project_type == "webgen":
+        target_dir = (PROJECT_ROOT / "output" / "webgen" / project_id).resolve()
+        safe_root = (PROJECT_ROOT / "output" / "webgen").resolve()
+        if not str(target_dir).startswith(str(safe_root)):
+            raise HTTPException(status_code=403, detail="Path traversal not allowed")
+        if not target_dir.exists():
+            raise HTTPException(status_code=404, detail="Project not found")
+        _shutil.rmtree(target_dir)
+        return {"deleted": True, "id": project_id, "type": project_type}
+
+    elif project_type == "content":
+        target_file = (PROJECT_ROOT / "backend" / "memory" / "content_jobs" / f"{project_id}.json").resolve()
+        safe_root = (PROJECT_ROOT / "backend" / "memory" / "content_jobs").resolve()
+        if not str(target_file).startswith(str(safe_root)):
+            raise HTTPException(status_code=403, detail="Path traversal not allowed")
+        if not target_file.exists():
+            raise HTTPException(status_code=404, detail="Project not found")
+        target_file.unlink()
+        return {"deleted": True, "id": project_id, "type": project_type}
+
+    elif project_type == "webgen_project":
+        target_file = (PROJECT_ROOT / "backend" / "memory" / "webgen_projects" / f"{project_id}.json").resolve()
+        safe_root = (PROJECT_ROOT / "backend" / "memory" / "webgen_projects").resolve()
+        if not str(target_file).startswith(str(safe_root)):
+            raise HTTPException(status_code=403, detail="Path traversal not allowed")
+        if not target_file.exists():
+            raise HTTPException(status_code=404, detail="Project not found")
+        target_file.unlink()
+        return {"deleted": True, "id": project_id, "type": project_type}
+
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported project type: {project_type}")
+
+
 @app.get("/projects/{project_id}/files")
 async def list_project_files(project_id: str, project_type: str = "webgen") -> dict[str, Any]:
     """List files in a specific project output folder."""
@@ -2002,6 +3432,51 @@ async def soul_add_goal(request: dict[str, Any]) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail="title is required")
     goal = _orchestrator.soul_set_goal(title, description, priority)
     return goal
+
+
+@app.patch("/soul/goals/{goal_id}")
+async def soul_update_goal(goal_id: str, request: dict[str, Any]) -> dict[str, Any]:
+    """
+    Activate or dismiss a pending_review goal.
+
+    body: {"action": "activate" | "dismiss"}
+    - activate: sets status to "active" — goal is now visible to agents
+    - dismiss: removes the goal entirely
+    Only goals with status='pending_review' can be activated this way.
+    """
+    if not _orchestrator:
+        raise HTTPException(status_code=503, detail="Orchestrator not initialized")
+    action = str(request.get("action", "")).lower()
+    if action not in ("activate", "dismiss"):
+        raise HTTPException(status_code=400, detail="action must be 'activate' or 'dismiss'")
+
+    soul = _orchestrator._soul_agent  # type: ignore[attr-defined]
+    if soul is None:
+        raise HTTPException(status_code=503, detail="Soul agent not available")
+
+    from typing import cast as _cast
+    _raw = soul.read_memory(soul.GOALS_KEY)
+    goals: list[dict[str, Any]] = _cast(list[dict[str, Any]], _raw) if isinstance(_raw, list) else []
+
+    updated: dict[str, Any] | None = None
+    new_goals: list[dict[str, Any]] = []
+    for g in goals:
+        if g.get("id") == goal_id:
+            if action == "activate":
+                g = {**g, "status": "active"}
+                updated = g
+                new_goals.append(g)
+            # dismiss: skip (don't append)
+        else:
+            new_goals.append(g)
+
+    if updated is None and action == "activate":
+        raise HTTPException(status_code=404, detail=f"Goal {goal_id!r} not found")
+
+    soul.write_memory(soul.GOALS_KEY, new_goals)
+    soul._active_goals = [g for g in new_goals if not g.get("completed") and g.get("status") != "pending_review"]
+
+    return {"goal_id": goal_id, "action": action, "goal": updated}
 
 
 # ---------------------------------------------------------------------------

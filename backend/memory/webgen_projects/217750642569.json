@@ -1,0 +1,305 @@
+{
+  "id": "217750642569",
+  "created_at": "2026-04-17T22:14:04.514404+00:00",
+  "updated_at": "2026-04-17T22:17:56.944040+00:00",
+  "status": "ready",
+  "brief": {
+    "business_name": "Bubble Up Laundromat",
+    "business_type": "custom",
+    "tagline": "",
+    "description": "Modern laundromat in Brooklyn",
+    "services": [],
+    "target_audience": "",
+    "tone": "professional",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": []
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - Bubble Up Laundromat",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "f5f4ee34",
+          "name": "hero",
+          "component_type": "hero-centered",
+          "content": {
+            "headline": "Welcome to Bubble Up Laundromat",
+            "subtitle": "Modern laundromat in Brooklyn"
+          },
+          "html": "<header class=\"relative h-[70vh] flex items-center justify-center text-white\" style=\"background: linear-gradient(135deg, #2563EB 0%, #3B82F6 60%, #0f172a 100%)\">\n    <div class=\"container mx-auto text-center\">\n        <h1 style=\"animation: fadeInUp 0.8s ease-out both\" class=\"text-4xl font-bold mb-4\">Welcome to Bubble Up Laundromat</h1>\n        <p class=\"text-lg mb-6 opacity-75\">Modern laundromat in Brooklyn</p>\n        <button role=\"button\" aria-label=\"Book Now\" class=\"px-8 py-3 bg-accent text-white rounded-md font-bold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl\">Get Started</button>\n    </div>\n</header>",
+          "order": 0
+        },
+        {
+          "id": "9726a418",
+          "name": "about",
+          "component_type": "text-section",
+          "content": {
+            "title": "About Us",
+            "body": "At Bubble Up Laundromat, we are dedicated to providing a modern and comfortable laundromat experience in the heart of Brooklyn. Our state-of-the-art facility offers everything you need for a hassle-free wash."
+          },
+          "html": "<section id=\"about\" aria-label=\"About Us\">\n  <div class=\"container mx-auto px-4 py-16\">\n    <header class=\"mb-8\">\n      <h2 class=\"text-3xl font-bold text-center text-primary\">At Bubble Up Laundromat</h2>\n    </header>\n    <main class=\"max-w-prose mx-auto\">\n      <p class=\"text-lg text-center text-gray-600\">We are dedicated to providing a modern and comfortable laundromat experience in the heart of Brooklyn. Our state-of-the-art facility offers everything you need for a hassle-free wash.</p>\n    </main>\n  </div>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "a24c5ae5",
+          "name": "services",
+          "component_type": "list-section",
+          "content": {
+            "title": "Our Services",
+            "items": [
+              "Laundry and Drying",
+              "Express Wash",
+              "Coinless Machines",
+              "Snacks and Drinks"
+            ]
+          },
+          "html": "<section id=\"services\" class=\"bg-[var(--color-primary)] text-white py-20\">\n  <div class=\"container mx-auto px-6\">\n    <h1 class=\"text-3xl font-bold mb-8\" style=\"animation: fadeInUp 0.8s ease-out both\">Our Services</h1>\n    <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6\">\n      <article class=\"glass-card p-6 rounded-lg shadow-lg hover:-translate-y-2 transition-transform duration-300\">\n        <h2 class=\"text-xl font-bold mb-4\">Laundry and Drying</h2>\n        <p>Effortlessly clean your clothes with our wide range of washing machines.</p>\n      </article>\n      <article class=\"glass-card p-6 rounded-lg shadow-lg hover:-translate-y-2 transition-transform duration-300\">\n        <h2 class=\"text-xl font-bold mb-4\">Express Wash</h2>\n        <p>Quickly get your clothes clean with our fast express wash option.</p>\n      </article>\n      <article class=\"glass-card p-6 rounded-lg shadow-lg hover:-translate-y-2 transition-transform duration-300\">\n        <h2 class=\"text-xl font-bold mb-4\">Coinless Machines</h2>\n        <p>Enjoy convenience with our self-service coinless washing and drying machines.</p>\n      </article>\n      <article class=\"glass-card p-6 rounded-lg shadow-lg hover:-translate-y-2 transition-transform duration-300\">\n        <h2 class=\"text-xl font-bold mb-4\">Snacks and Drinks</h2>\n        <p>Sip on refreshing drinks and munch on delicious snacks while you wait.</p>\n      </article>\n    </div>\n  </div>\n</section>",
+          "order": 2
+        },
+        {
+          "id": "341597ac",
+          "name": "location",
+          "component_type": "map-section",
+          "content": {
+            "title": "Location",
+            "address": "1234 Brooklyn Ave, Brooklyn, NY 11201",
+            "coordinates": [
+              40.7128,
+              -73.9654
+            ]
+          },
+          "html": "<section id=\"location\" class=\"py-24 bg-[#f9fafb] relative\">\n  <header>\n    <h2 class=\"text-3xl font-bold text-center mb-8\" style=\"animation: fadeInUp 0.8s ease-out both\">Location</h2>\n  </header>\n  <div class=\"container mx-auto px-4\">\n    <address class=\"text-center max-w-md mx-auto\">\n      <p>1234 Brooklyn Ave, Brooklyn, NY 11201</p>\n    </address>\n    <button type=\"button\" class=\"mt-8 bg-[#ea580c] text-white px-6 py-3 rounded-full hover:scale-105 hover:shadow-xl transition-all duration-300\" role=\"button\" aria-label=\"View Map\">\n      View Map\n    </button>\n  </div>\n</section>\n\n<style>\n  @keyframes fadeInUp {\n    from { opacity: 0; transform: translateY(20px); }\n    to { opacity: 1; transform: translateY(0); }\n  }\n  \n  .glass-card {\n    backdrop-filter: blur(10px);\n    border-radius: 8px;\n    background-color: rgba(255, 255, 255, 0.6);\n    padding: 24px;\n  }\n\n  button:focus-visible {\n    outline: 2px solid #ea580c;\n    outline-offset: 2px;\n  }\n</style>",
+          "order": 3
+        },
+        {
+          "id": "c5b97cb8",
+          "name": "hours",
+          "component_type": "table-section",
+          "content": {
+            "title": "Operating Hours",
+            "rows": [
+              [
+                "Monday-Friday",
+                "8:00 AM - 10:00 PM"
+              ],
+              [
+                "Saturday-Sunday",
+                "9:00 AM - 7:00 PM"
+              ]
+            ]
+          },
+          "html": "<section id=\"hours\" class=\"bg-[#f9fafb] py-24\">\n  <header>\n    <h2 class=\"text-center text-3xl font-semibold text-gray-800 mb-6\">Operating Hours</h2>\n  </header>\n  <main class=\"container mx-auto px-4\">\n    <table class=\"w-full table-fixed\">\n      <thead>\n        <tr class=\"bg-[#f1f5f9] border-b-2 border-gray-300\">\n          <th class=\"text-left py-3 px-6\">Day</th>\n          <th class=\"text-left py-3 px-6\">Hours</th>\n        </tr>\n      </thead>\n      <tbody>\n        <tr>\n          <td class=\"py-4 px-6\">Monday-Friday</td>\n          <td class=\"py-4 px-6\">8:00 AM - 10:00 PM</td>\n        </tr>\n        <tr>\n          <td class=\"py-4 px-6\">Saturday-Sunday</td>\n          <td class=\"py-4 px-6\">9:00 AM - 7:00 PM</td>\n        </tr>\n      </tbody>\n    </table>\n  </main>\n</section>",
+          "order": 4
+        },
+        {
+          "id": "9cefb2fd",
+          "name": "contact",
+          "component_type": "form-section",
+          "content": {
+            "title": "Get in Touch",
+            "fields": [
+              {
+                "type": "text",
+                "label": "Name"
+              },
+              {
+                "type": "email",
+                "label": "Email"
+              },
+              {
+                "type": "tel",
+                "label": "Phone Number"
+              },
+              {
+                "type": "textarea",
+                "label": "Message"
+              }
+            ],
+            "submit_label": "Send Message"
+          },
+          "html": "<section id=\"contact\" class=\"bg-gradient-to-br from-primary to-secondary py-24\">\n  <div class=\"container mx-auto px-4\">\n    <header>\n      <h1 class=\"text-white text-3xl font-bold mb-8\" style=\"animation: fadeInUp 0.8s ease-out both\">Get in Touch</h1>\n    </header>\n    <main class=\"grid grid-cols-1 md:grid-cols-2 gap-8\">\n      <form action=\"#\" method=\"POST\" class=\"glass-card p-6 shadow-lg rounded-lg\">\n        <div class=\"mb-4\">\n          <label for=\"name\" class=\"block text-gray-700 font-bold mb-2\">Name</label>\n          <input type=\"text\" id=\"name\" name=\"name\" class=\"w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary\">\n        </div>\n        <div class=\"mb-4\">\n          <label for=\"email\" class=\"block text-gray-700 font-bold mb-2\">Email</label>\n          <input type=\"email\" id=\"email\" name=\"email\" class=\"w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary\">\n        </div>\n        <div class=\"mb-4\">\n          <label for=\"phone\" class=\"block text-gray-700 font-bold mb-2\">Phone Number</label>\n          <input type=\"tel\" id=\"phone\" name=\"phone\" class=\"w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary\">\n        </div>\n        <div class=\"mb-4\">\n          <label for=\"message\" class=\"block text-gray-700 font-bold mb-2\">Message</label>\n          <textarea id=\"message\" name=\"message\" rows=\"5\" class=\"w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary\"></textarea>\n        </div>\n        <button type=\"submit\" role=\"button\" aria-label=\"Send Message\" class=\"bg-accent text-white font-bold py-2 px-4 rounded hover:scale-105 hover:shadow-xl\">Send Message</button>\n      </form>\n    </main>\n  </div>\n</section>",
+          "order": 5
+        },
+        {
+          "id": "d72d0e53",
+          "name": "blog",
+          "component_type": "list-section",
+          "content": {
+            "title": "Blog",
+            "items": [
+              {
+                "title": "The Benefits of Using a Laundromat",
+                "date": "2023-04-01"
+              },
+              {
+                "title": "How to Save Money on Laundry",
+                "date": "2023-03-15"
+              }
+            ]
+          },
+          "html": "<section id=\"blog\" aria-label=\"Blog Section\">\n  <header>\n    <h2 style=\"font-family: 'Poppins', sans-serif; font-size: 2rem; color: var(--color-primary); animation: fadeInUp 0.8s ease-out both;\">Latest from Our Blog</h2>\n  </header>\n  <main>\n    <div class=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4\">\n      <article class=\"glass-card p-6\">\n        <h3 style=\"font-family: 'Poppins', sans-serif; font-size: 1.5rem; color: var(--color-primary); background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;\" aria-label=\"The Benefits of Using a Laundromat\">\n          The Benefits of Using a Laundromat\n        </h3>\n        <p class=\"text-sm text-gray-600 mt-2\" style=\"font-family: 'Open Sans', sans-serif;\">Published on 2023-04-01</p>\n        <button role=\"button\" aria-label=\"Read more about The Benefits of Using a Laundromat\" class=\"mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:scale-105 hover:shadow-xl\">Read More</button>\n      </article>\n      <article class=\"glass-card p-6\">\n        <h3 style=\"font-family: 'Poppins', sans-serif; font-size: 1.5rem; color: var(--color-primary); background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;\" aria-label=\"How to Save Money on Laundry\">\n          How to Save Money on Laundry\n        </h3>\n        <p class=\"text-sm text-gray-600 mt-2\" style=\"font-family: 'Open Sans', sans-serif;\">Published on 2023-03-15</p>\n        <button role=\"button\" aria-label=\"Read more about How to Save Money on Laundry\" class=\"mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:scale-105 hover:shadow-xl\">Read More</button>\n      </article>\n    </div>\n  </main>\n</section>",
+          "order": 6
+        },
+        {
+          "id": "9812b23b",
+          "name": "faq",
+          "component_type": "accordion-section",
+          "content": {
+            "title": "FAQ",
+            "items": [
+              {
+                "question": "What types of machines do you have?",
+                "answer": "We offer coinless washing machines, drying racks, and a variety of other laundry equipment."
+              },
+              {
+                "question": "Do you have snack and drink options?",
+                "answer": "Yes, we provide snacks and drinks for your convenience."
+              }
+            ]
+          },
+          "html": "<section id=\"faq\" class=\"bg-[#f9fafb] py-24\">\n  <div class=\"container mx-auto px-6\">\n    <header>\n      <h1 class=\"text-3xl font-bold text-center mb-8 gradient-text\">FAQ</h1>\n    </header>\n    <main>\n      <div class=\"accordion\">\n        <details open>\n          <summary class=\"flex items-center justify-between p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300\" role=\"button\" aria-label=\"What types of machines do you have?\">\n            <span class=\"font-semibold\">What types of machines do you have?</span>\n          </summary>\n          <div class=\"p-4 bg-gray-50 rounded-lg shadow-md hover:shadow-xl transition-all duration-300\">\n            We offer coinless washing machines, drying racks, and a variety of other laundry equipment.\n          </div>\n        </details>\n        <details>\n          <summary class=\"flex items-center justify-between p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300\" role=\"button\" aria-label=\"Do you have snack and drink options?\">\n            <span class=\"font-semibold\">Do you have snack and drink options?</span>\n          </summary>\n          <div class=\"p-4 bg-gray-50 rounded-lg shadow-md hover:shadow-xl transition-all duration-300\">\n            Yes, we provide snacks and drinks for your convenience.\n          </div>\n        </details>\n      </div>\n    </main>\n  </div>\n</section>\n\n<style>\n  .gradient-text {\n    background: linear-gradient(90deg, #2563eb, #ea580c);\n    -webkit-background-clip: text;\n    -webkit-text-fill-color: transparent;\n  }\n\n  .accordion summary::-webkit-details-marker {\n    display: none;\n  }\n\n  .accordion summary::before {\n    content: '+';\n    margin-right: 1rem;\n    transition: transform 0.3s ease;\n  }\n\n  .accordion details[open] summary::before {\n    transform: rotate(-45deg);\n  }\n</style>",
+          "order": 7
+        }
+      ],
+      "seo": {
+        "title": "Bubble Up Laundromat - Your Clean Laundry Solution",
+        "meta_description": "Find the best laundromat near you with Bubble Up Laundromat. Visit now!",
+        "keywords": [
+          "laundry",
+          "laundromat",
+          "clean clothes",
+          "detergent",
+          "dryer"
+        ],
+        "og_title": "Bubble Up Laundromat",
+        "og_description": "Discover the convenience of doing laundry at Bubble Up Laundromat. Visit us today!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Bubble Up Laundromat",
+          "url": "https://www.bubbleuplaundromat.com/",
+          "logo": "https://www.bubbleuplaundromat.com/logo.png",
+          "image": "https://www.bubbleuplaundromat.com/hero.jpg",
+          "description": "Bubble Up Laundromat is your one-stop solution for all your laundry needs. Find us near you!",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Laundry St",
+            "addressLocality": "City",
+            "addressRegion": "State",
+            "postalCode": "Zip Code"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "08:00",
+              "closes": "22:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "10:00",
+              "closes": "23:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Sunday"
+              ],
+              "opens": "12:00",
+              "closes": "21:00"
+            }
+          ],
+          "sameAs": [
+            "https://www.facebook.com/BubbleUpLaundromat",
+            "https://twitter.com/BubbleUpLaundromat",
+            "https://www.instagram.com/bubbleuplaundromat/"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Bubble Up Laundromat offer?",
+            "a": "Bubble Up Laundromat offers a variety of laundry and cleaning services."
+          },
+          {
+            "q": "Where is Bubble Up Laundromat located?",
+            "a": "Bubble Up Laundromat is located in Brooklyn."
+          },
+          {
+            "q": "How can I contact Bubble Up Laundromat?",
+            "a": "You can call us at [phone number] or email us at [email address]."
+          },
+          {
+            "q": "What makes Bubble Up Laundromat unique?",
+            "a": "Bubble Up Laundromat is known for its modern facilities and customer-friendly services."
+          },
+          {
+            "q": "Is Bubble Up Laundromat open 24 hours a day?",
+            "a": "Yes, Bubble Up Laundromat operates on a 24/7 basis."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Bubble Up Laundromat",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Modern laundromat in Brooklyn offering various laundry and cleaning services.",
+        "topic_cluster": "Laundry Services",
+        "related_topics": [
+          "Brooklyn",
+          "24/7 Operation",
+          "Customer Service"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - Bubble Up Laundromat</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Find the best laundromat near you with Bubble Up Laundromat. Visit now!\">\n  <meta name=\"keywords\" content=\"laundry, laundromat, clean clothes, detergent, dryer\">\n  <meta property=\"og:title\" content=\"Bubble Up Laundromat\">\n  <meta property=\"og:description\" content=\"Discover the convenience of doing laundry at Bubble Up Laundromat. Visit us today!\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Bubble Up Laundromat\",\n  \"url\": \"https://www.bubbleuplaundromat.com/\",\n  \"logo\": \"https://www.bubbleuplaundromat.com/logo.png\",\n  \"image\": \"https://www.bubbleuplaundromat.com/hero.jpg\",\n  \"description\": \"Bubble Up Laundromat is your one-stop solution for all your laundry needs. Find us near you!\",\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"123 Laundry St\",\n    \"addressLocality\": \"City\",\n    \"addressRegion\": \"State\",\n    \"postalCode\": \"Zip Code\"\n  },\n  \"openingHoursSpecification\": [\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Monday\",\n        \"Tuesday\",\n        \"Wednesday\",\n        \"Thursday\",\n        \"Friday\"\n      ],\n      \"opens\": \"08:00\",\n      \"closes\": \"22:00\"\n    },\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Saturday\"\n      ],\n      \"opens\": \"10:00\",\n      \"closes\": \"23:00\"\n    },\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Sunday\"\n      ],\n      \"opens\": \"12:00\",\n      \"closes\": \"21:00\"\n    }\n  ],\n  \"sameAs\": [\n    \"https://www.facebook.com/BubbleUpLaundromat\",\n    \"https://twitter.com/BubbleUpLaundromat\",\n    \"https://www.instagram.com/bubbleuplaundromat/\"\n  ]\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What services does Bubble Up Laundromat offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bubble Up Laundromat offers a variety of laundry and cleaning services.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Where is Bubble Up Laundromat located?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bubble Up Laundromat is located in Brooklyn.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I contact Bubble Up Laundromat?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"You can call us at [phone number] or email us at [email address].\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What makes Bubble Up Laundromat unique?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bubble Up Laundromat is known for its modern facilities and customer-friendly services.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Is Bubble Up Laundromat open 24 hours a day?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, Bubble Up Laundromat operates on a 24/7 basis.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<header class=\"relative h-[70vh] flex items-center justify-center text-white\" style=\"background: linear-gradient(135deg, #2563EB 0%, #3B82F6 60%, #0f172a 100%)\">\n    <div class=\"container mx-auto text-center\">\n        <h1 style=\"animation: fadeInUp 0.8s ease-out both\" class=\"text-4xl font-bold mb-4\">Welcome to Bubble Up Laundromat</h1>\n        <p class=\"text-lg mb-6 opacity-75\">Modern laundromat in Brooklyn</p>\n        <button role=\"button\" aria-label=\"Book Now\" class=\"px-8 py-3 bg-accent text-white rounded-md font-bold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl\">Get Started</button>\n    </div>\n</header>\n\n<section id=\"about\" aria-label=\"About Us\">\n  <div class=\"container mx-auto px-4 py-16\">\n    <header class=\"mb-8\">\n      <h2 class=\"text-3xl font-bold text-center text-primary\">At Bubble Up Laundromat</h2>\n    </header>\n    <main class=\"max-w-prose mx-auto\">\n      <p class=\"text-lg text-center text-gray-600\">We are dedicated to providing a modern and comfortable laundromat experience in the heart of Brooklyn. Our state-of-the-art facility offers everything you need for a hassle-free wash.</p>\n    </main>\n  </div>\n</section>\n\n<section id=\"services\" class=\"bg-[var(--color-primary)] text-white py-20\">\n  <div class=\"container mx-auto px-6\">\n    <h1 class=\"text-3xl font-bold mb-8\" style=\"animation: fadeInUp 0.8s ease-out both\">Our Services</h1>\n    <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6\">\n      <article class=\"glass-card p-6 rounded-lg shadow-lg hover:-translate-y-2 transition-transform duration-300\">\n        <h2 class=\"text-xl font-bold mb-4\">Laundry and Drying</h2>\n        <p>Effortlessly clean your clothes with our wide range of washing machines.</p>\n      </article>\n      <article class=\"glass-card p-6 rounded-lg shadow-lg hover:-translate-y-2 transition-transform duration-300\">\n        <h2 class=\"text-xl font-bold mb-4\">Express Wash</h2>\n        <p>Quickly get your clothes clean with our fast express wash option.</p>\n      </article>\n      <article class=\"glass-card p-6 rounded-lg shadow-lg hover:-translate-y-2 transition-transform duration-300\">\n        <h2 class=\"text-xl font-bold mb-4\">Coinless Machines</h2>\n        <p>Enjoy convenience with our self-service coinless washing and drying machines.</p>\n      </article>\n      <article class=\"glass-card p-6 rounded-lg shadow-lg hover:-translate-y-2 transition-transform duration-300\">\n        <h2 class=\"text-xl font-bold mb-4\">Snacks and Drinks</h2>\n        <p>Sip on refreshing drinks and munch on delicious snacks while you wait.</p>\n      </article>\n    </div>\n  </div>\n</section>\n\n<section id=\"location\" class=\"py-24 bg-[#f9fafb] relative\">\n  <header>\n    <h2 class=\"text-3xl font-bold text-center mb-8\" style=\"animation: fadeInUp 0.8s ease-out both\">Location</h2>\n  </header>\n  <div class=\"container mx-auto px-4\">\n    <address class=\"text-center max-w-md mx-auto\">\n      <p>1234 Brooklyn Ave, Brooklyn, NY 11201</p>\n    </address>\n    <button type=\"button\" class=\"mt-8 bg-[#ea580c] text-white px-6 py-3 rounded-full hover:scale-105 hover:shadow-xl transition-all duration-300\" role=\"button\" aria-label=\"View Map\">\n      View Map\n    </button>\n  </div>\n</section>\n\n<style>\n  @keyframes fadeInUp {\n    from { opacity: 0; transform: translateY(20px); }\n    to { opacity: 1; transform: translateY(0); }\n  }\n  \n  .glass-card {\n    backdrop-filter: blur(10px);\n    border-radius: 8px;\n    background-color: rgba(255, 255, 255, 0.6);\n    padding: 24px;\n  }\n\n  button:focus-visible {\n    outline: 2px solid #ea580c;\n    outline-offset: 2px;\n  }\n</style>\n\n<section id=\"hours\" class=\"bg-[#f9fafb] py-24\">\n  <header>\n    <h2 class=\"text-center text-3xl font-semibold text-gray-800 mb-6\">Operating Hours</h2>\n  </header>\n  <main class=\"container mx-auto px-4\">\n    <table class=\"w-full table-fixed\">\n      <thead>\n        <tr class=\"bg-[#f1f5f9] border-b-2 border-gray-300\">\n          <th class=\"text-left py-3 px-6\">Day</th>\n          <th class=\"text-left py-3 px-6\">Hours</th>\n        </tr>\n      </thead>\n      <tbody>\n        <tr>\n          <td class=\"py-4 px-6\">Monday-Friday</td>\n          <td class=\"py-4 px-6\">8:00 AM - 10:00 PM</td>\n        </tr>\n        <tr>\n          <td class=\"py-4 px-6\">Saturday-Sunday</td>\n          <td class=\"py-4 px-6\">9:00 AM - 7:00 PM</td>\n        </tr>\n      </tbody>\n    </table>\n  </main>\n</section>\n\n<section id=\"contact\" class=\"bg-gradient-to-br from-primary to-secondary py-24\">\n  <div class=\"container mx-auto px-4\">\n    <header>\n      <h1 class=\"text-white text-3xl font-bold mb-8\" style=\"animation: fadeInUp 0.8s ease-out both\">Get in Touch</h1>\n    </header>\n    <main class=\"grid grid-cols-1 md:grid-cols-2 gap-8\">\n      <form action=\"#\" method=\"POST\" class=\"glass-card p-6 shadow-lg rounded-lg\">\n        <div class=\"mb-4\">\n          <label for=\"name\" class=\"block text-gray-700 font-bold mb-2\">Name</label>\n          <input type=\"text\" id=\"name\" name=\"name\" class=\"w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary\">\n        </div>\n        <div class=\"mb-4\">\n          <label for=\"email\" class=\"block text-gray-700 font-bold mb-2\">Email</label>\n          <input type=\"email\" id=\"email\" name=\"email\" class=\"w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary\">\n        </div>\n        <div class=\"mb-4\">\n          <label for=\"phone\" class=\"block text-gray-700 font-bold mb-2\">Phone Number</label>\n          <input type=\"tel\" id=\"phone\" name=\"phone\" class=\"w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary\">\n        </div>\n        <div class=\"mb-4\">\n          <label for=\"message\" class=\"block text-gray-700 font-bold mb-2\">Message</label>\n          <textarea id=\"message\" name=\"message\" rows=\"5\" class=\"w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary\"></textarea>\n        </div>\n        <button type=\"submit\" role=\"button\" aria-label=\"Send Message\" class=\"bg-accent text-white font-bold py-2 px-4 rounded hover:scale-105 hover:shadow-xl\">Send Message</button>\n      </form>\n    </main>\n  </div>\n</section>\n\n<section id=\"blog\" aria-label=\"Blog Section\">\n  <header>\n    <h2 style=\"font-family: 'Poppins', sans-serif; font-size: 2rem; color: var(--color-primary); animation: fadeInUp 0.8s ease-out both;\">Latest from Our Blog</h2>\n  </header>\n  <main>\n    <div class=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4\">\n      <article class=\"glass-card p-6\">\n        <h3 style=\"font-family: 'Poppins', sans-serif; font-size: 1.5rem; color: var(--color-primary); background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;\" aria-label=\"The Benefits of Using a Laundromat\">\n          The Benefits of Using a Laundromat\n        </h3>\n        <p class=\"text-sm text-gray-600 mt-2\" style=\"font-family: 'Open Sans', sans-serif;\">Published on 2023-04-01</p>\n        <button role=\"button\" aria-label=\"Read more about The Benefits of Using a Laundromat\" class=\"mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:scale-105 hover:shadow-xl\">Read More</button>\n      </article>\n      <article class=\"glass-card p-6\">\n        <h3 style=\"font-family: 'Poppins', sans-serif; font-size: 1.5rem; color: var(--color-primary); background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;\" aria-label=\"How to Save Money on Laundry\">\n          How to Save Money on Laundry\n        </h3>\n        <p class=\"text-sm text-gray-600 mt-2\" style=\"font-family: 'Open Sans', sans-serif;\">Published on 2023-03-15</p>\n        <button role=\"button\" aria-label=\"Read more about How to Save Money on Laundry\" class=\"mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:scale-105 hover:shadow-xl\">Read More</button>\n      </article>\n    </div>\n  </main>\n</section>\n\n<section id=\"faq\" class=\"bg-[#f9fafb] py-24\">\n  <div class=\"container mx-auto px-6\">\n    <header>\n      <h1 class=\"text-3xl font-bold text-center mb-8 gradient-text\">FAQ</h1>\n    </header>\n    <main>\n      <div class=\"accordion\">\n        <details open>\n          <summary class=\"flex items-center justify-between p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300\" role=\"button\" aria-label=\"What types of machines do you have?\">\n            <span class=\"font-semibold\">What types of machines do you have?</span>\n          </summary>\n          <div class=\"p-4 bg-gray-50 rounded-lg shadow-md hover:shadow-xl transition-all duration-300\">\n            We offer coinless washing machines, drying racks, and a variety of other laundry equipment.\n          </div>\n        </details>\n        <details>\n          <summary class=\"flex items-center justify-between p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300\" role=\"button\" aria-label=\"Do you have snack and drink options?\">\n            <span class=\"font-semibold\">Do you have snack and drink options?</span>\n          </summary>\n          <div class=\"p-4 bg-gray-50 rounded-lg shadow-md hover:shadow-xl transition-all duration-300\">\n            Yes, we provide snacks and drinks for your convenience.\n          </div>\n        </details>\n      </div>\n    </main>\n  </div>\n</section>\n\n<style>\n  .gradient-text {\n    background: linear-gradient(90deg, #2563eb, #ea580c);\n    -webkit-background-clip: text;\n    -webkit-text-fill-color: transparent;\n  }\n\n  .accordion summary::-webkit-details-marker {\n    display: none;\n  }\n\n  .accordion summary::before {\n    content: '+';\n    margin-right: 1rem;\n    transition: transform 0.3s ease;\n  }\n\n  .accordion details[open] summary::before {\n    transform: rotate(-45deg);\n  }\n</style>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What services does Bubble Up Laundromat offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bubble Up Laundromat offers a variety of laundry and cleaning services.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Where is Bubble Up Laundromat located?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bubble Up Laundromat is located in Brooklyn.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I contact Bubble Up Laundromat?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">You can call us at [phone number] or email us at [email address].</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What makes Bubble Up Laundromat unique?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bubble Up Laundromat is known for its modern facilities and customer-friendly services.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Is Bubble Up Laundromat open 24 hours a day?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, Bubble Up Laundromat operates on a 24/7 basis.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    }
+  ],
+  "template_ids": [],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/bubble-up-laundromat",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n",
+  "sitemap_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://bubbleuplaundromat.com/index.html</loc>\n    <priority>1.0</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>",
+  "robots_txt": "User-agent: *\nAllow: /\nSitemap: https://bubbleuplaundromat.com/sitemap.xml\n",
+  "errors": [
+    "[index] Multiple <h1> tags found (4)",
+    "[index][llm] Broken or placeholder content: '123 Laundry'"
+  ],
+  "metadata": {
+    "design_context": {
+      "style_name": "Soft UI Evolution",
+      "primary_color": "#2563EB",
+      "secondary_color": "#3B82F6",
+      "accent_color": "#EA580C",
+      "heading_font": "Poppins",
+      "body_font": "Open Sans"
+    },
+    "ux_scores": {
+      "index": 87
+    }
+  }
+}

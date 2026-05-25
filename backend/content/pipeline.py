@@ -69,15 +69,45 @@ class ContentPipeline:
         logger.info("CONTENT PIPELINE RUN STARTED")
         logger.info("=" * 60)
 
+        def _emit_stage(stage: str, step: int, total: int) -> None:
+            try:
+                from datetime import datetime as _dt
+                from backend.tasks import task_tracker as _tt
+                _tt.emit_activity("pipeline_stage", {
+                    "pipeline": "content",
+                    "stage": stage,
+                    "step": step,
+                    "total": total,
+                    "timestamp": _dt.now().isoformat(),
+                })
+            except Exception:
+                pass
+
+        _STAGE_MAP = {
+            "IdeaIntakeAgent": "intake",
+            "ScriptWriterAgent": "script",
+            "VoiceAgent": "voice",
+            "AvatarVideoAgent": "media",
+            "CaptionAgent": "caption",
+            "QAAgent": "qa",
+            "PublisherAgent": "publish",
+        }
+        total = len(self.agents)
+
         results: dict[str, int] = {}
-        for agent in self.agents:
+        for step, agent in enumerate(self.agents, start=1):
+            stage = _STAGE_MAP.get(agent.name, agent.name.lower())
             logger.info(f"--- Running {agent.name} ---")
+            # Emit STARTED event — only after confirmed entry into this stage
+            _emit_stage(f"{stage}:started", step, total)
             try:
                 processed = await agent.run()
                 results[agent.name] = len(processed)
+                _emit_stage(f"{stage}:completed", step, total)
             except Exception as e:
                 logger.error(f"{agent.name} FAILED: {e}")
                 results[agent.name] = 0
+                _emit_stage(f"{stage}:failed", step, total)
 
         logger.info(f"PIPELINE COMPLETE: {results}")
         return results

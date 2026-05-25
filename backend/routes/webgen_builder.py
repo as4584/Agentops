@@ -4,30 +4,33 @@ import os
 import re
 import shutil
 import subprocess
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+from typing import Any
 from importlib import import_module
 from pathlib import Path
-from typing import Any
+
+UTC = timezone.utc
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
-from backend.config import PROJECT_ROOT
+from backend.config import PROJECT_ROOT, WEBGEN_MODEL
 from backend.database.customer_store import customer_store
 from backend.llm import OllamaClient
 from backend.webgen.models import BusinessType, ClientBrief, SiteStatus
 from backend.webgen.pipeline import WebGenPipeline
-from backend.webgen.site_store import SiteStore
+from backend.webgen.site_store import SiteStore, WebgenRunStore
 
 router = APIRouter(prefix="/api/webgen", tags=["webgen-builder"])
 
-_pipeline = WebGenPipeline(llm=OllamaClient(model="qwen2.5-coder:7b"))
+_pipeline = WebGenPipeline(llm=OllamaClient(model=WEBGEN_MODEL))
 _store = SiteStore()
+_run_store = WebgenRunStore()
 
 
 class GenerateSiteRequest(BaseModel):
-    business_name: str = Field(..., min_length=2)
+    business_name: str = Field(default="", min_length=0)
     business_type: str = "custom"
     tagline: str = ""
     description: str = ""
@@ -35,6 +38,7 @@ class GenerateSiteRequest(BaseModel):
     target_audience: str = ""
     tone: str = "professional"
     customer_id: str | None = None
+    clone_url: str | None = None  # If set, pipeline clones this URL first
 
 
 class SavePageRequest(BaseModel):
@@ -103,8 +107,12 @@ def _resolve_qr_file_path(relative_path: str) -> Path:
     return candidate
 
 
-@router.post("/generate")
-async def generate_site(payload: GenerateSiteRequest) -> dict[str, Any]:
+async def _run_generate_site(
+    payload: GenerateSiteRequest,
+    run_id: str | None = None,
+    run_store: "WebgenRunStore | None" = None,
+) -> dict[str, Any]:
+    """Core logic shared by the HTTP route and the background task in server.py."""
     if payload.customer_id:
         customer = customer_store.get_customer(payload.customer_id)
         if customer is None:
@@ -123,7 +131,12 @@ async def generate_site(payload: GenerateSiteRequest) -> dict[str, Any]:
         services=payload.services,
         target_audience=payload.target_audience,
         tone=payload.tone,
+        clone_url=payload.clone_url,
     )
+
+    # When cloning, business_name may be empty — pipeline fills it from the page title.
+    if not brief.business_name and not payload.clone_url:
+        raise HTTPException(status_code=422, detail="business_name is required unless clone_url is set")
 
     project = await _pipeline.quick_generate(
         brief=brief,
@@ -134,24 +147,93 @@ async def generate_site(payload: GenerateSiteRequest) -> dict[str, Any]:
             "playwright_ok": True,
             "lighthouse_mobile_ok": True,
         },
+        run_id=run_id,
+        run_store=run_store,
     )
 
     if payload.customer_id:
         project.metadata["customer_id"] = payload.customer_id
     _store.save(project)
 
-    project_dir, html_file = _project_first_html(_slugify(payload.business_name))
+    # Use the project's actual output_dir (set by pipeline, not re-slugified from name
+    # which would drop dots/special chars and mismatch the real directory name).
+    effective_name = project.brief.business_name or payload.business_name or "site"
+    if project.output_dir and Path(project.output_dir).exists():
+        project_dir = Path(project.output_dir)
+        # Find first html in the directory
+        candidate_files = [project_dir / "index.html", project_dir / "home.html"]
+        html_file = next((c for c in candidate_files if c.exists()), None)
+        if html_file is None:
+            html_file = next((p for p in project_dir.glob("*.html") if p.is_file()), None)
+        if html_file is None:
+            raise HTTPException(status_code=404, detail="No HTML page found in project output")
+    else:
+        # Fallback: try slugified name (handles projects built before this fix)
+        project_dir, html_file = _project_first_html(_slugify(effective_name))
     html = html_file.read_text(encoding="utf-8", errors="ignore")
+    # Derive slug from actual directory name to keep URLs consistent
+    actual_slug = project_dir.name
 
     return {
         "project_id": project.id,
-        "project_slug": _slugify(payload.business_name),
+        "project_slug": actual_slug,
         "status": project.status.value,
         "customer_id": project.metadata.get("customer_id"),
         "output_dir": str(project_dir.relative_to(PROJECT_ROOT)),
         "preview_file": str(html_file.relative_to(PROJECT_ROOT)),
         "html": html,
         "pages": [page.slug for page in project.pages],
+        "sources": project.sources,
+        "clone_url": payload.clone_url,
+        "cloned_screenshot": (
+            str(Path(project.brief.cloned_screenshot).relative_to(PROJECT_ROOT))
+            if project.brief.cloned_screenshot
+            and Path(project.brief.cloned_screenshot).exists()
+            and PROJECT_ROOT in Path(project.brief.cloned_screenshot).parents
+            else None
+        ),
+    }
+
+
+@router.post("/generate")
+async def generate_site(payload: GenerateSiteRequest) -> dict[str, Any]:
+    """HTTP route wrapper — delegates to shared logic with no run tracking."""
+    return await _run_generate_site(payload)
+
+
+@router.delete("/projects/{project_id}")
+async def delete_project(project_id: str) -> dict[str, Any]:
+    """Delete a WebGen project and its on-disk output directory.
+
+    Returns 404 if the project doesn't exist. Output directory cleanup is
+    best-effort — a successful registry delete still returns 200 even if
+    the output dir was already gone.
+    """
+    project = _store.get(project_id)
+    if project is None:
+        raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
+
+    output_dir_removed = False
+    if project.output_dir:
+        out_path = Path(project.output_dir)
+        # Safety: only remove paths inside PROJECT_ROOT/output/webgen/
+        try:
+            resolved = out_path.resolve()
+            allowed_root = (PROJECT_ROOT / "output" / "webgen").resolve()
+            if str(resolved).startswith(str(allowed_root)) and resolved.exists():
+                shutil.rmtree(resolved, ignore_errors=True)
+                output_dir_removed = True
+        except Exception:
+            pass
+
+    deleted = _store.delete(project_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"Project {project_id} could not be deleted")
+
+    return {
+        "deleted": True,
+        "project_id": project_id,
+        "output_dir_removed": output_dir_removed,
     }
 
 
@@ -173,13 +255,29 @@ async def list_webgen_projects() -> dict[str, Any]:
     }
 
 
+@router.get("/active-run")
+async def get_active_run() -> dict[str, Any]:
+    """Return the most recently started RUNNING webgen pipeline run, if any."""
+    run = _run_store.get_active_run()
+    return {"run": run.model_dump() if run else None}
+
+
+@router.get("/runs/{run_id}")
+async def get_run_state(run_id: str) -> dict[str, Any]:
+    """Return the persisted state for a specific webgen run."""
+    run = _run_store.load(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return run.model_dump()
+
+
 @router.get("/projects/{project_id}")
 async def get_project(project_id: str) -> dict[str, Any]:
     project = _store.load(project_id)
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    slug = _slugify(project.brief.business_name)
+    slug = Path(project.output_dir).name if project.output_dir else _slugify(project.brief.business_name)
     project_dir, html_file = _project_first_html(slug)
     html = html_file.read_text(encoding="utf-8", errors="ignore")
 
@@ -201,7 +299,7 @@ async def save_project_page(project_id: str, payload: SavePageRequest) -> dict[s
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    slug = _slugify(project.brief.business_name)
+    slug = Path(project.output_dir).name if project.output_dir else _slugify(project.brief.business_name)
     _, html_file = _project_first_html(slug)
     html_file.write_text(payload.html, encoding="utf-8")
 
@@ -221,7 +319,7 @@ async def deploy_project(payload: DeployRequest) -> dict[str, Any]:
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    slug = _slugify(project.brief.business_name)
+    slug = Path(project.output_dir).name if project.output_dir else _slugify(project.brief.business_name)
     project_dir, _ = _project_first_html(slug)
 
     vercel_bin = _require_vercel_cli()

@@ -265,6 +265,7 @@ class TestChatModels:
         resp = ChatResponse(agent_id="monitor_agent", message="All systems nominal")
         assert resp.drift_status == DriftStatus.GREEN
         assert resp.tool_calls == []
+        assert resp.sources == []
 
     def test_system_status_defaults(self):
         status = SystemStatus()

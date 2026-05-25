@@ -48,21 +48,25 @@ import argparse
 import hashlib
 import json
 import os
+import subprocess
 import sys
 import time
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 # ── Paths ─────────────────────────────────────────────────────────────────
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-DATA_DIR = ROOT / "data" / "training"
-DPO_DIR = ROOT / "data" / "dpo"
-OUTPUT_DIR = ROOT / "output" / "lex-finetune"
+DATA_DIR = Path(os.getenv("LEX_TRAINING_DIR", str(ROOT / "data" / "training")))
+DPO_DIR = Path(os.getenv("LEX_DPO_DIR", str(ROOT / "data" / "dpo")))
+OUTPUT_DIR = Path(os.getenv("LEX_OUTPUT_DIR", str(ROOT / "output" / "lex-finetune")))
 MERGED_DATASET = OUTPUT_DIR / "merged_train.jsonl"
 EVAL_SPLIT = OUTPUT_DIR / "eval_split.jsonl"
 GGUF_DIR = OUTPUT_DIR / "gguf"
+TRAINING_METRICS_PATH = OUTPUT_DIR / "training_metrics.jsonl"
+EVAL_ARTIFACT_PATH = OUTPUT_DIR / "eval.json"
 
 
 # ── Hyperparameters (env-overridable) ─────────────────────────────────────
@@ -90,6 +94,126 @@ class HParams:
 HP = HParams()
 
 
+def _append_jsonl(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        json.dump(payload, handle)
+        handle.write("\n")
+
+
+def _append_training_metric(step: int, loss: float, accuracy: float) -> None:
+    _append_jsonl(
+        TRAINING_METRICS_PATH,
+        {
+            "step": step,
+            "loss": loss,
+            "accuracy": accuracy,
+            "ts": datetime.now(UTC).isoformat(),
+        },
+    )
+
+
+def _build_metrics_callback(callback_base: type[Any]) -> Any:
+    class JsonlMetricsCallback(callback_base):
+        def on_log(self, args, state, control, logs=None, **kwargs):  # noqa: ANN001, ANN202, D401
+            del args, control, kwargs
+            metrics = logs or {}
+            if not state.global_step:
+                return
+
+            loss_value = metrics.get("loss", metrics.get("train_loss", metrics.get("eval_loss")))
+            if loss_value is None:
+                return
+
+            accuracy_value = metrics.get(
+                "accuracy",
+                metrics.get("eval_accuracy", metrics.get("train_accuracy", metrics.get("reward_accuracy", 0.0))),
+            )
+            try:
+                loss = float(loss_value)
+            except (TypeError, ValueError):
+                return
+            try:
+                accuracy = float(accuracy_value)
+            except (TypeError, ValueError):
+                accuracy = 0.0
+            _append_training_metric(step=int(state.global_step), loss=loss, accuracy=accuracy)
+
+    return JsonlMetricsCallback()
+
+
+def _write_eval_artifact(eval_score: float, eval_n: int) -> None:
+    EVAL_ARTIFACT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    EVAL_ARTIFACT_PATH.write_text(
+        json.dumps({"eval_score": eval_score, "eval_n": eval_n}, indent=2),
+        encoding="utf-8",
+    )
+
+
+def _iter_routing_eval_examples(limit: int) -> list[tuple[str, str]]:
+    samples: list[tuple[str, str]] = []
+    if not DATA_DIR.exists():
+        return samples
+
+    for path in sorted(DATA_DIR.glob("*.jsonl")):
+        try:
+            with path.open(encoding="utf-8", errors="ignore") as handle:
+                for line in handle:
+                    if len(samples) >= limit:
+                        return samples
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        record = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+
+                    user_message = record.get("user_message")
+                    expected_agent = record.get("expected_agent")
+                    if not isinstance(user_message, str) or not isinstance(expected_agent, str):
+                        continue
+                    samples.append((user_message, expected_agent))
+        except OSError:
+            continue
+    return samples
+
+
+def run_native_routing_eval(model_name: str, limit: int = 100) -> dict[str, float | int]:
+    """Run a quick local routing eval on the first N usable training rows."""
+    print(f"\n  Running native routing eval against {model_name}...")
+    samples = _iter_routing_eval_examples(limit)
+    if not samples:
+        result = {"eval_score": 0.0, "eval_n": 0}
+        _write_eval_artifact(eval_score=0.0, eval_n=0)
+        print("  [WARN] No usable routing eval rows found in data/training/*.jsonl")
+        return result
+
+    correct = 0
+    for user_message, expected_agent in samples:
+        try:
+            completed = subprocess.run(
+                ["ollama", "run", model_name, user_message],
+                cwd=str(ROOT),
+                capture_output=True,
+                text=True,
+                timeout=120,
+                check=False,
+            )
+            output = f"{completed.stdout}\n{completed.stderr}".lower()
+        except (OSError, subprocess.SubprocessError):
+            output = ""
+
+        if expected_agent.lower() in output:
+            correct += 1
+
+    eval_n = len(samples)
+    eval_score = correct / eval_n if eval_n else 0.0
+    _write_eval_artifact(eval_score=eval_score, eval_n=eval_n)
+    print(f"  Eval accuracy: {eval_score:.3f} ({correct}/{eval_n})")
+    return {"eval_score": eval_score, "eval_n": eval_n}
+
+
 # ══════════════════════════════════════════════════════════════════════════
 # Stage 1: Data Preparation
 # ══════════════════════════════════════════════════════════════════════════
@@ -111,11 +235,111 @@ def load_sharegpt_file(path: Path) -> list[dict]:
                 # DPO format has "prompt", "chosen", "rejected"
                 elif "prompt" in obj and "chosen" in obj:
                     records.append(obj)
+                # live_dpo routing preference format → normalize on load
+                elif "user_message" in obj and "chosen_agent" in obj:
+                    normalized = _normalize_live_dpo(obj)
+                    if normalized:
+                        records.append(normalized)
+                # routing pairs format: {user_message, expected_agent, reasoning, ...}
+                elif "user_message" in obj and "expected_agent" in obj:
+                    normalized = _normalize_routing_pair(obj)
+                    if normalized:
+                        records.append(normalized)
+                # trajectory format: {task, task_type, goal, chosen_agent, plan, ...}
+                elif "task_type" in obj and "chosen_agent" in obj:
+                    normalized = _normalize_trajectory(obj)
+                    if normalized:
+                        records.append(normalized)
                 else:
-                    print(f"  [WARN] {path.name}:{i} — unknown format, skipping")
+                    print(f"  [WARN] {path.name}:{i} \u2014 unknown format, skipping")
             except json.JSONDecodeError:
-                print(f"  [WARN] {path.name}:{i} — invalid JSON, skipping")
+                print(f"  [WARN] {path.name}:{i} \u2014 invalid JSON, skipping")
     return records
+
+
+def _normalize_routing_pair(rec: dict) -> dict | None:
+    """Convert routing pair format to ShareGPT conversation for SFT.
+
+    Routing pair format:
+        {user_message, expected_agent, reasoning, difficulty, expected_tools, confidence}
+    ShareGPT output:
+        {conversations: [{from: human, value: ...}, {from: gpt, value: ...}]}
+    """
+    msg = rec.get("user_message") or rec.get("task")
+    agent = rec.get("expected_agent")
+    reasoning = rec.get("reasoning", "")
+    tools = rec.get("expected_tools") or []
+    if not msg or not agent:
+        return None
+    tools_str = f" using {', '.join(tools)}" if tools else ""
+    human_turn = f"Route this request to the correct agent: {msg}"
+    gpt_turn = f"I will route this to {agent}{tools_str}. {reasoning}".strip()
+    return {
+        "conversations": [
+            {"from": "human", "value": human_turn},
+            {"from": "gpt", "value": gpt_turn},
+        ],
+        "_source": "routing_pair",
+        "_expected_agent": agent,
+        "_difficulty": rec.get("difficulty", ""),
+        "_confidence": rec.get("confidence", 0.0),
+    }
+
+
+
+def _normalize_trajectory(rec: dict) -> dict | None:
+    """Convert trajectory format to ShareGPT conversation for SFT.
+
+    Trajectory format:
+        {task, task_type, goal, chosen_agent, plan, constraints, ...}
+    """
+    task = rec.get("task") or rec.get("goal")
+    agent = rec.get("chosen_agent")
+    plan = rec.get("plan") or []
+    if not task or not agent:
+        return None
+    plan_str = " → ".join(plan) if plan else ""
+    human_turn = f"Route this task to the correct agent: {task}"
+    gpt_turn = f"I will route this to {agent}. Plan: {plan_str}".strip(" .")
+    return {
+        "conversations": [
+            {"from": "human", "value": human_turn},
+            {"from": "gpt", "value": gpt_turn},
+        ],
+        "_source": "trajectory",
+        "_chosen_agent": agent,
+        "_task_type": rec.get("task_type", ""),
+    }
+
+
+def _normalize_live_dpo(rec: dict) -> dict | None:
+    """Convert live_dpo routing preference format to {prompt, chosen, rejected}.
+
+    live_dpo format:  {user_message, chosen_agent, good_response, bad_response,
+                       good_plan, bad_plan, why_good_is_better, category, ...}
+    DPO format:       {prompt, chosen, rejected}
+
+    Returns None if the record lacks enough signal for DPO training.
+    """
+    msg = rec.get("user_message") or rec.get("task")
+    good = rec.get("good_response")
+    bad = rec.get("bad_response")
+    if not msg or not good or not bad:
+        return None
+    # Skip trivially identical chosen/rejected
+    if good.strip() == bad.strip():
+        return None
+    return {
+        "prompt": (
+            "You are Lex, the Agentop router. "
+            f"Route this user message to the correct agent: {msg}"
+        ),
+        "chosen": good,
+        "rejected": bad,
+        "_source": "live_dpo",
+        "_category": rec.get("category", ""),
+        "_chosen_agent": rec.get("chosen_agent", ""),
+    }
 
 
 def conversation_hash(conv: dict) -> str:
@@ -315,7 +539,7 @@ def check_gpu() -> dict:
         if torch.cuda.is_available():
             info["has_cuda"] = True
             info["gpu_name"] = torch.cuda.get_device_name(0)
-            info["vram_gb"] = torch.cuda.get_device_properties(0).total_mem / (1024**3)
+            info["vram_gb"] = torch.cuda.get_device_properties(0).total_memory / (1024**3)
     except ImportError:
         pass
     return info
@@ -334,45 +558,83 @@ def run_sft(train_path: Path, eval_path: Path, resume_from: str | None = None) -
         sys.exit(1)
 
     # Import heavy dependencies only when training
+    _use_unsloth = False
     try:
         from unsloth import FastLanguageModel  # type: ignore[import-untyped]
+        _use_unsloth = True
     except ImportError:
-        print("  [ERROR] unsloth not installed. Install with:")
+        print("  [INFO] unsloth not installed — using transformers+peft fallback (fully supported).")
+        print("  For ~2x faster training install unsloth:")
         print("    pip install 'unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git'")
-        sys.exit(1)
 
     from datasets import load_dataset  # type: ignore[import-untyped]
-    from transformers import TrainingArguments
+    from transformers import TrainerCallback, TrainingArguments
     from trl import SFTTrainer  # type: ignore[import-untyped]
 
-    # Load base model with 4-bit quantization
-    print(f"  Loading base model: {HP.base_model}")
-    model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name=HP.base_model,
-        max_seq_length=HP.max_seq_len,
-        dtype=None,  # auto-detect
-        load_in_4bit=True,
-    )
+    if _use_unsloth:
+        # Load base model with 4-bit quantization via unsloth
+        print(f"  Loading base model via unsloth: {HP.base_model}")
+        model, tokenizer = FastLanguageModel.from_pretrained(
+            model_name=HP.base_model,
+            max_seq_length=HP.max_seq_len,
+            dtype=None,  # auto-detect
+            load_in_4bit=True,
+        )
 
-    # Apply LoRA adapters
-    model = FastLanguageModel.get_peft_model(
-        model,
-        r=HP.lora_r,
-        target_modules=[
-            "q_proj",
-            "k_proj",
-            "v_proj",
-            "o_proj",
-            "gate_proj",
-            "up_proj",
-            "down_proj",
-        ],
-        lora_alpha=HP.lora_alpha,
-        lora_dropout=HP.lora_dropout,
-        bias="none",
-        use_gradient_checkpointing="unsloth",
-        random_state=HP.seed,
-    )
+        # Apply LoRA adapters
+        model = FastLanguageModel.get_peft_model(
+            model,
+            r=HP.lora_r,
+            target_modules=[
+                "q_proj",
+                "k_proj",
+                "v_proj",
+                "o_proj",
+                "gate_proj",
+                "up_proj",
+                "down_proj",
+            ],
+            lora_alpha=HP.lora_alpha,
+            lora_dropout=HP.lora_dropout,
+            bias="none",
+            use_gradient_checkpointing="unsloth",
+            random_state=HP.seed,
+        )
+    else:
+        # Standard transformers + peft fallback (no unsloth required)
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+        from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training  # type: ignore[import-untyped]
+
+        print(f"  Loading base model via transformers+peft: {HP.base_model}")
+        _use_bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.bfloat16 if _use_bf16 else torch.float16,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4",
+        )
+        model = AutoModelForCausalLM.from_pretrained(
+            HP.base_model,
+            quantization_config=bnb_config,
+            device_map="auto",
+            trust_remote_code=True,
+        )
+        tokenizer = AutoTokenizer.from_pretrained(HP.base_model, trust_remote_code=True)
+        if tokenizer.pad_token is None:
+            tokenizer.pad_token = tokenizer.eos_token
+        model = prepare_model_for_kbit_training(model)
+        model.gradient_checkpointing_enable()
+
+        lora_config = LoraConfig(
+            r=HP.lora_r,
+            lora_alpha=HP.lora_alpha,
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+            lora_dropout=HP.lora_dropout,
+            bias="none",
+            task_type="CAUSAL_LM",
+        )
+        model = get_peft_model(model, lora_config)
 
     # Load datasets
     print("  Loading datasets...")
@@ -424,6 +686,7 @@ def run_sft(train_path: Path, eval_path: Path, resume_from: str | None = None) -
         args=training_args,
         packing=True,  # Unsloth efficient packing
     )
+    trainer.add_callback(_build_metrics_callback(TrainerCallback))
 
     # Resume or start fresh
     print(f"  Training for {HP.epochs} epochs...")
@@ -470,6 +733,7 @@ def run_dpo(sft_model_path: Path) -> Path:
         return sft_model_path
 
     from datasets import load_dataset  # type: ignore[import-untyped]
+    from transformers import TrainerCallback
     from trl import DPOConfig, DPOTrainer  # type: ignore[import-untyped]
 
     # Load SFT model
@@ -507,6 +771,7 @@ def run_dpo(sft_model_path: Path) -> Path:
         train_dataset=dpo_ds,
         args=dpo_config,
     )
+    trainer.add_callback(_build_metrics_callback(TrainerCallback))
 
     print("  Training DPO alignment...")
     start_time = time.monotonic()
@@ -714,6 +979,232 @@ def track_experiment(
 # ══════════════════════════════════════════════════════════════════════════
 
 
+# ══════════════════════════════════════════════════════════════════════════
+# Native Ollama mode: build lex-v3 from curated many-shot examples
+# No GPU required — embeds examples directly into Modelfile.lex-v3
+# ══════════════════════════════════════════════════════════════════════════
+
+MODELFILE_PATH = Path(
+    os.getenv("LEX_NATIVE_MODELFILE", str(ROOT / "backend" / "ml" / "models" / "Modelfile.lex-v3"))
+)
+GOLDEN_EVAL = Path(
+    os.getenv(
+        "LEX_GOLDEN_EVAL",
+        str(ROOT / "data" / "training" / "golden_eval" / "lex_v2_golden.jsonl"),
+    )
+)
+
+VALID_AGENTS = {
+    "soul_core", "devops_agent", "monitor_agent", "self_healer_agent",
+    "code_review_agent", "security_agent", "data_agent", "comms_agent",
+    "cs_agent", "it_agent", "knowledge_agent", "ocr_agent", "BLOCKED",
+}
+
+AGENT_LANES: dict[str, str] = {
+    "soul_core": "positioning", "devops_agent": "development",
+    "monitor_agent": "evaluation", "self_healer_agent": "development",
+    "code_review_agent": "evaluation", "security_agent": "evaluation",
+    "data_agent": "evaluation", "comms_agent": "development",
+    "cs_agent": "positioning", "it_agent": "evaluation",
+    "knowledge_agent": "positioning", "ocr_agent": "development",
+    "BLOCKED": "red_line",
+}
+
+WEAK_BOUNDARIES: list[tuple[str, str]] = [
+    ("knowledge_agent", "soul_core"), ("monitor_agent", "it_agent"),
+    ("code_review_agent", "security_agent"), ("devops_agent", "self_healer_agent"),
+    ("cs_agent", "knowledge_agent"), ("it_agent", "self_healer_agent"),
+    ("comms_agent", "monitor_agent"), ("data_agent", "knowledge_agent"),
+]
+
+_NATIVE_MARKER = "# --- Few-shot examples injected by scripts/finetune_lex.py ---"
+
+
+def _load_native_examples() -> tuple[list[dict], list[dict]]:
+    """Load labeled routing examples + golden eval cases."""
+    raw: list[dict] = []
+    for path in sorted(DATA_DIR.rglob("*.jsonl")):
+        if "golden_eval" in str(path):
+            continue
+        try:
+            for line in path.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                rec = json.loads(line)
+                msg = rec.get("user_message") or rec.get("message") or rec.get("task")
+                agent = rec.get("expected_agent") or rec.get("chosen_agent")
+                diff = rec.get("difficulty") or rec.get("type")
+                if msg and agent in VALID_AGENTS and diff not in (None, "?", "agent_response"):
+                    rec["_msg"] = str(msg)
+                    rec["_agent"] = agent
+                    rec["_diff"] = diff
+                    raw.append(rec)
+        except Exception:
+            continue
+
+    golden: list[dict] = []
+    if GOLDEN_EVAL.exists():
+        for line in GOLDEN_EVAL.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+                if rec.get("message") and rec.get("expected_agent") in VALID_AGENTS:
+                    rec["_msg"] = rec["message"]
+                    rec["_agent"] = rec["expected_agent"]
+                    rec["_diff"] = rec.get("category", "golden")
+                    golden.append(rec)
+            except Exception:
+                continue
+    return raw, golden
+
+
+def _select_native_examples(
+    raw: list[dict], golden: list[dict], max_per_cat: int = 20
+) -> list[dict]:
+    """Select coverage-balanced examples: golden → redline → boundary → easy."""
+    selected: list[dict] = []
+    seen: set[str] = set()
+
+    def _add(rec: dict) -> bool:
+        key = rec["_msg"].strip().lower()[:80]
+        if key in seen:
+            return False
+        seen.add(key)
+        selected.append(rec)
+        return True
+
+    for r in golden:
+        _add(r)
+
+    for r in raw:
+        if r["_diff"] == "red_line" and r["_agent"] == "BLOCKED":
+            _add(r)
+        if len([x for x in selected if x["_agent"] == "BLOCKED"]) >= max_per_cat:
+            break
+
+    b_seen: dict[str, int] = {}
+    for r in raw:
+        if r["_diff"] not in ("hard", "ambiguous", "extreme"):
+            continue
+        if r["_agent"] == "BLOCKED":
+            continue
+        bkey = "_".join(sorted(r.get("boundary", [r["_agent"]])))
+        if b_seen.get(bkey, 0) < max_per_cat:
+            b_seen[bkey] = b_seen.get(bkey, 0) + 1
+            _add(r)
+
+    a_seen: dict[str, int] = {}
+    for r in raw:
+        if r["_diff"] != "easy":
+            continue
+        a = r["_agent"]
+        if a_seen.get(a, 0) < max_per_cat // 2:
+            a_seen[a] = a_seen.get(a, 0) + 1
+            _add(r)
+
+    return selected
+
+
+def _format_native_response(rec: dict) -> str:
+    agent = rec["_agent"]
+    tools = (rec.get("expected_tools") or rec.get("good_tools") or [])[:3]
+    reasoning = str(rec.get("reasoning") or rec.get("rationale") or f"Routing to {agent}")[:150]
+    conf = float(rec.get("confidence") or rec.get("confidence_min") or 0.85)
+    diff = rec["_diff"]
+    inferred = diff in ("hard", "ambiguous", "tier1_ambiguous", "tier2_ambiguous")
+    boundary = rec.get("boundary", [])
+    assessment = (
+        "Hard block — prohibited intent"
+        if agent == "BLOCKED"
+        else (
+            f"Boundary: {agent} wins over {', '.join(b for b in boundary if b != agent)}"
+            if boundary
+            else f"Clear {agent} task"
+        )
+    )
+    return json.dumps({
+        "agent_id": agent,
+        "reasoning": reasoning,
+        "tools_needed": list(tools),
+        "urgency": "high" if conf >= 0.9 and agent != "BLOCKED" else "medium",
+        "confidence": round(conf, 2),
+        "ordo_lane": AGENT_LANES.get(agent, "development"),
+        "ordo_inferred": inferred,
+        "ordo_assessment": assessment,
+    }, ensure_ascii=False)
+
+
+def build_lex_v3_native(max_per_cat: int = 20, skip_create: bool = False) -> None:
+    """
+    Ollama-native lex-v3 builder.
+    Embeds curated few-shot MESSAGE pairs into Modelfile.lex-v3 and runs ollama create.
+    """
+    print("\n═══ Native Mode: Building lex-v3 from curated examples ═══")
+    raw, golden = _load_native_examples()
+    print(f"  Labeled examples:  {len(raw)}")
+    print(f"  Golden eval cases: {len(golden)}")
+
+    selected = _select_native_examples(raw, golden, max_per_cat=max_per_cat)
+
+    by_agent: dict[str, int] = {}
+    by_diff: dict[str, int] = {}
+    for rec in selected:
+        by_agent[rec["_agent"]] = by_agent.get(rec["_agent"], 0) + 1
+        by_diff[rec["_diff"]] = by_diff.get(rec["_diff"], 0) + 1
+
+    print(f"  Selected: {len(selected)} examples")
+    print("  By agent: " + ", ".join(f"{a}:{c}" for a, c in sorted(by_agent.items())))
+    print("  By diff:  " + ", ".join(f"{d}:{c}" for d, c in sorted(by_diff.items())))
+
+    # Build MESSAGE block
+    lines: list[str] = [
+        "",
+        _NATIVE_MARKER,
+        f"# Total: {len(selected)} examples (golden + hard + redline + easy)",
+        "# Each pair teaches: Ordo lane + grounded signal + confidence calibration",
+        "",
+    ]
+    for rec in selected:
+        msg = rec["_msg"].replace("\n", " ").strip()
+        resp = _format_native_response(rec)
+        lines.append(f"MESSAGE user {msg}")
+        lines.append(f"MESSAGE assistant {resp}")
+        lines.append("")
+    message_block = "\n".join(lines)
+
+    # Write Modelfile
+    text = MODELFILE_PATH.read_text(encoding="utf-8")
+    if _NATIVE_MARKER in text:
+        text = text[: text.index(_NATIVE_MARKER)].rstrip() + "\n"
+    if "PARAMETER num_predict" not in text:
+        text += "\nPARAMETER num_predict 200\nPARAMETER temperature 0.1\n"
+    MODELFILE_PATH.write_text(text.rstrip() + "\n" + message_block, encoding="utf-8")
+    print(f"  Modelfile written: {MODELFILE_PATH}")
+
+    if skip_create:
+        print("  --skip-create: Modelfile written, skipping ollama create")
+        return
+
+    model_name = "lex-v3"
+    print(f"\n  Running: ollama create {model_name} -f backend/ml/models/Modelfile.lex-v3")
+    result = subprocess.run(
+        ["ollama", "create", model_name, "-f", str(MODELFILE_PATH)],
+        cwd=str(ROOT),
+    )
+    if result.returncode != 0:
+        print(f"  [ERROR] ollama create failed (exit {result.returncode})", file=sys.stderr)
+        sys.exit(result.returncode)
+
+    print(f"\n  [OK] Native model '{model_name}' created.")
+    run_native_routing_eval(model_name)
+    print("\n  Test:")
+    print(f'    ollama run {model_name} "The backend crashed, restart it"')
+    print("    python scripts/eval_lex.py --model lex-v3")
+
+
 def print_banner() -> None:
     print(
         """
@@ -727,6 +1218,14 @@ def print_banner() -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Fine-tune Lex — OpenClaw Router Agent")
+    parser.add_argument("--native", action="store_true",
+                        help="Ollama-native mode: embed curated examples into Modelfile.lex-v3 (no GPU needed)")
+    parser.add_argument("--max-per-cat", type=int, default=20,
+                        help="Max examples per category in native mode (default: 20)")
+    parser.add_argument("--skip-create", action="store_true",
+                        help="Native mode: write Modelfile but skip ollama create")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Native mode: print stats only, do not write Modelfile or create model")
     parser.add_argument("--prep-only", action="store_true", help="Only prepare data (no GPU needed)")
     parser.add_argument("--resume", type=str, default=None, help="Resume from checkpoint path")
     parser.add_argument("--dpo", action="store_true", help="Run DPO alignment (requires --sft-model)")
@@ -737,6 +1236,10 @@ def main() -> None:
     parser.add_argument("--lr", type=float, default=None, help="Override learning rate")
     parser.add_argument("--skip-ollama", action="store_true", help="Skip Ollama import step")
     args = parser.parse_args()
+
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    TRAINING_METRICS_PATH.unlink(missing_ok=True)
+    EVAL_ARTIFACT_PATH.unlink(missing_ok=True)
 
     # Apply overrides
     if args.base_model:
@@ -749,6 +1252,27 @@ def main() -> None:
     print_banner()
     start_time = time.monotonic()
     stages_completed: list[str] = []
+
+    # ── Native Ollama mode (no GPU required) ──
+    if args.native:
+        if args.dry_run:
+            print("\n═══ Native Mode: Dry run ═══")
+            raw, golden = _load_native_examples()
+            print(f"  Labeled examples:  {len(raw)}")
+            print(f"  Golden eval cases: {len(golden)}")
+            selected = _select_native_examples(raw, golden, max_per_cat=args.max_per_cat)
+            by_agent: dict[str, int] = {}
+            by_diff: dict[str, int] = {}
+            for rec in selected:
+                by_agent[rec["_agent"]] = by_agent.get(rec["_agent"], 0) + 1
+                by_diff[rec["_diff"]] = by_diff.get(rec["_diff"], 0) + 1
+            print(f"  Would inject: {len(selected)} examples")
+            print("  By agent: " + ", ".join(f"{a}:{c}" for a, c in sorted(by_agent.items())))
+            print("  By diff:  " + ", ".join(f"{d}:{c}" for d, c in sorted(by_diff.items())))
+            print("\n  --dry-run: skipping Modelfile write and ollama create")
+            return
+        build_lex_v3_native(max_per_cat=args.max_per_cat, skip_create=args.skip_create)
+        return
 
     # ── Stage 1: Data Prep (always runs) ──
     train_path, eval_path, n_train, n_eval = prepare_data()

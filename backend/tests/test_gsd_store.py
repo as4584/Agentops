@@ -6,7 +6,10 @@ from __future__ import annotations
 
 import json
 from collections.abc import Generator
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from pathlib import Path
 from unittest.mock import patch
 

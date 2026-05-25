@@ -65,6 +65,13 @@ def detect_grounded_chat_query(message: str) -> str | None:
     ):
         return "v2_timeout_fallback"
 
+    # ── Webgen output navigation ──────────────────────────────────────────────
+    if _contains_any(text, ("show me the website", "show the website", "view the website",
+                             "show website you made", "see the website", "open the website",
+                             "show me the site", "view site", "generated website", "webgen output",
+                             "show me what you built", "show me the project")):
+        return "show_webgen_output"
+
     return None
 
 
@@ -98,6 +105,12 @@ def build_grounded_chat_reply(
         return GroundedChatReply(
             agent_id=_resolved_agent_id(requested_agent_id, default_agent_id="code_review_agent"),
             message=_format_v2_timeout_reply(),
+        )
+
+    if kind == "show_webgen_output":
+        return GroundedChatReply(
+            agent_id=_resolved_agent_id(requested_agent_id, default_agent_id="soul_core"),
+            message=_format_show_webgen_reply(),
         )
 
     return None
@@ -198,3 +211,35 @@ def _format_v2_timeout_reply() -> str:
         "- There is no special retry loop, admin alert, or event-log side effect in this code path. The behavior is a direct fallback to the legacy chat path.",
     ]
     return "\n".join(lines)
+
+
+def _format_show_webgen_reply() -> str:
+    """Deterministic reply for 'show me the website' — avoids a 60s ReAct loop."""
+    import os
+    from pathlib import Path
+
+    webgen_dir = Path(__file__).resolve().parent.parent / "output" / "webgen"
+    projects: list[str] = []
+    if webgen_dir.exists():
+        for child in sorted(webgen_dir.iterdir()):
+            if child.is_dir():
+                name = child.name.replace("-", " ").replace("_", " ").title()
+                index = child / "index.html"
+                label = f"- **{name}** — `output/webgen/{child.name}/index.html`"
+                if index.exists():
+                    label += " ✓ (index.html present)"
+                projects.append(label)
+
+    if not projects:
+        return (
+            "No generated websites found yet. Use the WebGen tab to build one, "
+            "or POST to /api/webgen/generate with your business details."
+        )
+
+    project_list = "\n".join(projects)
+    return (
+        f"Here are your generated websites in `output/webgen/`:\n\n{project_list}\n\n"
+        "Open them from the **Projects** tab on the dashboard, or serve them locally:\n"
+        "`python -m http.server 8080 --directory output/webgen/<project-name>`\n\n"
+        "The Projects tab (dashboard sidebar) lists all sites with file counts and sizes."
+    )

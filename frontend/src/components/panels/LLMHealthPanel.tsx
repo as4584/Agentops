@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Badge, Card, Group, SimpleGrid, Text, Tooltip } from '@mantine/core';
 import { api, type LLMHealthData, type ModelCircuitState } from '@/lib/api';
+import { useAdaptivePolling } from '@/lib/useAdaptivePolling';
 
 const POLL_MS = 15_000;
 
@@ -22,28 +23,18 @@ export default function LLMHealthPanel() {
   const [health, setHealth] = useState<LLMHealthData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let mounted = true;
-
-    const load = async () => {
+  useAdaptivePolling({
+    intervalMs: POLL_MS,
+    onTick: async () => {
       try {
-        const data = await api.llmHealth();
-        if (mounted) setHealth(data);
+        setHealth(await api.llmHealth());
       } catch {
-        if (mounted) setHealth({ circuit_states: {} });
+        setHealth({ circuit_states: {} });
       } finally {
-        if (mounted) setLoading(false);
+        setLoading(false);
       }
-    };
-
-    load();
-    const interval = setInterval(load, POLL_MS);
-
-    return () => {
-      mounted = false;
-      clearInterval(interval);
-    };
-  }, []);
+    },
+  });
 
   const states = Object.values(health?.circuit_states ?? {});
 

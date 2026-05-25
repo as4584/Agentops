@@ -12,7 +12,10 @@ from __future__ import annotations
 
 import asyncio
 import textwrap
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from pathlib import Path
 from typing import Any
 
@@ -635,7 +638,10 @@ class GSDAgent:
             # --- Health endpoint check ---
             if "health" in item_lower or "/health" in item_lower:
                 try:
-                    resp = urllib.request.urlopen("http://127.0.0.1:8000/health", timeout=3)
+                    from backend.config import BACKEND_HOST, BACKEND_PORT  # local import to avoid circular at module level
+
+                    _health_url = f"http://{BACKEND_HOST}:{BACKEND_PORT}/health"
+                    resp = urllib.request.urlopen(_health_url, timeout=3)
                     if resp.status == 200:
                         report.passed.append(
                             VerifyCheckItem(description=item, status="passed", detail="GET /health → 200")

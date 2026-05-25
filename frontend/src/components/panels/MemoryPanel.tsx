@@ -1,7 +1,8 @@
 import { API_BASE } from '@/lib/api';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Stack, Group, Text, Badge, Box, ScrollArea, ActionIcon } from '@mantine/core';
 import { IconTrash, IconRefresh } from '@tabler/icons-react';
+import { useAdaptivePolling } from '@/lib/useAdaptivePolling';
 
 interface MemoryStats {
   total_namespaces: number;
@@ -25,11 +26,7 @@ export default function MemoryPanel() {
     } catch {}
   };
 
-  useEffect(() => {
-    fetchStats();
-    const iv = setInterval(fetchStats, 10000);
-    return () => clearInterval(iv);
-  }, []);
+  useAdaptivePolling({ intervalMs: 20000, onTick: fetchStats });
 
   const clearNamespace = async (ns: string) => {
     try {

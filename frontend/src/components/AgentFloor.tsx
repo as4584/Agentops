@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   SimpleGrid,
   Card,
@@ -26,6 +26,7 @@ import {
   IconRobot,
 } from '@tabler/icons-react';
 import { api, type AgentVisualSnapshot } from '@/lib/api';
+import { useAdaptivePolling } from '@/lib/useAdaptivePolling';
 
 // ---------------------------------------------------------------------------
 // Pulse animation via global style injection
@@ -84,12 +85,11 @@ export default function AgentFloor({ snapshots: externalSnapshots, pollMs = 2000
     } catch { /* ignore — dashboard will show stale data */ }
   }, []);
 
-  useEffect(() => {
-    if (externalSnapshots) return;
-    fetchVisual();
-    const id = setInterval(fetchVisual, pollMs);
-    return () => clearInterval(id);
-  }, [externalSnapshots, fetchVisual, pollMs]);
+  useAdaptivePolling({
+    enabled: !externalSnapshots,
+    intervalMs: pollMs,
+    onTick: fetchVisual,
+  });
 
   if (!data.length) {
     return (

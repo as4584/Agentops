@@ -420,6 +420,28 @@ class TestPlannerExecutorValidator:
         # Executor turn goes through chat_with_schema → at least 1 schema call.
         assert schema_call_count >= 1, f"Expected ≥1 executor schema call, got {schema_call_count}"
 
+    @pytest.mark.asyncio
+    async def test_executor_turn_uses_unified_router_for_cloud_override(self, flags_all_on):
+        agent = make_agent("code_review_agent")
+        agent._context_assembler = stub_assembler()
+
+        async def _cloud_generate(self_router, prompt="", system="", **kw):
+            del self_router, prompt, system, kw
+            return {"output": _EXECUTOR_FINAL, "model_id": "claude-sonnet"}
+
+        with patch.object(agent.llm, "chat_with_schema", side_effect=AssertionError("local schema path should not run")):
+            with patch("backend.llm.unified_registry.UnifiedModelRouter.generate", new=_cloud_generate):
+                turn = await agent._executor_turn(
+                    message="Reply with a short acknowledgement.",
+                    observations=[],
+                    context={"model": "claude-sonnet"},
+                    turn_number=1,
+                )
+
+        assert turn.content == "Analysis complete. No issues found."
+        assert turn.is_final is True
+        assert turn.model_id == "claude-sonnet"
+
 
 # ===========================================================================
 # 3. GitNexus use in code_review_agent
@@ -595,6 +617,45 @@ class TestQdrantRetrieval:
         assert "INV-3" in combined or "Retrieved context" in combined, (
             "RAG content must appear in executor system prompt on turn 1"
         )
+
+    @pytest.mark.asyncio
+    async def test_retrieve_extracts_sources_into_context(self, flags_all_on):
+        """Turn 1 RAG retrieval should persist source paths into runtime context."""
+        from backend.ml.vector_store import QDRANT_AVAILABLE
+
+        if not QDRANT_AVAILABLE:
+            pytest.skip("qdrant-client not installed")
+
+        agent = make_agent("code_review_agent")
+        captured_prompts: list[str] = []
+        runtime_context: dict[str, Any] = {}
+
+        async def _schema_resp(messages, schema, **kw):
+            for m in messages:
+                if m.get("role") == "system":
+                    captured_prompts.append(m["content"])
+            return json.loads(_EXECUTOR_FINAL)
+
+        rag_content = (
+            "Retrieved context:\n"
+            "[score=0.92, src=docs/SOURCE_OF_TRUTH.md]\nINV-3 must never be violated."
+        )
+
+        mock_assembler = MagicMock()
+        mock_assembler.retrieve = AsyncMock(return_value=rag_content)
+        mock_assembler.ingest_memory = AsyncMock(return_value=True)
+        agent._context_assembler = mock_assembler
+
+        import backend.agents as _agents
+
+        with patch.object(agent.llm, "chat_with_schema", side_effect=_schema_resp):
+            with patch.object(_agents, "AGENT_PLANNER_ENABLED", False):
+                await agent._executor_turn("Review recent changes.", [], runtime_context, 1)
+
+        assert runtime_context["_rag_sources"] == ["docs/SOURCE_OF_TRUTH.md"]
+        combined = " ".join(captured_prompts)
+        assert "Source contract:" in combined
+        assert "docs/SOURCE_OF_TRUTH.md" in combined
 
     def test_health_check_reports_connected(self):
         """ContextAssembler.health_check() returns qdrant_available=True for in-memory store."""

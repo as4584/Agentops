@@ -7,7 +7,10 @@ Covers the data shapes for all five GSD commands:
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from enum import Enum
 from typing import Any
 

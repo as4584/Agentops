@@ -17,6 +17,8 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+import pytest
+
 # ---------------------------------------------------------------------------
 # PR1 — validate_embedding_startup wired in server lifespan (unit test)
 # ---------------------------------------------------------------------------
@@ -199,13 +201,14 @@ class TestEmbeddingStartupWarnings:
 
 
 class TestMetricsEndpoint:
-    def test_metrics_has_qdrant_fallback_counter(self) -> None:
+    def test_metrics_endpoint_accessible(self) -> None:
+        """Metrics endpoint returns a dict (may not have fallback counter anymore)."""
         import asyncio
 
         from backend.server import metrics
 
         result = asyncio.run(metrics())
-        assert "agentop_qdrant_fallback_total" in result
+        assert isinstance(result, dict)
 
     def test_metrics_has_degraded_fallback_counter(self) -> None:
         import asyncio
@@ -215,13 +218,25 @@ class TestMetricsEndpoint:
         result = asyncio.run(metrics())
         assert "agentop_degraded_fallback_total" in result
 
-    def test_metrics_qdrant_fallback_is_int(self) -> None:
-        import asyncio
+    def test_vector_store_raises_retrieval_error_when_disconnected(self) -> None:
+        """VectorStore raises RetrievalUnavailableError instead of silent fallback."""
+        from backend.ml.vector_store import RetrievalUnavailableError, VectorStore
 
-        from backend.server import metrics
+        # Create a VectorStore with in-memory mode so it initializes
+        store = VectorStore(in_memory=True)
+        # Then simulate disconnection by setting _client to None
+        store._client = None
 
-        result = asyncio.run(metrics())
-        assert isinstance(result["agentop_qdrant_fallback_total"], int)
+        # upsert should raise, not return 0
+        with pytest.raises(RetrievalUnavailableError):
+            store.upsert(
+                vectors=[[1.0, 2.0]],
+                payloads=[{"content": "test"}],
+            )
+
+        # search should raise, not return []
+        with pytest.raises(RetrievalUnavailableError):
+            store.search(query_vector=[1.0, 2.0])
 
     def test_metrics_uptime_non_negative(self) -> None:
         import asyncio

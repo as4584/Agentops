@@ -28,7 +28,6 @@ from pydantic import BaseModel, Field
 from backend.agents import ALL_AGENT_DEFINITIONS, SoulAgent, create_agent
 from backend.agents.gatekeeper_agent import GatekeeperAgent, GatekeeperResult
 from backend.config import A2A_MAX_DEPTH
-from backend.knowledge import KnowledgeVectorStore
 from backend.knowledge.context_assembler import ContextAssembler
 from backend.knowledge.doc_seed import seed_docs_to_qdrant
 from backend.llm import OllamaClient
@@ -43,8 +42,17 @@ from backend.models import (
     DriftReport,
     DriftStatus,
 )
+from backend.models import (
+    AgentDefinition,
+    AgentState,
+    AgentStatus,
+    ChangeImpactLevel,
+    DriftReport,
+    DriftStatus,
+)
 from backend.orchestrator.agent_factory import AgentBlueprint, FactoryResult, agent_factory
 from backend.orchestrator.agent_factory import AgentFactory as AgentFactory
+from backend.orchestrator.lex_router import VALID_AGENTS as _VALID_AGENTS
 from backend.tasks import TaskStatus, task_tracker
 from backend.utils import logger
 from backend.utils.tool_ids import ToolIdRegistry
@@ -52,7 +60,73 @@ from backend.utils.tool_ids import ToolIdRegistry
 UTC_TZ = timezone.utc  # noqa: UP017
 
 # ---------------------------------------------------------------------------
-# Orchestrator State Schema
+# Ordo Trace — Epistemic reasoning layer
+# ---------------------------------------------------------------------------
+
+_AGENT_LANE_MAP: dict[str, str] = {
+    "soul_core": "soul",
+    "devops_agent": "development",
+    "monitor_agent": "ops",
+    "self_healer_agent": "ops",
+    "code_review_agent": "evaluation",
+    "security_agent": "security",
+    "data_agent": "data",
+    "comms_agent": "comms",
+    "cs_agent": "support",
+    "it_agent": "ops",
+    "knowledge_agent": "architecture",
+    "ocr_agent": "data",
+}
+
+
+def _build_ordo_trace(
+    agent_id: str,
+    response: str,
+    tool_calls: list[Any],
+    error: str | None,
+) -> dict[str, Any]:
+    """Build an Ordo reasoning trace for any agent response."""
+    lane = _AGENT_LANE_MAP.get(agent_id, "development")
+    has_tools = bool(tool_calls)
+    has_error = bool(error)
+    resp_len = len(response)
+
+    # Confidence degrades with errors or empty responses
+    if has_error or resp_len < 20:
+        confidence = 0.35
+    elif has_tools:
+        confidence = 0.88
+    elif resp_len > 200:
+        confidence = 0.78
+    else:
+        confidence = 0.62
+
+    if has_tools:
+        grounded_signal = f"tool_output({len(tool_calls)} calls)"
+        inferred = False
+    elif resp_len > 50:
+        grounded_signal = "agent_memory + llm_reasoning"
+        inferred = True
+    else:
+        grounded_signal = "llm_parametric"
+        inferred = True
+
+    if has_error:
+        assessment = f"Response degraded — error encountered: {error[:60]}"
+    elif has_tools and not inferred:
+        assessment = "Grounded in tool output — high epistemic confidence."
+    elif inferred:
+        assessment = "Inferred from model knowledge — treat as medium confidence until verified."
+    else:
+        assessment = "Short response — may need follow-up for full coverage."
+
+    return {
+        "lane": lane,
+        "confidence": round(confidence, 2),
+        "grounded_signal": grounded_signal,
+        "inferred": inferred,
+        "assessment": assessment,
+    }
 # ---------------------------------------------------------------------------
 
 
@@ -137,9 +211,10 @@ class AgentOrchestrator:
     def __init__(self, llm_client: OllamaClient) -> None:
         self.llm_client = llm_client
         self._agents: dict[str, Any] = {}
+        self._known_agent_ids: set[str] = set(ALL_AGENT_DEFINITIONS)
         self._gatekeeper = GatekeeperAgent()
-        self._knowledge_store = KnowledgeVectorStore(llm_client)
-        self._context_assembler = ContextAssembler(llm_client)
+        self._knowledge_store: Any = None
+        self._context_assembler: ContextAssembler | None = None
         self._knowledge_agent_id = "knowledge_agent"
         self._intake_namespace = "social_intake"
         self._factory = agent_factory
@@ -164,25 +239,32 @@ class AgentOrchestrator:
         self._agent_state = AgentState(agent_id=self._knowledge_agent_id)
         self._graph = self._build_graph()
         self._compiled_graph = self._graph.compile()
-        self._initialize_agents()
-        logger.info("AgentOrchestrator initialized with full agent cluster")
+        logger.info("AgentOrchestrator initialized with lazy agent/runtime loading")
 
     def gatekeeper_review(self, payload: dict[str, Any]) -> GatekeeperResult:
         """Run mutation payload through the Gatekeeper review layer."""
         return self._gatekeeper.review_mutation(payload)
 
-    def _initialize_agents(self) -> None:
-        """Instantiate all registered agents from ALL_AGENT_DEFINITIONS."""
-        for agent_id in ALL_AGENT_DEFINITIONS:
-            try:
-                self._agents[agent_id] = create_agent(agent_id, self.llm_client)
-                logger.info(f"Agent instantiated: {agent_id}")
-            except Exception as exc:
-                logger.error(f"Failed to instantiate agent '{agent_id}': {exc}")
+    def _get_or_create_agent(self, agent_id: str) -> Any:
+        """Instantiate agents on demand so idle sessions stay lighter."""
+        if agent_id in self._agents:
+            return self._agents[agent_id]
+        if agent_id not in self._known_agent_ids:
+            raise KeyError(agent_id)
+
+        agent = create_agent(agent_id, self.llm_client)
+        self._agents[agent_id] = agent
+        logger.info(f"Agent instantiated lazily: {agent_id}")
+        return agent
+
+    def _get_context_assembler(self) -> ContextAssembler:
+        if self._context_assembler is None:
+            self._context_assembler = ContextAssembler(self.llm_client)
+        return self._context_assembler
 
     async def boot_soul(self) -> dict[str, Any]:
         """Run the Soul Agent boot sequence. Call this once after orchestrator init."""
-        soul = self._agents.get("soul_core")
+        soul = self._get_or_create_agent("soul_core")
         if isinstance(soul, SoulAgent):
             result = await soul.boot()
             logger.info(f"Soul boot complete: {result}")
@@ -191,21 +273,21 @@ class AgentOrchestrator:
 
     async def soul_reflect(self, trigger: str = "manual") -> str:
         """Trigger a soul self-reflection and return the reflection text."""
-        soul = self._agents.get("soul_core")
+        soul = self._get_or_create_agent("soul_core")
         if isinstance(soul, SoulAgent):
             return await soul.reflect(trigger=trigger)
         return "Soul Core agent not available."
 
     def soul_set_goal(self, title: str, description: str, priority: str = "MEDIUM") -> dict[str, Any]:
         """Add a goal to the Soul Agent."""
-        soul = self._agents.get("soul_core")
+        soul = self._get_or_create_agent("soul_core")
         if isinstance(soul, SoulAgent):
             return soul.set_goal(title, description, priority)
         return {"error": "Soul Core agent not available."}
 
     def soul_get_goals(self) -> list[dict[str, Any]]:
         """Return the soul's active goals."""
-        soul = self._agents.get("soul_core")
+        soul = self._get_or_create_agent("soul_core")
         if isinstance(soul, SoulAgent):
             return soul._active_goals
         return []
@@ -213,7 +295,7 @@ class AgentOrchestrator:
     # Complete registry of available agent IDs (knowledge + all BaseAgents)
     @property
     def _all_agent_ids(self) -> set[str]:
-        return {self._knowledge_agent_id, "direct_llm"} | set(self._agents.keys())
+        return {self._knowledge_agent_id, "direct_llm"} | self._known_agent_ids | set(self._agents.keys())
 
     # -----------------------------------------------------------------
     # LangGraph State Machine Construction
@@ -295,15 +377,22 @@ class AgentOrchestrator:
             return {"response": f"Error: {error}"}
 
         # ── Non-knowledge agents: delegate to BaseAgent ──────────────────
-        if target != self._knowledge_agent_id and target in self._agents:
+        if target != self._knowledge_agent_id and target in self._known_agent_ids:
             from backend.agents import BaseAgent as _BaseAgent
 
-            agent = self._agents[target]
+            agent = self._get_or_create_agent(target)
             if isinstance(agent, _BaseAgent):
                 try:
                     _t0 = datetime.now(UTC_TZ)
                     response = await agent.process_message(message, context)
                     _duration_ms = (datetime.now(UTC_TZ) - _t0).total_seconds() * 1000
+                    source_paths = list(
+                        dict.fromkeys(
+                            str(path).strip()
+                            for path in (context.get("_rag_sources") or [])
+                            if str(path).strip()
+                        )
+                    )
                     memory_store.append_shared_event(
                         {
                             "type": "AGENT_RESPONSE",
@@ -324,7 +413,16 @@ class AgentOrchestrator:
                         duration_ms=_duration_ms,
                         why_correct=f"Orchestrator routed to {target}",
                     )
-                    return {"response": response, "error": None}
+                    return {
+                        "response": response,
+                        "error": None,
+                        "sources": source_paths,
+                        "model_execution": (
+                            agent.get_last_execution_meta()
+                            if hasattr(agent, "get_last_execution_meta")
+                            else {}
+                        ),
+                    }
                 except Exception as exc:
                     error_msg = f"{target} execution error: {exc}"
                     logger.error(error_msg)
@@ -344,14 +442,15 @@ class AgentOrchestrator:
 
         try:
             business_id = str(context.get("business_id", "")).strip()
-            retrieved = await self._context_assembler.retrieve_records(
+            assembler = self._get_context_assembler()
+            retrieved = await assembler.retrieve_records(
                 message,
                 agent_id=self._knowledge_agent_id,
                 limit=4,
             )
             profile_hits: list[dict[str, Any]] = []
             if business_id:
-                profile_hits = await self._context_assembler.search_business_profiles(
+                profile_hits = await assembler.search_business_profiles(
                     query=message,
                     business_id=business_id,
                     limit=4,
@@ -360,7 +459,7 @@ class AgentOrchestrator:
             logger.info(
                 "Knowledge retrieval via ContextAssembler",
                 event_type="knowledge_context_assembler",
-                fallback_active=self._context_assembler.health_check().get("fallback_active", False),
+                fallback_active=assembler.health_check().get("fallback_active", False),
                 retrieved_chunks=len(retrieved),
                 business_profile_hits=len(profile_hits),
             )
@@ -431,6 +530,17 @@ class AgentOrchestrator:
             return {
                 "response": response,
                 "error": None,
+                "sources": citations,
+                "model_execution": {
+                    "selected_model": context.get("model") or self.llm_client.model,
+                    "answering_model": context.get("model") or self.llm_client.model,
+                    "runtime_model": self.llm_client.model,
+                    "execution_role": "knowledge_rag",
+                    "model_source": str(
+                        ((context.get("_model_selection") or {}).get("model_source"))
+                        or ("request" if context.get("model") else "fallback")
+                    ),
+                },
                 "knowledge_result": {
                     "answer": response,
                     "citations": citations,
@@ -443,6 +553,13 @@ class AgentOrchestrator:
                     },
                 },
             }
+
+        except asyncio.CancelledError:
+            # Route-level timeout cancelled this coroutine — clean up before re-raising.
+            self._agent_state.status = AgentStatus.IDLE
+            task_tracker.fail_task(_tid, error="Request cancelled (route timeout)")
+            logger.warning(f"Knowledge agent cancelled (route timeout)")
+            raise
 
         except Exception as e:
             error_msg = f"Direct LLM execution error: {e}"
@@ -523,19 +640,25 @@ class AgentOrchestrator:
             final_state = await self._compiled_graph.ainvoke(initial_state)  # type: ignore[arg-type]
 
             kr = final_state.get("knowledge_result") or {}
+            tool_calls = final_state.get("tool_calls", [])
+            error = final_state.get("error")
+            response = final_state.get("response", "")
             return {
                 "agent_id": agent_id,
-                "response": final_state.get("response", ""),
+                "response": response,
                 "drift_status": final_state.get("drift_status", DriftStatus.GREEN.value),
                 "governance_notes": final_state.get("governance_notes", []),
                 "timestamp": final_state.get("timestamp", datetime.now(UTC_TZ).isoformat()),
-                "error": final_state.get("error"),
+                "error": error,
                 # Structured fields — populated only for knowledge_agent
                 "answer": kr.get("answer"),
                 "citations": kr.get("citations"),
                 "confidence": kr.get("confidence"),
                 "stale_chunks": kr.get("stale_chunks"),
                 "agent_scope": kr.get("agent_scope"),
+                "model_execution": final_state.get("model_execution", {}),
+                # Ordo reasoning trace — always present
+                "ordo_trace": _build_ordo_trace(agent_id, response, tool_calls, error),
             }
 
         except Exception as e:
@@ -566,21 +689,41 @@ class AgentOrchestrator:
 
     def get_available_agents(self) -> list[str]:
         """Return list of all available agent IDs."""
-        return [self._knowledge_agent_id] + list(self._agents.keys())
+        return [self._knowledge_agent_id] + sorted(self._known_agent_ids)
 
     def get_agent_definition(self) -> AgentDefinition:
         """Return the knowledge agent definition (legacy compatibility)."""
         return self._agent_definition
 
-    def get_all_agent_definitions(self) -> list[AgentDefinition]:
-        """Return all agent definitions (knowledge + registered + factory agents)."""
-        defs = [self._agent_definition]
-        for agent in self._agents.values():
-            if hasattr(agent, "definition"):
-                defs.append(agent.definition)
-        for defn in self._factory.list_agents():
-            defs.append(defn)
-        return defs
+    def get_all_agent_definitions(
+        self,
+        include_factory: bool = False,
+    ) -> list[AgentDefinition]:
+        """Return agent definitions for the product roster.
+
+        By default returns only the 11 canonical production agents (VALID_AGENTS).
+        Pass ``include_factory=True`` to also include dynamically created
+        factory/debug agents — intended only for operator/debug surfaces.
+        """
+        # Preserve the full static roster even when agents are instantiated lazily.
+        # Runtime state still stays lightweight because we return definitions from
+        # the registry instead of forcing every agent object into memory.
+        candidate_defs: list[AgentDefinition] = [self._agent_definition]
+        candidate_defs.extend(
+            definition
+            for agent_id, definition in ALL_AGENT_DEFINITIONS.items()
+            if agent_id != self._knowledge_agent_id
+        )
+
+        # Filter to the canonical production roster
+        production_defs = [
+            d for d in candidate_defs if d.agent_id in _VALID_AGENTS
+        ]
+
+        if include_factory:
+            production_defs.extend(self._factory.list_agents())
+
+        return production_defs
 
     # -----------------------------------------------------------------
     # Agent Factory — Dynamic agent creation
@@ -967,7 +1110,7 @@ class AgentOrchestrator:
         state_answers = dict(state.get("answers", {}))
         state_answers[question_key] = clean_answer
         state["answers"] = state_answers
-        await self._context_assembler.ingest_business_profile(
+        await self._get_context_assembler().ingest_business_profile(
             business_id=business_id,
             field=question_key,
             answer=clean_answer,
@@ -1021,7 +1164,7 @@ class AgentOrchestrator:
             f"Business profile context: {json.dumps(answers, ensure_ascii=False)}"
         )
 
-        profile_hits = await self._context_assembler.search_business_profiles(
+        profile_hits = await self._get_context_assembler().search_business_profiles(
             query=semantic_query,
             business_id=business_id,
             limit=6,

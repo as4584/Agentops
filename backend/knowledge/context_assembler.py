@@ -20,18 +20,23 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import math
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from backend.llm import OllamaClient
 
 from backend.config import (
+    ACTIVE_RUNTIME_PROFILE,
     KNOWN_EMBED_DIMS,
+    KNOWLEDGE_JSON_FALLBACK_ENABLED,
     QDRANT_DEFAULT_DIM,
     QDRANT_EMBED_MODEL,
     QDRANT_HOST,
     QDRANT_IN_MEMORY,
     QDRANT_PORT,
+    RETRIEVAL_MODE,
 )
 from backend.ml.vector_store import QDRANT_AVAILABLE, VectorStore
 
@@ -109,6 +114,8 @@ _fallback_store: Any = None
 
 def _get_fallback_store(llm_client: Any) -> Any:
     """Return the KnowledgeVectorStore singleton for fallback retrieval."""
+    if not KNOWLEDGE_JSON_FALLBACK_ENABLED:
+        return None
     global _fallback_store
     if _fallback_store is None:
         try:
@@ -162,6 +169,10 @@ class ContextAssembler:
         )
         self._bm25.load()
 
+        # Sprint 4: corpus gap enforcement.
+        from backend.knowledge.corpus_gap import CorpusGapHandler  # noqa: PLC0415
+        self._gap_handler = CorpusGapHandler()
+
     def health_check(self) -> dict[str, Any]:
         """
         Return the current health state of the vector retrieval backend.
@@ -183,6 +194,7 @@ class ContextAssembler:
         return {
             "qdrant_available": connected,
             "fallback_active": not connected,
+            "fallback_enabled": KNOWLEDGE_JSON_FALLBACK_ENABLED,
             "fallback_count": ContextAssembler._fallback_count,
             # Counts search/upsert calls that returned empty because the client was None.
             # Non-zero while Qdrant is down even if no retrieval queries were made.
@@ -190,7 +202,14 @@ class ContextAssembler:
             "host": f"{QDRANT_HOST}:{QDRANT_PORT}",
             "in_memory": QDRANT_IN_MEMORY,
             "collections": collections,
+            "runtime_profile": ACTIVE_RUNTIME_PROFILE,
+            "retrieval_mode": RETRIEVAL_MODE,
         }
+
+    def _source_prefix_filter(self) -> list[str] | None:
+        if RETRIEVAL_MODE == "deep_index":
+            return None
+        return ["docs/"]
 
     async def search(
         self,
@@ -283,6 +302,214 @@ class ContextAssembler:
         """Delegate to RetrievalEngine health — for /health/deps."""
         return self._engine.retrieval_health()
 
+    # ------------------------------------------------------------------ #
+    #  Sprint 4: Staleness + confidence + gap enforcement                  #
+    # ------------------------------------------------------------------ #
+
+    # Staleness thresholds in hours — mirrors epistemic_principles.md §3.
+    # Commit-based scopes use sentinel 0.0 (any modification = stale).
+    _STALENESS_THRESHOLDS_HOURS: dict[str, float] = {
+        "security":       24.0,
+        "network":        168.0,
+        "remediation":    336.0,
+        "agents":         168.0,
+        "code_standards": 0.0,
+        "governance":     0.0,
+        "cicd":           0.0,
+        "schemas":        0.0,
+    }
+
+    # Scope adjacency — mirrors epistemic_principles.md §4.
+    _SCOPE_ADJACENCY: dict[str, frozenset[str]] = {
+        "security":     frozenset({"network"}),
+        "network":      frozenset({"security"}),
+        "cicd":         frozenset({"code_standards", "remediation"}),
+        "code_standards": frozenset({"cicd"}),
+        "remediation":  frozenset({"cicd"}),
+        "agents":       frozenset({"governance"}),
+        "governance":   frozenset({"agents"}),
+    }
+
+    def _check_staleness(self, chunk: dict[str, Any]) -> dict[str, Any]:
+        """
+        Compare chunk last_indexed against source last_modified.
+
+        Returns:
+            is_stale:    bool
+            stale_since: str | None  (ISO timestamp)
+            age_ratio:   float       (0.0–1.0, ratio of threshold consumed)
+            scope:       str
+        """
+        metadata = chunk.get("metadata", chunk)
+        scope = str(metadata.get("scope") or chunk.get("agent_scope") or "")
+        last_indexed_raw  = metadata.get("last_indexed")
+        last_modified_raw = metadata.get("source_last_modified")
+
+        _empty = {"is_stale": False, "stale_since": None, "age_ratio": 0.0, "scope": scope}
+
+        if not last_indexed_raw or not last_modified_raw:
+            return _empty
+
+        try:
+            last_indexed  = datetime.fromisoformat(str(last_indexed_raw))
+            last_modified = datetime.fromisoformat(str(last_modified_raw))
+            # Convert to UTC properly — astimezone preserves the instant,
+            # unlike .replace() which silently relabels.
+            if last_indexed.tzinfo is None:
+                last_indexed = last_indexed.replace(tzinfo=timezone.utc)
+            else:
+                last_indexed = last_indexed.astimezone(timezone.utc)
+            if last_modified.tzinfo is None:
+                last_modified = last_modified.replace(tzinfo=timezone.utc)
+            else:
+                last_modified = last_modified.astimezone(timezone.utc)
+        except ValueError:
+            return _empty
+
+        threshold_hours = self._STALENESS_THRESHOLDS_HOURS.get(scope)
+
+        # Commit-based scope: any modification after indexing = stale.
+        if threshold_hours == 0.0:
+            is_stale = last_modified > last_indexed
+            return {
+                "is_stale":    is_stale,
+                "stale_since": last_modified.isoformat() if is_stale else None,
+                "age_ratio":   1.0 if is_stale else 0.0,
+                "scope":       scope,
+            }
+
+        # Unknown scope — default 7 days.
+        if threshold_hours is None:
+            threshold_hours = 168.0
+
+        now = datetime.now(timezone.utc)
+        age_hours = (now - last_indexed).total_seconds() / 3600.0
+        age_ratio = min(age_hours / threshold_hours, 1.0) if threshold_hours > 0 else 0.0
+        is_stale  = last_modified > last_indexed or age_hours >= threshold_hours
+
+        return {
+            "is_stale":    is_stale,
+            "stale_since": last_modified.isoformat() if is_stale else None,
+            "age_ratio":   age_ratio,
+            "scope":       scope,
+        }
+
+    def _compute_confidence(
+        self,
+        chunk: dict[str, Any],
+        scope: str | None = None,
+    ) -> float:
+        """
+        Compute confidence score per epistemic_principles.md §4.
+
+        confidence = sigmoid(reranker_score) × recency_factor × scope_match_bonus
+        """
+        # reranker_score_normalised = sigmoid(raw)
+        raw_score = (
+            chunk.get("_reranker_score")
+            or chunk.get("rrf_score")
+            or chunk.get("score")
+            or 0.0
+        )
+        reranker_normalised = 1.0 / (1.0 + math.exp(-float(raw_score)))
+
+        # recency_factor from staleness
+        staleness = self._check_staleness(chunk)
+        if staleness["is_stale"]:
+            recency_factor = 0.0
+        elif staleness["age_ratio"] >= 0.5:
+            recency_factor = 0.75
+        else:
+            recency_factor = 1.0
+
+        # scope_match_bonus
+        chunk_scope = staleness["scope"]
+        if not scope or not chunk_scope:
+            scope_match_bonus = 1.0
+        elif scope == chunk_scope:
+            scope_match_bonus = 1.0
+        elif chunk_scope in self._SCOPE_ADJACENCY.get(scope, frozenset()):
+            scope_match_bonus = 0.85
+        else:
+            scope_match_bonus = 0.70
+
+        confidence = reranker_normalised * recency_factor * scope_match_bonus
+        return round(max(0.0, min(1.0, confidence)), 6)
+
+    async def search_with_gap_check(
+        self,
+        query: str,
+        requesting_agent: str,
+        scope: str | None = None,
+        top_k: int = 5,
+    ) -> dict[str, Any]:
+        """
+        Full retrieval pipeline with staleness annotation,
+        confidence scoring, and corpus gap enforcement.
+
+        Returns:
+            results:              list[dict]  — annotated chunks
+            stale_chunks:         list[str]   — chunk_ids that are stale
+            majority_stale:       bool
+            top_confidence:       float
+            gap_fired:            bool
+            agent_should_proceed: bool
+            gap_id:               str | None
+        """
+        raw_results = await self.search(query=query, agent_scope=scope, top_k=top_k)
+
+        annotated: list[dict[str, Any]] = []
+        stale_chunk_ids: list[str] = []
+
+        for chunk in raw_results:
+            staleness  = self._check_staleness(chunk)
+            confidence = self._compute_confidence(chunk, scope=scope)
+
+            annotated_chunk = {
+                **chunk,
+                "is_stale":    staleness["is_stale"],
+                "stale_since": staleness["stale_since"],
+                "age_ratio":   staleness["age_ratio"],
+                "confidence":  confidence,
+            }
+            annotated.append(annotated_chunk)
+
+            if staleness["is_stale"]:
+                chunk_id = (
+                    chunk.get("chunk_id")
+                    or chunk.get("id")
+                    or str(chunk.get("metadata", {}).get("chunk_id", "unknown"))
+                )
+                stale_chunk_ids.append(chunk_id)
+
+        majority_stale = (
+            len(stale_chunk_ids) > len(annotated) / 2
+            if annotated else False
+        )
+
+        top_confidence = max(
+            (c["confidence"] for c in annotated), default=0.0
+        )
+
+        gap_result = self._gap_handler.check(
+            requesting_agent=requesting_agent,
+            query=query,
+            top_confidence=top_confidence,
+        )
+
+        if majority_stale:
+            gap_result["agent_should_proceed"] = False
+
+        return {
+            "results":              annotated,
+            "stale_chunks":         stale_chunk_ids,
+            "majority_stale":       majority_stale,
+            "top_confidence":       top_confidence,
+            "gap_fired":            gap_result["gap_fired"],
+            "agent_should_proceed": gap_result["agent_should_proceed"],
+            "gap_id":               gap_result.get("gap_id"),
+        }
+
     async def retrieve(
         self,
         query: str,
@@ -307,13 +534,17 @@ class ContextAssembler:
             query_vec = await self._llm.embed(query)
         except Exception as exc:
             logger.warning(f"ContextAssembler embed failed: {exc}")
-            return await self._fallback_retrieve(query, limit)
+            return ""
 
         if not query_vec:
-            return await self._fallback_retrieve(query, limit)
+            # embed() returned empty — agent LLM is likely a generation model (e.g. qwen3),
+            # not an embedding model.  Skip RAG rather than triggering the JSON fallback
+            # which would call embed() hundreds of times and block the event loop.
+            return ""
 
         if not QDRANT_AVAILABLE or self._store._client is None:
-            return await self._fallback_retrieve(query, limit)
+            # Qdrant unavailable and no fast fallback — skip RAG silently.
+            return ""
 
         results: list[dict[str, Any]] = []
 
@@ -330,6 +561,7 @@ class ContextAssembler:
             logger.debug(f"ContextAssembler: agent collection '{agent_id}' search failed: {exc}")
 
         # 2. Global collections
+        source_prefixes = self._source_prefix_filter()
         for coll in self.GLOBAL_COLLECTIONS:
             if coll == agent_id:
                 continue
@@ -339,6 +571,15 @@ class ContextAssembler:
                     limit=max(2, limit // 2),
                     collection=coll,
                 )
+                if source_prefixes:
+                    global_hits = [
+                        hit
+                        for hit in global_hits
+                        if any(
+                            str(hit.get("payload", {}).get("source") or hit.get("payload", {}).get("path") or "").startswith(prefix)
+                            for prefix in source_prefixes
+                        )
+                    ]
                 results.extend(global_hits)
             except Exception as exc:
                 logger.debug(f"ContextAssembler: global collection '{coll}' search failed: {exc}")
@@ -371,6 +612,7 @@ class ContextAssembler:
             return await self._fallback_records(query, limit)
 
         results: list[dict[str, Any]] = []
+        source_prefixes = self._source_prefix_filter()
 
         try:
             agent_hits = self._store.search(
@@ -392,6 +634,15 @@ class ContextAssembler:
                     limit=max(2, limit // 2),
                     collection=coll,
                 )
+                if source_prefixes:
+                    global_hits = [
+                        hit
+                        for hit in global_hits
+                        if any(
+                            str(hit.get("payload", {}).get("source") or hit.get("payload", {}).get("path") or "").startswith(prefix)
+                            for prefix in source_prefixes
+                        )
+                    ]
                 results.extend(global_hits)
             except Exception as exc:
                 logger.debug(f"ContextAssembler: global collection '{coll}' search failed: {exc}")
@@ -589,7 +840,7 @@ class ContextAssembler:
             kv = _get_fallback_store(self._llm)
             if kv is None:
                 return []
-            results = await kv.search(query=query, top_k=limit)
+            results = await kv.search(query=query, top_k=limit, allow_build=False, mode=RETRIEVAL_MODE)
             return [
                 {
                     "path": str(result.get("path", "")),

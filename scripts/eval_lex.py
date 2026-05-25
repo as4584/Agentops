@@ -34,6 +34,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 DEFAULT_EVAL_SPLIT = ROOT / "output" / "lex-finetune" / "eval_split.jsonl"
+GOLDEN_EVAL_PATH = ROOT / "data" / "training" / "golden_eval" / "lex_v2_golden.jsonl"
 BENCHMARKS_DIR = ROOT / "data" / "benchmarks"
 
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
@@ -154,6 +155,10 @@ def extract_message_and_expected(record: dict) -> tuple[str | None, str | None]:
     if "user_message" in record:
         return record["user_message"], record.get("expected_agent")
 
+    # Golden eval format (uses 'message' key)
+    if "message" in record:
+        return record["message"], record.get("expected_agent")
+
     # ShareGPT format — first human turn is the message,
     # look for expected_agent in metadata
     convs = record.get("conversations", [])
@@ -199,7 +204,13 @@ def run_eval(
             continue
 
         prompt = build_routing_prompt(message)
-        row: dict = {"index": i, "user_message": message, "expected": expected}
+        row: dict = {
+            "index": i,
+            "user_message": message,
+            "expected": expected,
+            "category": record.get("category", "unknown"),
+            "id": record.get("id", ""),
+        }
 
         # Query v2
         if not skip_v2:
@@ -268,6 +279,19 @@ def run_eval(
         else None,
     }
 
+    # Per-category breakdown
+    cat_stats: dict[str, dict[str, int]] = {}
+    for row in results:
+        cat = row.get("category", "unknown")
+        if cat not in cat_stats:
+            cat_stats[cat] = {"v2_correct": 0, "v3_correct": 0, "total": 0}
+        cat_stats[cat]["total"] += 1
+        if row.get("v2", {}).get("match"):
+            cat_stats[cat]["v2_correct"] += 1
+        if row.get("v3", {}).get("match"):
+            cat_stats[cat]["v3_correct"] += 1
+    summary["by_category"] = cat_stats
+
     return {"summary": summary, "results": results}
 
 
@@ -308,6 +332,15 @@ def print_summary(summary: dict) -> None:
         delta = summary["delta_accuracy"]
         sign = "+" if delta >= 0 else ""
         print(f"  Δ accuracy        : {sign}{delta*100:.1f}%  (v3 vs v2)")
+    # Per-category breakdown
+    by_cat = summary.get("by_category", {})
+    if by_cat:
+        print("\n  Per-category (v2 | v3):")
+        for cat, stats in sorted(by_cat.items()):
+            total = stats["total"]
+            v2a = f"{stats['v2_correct']}/{total}" if summary.get("v2_accuracy") is not None else "—"
+            v3a = f"{stats['v3_correct']}/{total}" if summary.get("v3_accuracy") is not None else "—"
+            print(f"    {cat:40s} v2={v2a:6s}  v3={v3a:6s}")
     print("═" * 60)
 
 
@@ -326,25 +359,43 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_EVAL_SPLIT,
         help=f"Path to eval JSONL (default: {DEFAULT_EVAL_SPLIT})",
     )
+    p.add_argument(
+        "--golden",
+        action="store_true",
+        help=f"Use golden eval set: {GOLDEN_EVAL_PATH}",
+    )
     p.add_argument("--limit", type=int, default=None, help="Max records to evaluate")
     p.add_argument("--skip-v2", action="store_true", help="Skip v2 evaluation (v3 only)")
     p.add_argument("--skip-v3", action="store_true", help="Skip v3 evaluation (v2 only)")
     p.add_argument("--no-save", action="store_true", help="Print results but don't save files")
+    p.add_argument(
+        "--ci-gate",
+        type=float,
+        default=None,
+        metavar="THRESHOLD",
+        help="CI gate: exit 1 if v2 accuracy is below THRESHOLD (0.0-1.0), e.g. --ci-gate 0.70",
+    )
     return p.parse_args()
 
 
 def main() -> None:
     args = parse_args()
 
-    if not args.input.exists():
-        print(f"[ERROR] Eval file not found: {args.input}")
-        print("  Run 'python scripts/finetune_lex.py --prep-only' to generate it.")
+    # --golden overrides --input
+    input_path = GOLDEN_EVAL_PATH if args.golden else args.input
+
+    if not input_path.exists():
+        print(f"[ERROR] Eval file not found: {input_path}")
+        if args.golden:
+            print(f"  Golden eval not found at {input_path}")
+        else:
+            print("  Run 'python scripts/finetune_lex.py --prep-only' to generate it.")
         sys.exit(1)
 
     data = run_eval(
         v2_model=args.v2,
         v3_model=args.v3,
-        input_path=args.input,
+        input_path=input_path,
         limit=args.limit,
         skip_v2=args.skip_v2,
         skip_v3=args.skip_v3,
@@ -354,6 +405,14 @@ def main() -> None:
 
     if not args.no_save:
         save_results(data)
+
+    # CI gate: fail if accuracy below threshold
+    if args.ci_gate is not None:
+        v2_acc = data["summary"].get("v2_accuracy")
+        if v2_acc is not None and v2_acc < args.ci_gate:
+            print(f"\n[CI GATE FAILED] lex-v2 accuracy {v2_acc*100:.1f}% < threshold {args.ci_gate*100:.1f}%")
+            sys.exit(1)
+        print(f"[CI GATE PASSED] lex-v2 accuracy {v2_acc*100:.1f}% >= threshold {args.ci_gate*100:.1f}%")
 
 
 if __name__ == "__main__":

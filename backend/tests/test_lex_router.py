@@ -274,7 +274,7 @@ class TestKeywordRouteBoundary:
         assert result == "soul_core"
 
     def test_general_agents_reachable(self):
-        """All 10 canonical auto-route agents reachable via keyword fallback."""
+        """All 11 canonical auto-route agents reachable via keyword fallback."""
         reachable = set()
         test_msgs = [
             "deploy the build via docker",  # devops
@@ -287,6 +287,7 @@ class TestKeywordRouteBoundary:
             "customer support ticket complaint",  # cs
             "cpu memory disk network process",  # it
             "search docs knowledge documentation",  # knowledge
+            "build an app full stack react",  # coding
         ]
         for msg in test_msgs:
             reachable.add(_keyword_route(msg))
@@ -395,7 +396,7 @@ class TestResolveAgentAdvanced:
     @patch("backend.orchestrator.lex_router._fast_router", None)
     @patch("backend.orchestrator.lex_router.LLM_ROUTER_MODE", "keyword")
     async def test_general_agents_reachable_in_keyword_mode(self):
-        """All 10 canonical auto-route agents remain reachable in keyword-only mode."""
+        """All 11 canonical auto-route agents remain reachable in keyword-only mode."""
         reachable = set()
         test_msgs = [
             "deploy build docker",
@@ -408,6 +409,7 @@ class TestResolveAgentAdvanced:
             "customer support ticket",
             "cpu disk network",
             "search docs knowledge",
+            "build an app full stack react component",
         ]
         for msg in test_msgs:
             result = await resolve_agent(msg)
@@ -435,11 +437,12 @@ class TestResolveAgentAdvanced:
             assert result["method"] == "specialist_keyword"
 
     async def test_valid_agents_matches_canonical_roster(self):
-        """Sprint 1: VALID_AGENTS is the canonical 11, GENERAL_AUTO_ROUTE is the 10 non-soul agents."""
+        """Sprint 1: VALID_AGENTS is the canonical 12 (11 + coding_agent), GENERAL_AUTO_ROUTE is the 11 non-soul agents."""
         assert GENERAL_AUTO_ROUTE_AGENTS < VALID_AGENTS
-        assert len(VALID_AGENTS) == 11
+        assert len(VALID_AGENTS) == 12
         assert "soul_core" not in GENERAL_AUTO_ROUTE_AGENTS
-        assert len(GENERAL_AUTO_ROUTE_AGENTS) == 10
+        assert "coding_agent" in GENERAL_AUTO_ROUTE_AGENTS
+        assert len(GENERAL_AUTO_ROUTE_AGENTS) == 11
 
     @patch("backend.orchestrator.lex_router._fast_router", None)
     @patch("backend.orchestrator.lex_router.LLM_ROUTER_MODE", "keyword")

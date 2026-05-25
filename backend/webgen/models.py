@@ -6,7 +6,10 @@ WebGen Models — Data structures for the web generation pipeline.
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from enum import Enum
 from typing import Any
 
@@ -142,11 +145,46 @@ class ClientBrief(BaseModel):
     competitors: list[str] = Field(default_factory=list)
     special_features: list[str] = Field(default_factory=list)
     pages_requested: list[str] = Field(default_factory=list)
+    # ── URL Clone fields — populated when user pastes a URL to clone ──────────
+    clone_url: str | None = None  # source URL the user wants cloned
+    cloned_html: str | None = None  # HTML captured from the source page
+    cloned_screenshot: str | None = None  # filesystem path to screenshot PNG
+    cloned_tokens: dict[str, Any] = Field(default_factory=dict)  # extracted color/font tokens
 
 
 # ---------------------------------------------------------------------------
 # Main project model
 # ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# Webgen run-state (persisted per pipeline invocation, keyed by run_id)
+# ---------------------------------------------------------------------------
+
+
+class WebgenRunStatus(str, Enum):
+    """Lifecycle state for a single pipeline run."""
+
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class WebgenRunState(BaseModel):
+    """Persisted snapshot of an in-progress or finished webgen pipeline run."""
+
+    run_id: str
+    started_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
+    current_phase: str = ""
+    step: int = 0
+    total: int = 8
+    business_name: str = ""
+    clone_url: str = ""
+    project_id: str = ""
+    project_slug: str = ""
+    status: WebgenRunStatus = WebgenRunStatus.RUNNING
+    last_event_at: str = Field(default_factory=lambda: datetime.now(UTC).isoformat())
+    error: str = ""
 
 
 class SiteProject(BaseModel):
@@ -165,6 +203,7 @@ class SiteProject(BaseModel):
     robots_txt: str = ""
     errors: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
+    sources: list[str] = Field(default_factory=list, description="RAG source paths used during generation")
 
     def advance(self, new_status: SiteStatus) -> None:
         """Transition to a new status with validation."""

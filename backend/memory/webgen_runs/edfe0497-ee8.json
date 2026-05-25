@@ -1,0 +1,14 @@
+{
+  "run_id": "edfe0497-ee8",
+  "started_at": "2026-04-21T22:03:26.961315+00:00",
+  "current_phase": "export",
+  "step": 6,
+  "total": 6,
+  "business_name": "about hamburgers",
+  "clone_url": "",
+  "project_id": "af3e07f45e58",
+  "project_slug": "about-hamburgers",
+  "status": "completed",
+  "last_event_at": "2026-04-21T22:07:07.543632+00:00",
+  "error": ""
+}

@@ -1,0 +1,13 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e9]:
+        - heading "Agentop" [level=2] [ref=e10]
+        - paragraph [ref=e11]: Local AI Control Center
+      - generic [ref=e12]:
+        - button "OS View" [ref=e13] [cursor=pointer]:
+          - generic [ref=e15]: OS View
+        - generic [ref=e19]: "Drift: GREEN"
+    - generic [ref=e20]:
+      - paragraph [ref=e22]: Connecting to backend…
+      - paragraph [ref=e23]: Waiting for http://localhost:8000

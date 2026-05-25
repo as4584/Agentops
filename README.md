@@ -197,6 +197,40 @@ This section documents the incremental engineering work that brought Agentop fro
 
 **Result:** 22 skills, 21 agents, hardened browser, automated tech news pipeline, leaner model footprint.
 
+### Phase 12 — RAG Pipeline Fix (ContextAssembler Embed Model)
+
+**Problem:** Every `/chat` request to any agent timed out at 180 seconds. Direct Ollama calls responded in under 10s but all backend agent calls failed.
+
+**Root cause:** A single line in `ContextAssembler` was passing the agent's generation model (`qwen3:4b`) as the embed client. When Qdrant was unavailable (the fallback path), `KnowledgeVectorStore.ensure_index()` tried to build a full JSON vector index by calling `embed()` on `qwen3:4b` for every document chunk. Since qwen3 is a generation model — not an embedding model — each `embed()` call returned empty after timing out. The index-build loop occupied Ollama's serial queue entirely, leaving `chat_with_schema` waiting for a slot that never came. The step timeout of 180s was always hit.
+
+**What was wrong:**
+- `_get_context_assembler()` in `backend/agents/__init__.py` passed `self.llm` (the agent's generation LLM) to `ContextAssembler`
+- `ContextAssembler._fallback_records()` called `KnowledgeVectorStore(self._llm)` — same wrong model
+- `KnowledgeVectorStore.ensure_index()` called `llm.embed()` for every chunk with no `vectors.json` cache on disk
+- Each call: `/api/embed` (10s timeout) → fails → `/api/embeddings` (10s timeout) → fails → skip chunk
+- N chunks × 20s = total queue blockage >> 180s step timeout
+
+**The fix** — `backend/knowledge/context_assembler.py` `retrieve()`:
+```python
+# Before: triggered full JSON index rebuild using qwen3:4b on every RAG miss
+if not query_vec:
+    return await self._fallback_retrieve(query, limit)
+
+# After: skip RAG silently — chat completes in ~8s instead of timing out
+if not query_vec:
+    # embed() returned empty — agent LLM is a generation model, not an embed model.
+    # Skip RAG rather than triggering the JSON fallback which blocks the Ollama queue.
+    return ""
+```
+
+**The full fix** (follow-up recommended): `_get_context_assembler()` should initialize `ContextAssembler` with `OllamaClient(model=QDRANT_EMBED_MODEL)` (`nomic-embed-text`) instead of `self.llm`. This enables live Qdrant RAG for all agents without risking queue contention.
+
+**Result:** `soul_core` step latency dropped from 180s (timeout) to ~8-9s. `chat_with_schema attempt=1 success` on first try. Zero RAG contention with generation inference.
+
+**Lesson:** Never share an LLM inference client between generation and embedding workloads. Ollama processes requests serially per model — two long-running callers on the same model instance will always block each other.
+
+---
+
 ### Phase 11 — External Repo Integration & Repo Cleanup
 
 **Problem:** Sandbox repos (UI/UX Pro Max, OpenClaw/GoClaw, Claude Code skills) were sitting unused. Root directory was cluttered with scratch files. No documentation of the OpenClaw bridge architecture.

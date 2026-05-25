@@ -1,0 +1,266 @@
+{
+  "id": "d2d01b068545",
+  "created_at": "2026-04-17T22:26:47.198910+00:00",
+  "updated_at": "2026-04-17T22:31:27.285017+00:00",
+  "status": "ready",
+  "brief": {
+    "business_name": "Bubble Up Laundromat",
+    "business_type": "custom",
+    "tagline": "Fresh, Fast, Friendly",
+    "description": "Modern laundromat in Brooklyn. Self-service washers and dryers, drop-off service, and free WiFi. Open 7am-11pm daily.",
+    "services": [
+      "Self-service wash & dry",
+      "Drop-off laundry service",
+      "Dry cleaning",
+      "Fluff & fold",
+      "Free WiFi"
+    ],
+    "target_audience": "Brooklyn residents, busy professionals, students",
+    "tone": "friendly",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": []
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - Bubble Up Laundromat",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "95a9ea46",
+          "name": "hero",
+          "component_type": "hero-centered",
+          "content": {
+            "headline": "Fresh, Fast, Friendly",
+            "subtitle": "Modern laundromat in Brooklyn. Self-service washers and dryers, drop-off service, and free WiFi."
+          },
+          "html": "<header class=\"bg-gradient-to-br from-primary via-secondary to-accent h-screen flex items-center justify-center\">\n    <div class=\"text-center px-4\">\n        <h1 class=\"font-fredoka text-white text-5xl sm:text-6xl mb-2\" style=\"animation: fadeInUp 0.8s ease-out both\">Fresh, Fast, Friendly</h1>\n        <p class=\"font-nunito text-lg text-white sm:text-xl mb-6 opacity-70\">Modern laundromat in Brooklyn. Self-service washers and dryers, drop-off service, and free WiFi.</p>\n        <nav>\n            <ul class=\"flex gap-4\">\n                <li><a href=\"index.html\" class=\"text-white hover:text-accent transition-colors duration-200\">Home</a></li>\n            </ul>\n        </nav>\n    </div>\n</header>\n\n<style>\n@keyframes fadeInUp {\n    from { opacity: 0; transform: translateY(20px); }\n    to { opacity: 1; transform: translateY(0); }\n}\n.glass-card {\n    background-color: rgba(255, 255, 255, 0.3);\n    backdrop-filter: blur(10px);\n    border-radius: 16px;\n    box-shadow: -5px -5px 15px rgba(0, 0, 0, 0.1), 5px 5px 15px rgba(0, 0, 0, 0.1);\n    transition: all 300ms ease;\n}\n.glass-card:hover {\n    transform: translateY(-2px) scale(1.05);\n    box-shadow: -7px -7px 20px rgba(0, 0, 0, 0.2), 7px 7px 20px rgba(0, 0, 0, 0.2);\n}\n</style>",
+          "order": 0
+        },
+        {
+          "id": "690ba68f",
+          "name": "services",
+          "component_type": "list-grid",
+          "content": {
+            "items": [
+              {
+                "icon": "wash",
+                "title": "Self-service wash & dry"
+              },
+              {
+                "icon": "drop-off",
+                "title": "Drop-off laundry service"
+              },
+              {
+                "icon": "dry-cleaning",
+                "title": "Dry cleaning"
+              },
+              {
+                "icon": "fluff-fold",
+                "title": "Fluff & fold"
+              },
+              {
+                "icon": "wifi",
+                "title": "Free WiFi"
+              }
+            ]
+          },
+          "html": "<section id=\"services\" class=\"bg-[#f9fafb] py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-center text-3xl font-bold mb-8\">Our Services</h2>\n    <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-center justify-center\">\n      <!-- Service Item 1 -->\n      <article class=\"glass-card p-4 rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <i class=\"icon-wash text-5xl mb-4\"></i>\n        <h3 class=\"text-xl font-semibold\">Self-service wash & dry</h3>\n        <p>Enjoy clean clothes without the hassle of waiting in line.</p>\n      </article>\n      \n      <!-- Service Item 2 -->\n      <article class=\"glass-card p-4 rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <i class=\"icon-drop-off text-5xl mb-4\"></i>\n        <h3 class=\"text-xl font-semibold\">Drop-off laundry service</h3>\n        <p>Simply drop off your clothes and we'll take care of the rest.</p>\n      </article>\n      \n      <!-- Service Item 3 -->\n      <article class=\"glass-card p-4 rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <i class=\"icon-dry-cleaning text-5xl mb-4\"></i>\n        <h3 class=\"text-xl font-semibold\">Dry cleaning</h3>\n        <p>Get your delicate items spotlessly clean and crisp.</p>\n      </article>\n      \n      <!-- Service Item 4 -->\n      <article class=\"glass-card p-4 rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <i class=\"icon-fluff-fold text-5xl mb-4\"></i>\n        <h3 class=\"text-xl font-semibold\">Fluff & fold</h3>\n        <p>Receive your laundry neatly folded and ready for wear.</p>\n      </article>\n      \n      <!-- Service Item 5 -->\n      <article class=\"glass-card p-4 rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <i class=\"icon-wifi text-5xl mb-4\"></i>\n        <h3 class=\"text-xl font-semibold\">Free WiFi</h3>\n        <p>Stay connected with high-speed internet during your visit.</p>\n      </article>\n    </div>\n  </div>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "43d74acf",
+          "name": "open-hours",
+          "component_type": "callout-box",
+          "content": {
+            "title": "Hours of Operation",
+            "text": "Open 7am-11pm daily"
+          },
+          "html": "<section class=\"bg-gray-200 py-24\">\n  <div class=\"container mx-auto px-6 text-center\">\n    <h2 class=\"text-3xl font-bold mb-8\" style=\"animation: fadeInUp 0.8s ease-out both;\">Hours of Operation</h2>\n    <p class=\"text-lg mb-12\">Open 7am-11pm daily</p>\n    <div class=\"glass-card p-6 rounded-lg shadow-xl\">\n      <h3 class=\"text-xl font-bold mb-4\">Get Started Today!</h3>\n      <button role=\"button\" aria-label=\"Book Now\" class=\"bg-primary text-white px-8 py-3 rounded-full hover:scale-105 hover:shadow-xl transition-all duration-300\">Book Now</button>\n    </div>\n  </div>\n</section>\n\n<style>\n  .glass-card {\n    backdrop-filter: blur(10px);\n    border-radius: 16px;\n    box-shadow: rgba(255, 255, 255, 0.3) 0px 4px 8px -2px, rgba(255, 255, 255, 0.2) 0px 1px 2px 0px;\n    transition: all 0.15s ease-in-out;\n  }\n\n  .glass-card:hover {\n    transform: translateY(-2px);\n  }\n</style>",
+          "order": 2
+        },
+        {
+          "id": "1abb687a",
+          "name": "about-us",
+          "component_type": "paragraph",
+          "content": {
+            "text": "Welcome to Bubble Up Laundromat! We are a modern laundromat in Brooklyn offering self-service washers and dryers, drop-off laundry service, and free WiFi. Our friendly staff is always ready to help with any questions or concerns."
+          },
+          "html": "<section id=\"about-us\" class=\"bg-[#F9FAFB] py-24\">\n  <div class=\"container mx-auto px-6 text-center\">\n    <h1 style=\"animation: fadeInUp 0.8s ease-out both\" class=\"text-3xl font-bold mb-6 text-[var(--color-primary)] bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-secondary)] -webkit-background-clip:text -webkit-text-fill-color:transparent\">Welcome to Bubble Up Laundromat</h1>\n    <p class=\"text-lg text-gray-700 mb-8\">We are a modern laundromat in Brooklyn offering self-service washers and dryers, drop-off laundry service, and free WiFi. Our friendly staff is always ready to help with any questions or concerns.</p>\n  </div>\n</section>",
+          "order": 3
+        },
+        {
+          "id": "2aeca55b",
+          "name": "contact",
+          "component_type": "form",
+          "content": {
+            "fields": [
+              {
+                "label": "Name",
+                "type": "text"
+              },
+              {
+                "label": "Email",
+                "type": "email"
+              },
+              {
+                "label": "Message",
+                "type": "textarea"
+              }
+            ],
+            "submit_label": "Send Message"
+          },
+          "html": "<section id=\"contact\" class=\"bg-[#f9fafb] py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-3xl font-bold text-center mb-12\">Get in Touch</h2>\n    <form action=\"#\" method=\"post\" class=\"max-w-lg mx-auto\">\n      <div class=\"mb-4\">\n        <label for=\"name\" class=\"block text-sm font-medium text-gray-700\">Name</label>\n        <input type=\"text\" id=\"name\" name=\"name\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email</label>\n        <input type=\"email\" id=\"email\" name=\"email\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"message\" class=\"block text-sm font-medium text-gray-700\">Message</label>\n        <textarea id=\"message\" name=\"message\" required rows=\"6\" class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\"></textarea>\n      </div>\n      <button type=\"submit\" role=\"button\" aria-label=\"Send Message\" class=\"inline-flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#EA580C] hover:bg-[#e74c3c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform-gpu scale-100 hover:scale-105 hover:shadow-xl\">Send Message</button>\n    </form>\n  </div>\n</section>",
+          "order": 4
+        },
+        {
+          "id": "5f19c1f2",
+          "name": "location",
+          "component_type": "map",
+          "content": {
+            "address": "1234 Brooklyn Ave, Brooklyn, NY 11205"
+          },
+          "html": "<section id=\"location\" class=\"bg-[#f9fafc] py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-center text-3xl font-bold text-secondary mb-8\">Find Us</h2>\n    <article class=\"glass-card p-6 rounded-lg shadow-md max-w-lg mx-auto text-center\">\n      <header>\n        <h3 class=\"text-xl font-semibold text-primary mb-4\">Our Location</h3>\n      </header>\n      <p class=\"mb-4\">1234 Brooklyn Ave, Brooklyn, NY 11205</p>\n      <a href=\"https://www.google.com/maps/dir//Bubble+Up+Laundromat/@40.698784,-73.9848766,17z/data=!4m6!3m5!1s0x89c25c1f8e45a0d7:0x1b486a1cc29fc33c!8m2!3d40.6987813!4d-73.9826879!16s%2Fg%2F1z8qf5yv?entry=ttu\" target=\"_blank\" class=\"btn bg-primary text-secondary px-4 py-2 rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl inline-block mt-4\">Get Directions</a>\n    </article>\n  </div>\n</section>",
+          "order": 5
+        }
+      ],
+      "seo": {
+        "title": "Bubble Up Laundromat - Self-Service Wash & Dry, Drop-off Laundry, Dry Cleaning",
+        "meta_description": "Find your perfect wash and dry solution at Bubble Up Laundromat. Try our self-service option or drop off your laundry for pick-up.",
+        "keywords": [
+          "laundry",
+          "self-service",
+          "drop-off",
+          "dry cleaning"
+        ],
+        "og_title": "Bubble Up Laundromat - Your Laundry Solution",
+        "og_description": "Experience convenience with Bubble Up Laundromat's self-service wash and dry, drop-off laundry service, and dry cleaning.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Bubble Up Laundromat",
+          "description": "Find your perfect wash and dry solution at Bubble Up Laundromat. Try our self-service option or drop off your laundry for pick-up.",
+          "url": "http://www.bubbleuplaundromat.com/",
+          "logo": "http://www.bubbleuplaundromat.com/logo.png",
+          "image": "http://www.bubbleuplaundromat.com/banner.jpg",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Laundry St.",
+            "addressLocality": "City",
+            "addressRegion": "State",
+            "postalCode": "ZIP"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "08:00",
+              "closes": "20:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Saturday"
+              ],
+              "opens": "10:00",
+              "closes": "17:00"
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Sunday"
+              ],
+              "opens": "12:00",
+              "closes": "16:00"
+            }
+          ],
+          "sameAs": [
+            "https://www.facebook.com/bubbleuplaundromat",
+            "https://twitter.com/bubbleuplaundromat",
+            "https://www.instagram.com/bubbleuplaundromat"
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Bubble Up Laundromat offer?",
+            "a": "Bubble Up Laundromat offers self-service wash & dry, drop-off laundry service, dry cleaning, fluff & fold, and free WiFi."
+          },
+          {
+            "q": "When is Bubble Up Laundromat open?",
+            "a": "Bubble Up Laundromat is open from 7am to 11pm daily."
+          },
+          {
+            "q": "Is there a charge for using the laundromat?",
+            "a": "No, there are no charges for using the self-service washers and dryers. However, some additional services like dry cleaning may incur fees."
+          },
+          {
+            "q": "Do they offer free WiFi?",
+            "a": "Yes, Bubble Up Laundromat provides free WiFi to its customers."
+          },
+          {
+            "q": "What is the location of Bubble Up Laundromat?",
+            "a": "Bubble Up Laundromat is located in Brooklyn."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Bubble Up Laundromat",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Bubble Up Laundromat is a modern laundromat in Brooklyn offering self-service wash & dry, drop-off laundry service, dry cleaning, fluff & fold, and free WiFi. Open daily from 7am to 11pm.",
+        "topic_cluster": "Laundry Services",
+        "related_topics": [
+          "Self-Service Laundry",
+          "Drop-Off Service",
+          "Dry Cleaning",
+          "Fluff & Fold",
+          "Free WiFi"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - Bubble Up Laundromat</title>\n  <meta name=\"description\" content=\"Fresh, Fast, Friendly\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Fredoka', system-ui, -apple-system, sans-serif;\n  --font-body: 'Nunito', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Find your perfect wash and dry solution at Bubble Up Laundromat. Try our self-service option or drop off your laundry for pick-up.\">\n  <meta name=\"keywords\" content=\"laundry, self-service, drop-off, dry cleaning\">\n  <meta property=\"og:title\" content=\"Bubble Up Laundromat - Your Laundry Solution\">\n  <meta property=\"og:description\" content=\"Experience convenience with Bubble Up Laundromat's self-service wash and dry, drop-off laundry service, and dry cleaning.\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Bubble Up Laundromat\",\n  \"description\": \"Find your perfect wash and dry solution at Bubble Up Laundromat. Try our self-service option or drop off your laundry for pick-up.\",\n  \"url\": \"http://www.bubbleuplaundromat.com/\",\n  \"logo\": \"http://www.bubbleuplaundromat.com/logo.png\",\n  \"image\": \"http://www.bubbleuplaundromat.com/banner.jpg\",\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"123 Laundry St.\",\n    \"addressLocality\": \"City\",\n    \"addressRegion\": \"State\",\n    \"postalCode\": \"ZIP\"\n  },\n  \"openingHoursSpecification\": [\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Monday\",\n        \"Tuesday\",\n        \"Wednesday\",\n        \"Thursday\",\n        \"Friday\"\n      ],\n      \"opens\": \"08:00\",\n      \"closes\": \"20:00\"\n    },\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Saturday\"\n      ],\n      \"opens\": \"10:00\",\n      \"closes\": \"17:00\"\n    },\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Sunday\"\n      ],\n      \"opens\": \"12:00\",\n      \"closes\": \"16:00\"\n    }\n  ],\n  \"sameAs\": [\n    \"https://www.facebook.com/bubbleuplaundromat\",\n    \"https://twitter.com/bubbleuplaundromat\",\n    \"https://www.instagram.com/bubbleuplaundromat\"\n  ]\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What services does Bubble Up Laundromat offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bubble Up Laundromat offers self-service wash & dry, drop-off laundry service, dry cleaning, fluff & fold, and free WiFi.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"When is Bubble Up Laundromat open?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bubble Up Laundromat is open from 7am to 11pm daily.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Is there a charge for using the laundromat?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"No, there are no charges for using the self-service washers and dryers. However, some additional services like dry cleaning may incur fees.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Do they offer free WiFi?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, Bubble Up Laundromat provides free WiFi to its customers.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What is the location of Bubble Up Laundromat?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bubble Up Laundromat is located in Brooklyn.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<header class=\"bg-gradient-to-br from-primary via-secondary to-accent h-screen flex items-center justify-center\">\n    <div class=\"text-center px-4\">\n        <h1 class=\"font-fredoka text-white text-5xl sm:text-6xl mb-2\" style=\"animation: fadeInUp 0.8s ease-out both\">Fresh, Fast, Friendly</h1>\n        <p class=\"font-nunito text-lg text-white sm:text-xl mb-6 opacity-70\">Modern laundromat in Brooklyn. Self-service washers and dryers, drop-off service, and free WiFi.</p>\n        <nav>\n            <ul class=\"flex gap-4\">\n                <li><a href=\"index.html\" class=\"text-white hover:text-accent transition-colors duration-200\">Home</a></li>\n            </ul>\n        </nav>\n    </div>\n</header>\n\n<style>\n@keyframes fadeInUp {\n    from { opacity: 0; transform: translateY(20px); }\n    to { opacity: 1; transform: translateY(0); }\n}\n.glass-card {\n    background-color: rgba(255, 255, 255, 0.3);\n    backdrop-filter: blur(10px);\n    border-radius: 16px;\n    box-shadow: -5px -5px 15px rgba(0, 0, 0, 0.1), 5px 5px 15px rgba(0, 0, 0, 0.1);\n    transition: all 300ms ease;\n}\n.glass-card:hover {\n    transform: translateY(-2px) scale(1.05);\n    box-shadow: -7px -7px 20px rgba(0, 0, 0, 0.2), 7px 7px 20px rgba(0, 0, 0, 0.2);\n}\n</style>\n\n<section id=\"services\" class=\"bg-[#f9fafb] py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-center text-3xl font-bold mb-8\">Our Services</h2>\n    <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-center justify-center\">\n      <!-- Service Item 1 -->\n      <article class=\"glass-card p-4 rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <i class=\"icon-wash text-5xl mb-4\"></i>\n        <h3 class=\"text-xl font-semibold\">Self-service wash & dry</h3>\n        <p>Enjoy clean clothes without the hassle of waiting in line.</p>\n      </article>\n      \n      <!-- Service Item 2 -->\n      <article class=\"glass-card p-4 rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <i class=\"icon-drop-off text-5xl mb-4\"></i>\n        <h3 class=\"text-xl font-semibold\">Drop-off laundry service</h3>\n        <p>Simply drop off your clothes and we'll take care of the rest.</p>\n      </article>\n      \n      <!-- Service Item 3 -->\n      <article class=\"glass-card p-4 rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <i class=\"icon-dry-cleaning text-5xl mb-4\"></i>\n        <h3 class=\"text-xl font-semibold\">Dry cleaning</h3>\n        <p>Get your delicate items spotlessly clean and crisp.</p>\n      </article>\n      \n      <!-- Service Item 4 -->\n      <article class=\"glass-card p-4 rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <i class=\"icon-fluff-fold text-5xl mb-4\"></i>\n        <h3 class=\"text-xl font-semibold\">Fluff & fold</h3>\n        <p>Receive your laundry neatly folded and ready for wear.</p>\n      </article>\n      \n      <!-- Service Item 5 -->\n      <article class=\"glass-card p-4 rounded-lg shadow-md hover:-translate-y-2 transition-transform duration-300\">\n        <i class=\"icon-wifi text-5xl mb-4\"></i>\n        <h3 class=\"text-xl font-semibold\">Free WiFi</h3>\n        <p>Stay connected with high-speed internet during your visit.</p>\n      </article>\n    </div>\n  </div>\n</section>\n\n<section class=\"bg-gray-200 py-24\">\n  <div class=\"container mx-auto px-6 text-center\">\n    <h2 class=\"text-3xl font-bold mb-8\" style=\"animation: fadeInUp 0.8s ease-out both;\">Hours of Operation</h2>\n    <p class=\"text-lg mb-12\">Open 7am-11pm daily</p>\n    <div class=\"glass-card p-6 rounded-lg shadow-xl\">\n      <h3 class=\"text-xl font-bold mb-4\">Get Started Today!</h3>\n      <button role=\"button\" aria-label=\"Book Now\" class=\"bg-primary text-white px-8 py-3 rounded-full hover:scale-105 hover:shadow-xl transition-all duration-300\">Book Now</button>\n    </div>\n  </div>\n</section>\n\n<style>\n  .glass-card {\n    backdrop-filter: blur(10px);\n    border-radius: 16px;\n    box-shadow: rgba(255, 255, 255, 0.3) 0px 4px 8px -2px, rgba(255, 255, 255, 0.2) 0px 1px 2px 0px;\n    transition: all 0.15s ease-in-out;\n  }\n\n  .glass-card:hover {\n    transform: translateY(-2px);\n  }\n</style>\n\n<section id=\"about-us\" class=\"bg-[#F9FAFB] py-24\">\n  <div class=\"container mx-auto px-6 text-center\">\n    <h1 style=\"animation: fadeInUp 0.8s ease-out both\" class=\"text-3xl font-bold mb-6 text-[var(--color-primary)] bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-secondary)] -webkit-background-clip:text -webkit-text-fill-color:transparent\">Welcome to Bubble Up Laundromat</h1>\n    <p class=\"text-lg text-gray-700 mb-8\">We are a modern laundromat in Brooklyn offering self-service washers and dryers, drop-off laundry service, and free WiFi. Our friendly staff is always ready to help with any questions or concerns.</p>\n  </div>\n</section>\n\n<section id=\"contact\" class=\"bg-[#f9fafb] py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-3xl font-bold text-center mb-12\">Get in Touch</h2>\n    <form action=\"#\" method=\"post\" class=\"max-w-lg mx-auto\">\n      <div class=\"mb-4\">\n        <label for=\"name\" class=\"block text-sm font-medium text-gray-700\">Name</label>\n        <input type=\"text\" id=\"name\" name=\"name\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email</label>\n        <input type=\"email\" id=\"email\" name=\"email\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"message\" class=\"block text-sm font-medium text-gray-700\">Message</label>\n        <textarea id=\"message\" name=\"message\" required rows=\"6\" class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\"></textarea>\n      </div>\n      <button type=\"submit\" role=\"button\" aria-label=\"Send Message\" class=\"inline-flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#EA580C] hover:bg-[#e74c3c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform-gpu scale-100 hover:scale-105 hover:shadow-xl\">Send Message</button>\n    </form>\n  </div>\n</section>\n\n<section id=\"location\" class=\"bg-[#f9fafc] py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 class=\"text-center text-3xl font-bold text-secondary mb-8\">Find Us</h2>\n    <article class=\"glass-card p-6 rounded-lg shadow-md max-w-lg mx-auto text-center\">\n      <header>\n        <h3 class=\"text-xl font-semibold text-primary mb-4\">Our Location</h3>\n      </header>\n      <p class=\"mb-4\">1234 Brooklyn Ave, Brooklyn, NY 11205</p>\n      <a href=\"https://www.google.com/maps/dir//Bubble+Up+Laundromat/@40.698784,-73.9848766,17z/data=!4m6!3m5!1s0x89c25c1f8e45a0d7:0x1b486a1cc29fc33c!8m2!3d40.6987813!4d-73.9826879!16s%2Fg%2F1z8qf5yv?entry=ttu\" target=\"_blank\" class=\"btn bg-primary text-secondary px-4 py-2 rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl inline-block mt-4\">Get Directions</a>\n    </article>\n  </div>\n</section>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What services does Bubble Up Laundromat offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bubble Up Laundromat offers self-service wash & dry, drop-off laundry service, dry cleaning, fluff & fold, and free WiFi.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">When is Bubble Up Laundromat open?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bubble Up Laundromat is open from 7am to 11pm daily.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Is there a charge for using the laundromat?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">No, there are no charges for using the self-service washers and dryers. However, some additional services like dry cleaning may incur fees.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Do they offer free WiFi?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, Bubble Up Laundromat provides free WiFi to its customers.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What is the location of Bubble Up Laundromat?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bubble Up Laundromat is located in Brooklyn.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    }
+  ],
+  "template_ids": [],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/bubble-up-laundromat",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Fredoka', system-ui, -apple-system, sans-serif;\n  --font-body: 'Nunito', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n",
+  "sitemap_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://bubbleuplaundromat.com/index.html</loc>\n    <priority>1.0</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>",
+  "robots_txt": "User-agent: *\nAllow: /\nSitemap: https://bubbleuplaundromat.com/sitemap.xml\n",
+  "errors": [
+    "[index] Multiple <h1> tags found (2)"
+  ],
+  "metadata": {
+    "design_context": {
+      "style_name": "Neumorphism",
+      "primary_color": "#2563EB",
+      "secondary_color": "#3B82F6",
+      "accent_color": "#EA580C",
+      "heading_font": "Fredoka",
+      "body_font": "Nunito"
+    },
+    "ux_scores": {
+      "index": 88
+    }
+  }
+}

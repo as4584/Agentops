@@ -53,6 +53,21 @@ class SEOAgent(WebAgentBase):
         logger.info(f"[{self.name}] SEO optimization complete")
         return project
 
+    async def run_strategy(self, project: SiteProject) -> SiteProject:
+        """Pre-build: generate SEO profiles for each page without mutating HTML.
+
+        Populates ``page.seo`` on every PageSpec so the build stage can apply
+        the metadata during or after HTML generation.  Does NOT advance the
+        project status — the status remains PLANNED.
+        """
+        brief = project.brief
+        logger.info(f"[{self.name}] Building SEO strategy for {len(project.pages)} pages")
+        for page in project.pages:
+            seo = await self._generate_seo_profile(page, brief)
+            page.seo = seo
+        logger.info(f"[{self.name}] SEO strategy complete")
+        return project
+
     async def _generate_seo_profile(self, page: PageSpec, brief) -> SEOProfile:
         """Generate SEO metadata for a page via LLM."""
         prompt = f"""Generate SEO metadata for this webpage:

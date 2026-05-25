@@ -168,6 +168,11 @@ class TestHealthLegacy:
         data = client.get("/health").json()
         assert "uptime_seconds" in data
 
+    def test_exposes_runtime_profile_and_retrieval_mode(self, client):
+        data = client.get("/health").json()
+        assert data["runtime_profile"] in {"minimal", "operator", "studio"}
+        assert data["retrieval_mode"] in {"fast_context", "deep_index"}
+
 
 # ---------------------------------------------------------------------------
 # skip_auth_paths — all probe paths bypass auth

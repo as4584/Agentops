@@ -7,6 +7,8 @@ uses the local Ollama LLM instead of cloud moderation APIs.
 
 from __future__ import annotations
 
+import asyncio
+import functools
 import json
 import subprocess
 from difflib import SequenceMatcher
@@ -38,12 +40,12 @@ class QAAgent(ContentAgent):
 
         # Audio checks
         if job.voice_audio_path and Path(job.voice_audio_path).exists():
-            lufs = self._measure_lufs(job.voice_audio_path)
+            lufs = await asyncio.to_thread(self._measure_lufs, job.voice_audio_path)
             report.audio_lufs = lufs
             if lufs is not None:
                 ok = self.LUFS_MIN <= lufs <= self.LUFS_MAX
                 notes.append(f"{'✅' if ok else '⚠️'} Audio LUFS: {lufs:.1f}")
-            clipped = self._check_clipping(job.voice_audio_path)
+            clipped = await asyncio.to_thread(self._check_clipping, job.voice_audio_path)
             report.audio_clipped = clipped
             notes.append("❌ Audio clipping" if clipped else "✅ No clipping")
         else:
@@ -52,11 +54,11 @@ class QAAgent(ContentAgent):
         # Video checks
         vid = job.captioned_video_path
         if vid and Path(vid).exists():
-            dur = self._get_duration(vid)
+            dur = await asyncio.to_thread(self._get_duration, vid)
             report.video_duration_sec = dur
             ok = self.MIN_DURATION <= dur <= self.MAX_DURATION
             notes.append(f"{'✅' if ok else '❌'} Duration: {dur:.1f}s")
-            report.visual_artifacts = self._check_artifacts(vid)
+            report.visual_artifacts = await asyncio.to_thread(self._check_artifacts, vid)
             notes.append("❌ Visual artifacts" if report.visual_artifacts else "✅ No artifacts")
         else:
             notes.append("⚠️ Video file missing")
@@ -149,6 +151,69 @@ class QAAgent(ContentAgent):
         return not any(p in lower for p in banned)
 
     # ── FFmpeg checks ────────────────────────────────────
+
+    async def _measure_lufs_async(self, path: str) -> float | None:
+        try:
+            r = await asyncio.to_thread(
+                functools.partial(
+                    subprocess.run,
+                    ["ffmpeg", "-i", path, "-af", "loudnorm=print_format=json", "-f", "null", "-"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                )
+            )
+            for line in r.stderr.splitlines():
+                if '"input_i"' in line:
+                    return float(line.split(":")[1].strip().strip('",'))
+        except Exception:
+            pass
+        return None
+
+    async def _check_clipping_async(self, path: str) -> bool:
+        try:
+            r = await asyncio.to_thread(
+                functools.partial(
+                    subprocess.run,
+                    ["ffmpeg", "-i", path, "-af", "astats=metadata=1:reset=1", "-f", "null", "-"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                )
+            )
+            return "Number of Clips" in r.stderr
+        except Exception:
+            return False
+
+    async def _get_duration_async(self, path: str) -> float:
+        try:
+            r = await asyncio.to_thread(
+                functools.partial(
+                    subprocess.run,
+                    ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", path],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+            )
+            return float(json.loads(r.stdout).get("format", {}).get("duration", 0))
+        except Exception:
+            return 0.0
+
+    async def _check_artifacts_async(self, path: str) -> bool:
+        try:
+            r = await asyncio.to_thread(
+                functools.partial(
+                    subprocess.run,
+                    ["ffmpeg", "-i", path, "-vf", "blackdetect=d=0.5:pix_th=0.10", "-an", "-f", "null", "-"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                )
+            )
+            return "blackdetect" in r.stderr.lower()
+        except Exception:
+            return False
 
     def _measure_lufs(self, path: str) -> float | None:
         try:

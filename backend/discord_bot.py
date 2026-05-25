@@ -50,12 +50,14 @@ if _env_path.exists():
 try:
     import discord
     from discord import Intents, Message
+    from discord import app_commands
 
     HAS_DISCORD = True
 except ImportError:
     discord = None  # type: ignore[assignment]
     Intents = None  # type: ignore[assignment,misc]
     Message = None  # type: ignore[assignment,misc]
+    app_commands = None  # type: ignore[assignment]
     HAS_DISCORD = False
 
 try:
@@ -170,6 +172,61 @@ AGENT_ALIASES: dict[str, str] = {
 # ---------------------------------------------------------------------------
 # Discord Client
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Durable Discord Post History
+# ---------------------------------------------------------------------------
+# Orchad-readable record of everything the bot posts to Discord channels.
+# Kept as a JSON-lines file so it survives restarts and is easy to query.
+
+_DISCORD_POST_LOG_PATH = Path(__file__).resolve().parent.parent / "data" / "agents" / "discord_post_history.jsonl"
+
+
+def _log_discord_post(record: dict) -> None:
+    """Append a structured record of a Discord channel send to the durable log."""
+    import datetime as _dt
+
+    try:
+        _DISCORD_POST_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        record.setdefault("logged_at", _dt.datetime.utcnow().isoformat() + "Z")
+        with _DISCORD_POST_LOG_PATH.open("a") as fh:
+            fh.write(json.dumps(record) + "\n")
+    except Exception as _exc:
+        logger.warning(f"[DiscordPostLog] Failed to write record: {_exc}")
+
+
+def get_discord_post_history(
+    event_type: str | None = None,
+    channel_name: str | None = None,
+    limit: int = 50,
+) -> list[dict]:
+    """Return recent Discord post records filtered by event_type and/or channel_name."""
+    if not _DISCORD_POST_LOG_PATH.exists():
+        return []
+    try:
+        lines = _DISCORD_POST_LOG_PATH.read_text().splitlines()
+        records = []
+        for line in reversed(lines):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except Exception:
+                continue
+            if event_type and rec.get("event_type") != event_type:
+                continue
+            if channel_name and rec.get("channel_name") != channel_name:
+                continue
+            records.append(rec)
+            if len(records) >= limit:
+                break
+        return records
+    except Exception as _exc:
+        logger.warning(f"[DiscordPostLog] Failed to read history: {_exc}")
+        return []
+
+
 _ClientBase = discord.Client if HAS_DISCORD else object  # type: ignore[union-attr]
 
 
@@ -180,6 +237,7 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
         intents = Intents.default()  # type: ignore[union-attr]
         intents.message_content = True
         super().__init__(intents=intents)
+        self.tree = app_commands.CommandTree(self)  # type: ignore[union-attr]
         self._http_client: Any = None
         self._conversation_agents: dict[int, str] = {}  # channel_id → last agent
         self._rate_limits: dict[int, float] = {}  # user_id → last msg time
@@ -191,6 +249,98 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
         self._last_content_report_mtime: float = 0.0  # track report file changes
         self._empty_content_warned: bool = False  # warn once about MESSAGE_CONTENT intent
         self._comment_farm_channel_id: int | None = COMMENT_FARM_CHANNEL_ID  # resolved on ready
+        self._register_slash_commands()
+
+    def _register_slash_commands(self) -> None:
+        """Register all /slash commands on the CommandTree."""
+
+        @self.tree.command(name="ask", description="Ask any Agentop agent a question (auto-routes)")
+        @app_commands.describe(message="Your question or task")  # type: ignore[union-attr]
+        async def slash_ask(interaction: Any, message: str) -> None:
+            await interaction.response.defer(thinking=True)
+            await self._handle_chat_interaction(interaction, message, agent_id="auto")
+
+        @self.tree.command(name="soul", description="Reflect on goals, trust, or system health")
+        @app_commands.describe(message="Your question")  # type: ignore[union-attr]
+        async def slash_soul(interaction: Any, message: str) -> None:
+            await interaction.response.defer(thinking=True)
+            await self._handle_chat_interaction(interaction, message, agent_id="soul_core")
+
+        @self.tree.command(name="devops", description="CI/CD, git, deployment questions")
+        @app_commands.describe(message="Your question")  # type: ignore[union-attr]
+        async def slash_devops(interaction: Any, message: str) -> None:
+            await interaction.response.defer(thinking=True)
+            await self._handle_chat_interaction(interaction, message, agent_id="devops_agent")
+
+        @self.tree.command(name="security", description="CVE checks, secret scanning, vulnerability questions")
+        @app_commands.describe(message="Your question")  # type: ignore[union-attr]
+        async def slash_security(interaction: Any, message: str) -> None:
+            await interaction.response.defer(thinking=True)
+            await self._handle_chat_interaction(interaction, message, agent_id="security_agent")
+
+        @self.tree.command(name="monitor", description="System health, logs, and metrics")
+        @app_commands.describe(message="Your question")  # type: ignore[union-attr]
+        async def slash_monitor(interaction: Any, message: str) -> None:
+            await interaction.response.defer(thinking=True)
+            await self._handle_chat_interaction(interaction, message, agent_id="monitor_agent")
+
+        @self.tree.command(name="code", description="Code review, PR review, pattern enforcement")
+        @app_commands.describe(message="Your question")  # type: ignore[union-attr]
+        async def slash_code(interaction: Any, message: str) -> None:
+            await interaction.response.defer(thinking=True)
+            await self._handle_chat_interaction(interaction, message, agent_id="code_review_agent")
+
+        @self.tree.command(name="knowledge", description="Search the Agentop knowledge base")
+        @app_commands.describe(query="What to search for")  # type: ignore[union-attr]
+        async def slash_knowledge(interaction: Any, query: str) -> None:
+            await interaction.response.defer(thinking=True)
+            await self._handle_chat_interaction(interaction, query, agent_id="knowledge_agent")
+
+        @self.tree.command(name="data", description="ETL, schema, SQLite queries")
+        @app_commands.describe(message="Your question")  # type: ignore[union-attr]
+        async def slash_data(interaction: Any, message: str) -> None:
+            await interaction.response.defer(thinking=True)
+            await self._handle_chat_interaction(interaction, message, agent_id="data_agent")
+
+        @self.tree.command(name="farm", description="Generate engagement comment drafts for an Instagram post")
+        @app_commands.describe(url="Instagram post URL")  # type: ignore[union-attr]
+        async def slash_farm(interaction: Any, url: str) -> None:
+            await interaction.response.defer(thinking=True)
+            # Re-use _cmd_farm but need a message-like object — create an interaction wrapper
+            await self._handle_farm_interaction(interaction, url)
+
+        @self.tree.command(name="news", description="Show latest AI & security news")
+        @app_commands.describe(topic="Optional topic filter (e.g. deepseek, cybersecurity)")  # type: ignore[union-attr]
+        async def slash_news(interaction: Any, topic: str = "") -> None:
+            await interaction.response.defer(thinking=True)
+            await self._handle_news_interaction(interaction, topic)
+
+        @self.tree.command(name="status", description="Show Agentop system health")
+        async def slash_status(interaction: Any) -> None:
+            await interaction.response.defer(thinking=True)
+            await self._handle_status_interaction(interaction)
+
+        @self.tree.command(name="help", description="Show all available commands")
+        async def slash_help(interaction: Any) -> None:
+            embed = discord.Embed(  # type: ignore[union-attr]
+                title="🤖 Agentop — Command Reference",
+                description="Slash commands (/) or prefix commands (!). @mention me to chat freely.",
+                color=0x00FFC8,
+            )
+            embed.add_field(
+                name="💬 Chat agents",
+                value="`/ask` `/soul` `/devops` `/security` `/monitor` `/code` `/knowledge` `/data`",
+                inline=False,
+            )
+            embed.add_field(name="📲 Content", value="`/farm <url>` — Instagram comment drafts", inline=False)
+            embed.add_field(name="📰 News", value="`/news [topic]` — AI & security news feed", inline=False)
+            embed.add_field(name="📊 Status", value="`/status` — system health", inline=False)
+            embed.add_field(
+                name="⚡ Tip",
+                value="@mention me anywhere to chat without a command prefix.",
+                inline=False,
+            )
+            await interaction.response.send_message(embed=embed)
 
     async def setup_hook(self) -> None:
         self._http_client = httpx.AsyncClient(  # type: ignore[union-attr]
@@ -198,6 +348,17 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
             headers=build_auth_headers(),
         )
         logger.info("Agentop Discord bot initialized")
+        # Sync slash commands. Guild sync is instant (dev); global takes up to 1h on first run.
+        # Set DISCORD_DEV_GUILD_ID in .env for instant registration during development.
+        _dev_guild_id = os.getenv("DISCORD_DEV_GUILD_ID", "").strip()
+        if _dev_guild_id.isdigit():
+            _guild = discord.Object(id=int(_dev_guild_id))  # type: ignore[union-attr]
+            self.tree.copy_global_to(guild=_guild)
+            await self.tree.sync(guild=_guild)
+            logger.info(f"Slash commands synced to dev guild {_dev_guild_id} (instant)")
+        else:
+            await self.tree.sync()
+            logger.info("Slash commands synced globally (up to 1h to propagate)")
         # Start security alert poller if channel is configured
         if SECURITY_CHANNEL_ID:
             self.loop.create_task(self._security_alert_poller())
@@ -370,6 +531,14 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
                 await channel.send(embed=embed)
                 delivered_ids.append(alert.get("alert_id", ""))
                 logger.info(f"[SecurityPoller] Delivered alert {alert.get('alert_id')} — {alert.get('severity')}")
+                _log_discord_post({
+                    "event_type": "DISCORD_ALERT_POSTED",
+                    "channel_name": "security-alerts",
+                    "channel_id": getattr(channel, "id", None),
+                    "title": alert.get("message", alert.get("title", ""))[:200],
+                    "severity": alert.get("severity", ""),
+                    "alert_id": alert.get("alert_id", ""),
+                })
             except Exception as exc:
                 logger.warning(f"[SecurityPoller] Failed to send alert: {exc}")
 
@@ -535,6 +704,13 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
             await channel.send(embed=embed)
             self._last_content_report_mtime = mtime
             logger.info("[ContentReport] Posted new optimization report to #content-report")
+            _log_discord_post({
+                "event_type": "DISCORD_CONTENT_REPORT_POSTED",
+                "channel_name": CONTENT_CHANNEL_NAME,
+                "channel_id": self._content_channel_id,
+                "title": "Content Optimization Report",
+                "preview": text[:200],
+            })
         except Exception as exc:
             logger.warning(f"[ContentReport] Failed to post report: {exc}")
 
@@ -781,6 +957,17 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
                 await channel.send(embed=embed)
                 self._delivered_news_ids.add(item["id"])
                 logger.info(f"[NewsIntel] Delivered [{item.get('category', '?')}] {item.get('title', '?')[:60]}")
+                # Durable log so Orchad can answer "what was posted to Discord?"
+                _log_discord_post({
+                    "event_type": "DISCORD_NEWS_POSTED",
+                    "channel_name": NEWS_CHANNEL_NAME,
+                    "channel_id": self._news_channel_id,
+                    "title": item.get("title", "")[:200],
+                    "category": item.get("category", ""),
+                    "source_url": item.get("url", ""),
+                    "news_id": item.get("id", ""),
+                    "timestamp": item.get("published_at", ""),
+                })
             except Exception as exc:
                 logger.warning(f"[NewsIntel] Embed send failed: {exc}")
 
@@ -1036,6 +1223,9 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
                     "self_healer_agent, code_review_agent, security_agent, data_agent, "
                     "comms_agent, cs_agent, it_agent, knowledge_agent. "
                     "4) Be direct and helpful. No verbose preamble. "
+                    "5) Apply Ordo reasoning: classify the lane (dev/eval/arch/positioning), "
+                    "state confidence, and if confidence <0.65 say what you need to be sure. "
+                    "6) If your answer relies on retrieved documents cite them briefly (e.g. \u2018per config.py\u2019). "
                     "[/DISCORD CONTEXT]\n\n"
                 )
                 payload: dict[str, Any] = {
@@ -1061,6 +1251,8 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
                     agent_name = data.get("agent_id", agent_id)
                     response_text = data.get("message", "No response.")
                     drift = data.get("drift_status", "GREEN")
+                    ordo = data.get("ordo_trace") or {}
+                    sources = data.get("sources") or []
 
                     # Strip any echoed Discord context prefix from response
                     response_text = re.sub(
@@ -1074,12 +1266,33 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
                     if len(response_text) > 1800:
                         response_text = response_text[:1800] + "\n\n*...truncated for Discord*"
 
+                    # --- Ordo reasoning badge ---
+                    ordo_footer = ""
+                    if ordo:
+                        conf = ordo.get("confidence", 0.0)
+                        lane = ordo.get("lane", "")
+                        inferred = ordo.get("inferred", False)
+                        if conf >= 0.75:
+                            conf_icon = "🟢"
+                        elif conf >= 0.5:
+                            conf_icon = "🟡"
+                        else:
+                            conf_icon = "🔴"
+                        inferred_tag = " *(inferred)*" if inferred else ""
+                        ordo_footer = f"\n-# {conf_icon} {int(conf * 100)}% confidence · {lane}{inferred_tag}"
+
+                    # --- RAG source citations ---
+                    sources_footer = ""
+                    if sources:
+                        cited = ", ".join(f"`{s}`" for s in sources[:3])
+                        sources_footer = f"\n-# 📚 Sources: {cited}"
+
                     # Format response with agent attribution
                     header = f"**[{agent_name}]**"
                     if drift != "GREEN":
                         header += f" ⚠️ Drift: {drift}"
 
-                    full_response = f"{header}\n{response_text}"
+                    full_response = f"{header}\n{response_text}{ordo_footer}{sources_footer}"
 
                     # Track conversation agent for context
                     self._conversation_agents[message.channel.id] = agent_name
@@ -1111,6 +1324,168 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
                 await message.reply(chunk)
             else:
                 await message.channel.send(chunk)
+
+    # -------------------------------------------------------------------------
+    # Slash command interaction handlers
+    # Interactions use followup.send() after defer(), not message.reply()
+    # -------------------------------------------------------------------------
+
+    async def _handle_chat_interaction(self, interaction: Any, text: str, agent_id: str) -> None:
+        """Handle a slash command chat interaction — mirrors _handle_chat but uses interaction API."""
+        if not self._http_client:
+            await interaction.followup.send("Bot not fully initialized yet.")
+            return
+        try:
+            discord_prefix = (
+                "[DISCORD CONTEXT] You are responding via Discord. Rules: "
+                "1) Keep responses under 500 characters. "
+                "2) Do NOT hallucinate tool calls or agent names. "
+                "3) Only reference valid Agentop agents. "
+                "4) Be direct and helpful. No verbose preamble. "
+                "5) Apply Ordo reasoning: classify the lane, state confidence, "
+                "and if confidence <0.65 say what you need to be sure. "
+                "6) If your answer relies on retrieved documents cite them briefly. "
+                "[/DISCORD CONTEXT]\n\n"
+            )
+            payload: dict[str, Any] = {
+                "agent_id": agent_id,
+                "message": discord_prefix + text,
+                "context": {
+                    "source": "discord_slash",
+                    "user": str(interaction.user),
+                    "user_id": str(interaction.user.id),
+                    "channel": str(interaction.channel),
+                    "channel_id": str(interaction.channel_id),
+                    "guild": str(getattr(interaction.guild, "name", "DM")),
+                },
+            }
+            resp = await self._http_client.post(f"{AGENTOP_API_URL}/chat", json=payload)
+            if resp.status_code == 200:
+                data = resp.json()
+                agent_name = data.get("agent_id", agent_id)
+                response_text = data.get("message", "No response.")
+                ordo = data.get("ordo_trace") or {}
+                sources = data.get("sources") or []
+
+                response_text = re.sub(
+                    r"\[DISCORD CONTEXT\].*?\[/DISCORD CONTEXT\]\s*", "", response_text, flags=re.DOTALL
+                ).strip()
+                if len(response_text) > 1800:
+                    response_text = response_text[:1800] + "\n\n*...truncated for Discord*"
+
+                ordo_footer = ""
+                if ordo:
+                    conf = ordo.get("confidence", 0.0)
+                    lane = ordo.get("lane", "")
+                    inferred = ordo.get("inferred", False)
+                    conf_icon = "🟢" if conf >= 0.75 else "🟡" if conf >= 0.5 else "🔴"
+                    inferred_tag = " *(inferred)*" if inferred else ""
+                    ordo_footer = f"\n-# {conf_icon} {int(conf * 100)}% confidence · {lane}{inferred_tag}"
+
+                sources_footer = ""
+                if sources:
+                    cited = ", ".join(f"`{s}`" for s in sources[:3])
+                    sources_footer = f"\n-# 📚 Sources: {cited}"
+
+                full_response = f"**[{agent_name}]**\n{response_text}{ordo_footer}{sources_footer}"
+                # Slash commands: send as chunks via followup
+                chunks = _split_message(full_response, MAX_DISCORD_LENGTH)
+                for chunk in chunks:
+                    await interaction.followup.send(chunk)
+            else:
+                await interaction.followup.send(f"❌ Backend error ({resp.status_code}): {resp.text[:200]}")
+        except Exception as exc:
+            logger.exception("Slash command chat handler error")
+            await interaction.followup.send(f"❌ Error: {type(exc).__name__}: {str(exc)[:100]}")
+
+    async def _handle_farm_interaction(self, interaction: Any, url: str) -> None:
+        """Handle /farm slash command."""
+        if "instagram.com" not in url:
+            await interaction.followup.send("❌ That doesn't look like an Instagram URL.")
+            return
+        import subprocess
+        farm_script = str(COMMENT_FARM_PATH.parent / "comment_farm.py")
+        try:
+            result = await self.loop.run_in_executor(
+                None,
+                lambda: subprocess.run(
+                    ["python3", farm_script, "--post", url],
+                    capture_output=True, text=True, timeout=120, env={**os.environ},
+                ),
+            )
+            output = result.stdout + result.stderr
+            lines = output.strip().split("\n")
+            draft_lines = [line for line in lines if re.match(r"^\d+\.", line.strip())]
+            if draft_lines:
+                handle_match = re.search(r"@(\w[\w.]+)", output)
+                handle = handle_match.group(1) if handle_match else "creator"
+                embed = discord.Embed(  # type: ignore[union-attr]
+                    title=f"💬 Comment drafts for @{handle}",
+                    description=f"**[Open post →]({url})**",
+                    color=0x00FFC8,
+                )
+                options = "\n".join(f"`{line.strip()}`" for line in draft_lines[:3])
+                embed.add_field(name="📋 Copy one of these:", value=options, inline=False)
+                embed.set_footer(text="Post within 30 min for max visibility")
+                await interaction.followup.send(embed=embed)
+            else:
+                await interaction.followup.send("⚠️ Couldn't generate drafts. Check Ollama is running.")
+        except Exception as exc:
+            await interaction.followup.send(f"❌ Error: {type(exc).__name__}: {str(exc)[:100]}")
+
+    async def _handle_news_interaction(self, interaction: Any, topic: str) -> None:
+        """Handle /news slash command."""
+        import json as _json
+        try:
+            news_file = Path(__file__).parent.parent / "data" / "agents" / "knowledge_agent" / "news_intel" / "latest.json"
+            if not news_file.exists():
+                await interaction.followup.send("📭 No news cached yet. Check back after the next poll cycle (10 min).")
+                return
+            items: list[dict] = _json.loads(news_file.read_text())
+            if topic:
+                items = [i for i in items if topic.lower() in (i.get("title", "") + " ".join(i.get("topics", []))).lower()]
+            embed = discord.Embed(  # type: ignore[union-attr]
+                title=f"📰 News Intel{' — ' + topic.title() if topic else ''}",
+                description=f"Latest {min(len(items), 8)} items",
+                color=0x3B82F6,
+            )
+            for item in items[:8]:
+                title = item.get("title", "?")[:100]
+                url = item.get("url", "")
+                source = item.get("source_name", "?")
+                flag = "⭐ " if item.get("high_relevance") else ""
+                value = f"{flag}[{title}]({url})" if url else f"{flag}{title}"
+                embed.add_field(name=source, value=value[:1024], inline=False)
+            await interaction.followup.send(embed=embed)
+        except Exception as exc:
+            await interaction.followup.send(f"❌ News error: {exc}")
+
+    async def _handle_status_interaction(self, interaction: Any) -> None:
+        """Handle /status slash command."""
+        if not self._http_client:
+            await interaction.followup.send("Bot not fully initialized yet.")
+            return
+        try:
+            resp = await self._http_client.get(f"{AGENTOP_API_URL}/health", timeout=10)
+            if resp.status_code == 200:
+                health = resp.json()
+                status = health.get("status", "unknown")
+                llm_ok = health.get("llm_available", False)
+                agents = health.get("agents_active", 0)
+                model = health.get("model", "unknown")
+                color = 0x00FF88 if status == "healthy" else 0xFF6600
+                embed = discord.Embed(  # type: ignore[union-attr]
+                    title=f"{'✅' if status == 'healthy' else '⚠️'} Agentop — {status.title()}",
+                    color=color,
+                )
+                embed.add_field(name="LLM", value=f"{'✅' if llm_ok else '❌'} {model}", inline=True)
+                embed.add_field(name="Agents active", value=str(agents), inline=True)
+                embed.add_field(name="Backend", value=f"`{AGENTOP_API_URL}`", inline=True)
+                await interaction.followup.send(embed=embed)
+            else:
+                await interaction.followup.send(f"❌ Health check failed ({resp.status_code})")
+        except Exception as exc:
+            await interaction.followup.send(f"❌ Can't reach backend: {exc}")
 
     async def _send_help(self, message: Any) -> None:
         embed = discord.Embed(  # type: ignore[union-attr]
@@ -1238,16 +1613,84 @@ def _format_alert_embed(alert: dict) -> Any:
     severity = alert.get("severity", "MEDIUM")
     color_map = {"CRITICAL": 0xFF0000, "HIGH": 0xFF6600, "MEDIUM": 0xFFAA00}
     color = color_map.get(severity, 0xFFAA00)
+    severity_emoji = {"CRITICAL": "🔴", "HIGH": "🟠", "MEDIUM": "🟡"}.get(severity, "🟡")
+
+    alert_type = alert.get("type", "UNKNOWN")
+    # Human-readable type labels
+    type_labels = {
+        "SECRET_FOUND": "Hard-coded secret detected",
+        "CVE": "Known vulnerability (CVE)",
+        "INJECTION": "Possible injection attack",
+        "DRIFT": "Architecture drift detected",
+        "ANOMALY": "Anomalous behavior detected",
+        "POLICY_VIOLATION": "Policy violation",
+    }
+    readable_type = type_labels.get(alert_type, alert_type.replace("_", " ").title())
+
+    summary = alert.get("summary", "").strip()
+    detail = alert.get("detail", alert.get("raw_detail", "")).strip()
+    agent_id = alert.get("agent_id", "unknown")
+    file_ref = alert.get("file", alert.get("path", ""))
+
+    # Build title
+    title = f"{severity_emoji} {severity} — {readable_type}"
+
+    # Build description: summary first, then file ref if present
+    description_parts = []
+    if summary:
+        description_parts.append(summary[:300])
+    if file_ref:
+        description_parts.append(f"**File:** `{file_ref}`")
+    description = "\n".join(description_parts) if description_parts else "No summary available."
 
     embed = discord.Embed(  # type: ignore[union-attr]
-        title=f"🚨 Security Alert — {severity}",
-        description=alert.get("summary", "No summary available")[:300],
+        title=title,
+        description=description,
         color=color,
     )
-    embed.add_field(name="Type", value=alert_type, inline=True)
-    embed.add_field(name="Agent", value=alert.get("agent_id", "unknown"), inline=True)
-    embed.add_field(name="Alert ID", value=alert.get("alert_id", "?")[:12], inline=True)
-    embed.set_footer(text=f"Received: {alert.get('received_at', 'unknown')}")
+
+    # What this means
+    meaning_map = {
+        "SECRET_FOUND": (
+            "A secret key, token, or password may be hard-coded in your source files. "
+            "If this reaches a public repo it can be exploited immediately."
+        ),
+        "CVE": (
+            "A dependency you use has a known security vulnerability with a published exploit. "
+            "Attackers can target this if your service is exposed."
+        ),
+        "INJECTION": (
+            "Someone may be attempting to inject malicious commands through user input. "
+            "This could lead to data leakage or remote code execution."
+        ),
+        "DRIFT": (
+            "Your running system no longer matches the expected architecture. "
+            "This may cause unpredictable behavior or security gaps."
+        ),
+    }
+    meaning = meaning_map.get(alert_type, "Review the details above and investigate the source.")
+    embed.add_field(name="💡 What this means", value=meaning, inline=False)
+
+    # What to do
+    action_map = {
+        "SECRET_FOUND": "1. Rotate the exposed secret immediately.\n2. Remove it from code and use `.env`.\n3. Audit git history with `git log -p | grep <secret>`.",
+        "CVE": "1. Run `pip list --outdated` or `npm audit`.\n2. Update the affected package.\n3. Redeploy after patching.",
+        "INJECTION": "1. Check recent `/chat` requests in `data/dpo/chat_failures_*.jsonl`.\n2. Review `backend/security_middleware.py` logs.\n3. Block or rate-limit the source IP if needed.",
+        "DRIFT": "1. Run `GET /health` to compare expected vs actual state.\n2. Restart affected agents via `/agent-control/restart`.\n3. Review `docs/DRIFT_GUARD.md` for invariants.",
+    }
+    action = action_map.get(alert_type, "Review `backend/logs/system.jsonl` and the agent that raised this alert.")
+    embed.add_field(name="🔧 What to do", value=action, inline=False)
+
+    # Technical details (collapsed into one small field)
+    tech_parts = [f"Agent: `{agent_id}`"]
+    if detail:
+        tech_parts.append(f"Detail: {detail[:200]}")
+    alert_id = alert.get("alert_id", "")
+    if alert_id:
+        tech_parts.append(f"ID: `{alert_id[:12]}`")
+    embed.add_field(name="🔍 Technical", value="\n".join(tech_parts), inline=False)
+
+    embed.set_footer(text=f"Received: {alert.get('received_at', 'unknown')} · Alert raised by {agent_id}")
     return embed
 
 

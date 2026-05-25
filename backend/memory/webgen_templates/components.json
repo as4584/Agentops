@@ -1,0 +1,200 @@
+[
+  {
+    "id": "47d81f35",
+    "name": "hero-centered",
+    "category": "header",
+    "description": "Centered hero with headline, subtitle, and CTA button",
+    "html_template": "<section class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <h1 class=\"blog-post-title\">{{headline}}</h1>\n  <div class=\"blog-post-meta\">\n    <span>Apr 16, 2026</span><span>\u2022</span><span>16 min</span><span>\u2022</span><span>By <span><a class=\"blog-author-inline-link\" href=\"/blog/author/nicolas-zeeb\">Nicolas Zeeb</a></span></span>\n  </div>\n  <div class=\"blog-post-category-wrap\">\n    <span class=\"blog_coll_tag blog-post-category\">Guides</span>\n  </div>\n</section>",
+    "variables": [
+      "headline",
+      "subtitle",
+      "cta_link",
+      "cta_text"
+    ],
+    "business_types": [
+      "custom"
+    ],
+    "tags": [
+      "centered",
+      "cta"
+    ],
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "created_at": "2026-04-19T20:42:54.404802+00:00"
+  },
+  {
+    "id": "5612c4b0",
+    "name": "blog-post-hero",
+    "category": "header",
+    "description": "Hero section for blog post with back link and title",
+    "html_template": "<section class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <a href=\"/blog\" class=\"blog-post-back-link\">\u2190 Back to blog</a>\n  <h1 class=\"blog-post-title\">{{headline}}</h1>\n</section>",
+    "variables": [
+      "headline"
+    ],
+    "business_types": [
+      "custom"
+    ],
+    "tags": [],
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "created_at": "2026-04-19T20:42:54.404984+00:00"
+  },
+  {
+    "id": "92ead481",
+    "name": "blog-post-meta",
+    "category": "header",
+    "description": "Meta section for blog post with date and author link",
+    "html_template": "<div class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <span>Apr 16, 2026</span><span>\u2022</span><span>16 min</span><span>\u2022</span><span>By <span><a class=\"blog-author-inline-link\" href=\"/blog/author/nicolas-zeeb\">Nicolas Zeeb</a></span></span>\n</div>",
+    "variables": [],
+    "business_types": [
+      "custom"
+    ],
+    "tags": [],
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "created_at": "2026-04-19T20:42:54.405118+00:00"
+  },
+  {
+    "id": "137fbfb6",
+    "name": "blog-post-category",
+    "category": "header",
+    "description": "Category section for blog post with tag",
+    "html_template": "<div class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <span class=\"blog_coll_tag blog-post-category\">Guides</span>\n</div>",
+    "variables": [],
+    "business_types": [
+      "custom"
+    ],
+    "tags": [],
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "created_at": "2026-04-19T20:42:54.408292+00:00"
+  },
+  {
+    "id": "7f937490",
+    "name": "blog-post-content",
+    "category": "content",
+    "description": "Content section for blog post with placeholder for dynamic content",
+    "html_template": "<div class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  {{content}}</div>",
+    "variables": [
+      "content"
+    ],
+    "business_types": [
+      "custom"
+    ],
+    "tags": [],
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "created_at": "2026-04-19T20:42:54.408462+00:00"
+  },
+  {
+    "id": "7bd7492d",
+    "name": "blog-post-cta",
+    "category": "footer",
+    "description": "CTA section for blog post with placeholder for dynamic content",
+    "html_template": "<div class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <a href=\"{{cta_link}}\">{{cta_text}}</a>\n</div>",
+    "variables": [
+      "cta_link",
+      "cta_text"
+    ],
+    "business_types": [
+      "custom"
+    ],
+    "tags": [],
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "created_at": "2026-04-19T20:42:54.408601+00:00"
+  },
+  {
+    "id": "556d7294",
+    "name": "hero",
+    "category": "hero",
+    "description": "Full hero section with headline, subtitle, and CTA button",
+    "html_template": "<section class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <h1>{{headline}}</h1>\n  <p>{{subtitle}}</p>\n  <a href=\"{{cta_link}}\">{{cta_text}}</a>\n</section>",
+    "variables": [
+      "headline",
+      "subtitle",
+      "cta_link",
+      "cta_text"
+    ],
+    "business_types": [
+      "custom"
+    ],
+    "tags": [
+      "hero"
+    ],
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "created_at": "2026-04-19T20:49:53.758424+00:00"
+  },
+  {
+    "id": "141f89f5",
+    "name": "meta",
+    "category": "meta",
+    "description": "Meta section with title, description, and image URL",
+    "html_template": "<section class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <h1>{{title}}</h1>\n  <p>{{description}}</p>\n  <img src=\"{{image_url}}\">\n</section>",
+    "variables": [
+      "title",
+      "description",
+      "image_url"
+    ],
+    "business_types": [
+      "custom"
+    ],
+    "tags": [
+      "meta"
+    ],
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "created_at": "2026-04-19T20:49:53.758912+00:00"
+  },
+  {
+    "id": "15178fbe",
+    "name": "category",
+    "category": "category",
+    "description": "Category section with category name and link to related content",
+    "html_template": "<section class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <h2>{{category}}</h2>\n  <a href=\"{{link}}\">Learn more</a>\n</section>",
+    "variables": [
+      "category",
+      "link"
+    ],
+    "business_types": [
+      "custom"
+    ],
+    "tags": [
+      "category"
+    ],
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "created_at": "2026-04-19T20:49:53.815010+00:00"
+  },
+  {
+    "id": "a610fa44",
+    "name": "content",
+    "category": "content",
+    "description": "Content section with headline, subtitle, and paragraphs",
+    "html_template": "<section class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <h1>{{headline}}</h1>\n  <p>{{subtitle}}</p>\n  <div class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n    {{paragraphs}}\n  </div>\n</section>",
+    "variables": [
+      "headline",
+      "subtitle",
+      "paragraphs"
+    ],
+    "business_types": [
+      "custom"
+    ],
+    "tags": [
+      "content"
+    ],
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "created_at": "2026-04-19T20:49:53.815302+00:00"
+  },
+  {
+    "id": "5b526836",
+    "name": "cta",
+    "category": "cta",
+    "description": "CTA section with button text and link",
+    "html_template": "<section class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <a href=\"{{link}}\">{{button_text}}</a>\n</section>",
+    "variables": [
+      "link",
+      "button_text"
+    ],
+    "business_types": [
+      "custom"
+    ],
+    "tags": [
+      "cta"
+    ],
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "created_at": "2026-04-19T20:49:53.815544+00:00"
+  }
+]

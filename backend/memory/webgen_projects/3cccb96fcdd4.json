@@ -1,0 +1,432 @@
+{
+  "id": "3cccb96fcdd4",
+  "created_at": "2026-04-18T04:39:59.714942+00:00",
+  "updated_at": "2026-04-18T04:50:32.305702+00:00",
+  "status": "ready",
+  "brief": {
+    "business_name": "Business",
+    "business_type": "custom",
+    "tagline": "",
+    "description": "make me a website",
+    "services": [],
+    "target_audience": "",
+    "tone": "professional",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": []
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - Business",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "20accf6b",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "<nav class=\"bg-white dark:bg-black flex items-center justify-between py-2 px-4\">\n    <a href=\"#\" aria-label=\"Home\" class=\"font-bold text-lg text-gray-800 dark:text-gray-300 hover:text-gray-700 transition-colors duration-300 ease-in-out\">Home</a>\n    <a href=\"#\" aria-label=\"About Us\" class=\"font-bold text-lg text-gray-800 dark:text-gray-300 hover:text-gray-700 transition-colors duration-300 ease-in-out\">About Us</a>\n    <a href=\"#\" aria-label=\"Services\" class=\"font-bold text-lg text-gray-800 dark:text-gray-300 hover:text-gray-700 transition-colors duration-300 ease-in-out\">Services</a>\n    <a href=\"#\" aria-label=\"Contact\" class=\"font-bold text-lg text-gray-800 dark:text-gray-300 hover:text-gray-700 transition-colors duration-300 ease-in-out\">Contact</a>\n</nav>\n<header class=\"bg-gradient-to-r from-primary-500 to-secondary-500 py-4 px-8 text-white font-semibold text-2xl\">\n    <h1 class=\"text-center mb-6\">Business</h1>\n    <p class=\"text-center mb-6\">Type: custom<br/>Tagline: </p>\n    <div class=\"mt-0 flex flex-col gap-4\">\n        <div class=\"bg-white py-2 px-4 rounded-lg shadow-md glass-card transition hover:-translate-y-2 duration-300 ease-in-out\">\n            <h2 class=\"font-bold mb-1 text-gray-700\">Services</h2>\n            <p class=\"text-gray-500 font-semibold\">Various services</p>\n        </div>\n        <div class=\"bg-white py-2 px-4 rounded-lg shadow-md glass-card transition hover:-translate-y-2 duration-300 ease-in-out\">\n            <h2 class=\"font-bold mb-1 text-gray-700\">Features</h2>\n            <p class=\"text-gray-500 font-semibold\">Customized to meet your needs</p>\n        </div>\n    </div>\n</header>",
+          "order": 0
+        },
+        {
+          "id": "03f089e5",
+          "name": "hero",
+          "component_type": "hero",
+          "content": {},
+          "html": "<nav>\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both\">Business</h1>\n  <button role=\"button\" aria-label=\"Contact us\">Contact us</button>\n  <button role=\"button\" aria-label=\"Learn more about our services\">Learn more</button>\n  <button role=\"button\" aria-label=\"Get in touch with us\">Get in touch</button>\n</nav>\n<header class=\"bg-gradient-to-r from-primary to-secondary text-white px-8 py-4 shadow-md\">\n  <h2 class=\"text-xl font-bold mb-4\">Our Services</h2>\n  <p>Various services available</p>\n</header>\n<main class=\"mt-16 px-8 max-w-screen-lg mx-auto\">\n  <section class=\"mb-4\">\n    <h3 class=\"text-xl font-bold mb-2\">Service 1</h3>\n    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod velit vel enim tincidunt auctor.</p>\n    <a href=\"#\" class=\"btn bg-primary hover:bg-accent text-white font-bold py-2 px-4 rounded\">Learn More</a>\n  </section>\n  <section class=\"mb-4\">\n    <h3 class=\"text-xl font-bold mb-2\">Service 2</h3>\n    <p>Nullam euismod velit vel enim tincidunt auctor. Integer id augue nisi.</p>\n    <a href=\"#\" class=\"btn bg-primary hover:bg-accent text-white font-bold py-2 px-4 rounded\">Learn More</a>\n  </section>\n  <section class=\"mb-4\">\n    <h3 class=\"text-xl font-bold mb-2\">Service 3</h3>\n    <p>Integer id augue nisi. Maecenas eu ligula sit amet quam bibendum porttitor.</p>\n    <a href=\"#\" class=\"btn bg-primary hover:bg-accent text-white font-bold py-2 px-4 rounded\">Learn More</a>\n  </section>\n</main>\n<footer class=\"bg-gray-900 py-4\">\n  <p>&copy; 2023 Business. All rights reserved.</p>\n</footer>",
+          "order": 1
+        },
+        {
+          "id": "96524b38",
+          "name": "features",
+          "component_type": "features",
+          "content": {},
+          "html": "<section class=\"bg-gradient-to-r from-blue-500 to-purple-600 h-screen flex justify-center items-center text-white font-sans\">\n  <h1 class=\"text-4xl mb-8\">Featured Services</h1>\n</section>\n\n<main class=\"container mx-auto px-4 py-8 max-w-screen-lg flex flex-wrap justify-between items-center gap-8 md:gap-6\">\n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 1\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 1</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 2\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 2</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 3\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 3</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 4\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 4</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 5\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 5</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 6\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 6</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 7\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 7</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 8\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 8</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n</main>",
+          "order": 2
+        },
+        {
+          "id": "05d4189b",
+          "name": "testimonials",
+          "component_type": "testimonials",
+          "content": {},
+          "html": "<section>\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both\">Testimonials</h1>\n  <div class=\"bg-gradient-to-r from-primary-500 to-secondary-500 h-[calc(100vh-6rem)] text-white font-poppins text-3xl md:text-4xl lg:text-5xl mb-8 flex items-center justify-center\">\n    <div class=\"container mx-auto px-4 max-w-md lg:max-w-2xl xl:max-w-none\">\n      <h2 class=\"text-primary-600 md:text-3xl mb-4\">What our clients say</h2>\n    </div>\n  </div>\n  <div class=\"container mx-auto px-4 max-w-md lg:max-w-2xl xl:max-w-none\">\n    <div class=\"flex flex-wrap gap-8 mb-16\">\n      <div class=\"glass-card hover:-translate-y-2 transition-transform duration-300\">\n        <h3>John Doe</h3>\n        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae enim eu nisl egestas fringilla.</p>\n        <a href=\"#\" class=\"btn\">Read more</a>\n      </div>\n      <div class=\"glass-card hover:-translate-y-2 transition-transform duration-300\">\n        <h3>Jane Smith</h3>\n        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae enim eu nisl egestas fringilla.</p>\n        <a href=\"#\" class=\"btn\">Read more</a>\n      </div>\n    </div>\n  </div>\n</section>",
+          "order": 3
+        },
+        {
+          "id": "7800ec34",
+          "name": "cta",
+          "component_type": "cta",
+          "content": {},
+          "html": "<section>\n  <div class=\"container mx-auto px-4 py-8 md:px-0 md:py-16 text-center\">\n    <h2 class=\"text-3xl font-bold leading-tight mb-4 text-primary-dark dark:text-primary-light\">Services</h2>\n    <div class=\"grid lg:grid-cols-2 gap-4 md:gap-8\">\n      <div class=\"glass-card hover:-translate-y-2 transition-transform duration-300\">\n        <div class=\"shadow-md rounded-lg overflow-hidden\">\n          <img src=\"https://via.placeholder.com/700x400\" alt=\"\" class=\"w-full h-full object-cover\">\n          <div class=\"px-4 py-6\">\n            <h3 class=\"text-2xl font-bold leading-tight mb-2 text-primary-dark dark:text-primary-light\">Service One</h3>\n            <p class=\"mt-0 mb-4 text-gray-700 dark:text-gray-400\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.</p>\n            <a href=\"#\" class=\"btn btn-primary hover:bg-primary-dark dark:hover:bg-primary-light\">Call to Action</a>\n          </div>\n        </div>\n      </div>\n      <div class=\"glass-card hover:-translate-y-2 transition-transform duration-300\">\n        <div class=\"shadow-md rounded-lg overflow-hidden\">\n          <img src=\"https://via.placeholder.com/700x400\" alt=\"\" class=\"w-full h-full object-cover\">\n          <div class=\"px-4 py-6\">\n            <h3 class=\"text-2xl font-bold leading-tight mb-2 text-primary-dark dark:text-primary-light\">Service Two</h3>\n            <p class=\"mt-0 mb-4 text-gray-700 dark:text-gray-400\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.</p>\n            <a href=\"#\" class=\"btn btn-primary hover:bg-primary-dark dark:hover:bg-primary-light\">Call to Action</a>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</section>",
+          "order": 4
+        },
+        {
+          "id": "98ef9772",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "<footer>\n  <nav role=\"navigation\">\n    <a href=\"#\">Home</a>\n    <a href=\"#\">About Us</a>\n    <a href=\"#\">Services</a>\n    <a href=\"#\">Contact</a>\n  </nav>\n  \n  <div class=\"container mx-auto px-4 py-8 flex justify-between items-center\">\n    <div class=\"w-full max-w-lg mx-auto text-center\">\n      <h1 class=\"text-3xl font-bold mb-2\" style=\"animation: fadeInUp 0.8s ease-out both\">Our Business</h1>\n      <p class=\"text-gray-600 mb-4\">Various services provided with professionalism.</p>\n      <div class=\"flex items-center space-x-3 mb-2\">\n        <button role=\"button\" aria-label=\"Call us\" class=\"btn bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded\">Call</button>\n        <button role=\"button\" aria-label=\"Email us\" class=\"btn bg-secondary hover:bg-primary text-white font-bold py-2 px-4 rounded\">Email</button>\n      </div>\n    </div>\n    \n    <div class=\"w-full max-w-lg mx-auto flex justify-end items-center space-x-3 mb-2\">\n      <a href=\"#\" role=\"button\" aria-label=\"Follow us on social media\" class=\"btn bg-accent hover:bg-primary text-white font-bold py-2 px-4 rounded\"><i class=\"fab fa-facebook\"></i></a>\n      <a href=\"#\" role=\"button\" aria-label=\"Follow us on social media\" class=\"btn bg-accent hover:bg-primary text-white font-bold py-2 px-4 rounded\"><i class=\"fab fa-twitter\"></i></a>\n      <a href=\"#\" role=\"button\" aria-label=\"Follow us on social media\" class=\"btn bg-accent hover:bg-primary text-white font-bold py-2 px-4 rounded\"><i class=\"fab fa-instagram\"></i></a>\n    </div>\n    \n  </div>\n</footer>",
+          "order": 5
+        }
+      ],
+      "seo": {
+        "title": "Home - Business",
+        "meta_description": "Welcome to our website. We offer various services for businesses. Get in touch with us today!",
+        "keywords": [
+          "business",
+          "services"
+        ],
+        "og_title": "Home - Business",
+        "og_description": "Welcome to our website. We offer various services for businesses. Get in touch with us today!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org/",
+          "@type": "LocalBusiness",
+          "name": "Business Name",
+          "url": "https://www.example.com/index",
+          "logo": "https://www.example.com/images/logo.png",
+          "telephone": "+1-555-1234",
+          "openingHours": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "opens": "09:00",
+            "closes": "17:00"
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Main St",
+            "addressLocality": "Anytown",
+            "addressRegion": "CA",
+            "postalCode": "12345",
+            "addressCountry": "US"
+          },
+          "services": [
+            {
+              "@type": "Service",
+              "name": "Service 1"
+            },
+            {
+              "@type": "Service",
+              "name": "Service 2"
+            }
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "Business",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - Business</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<nav class=\"bg-white dark:bg-black flex items-center justify-between py-2 px-4\">\n    <a href=\"#\" aria-label=\"Home\" class=\"font-bold text-lg text-gray-800 dark:text-gray-300 hover:text-gray-700 transition-colors duration-300 ease-in-out\">Home</a>\n    <a href=\"#\" aria-label=\"About Us\" class=\"font-bold text-lg text-gray-800 dark:text-gray-300 hover:text-gray-700 transition-colors duration-300 ease-in-out\">About Us</a>\n    <a href=\"#\" aria-label=\"Services\" class=\"font-bold text-lg text-gray-800 dark:text-gray-300 hover:text-gray-700 transition-colors duration-300 ease-in-out\">Services</a>\n    <a href=\"#\" aria-label=\"Contact\" class=\"font-bold text-lg text-gray-800 dark:text-gray-300 hover:text-gray-700 transition-colors duration-300 ease-in-out\">Contact</a>\n</nav>\n<header class=\"bg-gradient-to-r from-primary-500 to-secondary-500 py-4 px-8 text-white font-semibold text-2xl\">\n    <h1 class=\"text-center mb-6\">Business</h1>\n    <p class=\"text-center mb-6\">Type: custom<br/>Tagline: </p>\n    <div class=\"mt-0 flex flex-col gap-4\">\n        <div class=\"bg-white py-2 px-4 rounded-lg shadow-md glass-card transition hover:-translate-y-2 duration-300 ease-in-out\">\n            <h2 class=\"font-bold mb-1 text-gray-700\">Services</h2>\n            <p class=\"text-gray-500 font-semibold\">Various services</p>\n        </div>\n        <div class=\"bg-white py-2 px-4 rounded-lg shadow-md glass-card transition hover:-translate-y-2 duration-300 ease-in-out\">\n            <h2 class=\"font-bold mb-1 text-gray-700\">Features</h2>\n            <p class=\"text-gray-500 font-semibold\">Customized to meet your needs</p>\n        </div>\n    </div>\n</header>\n\n<nav>\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both\">Business</h1>\n  <button role=\"button\" aria-label=\"Contact us\">Contact us</button>\n  <button role=\"button\" aria-label=\"Learn more about our services\">Learn more</button>\n  <button role=\"button\" aria-label=\"Get in touch with us\">Get in touch</button>\n</nav>\n<header class=\"bg-gradient-to-r from-primary to-secondary text-white px-8 py-4 shadow-md\">\n  <h2 class=\"text-xl font-bold mb-4\">Our Services</h2>\n  <p>Various services available</p>\n</header>\n<main class=\"mt-16 px-8 max-w-screen-lg mx-auto\">\n  <section class=\"mb-4\">\n    <h3 class=\"text-xl font-bold mb-2\">Service 1</h3>\n    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod velit vel enim tincidunt auctor.</p>\n    <a href=\"#\" class=\"btn bg-primary hover:bg-accent text-white font-bold py-2 px-4 rounded\">Learn More</a>\n  </section>\n  <section class=\"mb-4\">\n    <h3 class=\"text-xl font-bold mb-2\">Service 2</h3>\n    <p>Nullam euismod velit vel enim tincidunt auctor. Integer id augue nisi.</p>\n    <a href=\"#\" class=\"btn bg-primary hover:bg-accent text-white font-bold py-2 px-4 rounded\">Learn More</a>\n  </section>\n  <section class=\"mb-4\">\n    <h3 class=\"text-xl font-bold mb-2\">Service 3</h3>\n    <p>Integer id augue nisi. Maecenas eu ligula sit amet quam bibendum porttitor.</p>\n    <a href=\"#\" class=\"btn bg-primary hover:bg-accent text-white font-bold py-2 px-4 rounded\">Learn More</a>\n  </section>\n</main>\n<footer class=\"bg-gray-900 py-4\">\n  <p>&copy; 2023 Business. All rights reserved.</p>\n</footer>\n\n<section class=\"bg-gradient-to-r from-blue-500 to-purple-600 h-screen flex justify-center items-center text-white font-sans\">\n  <h1 class=\"text-4xl mb-8\">Featured Services</h1>\n</section>\n\n<main class=\"container mx-auto px-4 py-8 max-w-screen-lg flex flex-wrap justify-between items-center gap-8 md:gap-6\">\n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 1\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 1</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 2\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 2</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 3\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 3</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 4\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 4</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 5\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 5</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 6\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 6</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 7\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 7</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n  <div class=\"glass-card bg-white hover:shadow-2xl transition-transform duration-300\" role=\"button\" aria-label=\"Service 8\">\n    <h2 class=\"text-xl font-semibold mb-2\">Service 8</h2>\n    <p class=\"text-gray-600\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut odio vel lectus malesuada eget et sapien.</p>\n    <button class=\"btn btn-primary bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded\">Call to Action</button>\n  </div>\n  \n</main>\n\n<section>\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both\">Testimonials</h1>\n  <div class=\"bg-gradient-to-r from-primary-500 to-secondary-500 h-[calc(100vh-6rem)] text-white font-poppins text-3xl md:text-4xl lg:text-5xl mb-8 flex items-center justify-center\">\n    <div class=\"container mx-auto px-4 max-w-md lg:max-w-2xl xl:max-w-none\">\n      <h2 class=\"text-primary-600 md:text-3xl mb-4\">What our clients say</h2>\n    </div>\n  </div>\n  <div class=\"container mx-auto px-4 max-w-md lg:max-w-2xl xl:max-w-none\">\n    <div class=\"flex flex-wrap gap-8 mb-16\">\n      <div class=\"glass-card hover:-translate-y-2 transition-transform duration-300\">\n        <h3>John Doe</h3>\n        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae enim eu nisl egestas fringilla.</p>\n        <a href=\"#\" class=\"btn\">Read more</a>\n      </div>\n      <div class=\"glass-card hover:-translate-y-2 transition-transform duration-300\">\n        <h3>Jane Smith</h3>\n        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae enim eu nisl egestas fringilla.</p>\n        <a href=\"#\" class=\"btn\">Read more</a>\n      </div>\n    </div>\n  </div>\n</section>\n\n<section>\n  <div class=\"container mx-auto px-4 py-8 md:px-0 md:py-16 text-center\">\n    <h2 class=\"text-3xl font-bold leading-tight mb-4 text-primary-dark dark:text-primary-light\">Services</h2>\n    <div class=\"grid lg:grid-cols-2 gap-4 md:gap-8\">\n      <div class=\"glass-card hover:-translate-y-2 transition-transform duration-300\">\n        <div class=\"shadow-md rounded-lg overflow-hidden\">\n          <img src=\"https://via.placeholder.com/700x400\" alt=\"\" class=\"w-full h-full object-cover\">\n          <div class=\"px-4 py-6\">\n            <h3 class=\"text-2xl font-bold leading-tight mb-2 text-primary-dark dark:text-primary-light\">Service One</h3>\n            <p class=\"mt-0 mb-4 text-gray-700 dark:text-gray-400\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.</p>\n            <a href=\"#\" class=\"btn btn-primary hover:bg-primary-dark dark:hover:bg-primary-light\">Call to Action</a>\n          </div>\n        </div>\n      </div>\n      <div class=\"glass-card hover:-translate-y-2 transition-transform duration-300\">\n        <div class=\"shadow-md rounded-lg overflow-hidden\">\n          <img src=\"https://via.placeholder.com/700x400\" alt=\"\" class=\"w-full h-full object-cover\">\n          <div class=\"px-4 py-6\">\n            <h3 class=\"text-2xl font-bold leading-tight mb-2 text-primary-dark dark:text-primary-light\">Service Two</h3>\n            <p class=\"mt-0 mb-4 text-gray-700 dark:text-gray-400\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.</p>\n            <a href=\"#\" class=\"btn btn-primary hover:bg-primary-dark dark:hover:bg-primary-light\">Call to Action</a>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</section>\n\n<footer>\n  <nav role=\"navigation\">\n    <a href=\"#\">Home</a>\n    <a href=\"#\">About Us</a>\n    <a href=\"#\">Services</a>\n    <a href=\"#\">Contact</a>\n  </nav>\n  \n  <div class=\"container mx-auto px-4 py-8 flex justify-between items-center\">\n    <div class=\"w-full max-w-lg mx-auto text-center\">\n      <h1 class=\"text-3xl font-bold mb-2\" style=\"animation: fadeInUp 0.8s ease-out both\">Our Business</h1>\n      <p class=\"text-gray-600 mb-4\">Various services provided with professionalism.</p>\n      <div class=\"flex items-center space-x-3 mb-2\">\n        <button role=\"button\" aria-label=\"Call us\" class=\"btn bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded\">Call</button>\n        <button role=\"button\" aria-label=\"Email us\" class=\"btn bg-secondary hover:bg-primary text-white font-bold py-2 px-4 rounded\">Email</button>\n      </div>\n    </div>\n    \n    <div class=\"w-full max-w-lg mx-auto flex justify-end items-center space-x-3 mb-2\">\n      <a href=\"#\" role=\"button\" aria-label=\"Follow us on social media\" class=\"btn bg-accent hover:bg-primary text-white font-bold py-2 px-4 rounded\"><i class=\"fab fa-facebook\"></i></a>\n      <a href=\"#\" role=\"button\" aria-label=\"Follow us on social media\" class=\"btn bg-accent hover:bg-primary text-white font-bold py-2 px-4 rounded\"><i class=\"fab fa-twitter\"></i></a>\n      <a href=\"#\" role=\"button\" aria-label=\"Follow us on social media\" class=\"btn bg-accent hover:bg-primary text-white font-bold py-2 px-4 rounded\"><i class=\"fab fa-instagram\"></i></a>\n    </div>\n    \n  </div>\n</footer>\n\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    },
+    {
+      "slug": "about",
+      "title": "About Us - Business",
+      "purpose": "Company story and team",
+      "sections": [
+        {
+          "id": "1b083f5a",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "<nav class=\"bg-gray-800 text-white px-4 py-8\">\n  <div class=\"container mx-auto flex items-center justify-between hidden md:block md:mx-20\">\n    <a href=\"#\" aria-label=\"Logo\">\n      <span class=\"sr-only\">Logo</span>\n    </a>\n    <nav class=\"flex space-x-4 text-sm\">\n      <a href=\"#\">Home</a>\n      <a href=\"#\">About Us</a>\n      <a href=\"#\">Services</a>\n      <a href=\"#\">Contact</a>\n    </nav>\n  </div>\n  <section class=\"hidden md:block w-full py-8 text-center\">\n    <h1 class=\"text-5xl font-bold mb-4\" style=\"animation: fadeInUp 0.8s ease-out both\">Business</h1>\n    <p class=\"mt-2 text-lg leading-loose\">Various services, professional tone.</p>\n    <div class=\"mt-6 flex space-x-4 text-sm\">\n      <button aria-label=\"Phone\">Phone</button>\n      <button aria-label=\"Email\">Email</button>\n    </div>\n  </section>\n</nav>",
+          "order": 0
+        },
+        {
+          "id": "fc2a7302",
+          "name": "hero-small",
+          "component_type": "hero-small",
+          "content": {},
+          "html": "<section id=\"hero-small\">\n  <nav>\n    <a href=\"#\" role=\"button\" aria-label=\"Home\" class=\"btn btn-primary\">Home</a>\n    <a href=\"#\" role=\"button\" aria-label=\"About Us\" class=\"btn btn-secondary\">About Us</a>\n    <a href=\"#\" role=\"button\" aria-label=\"Services\" class=\"btn btn-accent\">Services</a>\n    <a href=\"#\" role=\"button\" aria-label=\"Contact\" class=\"btn btn-tertiary\">Contact</a>\n  </nav>\n  <header class=\"bg-gradient-to-br from-primary to-secondary text-white p-8 text-center\">\n    <h1 class=\"text-5xl font-bold mb-4\">Business</h1>\n    <p class=\"text-lg mb-8\">Various services, professional tone. Reach us at [phone] or [email].</p>\n  </header>\n  <main>\n    <div class=\"container mx-auto grid md:grid-cols-2 gap-4\">\n      <article>\n        <h2 class=\"text-3xl font-bold mb-2\">Service One</h2>\n        <p class=\"mb-4\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae enim ut nisi elementum scelerisque.</p>\n        <button role=\"button\" aria-label=\"Service One Button\" class=\"btn btn-primary glass-card hover:-translate-y-2 transition-transform duration-300\">Learn More</button>\n      </article>\n      <article>\n        <h2 class=\"text-3xl font-bold mb-2\">Service Two</h2>\n        <p class=\"mb-4\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae enim ut nisi elementum scelerisque.</p>\n        <button role=\"button\" aria-label=\"Service Two Button\" class=\"btn btn-secondary glass-card hover:-translate-y-2 transition-transform duration-300\">Learn More</button>\n      </article>\n    </div>\n  </main>\n  <footer class=\"bg-gray-100 py-8 text-center\">Copyright \u00a9 Business 2023</footer>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "5ca65b6b",
+          "name": "story",
+          "component_type": "story",
+          "content": {},
+          "html": "<section>\n  <h2 id=\"story\" aria-label=\"Our Story\">Our Story</h2>\n  <main>\n    <article>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer auctor nisl ac felis malesuada bibendum.</p>\n      <button role=\"button\" aria-label=\"Read more\">Read More</button>\n    </article>\n    <article>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer auctor nisl ac felis malesuada bibendum.</p>\n      <button role=\"button\" aria-label=\"Read more\">Read More</button>\n    </article>\n    <article>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer auctor nisl ac felis malesuada bibendum.</p>\n      <button role=\"button\" aria-label=\"Read more\">Read More</button>\n    </article>\n  </main>\n</section>",
+          "order": 2
+        },
+        {
+          "id": "be28b041",
+          "name": "team",
+          "component_type": "team",
+          "content": {},
+          "html": "<section>\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both\">Meet Our Team</h1>\n  <main class=\"container mx-auto flex justify-between space-x-8 py-8 md:py-12\">\n    <article class=\"flex-1 glass-card mr-6\">\n      <div class=\"rounded-lg shadow-lg overflow-hidden\">\n        <img src=\"https://via.placeholder.com/400x300\" alt=\"\" class=\"w-full h-full object-cover\">\n        <div class=\"p-8 text-center\">\n          <h2 class=\"text-xl font-bold mb-4\">John Doe</h2>\n          <p class=\"text-gray-600 mb-4\">CEO & Founder</p>\n          <button role=\"button\" aria-label=\"Learn more about John Doe\" class=\"btn bg-primary text-white rounded-lg p-3 hover:bg-secondary hover:text-black transition-all duration-300 focus:outline-none\">Read More</button>\n        </div>\n      </div>\n    </article>\n    <article class=\"flex-1 glass-card ml-6\">\n      <div class=\"rounded-lg shadow-lg overflow-hidden\">\n        <img src=\"https://via.placeholder.com/400x300\" alt=\"\" class=\"w-full h-full object-cover\">\n        <div class=\"p-8 text-center\">\n          <h2 class=\"text-xl font-bold mb-4\">Jane Smith</h2>\n          <p class=\"text-gray-600 mb-4\">Head of Design</p>\n          <button role=\"button\" aria-label=\"Learn more about Jane Smith\" class=\"btn bg-primary text-white rounded-lg p-3 hover:bg-secondary hover:text-black transition-all duration-300 focus:outline-none\">Read More</button>\n        </div>\n      </div>\n    </article>\n  </main>\n</section>",
+          "order": 3
+        },
+        {
+          "id": "e1d3bb87",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "About Us - Business | Business",
+        "meta_description": "make me a website",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "Business",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>About Us - Business</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"make me a website\">\n  <meta property=\"og:type\" content=\"website\">\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<nav class=\"bg-gray-800 text-white px-4 py-8\">\n  <div class=\"container mx-auto flex items-center justify-between hidden md:block md:mx-20\">\n    <a href=\"#\" aria-label=\"Logo\">\n      <span class=\"sr-only\">Logo</span>\n    </a>\n    <nav class=\"flex space-x-4 text-sm\">\n      <a href=\"#\">Home</a>\n      <a href=\"#\">About Us</a>\n      <a href=\"#\">Services</a>\n      <a href=\"#\">Contact</a>\n    </nav>\n  </div>\n  <section class=\"hidden md:block w-full py-8 text-center\">\n    <h1 class=\"text-5xl font-bold mb-4\" style=\"animation: fadeInUp 0.8s ease-out both\">Business</h1>\n    <p class=\"mt-2 text-lg leading-loose\">Various services, professional tone.</p>\n    <div class=\"mt-6 flex space-x-4 text-sm\">\n      <button aria-label=\"Phone\">Phone</button>\n      <button aria-label=\"Email\">Email</button>\n    </div>\n  </section>\n</nav>\n\n<section id=\"hero-small\">\n  <nav>\n    <a href=\"#\" role=\"button\" aria-label=\"Home\" class=\"btn btn-primary\">Home</a>\n    <a href=\"#\" role=\"button\" aria-label=\"About Us\" class=\"btn btn-secondary\">About Us</a>\n    <a href=\"#\" role=\"button\" aria-label=\"Services\" class=\"btn btn-accent\">Services</a>\n    <a href=\"#\" role=\"button\" aria-label=\"Contact\" class=\"btn btn-tertiary\">Contact</a>\n  </nav>\n  <header class=\"bg-gradient-to-br from-primary to-secondary text-white p-8 text-center\">\n    <h1 class=\"text-5xl font-bold mb-4\">Business</h1>\n    <p class=\"text-lg mb-8\">Various services, professional tone. Reach us at [phone] or [email].</p>\n  </header>\n  <main>\n    <div class=\"container mx-auto grid md:grid-cols-2 gap-4\">\n      <article>\n        <h2 class=\"text-3xl font-bold mb-2\">Service One</h2>\n        <p class=\"mb-4\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae enim ut nisi elementum scelerisque.</p>\n        <button role=\"button\" aria-label=\"Service One Button\" class=\"btn btn-primary glass-card hover:-translate-y-2 transition-transform duration-300\">Learn More</button>\n      </article>\n      <article>\n        <h2 class=\"text-3xl font-bold mb-2\">Service Two</h2>\n        <p class=\"mb-4\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae enim ut nisi elementum scelerisque.</p>\n        <button role=\"button\" aria-label=\"Service Two Button\" class=\"btn btn-secondary glass-card hover:-translate-y-2 transition-transform duration-300\">Learn More</button>\n      </article>\n    </div>\n  </main>\n  <footer class=\"bg-gray-100 py-8 text-center\">Copyright \u00a9 Business 2023</footer>\n</section>\n\n<section>\n  <h2 id=\"story\" aria-label=\"Our Story\">Our Story</h2>\n  <main>\n    <article>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer auctor nisl ac felis malesuada bibendum.</p>\n      <button role=\"button\" aria-label=\"Read more\">Read More</button>\n    </article>\n    <article>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer auctor nisl ac felis malesuada bibendum.</p>\n      <button role=\"button\" aria-label=\"Read more\">Read More</button>\n    </article>\n    <article>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer auctor nisl ac felis malesuada bibendum.</p>\n      <button role=\"button\" aria-label=\"Read more\">Read More</button>\n    </article>\n  </main>\n</section>\n\n<section>\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both\">Meet Our Team</h1>\n  <main class=\"container mx-auto flex justify-between space-x-8 py-8 md:py-12\">\n    <article class=\"flex-1 glass-card mr-6\">\n      <div class=\"rounded-lg shadow-lg overflow-hidden\">\n        <img src=\"https://via.placeholder.com/400x300\" alt=\"\" class=\"w-full h-full object-cover\">\n        <div class=\"p-8 text-center\">\n          <h2 class=\"text-xl font-bold mb-4\">John Doe</h2>\n          <p class=\"text-gray-600 mb-4\">CEO & Founder</p>\n          <button role=\"button\" aria-label=\"Learn more about John Doe\" class=\"btn bg-primary text-white rounded-lg p-3 hover:bg-secondary hover:text-black transition-all duration-300 focus:outline-none\">Read More</button>\n        </div>\n      </div>\n    </article>\n    <article class=\"flex-1 glass-card ml-6\">\n      <div class=\"rounded-lg shadow-lg overflow-hidden\">\n        <img src=\"https://via.placeholder.com/400x300\" alt=\"\" class=\"w-full h-full object-cover\">\n        <div class=\"p-8 text-center\">\n          <h2 class=\"text-xl font-bold mb-4\">Jane Smith</h2>\n          <p class=\"text-gray-600 mb-4\">Head of Design</p>\n          <button role=\"button\" aria-label=\"Learn more about Jane Smith\" class=\"btn bg-primary text-white rounded-lg p-3 hover:bg-secondary hover:text-black transition-all duration-300 focus:outline-none\">Read More</button>\n        </div>\n      </div>\n    </article>\n  </main>\n</section>\n\n\n\n</body>\n</html>",
+      "nav_label": "About Us",
+      "nav_order": 2
+    },
+    {
+      "slug": "services",
+      "title": "Services - Business",
+      "purpose": "Service offerings",
+      "sections": [
+        {
+          "id": "a077abc9",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "48a920c1",
+          "name": "hero-small",
+          "component_type": "hero-small",
+          "content": {},
+          "html": "<nav>\n  <a href=\"index.html\">Home</a>\n  <a href=\"about.html\">About Us</a>\n  <a href=\"services.html\">Services</a>\n  <a href=\"contact.html\">Contact</a>\n</nav>\n<header class=\"bg-gradient-to-r from-primary-700 to-secondary-600 text-white py-12\">\n  <h1 class=\"text-5xl font-bold leading-tight mb-4\">Business</h1>\n  <nav class=\"flex items-center justify-between mt-8\">\n    <a href=\"#\" class=\"text-lg text-gray-500 hover:text-gray-900 transition duration-200 ease-in-out\">Home</a>\n    <a href=\"#\" class=\"text-lg text-gray-500 hover:text-gray-900 transition duration-200 ease-in-out\">About Us</a>\n    <a href=\"#\" class=\"text-lg text-gray-500 hover:text-gray-900 transition duration-200 ease-in-out\">Services</a>\n    <a href=\"#\" class=\"text-lg text-gray-500 hover:text-gray-900 transition duration-200 ease-in-out\">Contact</a>\n  </nav>\n</header>\n<main>\n  <section>\n    <h2 class=\"mb-8\">Various Services</h2>\n    <div class=\"flex gap-4 mt-4 text-sm text-gray-600 hover:text-gray-900 transition duration-200 ease-in-out\">\n      <a href=\"#\" aria-label=\"Service 1\" role=\"button\" class=\"btn btn-primary\">Service 1</a>\n      <a href=\"#\" aria-label=\"Service 2\" role=\"button\" class=\"btn btn-secondary\">Service 2</a>\n      <a href=\"#\" aria-label=\"Service 3\" role=\"button\" class=\"btn btn-accent\">Service 3</a>\n    </div>\n  </section>\n  <section class=\"mt-8\">\n    <h2 class=\"mb-8\">More Information</h2>\n    <ul class=\"list-none flex gap-4 mt-4 text-sm text-gray-600 hover:text-gray-900 transition duration-200 ease-in-out\">\n      <li aria-label=\"Phone\" role=\"button\" class=\"btn btn-primary\">Phone</li>\n      <li aria-label=\"Email\" role=\"button\" class=\"btn btn-secondary\">Email</li>\n    </ul>\n  </section>\n</main>\n<footer class=\"bg-gray-800 text-white py-12\">\n  &copy; 2022 Business. All rights reserved.\n</footer>",
+          "order": 1
+        },
+        {
+          "id": "e56cf824",
+          "name": "services-grid",
+          "component_type": "services-grid",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "7e19cc68",
+          "name": "cta",
+          "component_type": "cta",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "236a87fe",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "Business Services - Custom Solutions",
+        "meta_description": "Explore our diverse range of business services and custom solutions. Contact us today!",
+        "keywords": [
+          "business services",
+          "custom solutions"
+        ],
+        "og_title": "Business Services - Custom Solutions",
+        "og_description": "Discover the best business services for your needs. Our custom solutions are tailored to meet your unique requirements.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org/",
+          "@type": "LocalBusiness",
+          "name": "Business Name",
+          "url": "https://www.businessname.com/services",
+          "telephone": "+1-555-555-5555",
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday"
+            ],
+            "opens": "09:00",
+            "closes": "17:00"
+          }
+        }
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "Business",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Services - Business</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Explore our diverse range of business services and custom solutions. Contact us today!\">\n  <meta name=\"keywords\" content=\"business services, custom solutions\">\n  <meta property=\"og:title\" content=\"Business Services - Custom Solutions\">\n  <meta property=\"og:description\" content=\"Discover the best business services for your needs. Our custom solutions are tailored to meet your unique requirements.\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Business Name\",\n  \"url\": \"https://www.businessname.com/services\",\n  \"telephone\": \"+1-555-555-5555\",\n  \"openingHoursSpecification\": {\n    \"@type\": \"OpeningHoursSpecification\",\n    \"dayOfWeek\": [\n      \"Monday\"\n    ],\n    \"opens\": \"09:00\",\n    \"closes\": \"17:00\"\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n\n\n<nav>\n  <a href=\"index.html\">Home</a>\n  <a href=\"about.html\">About Us</a>\n  <a href=\"services.html\">Services</a>\n  <a href=\"contact.html\">Contact</a>\n</nav>\n<header class=\"bg-gradient-to-r from-primary-700 to-secondary-600 text-white py-12\">\n  <h1 class=\"text-5xl font-bold leading-tight mb-4\">Business</h1>\n  <nav class=\"flex items-center justify-between mt-8\">\n    <a href=\"#\" class=\"text-lg text-gray-500 hover:text-gray-900 transition duration-200 ease-in-out\">Home</a>\n    <a href=\"#\" class=\"text-lg text-gray-500 hover:text-gray-900 transition duration-200 ease-in-out\">About Us</a>\n    <a href=\"#\" class=\"text-lg text-gray-500 hover:text-gray-900 transition duration-200 ease-in-out\">Services</a>\n    <a href=\"#\" class=\"text-lg text-gray-500 hover:text-gray-900 transition duration-200 ease-in-out\">Contact</a>\n  </nav>\n</header>\n<main>\n  <section>\n    <h2 class=\"mb-8\">Various Services</h2>\n    <div class=\"flex gap-4 mt-4 text-sm text-gray-600 hover:text-gray-900 transition duration-200 ease-in-out\">\n      <a href=\"#\" aria-label=\"Service 1\" role=\"button\" class=\"btn btn-primary\">Service 1</a>\n      <a href=\"#\" aria-label=\"Service 2\" role=\"button\" class=\"btn btn-secondary\">Service 2</a>\n      <a href=\"#\" aria-label=\"Service 3\" role=\"button\" class=\"btn btn-accent\">Service 3</a>\n    </div>\n  </section>\n  <section class=\"mt-8\">\n    <h2 class=\"mb-8\">More Information</h2>\n    <ul class=\"list-none flex gap-4 mt-4 text-sm text-gray-600 hover:text-gray-900 transition duration-200 ease-in-out\">\n      <li aria-label=\"Phone\" role=\"button\" class=\"btn btn-primary\">Phone</li>\n      <li aria-label=\"Email\" role=\"button\" class=\"btn btn-secondary\">Email</li>\n    </ul>\n  </section>\n</main>\n<footer class=\"bg-gray-800 text-white py-12\">\n  &copy; 2022 Business. All rights reserved.\n</footer>\n\n\n\n\n\n\n\n</body>\n</html>",
+      "nav_label": "Services",
+      "nav_order": 3
+    },
+    {
+      "slug": "contact",
+      "title": "Contact - Business",
+      "purpose": "Contact form and info",
+      "sections": [
+        {
+          "id": "c1d5108c",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "<nav class=\"bg-[var(--color-primary)] relative flex flex-col items-center justify-start mb-12\">\n  <div class=\"w-full max-w-screen-sm mx-auto px-4 py-6 font-poppins text-white text-5xl leading-tight tracking-widest\">Business</div>\n  <div class=\"flex w-full justify-between my-4\">\n    <button aria-label=\"Home\" role=\"button\" class=\"btn bg-[var(--color-accent)] hover:bg-[var(--color-secondary)] text-white font-poppins py-2 px-4 rounded-lg shadow-none transition duration-300\">Home</button>\n    <button aria-label=\"About Us\" role=\"button\" class=\"btn bg-[var(--color-accent)] hover:bg-[var(--color-secondary)] text-white font-poppins py-2 px-4 rounded-lg shadow-none transition duration-300\">About Us</button>\n    <button aria-label=\"Services\" role=\"button\" class=\"btn bg-[var(--color-accent)] hover:bg-[var(--color-secondary)] text-white font-poppins py-2 px-4 rounded-lg shadow-none transition duration-300\">Services</button>\n    <button aria-label=\"Contact\" role=\"button\" class=\"btn bg-[var(--color-accent)] hover:bg-[var(--color-secondary)] text-white font-poppins py-2 px-4 rounded-lg shadow-none transition duration-300\">Contact</button>\n  </div>\n</nav>",
+          "order": 0
+        },
+        {
+          "id": "ab5009e3",
+          "name": "hero-small",
+          "component_type": "hero-small",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "db4189b8",
+          "name": "contact-form",
+          "component_type": "contact-form",
+          "content": {},
+          "html": "<section>\n  <h2>Contact Us</h2>\n  <div class=\"px-8\">\n    <form role=\"document\">\n      <div class=\"mb-4\">\n        <label for=\"name\" required>Name</label>\n        <input type=\"text\" id=\"name\" aria-label=\"Your name\" required />\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"email\" required>Email</label>\n        <input type=\"email\" id=\"email\" aria-label=\"Your email address\" required />\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"phone\" required>Phone</label>\n        <input type=\"tel\" id=\"phone\" aria-label=\"Your phone number\" required />\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"message\" required>Message</label>\n        <textarea id=\"message\" rows=\"4\" required></textarea>\n      </div>\n      <button type=\"submit\" class=\"btn btn-primary\">Submit</button>\n    </form>\n  </div>\n</section>",
+          "order": 2
+        },
+        {
+          "id": "2c506468",
+          "name": "map",
+          "component_type": "map",
+          "content": {},
+          "html": "<nav>\n  <a href=\"index.html\">Home</a>\n  <a href=\"about.html\">About Us</a>\n  <a href=\"services.html\">Services</a>\n  <a href=\"contact.html\">Contact</a>\n</nav>\n\n<header class=\"bg-linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%) text-white font-bold py-8\">\n  <h1>Our Business</h1>\n  <div class=\"absolute inset-y-0 flex items-center justify-end px-4\">\n    <button role=\"button\" aria-label=\"Phone\" class=\"btn bg-transparent text-white hover:bg-gray-200 hover:text-gray-700\">\n      Phone\n    </button>\n    <button role=\"button\" aria-label=\"Email\" class=\"btn bg-transparent text-white hover:bg-gray-200 hover:text-gray-700 mx-4\">\n      Email\n    </button>\n  </div>\n</header>\n\n<main>\n  <h2>Our Services</h2>\n  <section class=\"glass-card mb-4\">\n    <h3>Service 1</h3>\n    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eget turpis ac arcu pharetra bibendum.</p>\n    <button role=\"button\" aria-label=\"CTA 1\" class=\"btn bg-transparent text-white hover:bg-gray-200 hover:text-gray-700\">Learn More</button>\n  </section>\n  <section class=\"glass-card mb-4\">\n    <h3>Service 2</h3>\n    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eget turpis ac arcu pharetra bibendum.</p>\n    <button role=\"button\" aria-label=\"CTA 2\" class=\"btn bg-transparent text-white hover:bg-gray-200 hover:text-gray-700\">Learn More</button>\n  </section>\n  <section class=\"glass-card mb-4\">\n    <h3>Service 3</h3>\n    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eget turpis ac arcu pharetra bibendum.</p>\n    <button role=\"button\" aria-label=\"CTA 3\" class=\"btn bg-transparent text-white hover:bg-gray-200 hover:text-gray-700\">Learn More</button>\n  </section>\n</main>",
+          "order": 3
+        },
+        {
+          "id": "9eb18999",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "Contact - Business | Business",
+        "meta_description": "make me a website",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "How can I get in touch with this business?",
+            "a": "You can use the contact form on their website or call them directly at (123) 456-7890."
+          },
+          {
+            "q": "What services does this business offer?",
+            "a": "This business offers various services, but they haven't specified them yet. Please check their website for more information."
+          },
+          {
+            "q": "Can I make a website with this business?",
+            "a": "Yes, you can make a website with this business. However, the details of the process are not available on their website. Please contact them for more information."
+          },
+          {
+            "q": "What is this business about?",
+            "a": "This business is a custom one, so there isn't much information available online. You can check their website or contact them directly for more details."
+          },
+          {
+            "q": "How long does it take to make a website with this business?",
+            "a": "The time required to make a website with this business depends on the complexity of the project and the services you require. Please contact them for a custom quote."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Business",
+        "entity_type": "LocalBusiness",
+        "entity_description": "This is a custom business that offers various services. They have a contact form on their website and can be reached by phone at (123) 456-7890.",
+        "topic_cluster": "Custom Business Services",
+        "related_topics": [
+          "Website Design",
+          "Web Development",
+          "Marketing",
+          "Social Media Management",
+          "Search Engine Optimization"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Contact - Business</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"make me a website\">\n  <meta property=\"og:type\" content=\"website\">\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I get in touch with this business?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"You can use the contact form on their website or call them directly at (123) 456-7890.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What services does this business offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"This business offers various services, but they haven't specified them yet. Please check their website for more information.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Can I make a website with this business?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, you can make a website with this business. However, the details of the process are not available on their website. Please contact them for more information.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What is this business about?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"This business is a custom one, so there isn't much information available online. You can check their website or contact them directly for more details.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How long does it take to make a website with this business?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"The time required to make a website with this business depends on the complexity of the project and the services you require. Please contact them for a custom quote.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<nav class=\"bg-[var(--color-primary)] relative flex flex-col items-center justify-start mb-12\">\n  <div class=\"w-full max-w-screen-sm mx-auto px-4 py-6 font-poppins text-white text-5xl leading-tight tracking-widest\">Business</div>\n  <div class=\"flex w-full justify-between my-4\">\n    <button aria-label=\"Home\" role=\"button\" class=\"btn bg-[var(--color-accent)] hover:bg-[var(--color-secondary)] text-white font-poppins py-2 px-4 rounded-lg shadow-none transition duration-300\">Home</button>\n    <button aria-label=\"About Us\" role=\"button\" class=\"btn bg-[var(--color-accent)] hover:bg-[var(--color-secondary)] text-white font-poppins py-2 px-4 rounded-lg shadow-none transition duration-300\">About Us</button>\n    <button aria-label=\"Services\" role=\"button\" class=\"btn bg-[var(--color-accent)] hover:bg-[var(--color-secondary)] text-white font-poppins py-2 px-4 rounded-lg shadow-none transition duration-300\">Services</button>\n    <button aria-label=\"Contact\" role=\"button\" class=\"btn bg-[var(--color-accent)] hover:bg-[var(--color-secondary)] text-white font-poppins py-2 px-4 rounded-lg shadow-none transition duration-300\">Contact</button>\n  </div>\n</nav>\n\n\n\n<section>\n  <h2>Contact Us</h2>\n  <div class=\"px-8\">\n    <form role=\"document\">\n      <div class=\"mb-4\">\n        <label for=\"name\" required>Name</label>\n        <input type=\"text\" id=\"name\" aria-label=\"Your name\" required />\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"email\" required>Email</label>\n        <input type=\"email\" id=\"email\" aria-label=\"Your email address\" required />\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"phone\" required>Phone</label>\n        <input type=\"tel\" id=\"phone\" aria-label=\"Your phone number\" required />\n      </div>\n      <div class=\"mb-4\">\n        <label for=\"message\" required>Message</label>\n        <textarea id=\"message\" rows=\"4\" required></textarea>\n      </div>\n      <button type=\"submit\" class=\"btn btn-primary\">Submit</button>\n    </form>\n  </div>\n</section>\n\n<nav>\n  <a href=\"index.html\">Home</a>\n  <a href=\"about.html\">About Us</a>\n  <a href=\"services.html\">Services</a>\n  <a href=\"contact.html\">Contact</a>\n</nav>\n\n<header class=\"bg-linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%) text-white font-bold py-8\">\n  <h1>Our Business</h1>\n  <div class=\"absolute inset-y-0 flex items-center justify-end px-4\">\n    <button role=\"button\" aria-label=\"Phone\" class=\"btn bg-transparent text-white hover:bg-gray-200 hover:text-gray-700\">\n      Phone\n    </button>\n    <button role=\"button\" aria-label=\"Email\" class=\"btn bg-transparent text-white hover:bg-gray-200 hover:text-gray-700 mx-4\">\n      Email\n    </button>\n  </div>\n</header>\n\n<main>\n  <h2>Our Services</h2>\n  <section class=\"glass-card mb-4\">\n    <h3>Service 1</h3>\n    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eget turpis ac arcu pharetra bibendum.</p>\n    <button role=\"button\" aria-label=\"CTA 1\" class=\"btn bg-transparent text-white hover:bg-gray-200 hover:text-gray-700\">Learn More</button>\n  </section>\n  <section class=\"glass-card mb-4\">\n    <h3>Service 2</h3>\n    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eget turpis ac arcu pharetra bibendum.</p>\n    <button role=\"button\" aria-label=\"CTA 2\" class=\"btn bg-transparent text-white hover:bg-gray-200 hover:text-gray-700\">Learn More</button>\n  </section>\n  <section class=\"glass-card mb-4\">\n    <h3>Service 3</h3>\n    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eget turpis ac arcu pharetra bibendum.</p>\n    <button role=\"button\" aria-label=\"CTA 3\" class=\"btn bg-transparent text-white hover:bg-gray-200 hover:text-gray-700\">Learn More</button>\n  </section>\n</main>\n\n\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I get in touch with this business?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">You can use the contact form on their website or call them directly at (123) 456-7890.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What services does this business offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">This business offers various services, but they haven't specified them yet. Please check their website for more information.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Can I make a website with this business?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, you can make a website with this business. However, the details of the process are not available on their website. Please contact them for more information.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What is this business about?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">This business is a custom one, so there isn't much information available online. You can check their website or contact them directly for more details.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How long does it take to make a website with this business?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">The time required to make a website with this business depends on the complexity of the project and the services you require. Please contact them for a custom quote.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Contact",
+      "nav_order": 4
+    }
+  ],
+  "template_ids": [],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/business",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n",
+  "sitemap_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://business.com/index.html</loc>\n    <priority>1.0</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://business.com/about.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://business.com/services.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://business.com/contact.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>",
+  "robots_txt": "User-agent: *\nAllow: /\nSitemap: https://business.com/sitemap.xml\n",
+  "errors": [
+    "[index] Missing <h1> tag",
+    "[index] Page body seems too short (< 100 chars)",
+    "[about] Multiple <h1> tags found (3)",
+    "[about] Missing og:title meta tag",
+    "[about] Missing JSON-LD structured data",
+    "[contact] Missing og:title meta tag",
+    "[index][llm] Missing call-to-action button"
+  ],
+  "metadata": {
+    "design_context": {
+      "style_name": "Soft UI Evolution",
+      "primary_color": "#2563EB",
+      "secondary_color": "#3B82F6",
+      "accent_color": "#EA580C",
+      "heading_font": "Poppins",
+      "body_font": "Open Sans"
+    },
+    "ux_scores": {
+      "index": 81,
+      "about": 87,
+      "services": 78,
+      "contact": 82
+    }
+  }
+}

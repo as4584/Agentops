@@ -35,6 +35,9 @@ class ModelSpec:
     best_for: list[str]
     fallback_chain: list[str] = field(default_factory=lambda: cast(list[str], []))
     supports_tools: bool = False
+    # Operator-facing identity metadata
+    role: str = ""                  # e.g. "fine-tuned-orchestrator", "base-router"
+    alias_of: str | None = None     # points to the base model this was derived from
 
 
 @dataclass
@@ -64,8 +67,34 @@ UNIFIED_MODEL_REGISTRY: dict[str, ModelSpec] = {
         input_cost_per_m=0.0,
         output_cost_per_m=0.0,
         best_for=["orchestration", "agent_tasks", "reasoning", "code"],
-        fallback_chain=["mistral:7b", "llama3.2"],
+        fallback_chain=["lex-v3", "mistral:7b", "llama3.2"],
         supports_tools=True,
+        role="fine-tuned-orchestrator",
+        alias_of="gemma3:4b",
+    ),
+    "lex-v3": ModelSpec(
+        model_id="lex-v3",
+        provider=ModelProvider.OLLAMA,
+        display_name="Lex v3 (Router)",
+        context_window=32768,
+        input_cost_per_m=0.0,
+        output_cost_per_m=0.0,
+        best_for=["routing", "agent_classification", "boundary_detection", "orchestration"],
+        fallback_chain=["lex-v2", "qwen2.5:3b", "llama3.2:1b"],
+        supports_tools=False,
+        role="fine-tuned-router",
+    ),
+    "lex-v2": ModelSpec(
+        model_id="lex-v2",
+        provider=ModelProvider.OLLAMA,
+        display_name="Lex v2 (Router legacy)",
+        context_window=32768,
+        input_cost_per_m=0.0,
+        output_cost_per_m=0.0,
+        best_for=["routing", "agent_classification"],
+        fallback_chain=["qwen2.5:3b", "llama3.2:1b"],
+        supports_tools=False,
+        role="fine-tuned-router-v2",
     ),
     "webgen": ModelSpec(
         model_id="webgen",
@@ -77,6 +106,20 @@ UNIFIED_MODEL_REGISTRY: dict[str, ModelSpec] = {
         best_for=["web_generation", "html", "css", "frontend"],
         fallback_chain=["qwen2.5", "mistral:7b"],
         supports_tools=True,
+        role="fine-tuned-webgen",
+        alias_of="llama3.2",
+    ),
+    "gemma3:4b": ModelSpec(
+        model_id="gemma3:4b",
+        provider=ModelProvider.OLLAMA,
+        display_name="Gemma 3 4B",
+        context_window=128000,
+        input_cost_per_m=0.0,
+        output_cost_per_m=0.0,
+        best_for=["routing", "reasoning", "boundary_classification"],
+        fallback_chain=["llama3.2", "mistral:7b"],
+        supports_tools=False,
+        role="base-router",
     ),
     # ── Local base models ──
     "llama3.2:1b": ModelSpec(
@@ -223,6 +266,28 @@ UNIFIED_MODEL_REGISTRY: dict[str, ModelSpec] = {
         fallback_chain=["kimi-k2", "claude-sonnet"],
         supports_tools=True,
     ),
+    "minimax/minimax-m1": ModelSpec(
+        model_id="minimax/minimax-m1",
+        provider=ModelProvider.OPENROUTER,
+        display_name="MiniMax M1",
+        context_window=1000000,
+        input_cost_per_m=0.30,
+        output_cost_per_m=1.10,
+        best_for=["long_context", "document_analysis", "reasoning"],
+        fallback_chain=["kimi-k2", "claude-sonnet"],
+        supports_tools=True,
+    ),
+    "minimax/minimax-m1:extended": ModelSpec(
+        model_id="minimax/minimax-m1:extended",
+        provider=ModelProvider.OPENROUTER,
+        display_name="MiniMax M1 Extended",
+        context_window=1000000,
+        input_cost_per_m=0.30,
+        output_cost_per_m=1.10,
+        best_for=["long_context", "deep_reasoning", "extended_thinking"],
+        fallback_chain=["minimax/minimax-m1", "kimi-k2-thinking"],
+        supports_tools=True,
+    ),
     "claude-sonnet": ModelSpec(
         model_id="claude-sonnet",
         provider=ModelProvider.OPENROUTER,
@@ -274,7 +339,7 @@ DEFAULT_TASK_MODELS: dict[str, str] = {
     "general": OLLAMA_MODEL,
     # Sprint 1: explicit role-based keys for the ReAct runtime.
     # All defaults are local Ollama models — local-first principle (no external API calls).
-    "router": "qwen2.5:3b",
+    "router": "lex-v3",  # fine-tuned routing model (trained ~1h ago, ~3.3GB)
     "planner": "qwen2.5",
     "code_planner": "qwen2.5-coder:7b",
     "executor": "qwen2.5-coder:7b",
@@ -312,6 +377,47 @@ class UnifiedModelRouter:
             state = ModelHealthState(model_id=model_id)
             self._health_map[model_id] = state
         return state
+
+    @staticmethod
+    def _local_model_candidates(model_id: str) -> list[str]:
+        spec = UNIFIED_MODEL_REGISTRY.get(model_id)
+        candidates = [model_id]
+        if spec is not None and spec.provider == ModelProvider.OLLAMA:
+            candidates.extend(spec.fallback_chain)
+
+        deduped: list[str] = []
+        for candidate in candidates:
+            if candidate and candidate not in deduped:
+                deduped.append(candidate)
+        return deduped
+
+    @staticmethod
+    def _match_ollama_model_name(requested_id: str, available_models: list[str]) -> str | None:
+        if not requested_id:
+            return None
+
+        for available in available_models:
+            if available == requested_id:
+                return available
+
+        for available in available_models:
+            if available.startswith(f"{requested_id}:") or available.startswith(f"{requested_id}-"):
+                return available
+
+        return None
+
+    async def resolve_ollama_runtime_model(self, model_id: str) -> str | None:
+        try:
+            available_models = await self.local_client.list_models()
+        except Exception:
+            return None
+
+        for candidate in self._local_model_candidates(model_id):
+            matched = self._match_ollama_model_name(candidate, available_models)
+            if matched is not None:
+                return matched
+
+        return None
 
     def _is_circuit_open(self, model_id: str) -> bool:
         state = self._get_health_state(model_id)
@@ -358,8 +464,7 @@ class UnifiedModelRouter:
             try:
                 if not await self.local_client.is_available():
                     return False
-                available = await self.local_client.list_models()
-                return any(model_id in item for item in available)
+                return await self.resolve_ollama_runtime_model(model_id) is not None
             except Exception:
                 return False
 
@@ -434,8 +539,12 @@ class UnifiedModelRouter:
         max_tokens: int,
     ) -> dict[str, Any]:
         if spec.provider == ModelProvider.OLLAMA:
+            runtime_model = await self.resolve_ollama_runtime_model(spec.model_id)
+            if runtime_model is None:
+                raise RuntimeError(f"No installed Ollama model matched '{spec.model_id}'")
+
             previous_model = self.local_client.model
-            self.local_client.model = spec.model_id
+            self.local_client.model = runtime_model
             try:
                 output = await self.local_client.generate(
                     prompt=prompt,
@@ -448,6 +557,7 @@ class UnifiedModelRouter:
 
             return {
                 "model_id": spec.model_id,
+                "runtime_model_id": runtime_model,
                 "provider": spec.provider.value,
                 "output": output,
                 "estimated_cost_usd": 0.0,
@@ -483,8 +593,12 @@ class UnifiedModelRouter:
         reg: ToolIdRegistry,
     ) -> dict[str, Any]:
         if spec.provider == ModelProvider.OLLAMA:
+            runtime_model = await self.resolve_ollama_runtime_model(spec.model_id)
+            if runtime_model is None:
+                raise RuntimeError(f"No installed Ollama model matched '{spec.model_id}'")
+
             previous_model = self.local_client.model
-            self.local_client.model = spec.model_id
+            self.local_client.model = runtime_model
             try:
                 output = await self.local_client.chat(
                     messages=messages,
@@ -496,6 +610,7 @@ class UnifiedModelRouter:
 
             return {
                 "model_id": spec.model_id,
+                "runtime_model_id": runtime_model,
                 "provider": spec.provider.value,
                 "output": output,
                 "tool_calls": [],

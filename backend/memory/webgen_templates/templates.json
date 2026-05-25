@@ -1,0 +1,358 @@
+[
+  {
+    "id": "3c077ad4",
+    "name": "Claude Opus 4.7 Benchmarks Explained",
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "source_path": "",
+    "business_type": "custom",
+    "description": "Brief description of the site layout",
+    "page_structure": [
+      {
+        "slug": "blog/claude-opus-4-7-benchmarks-explained",
+        "title": "Claude Opus 4.7 Benchmarks Explained",
+        "sections": [
+          "header",
+          "hero",
+          "features",
+          "testimonials",
+          "cta",
+          "footer"
+        ]
+      }
+    ],
+    "component_ids": [
+      "47d81f35",
+      "5612c4b0",
+      "92ead481",
+      "137fbfb6",
+      "7f937490",
+      "7bd7492d"
+    ],
+    "style": {
+      "name": "",
+      "description": "",
+      "css_classes": [],
+      "color_scheme": {},
+      "font_stack": "",
+      "spacing": ""
+    },
+    "nav_pattern": "top-bar",
+    "footer_pattern": "standard",
+    "section_order": [
+      "header",
+      "hero",
+      "features",
+      "testimonials",
+      "cta",
+      "footer"
+    ],
+    "created_at": "2026-04-19T20:42:54.408784+00:00",
+    "metadata": {}
+  },
+  {
+    "id": "a09065e5",
+    "name": "Claude Opus 4.7 Benchmarks Explained",
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "source_path": "",
+    "business_type": "custom",
+    "description": "Blog post with sections: hero, meta, category, content, and footer.",
+    "page_structure": [
+      {
+        "slug": "claude-opus-4-7-benchmarks-explained",
+        "title": "Claude Opus 4.7 Benchmarks Explained",
+        "sections": [
+          "hero",
+          "meta",
+          "category",
+          "content",
+          "footer"
+        ]
+      }
+    ],
+    "component_ids": [
+      "556d7294",
+      "141f89f5",
+      "15178fbe",
+      "a610fa44",
+      "5b526836"
+    ],
+    "style": {
+      "name": "",
+      "description": "",
+      "css_classes": [],
+      "color_scheme": {},
+      "font_stack": "",
+      "spacing": ""
+    },
+    "nav_pattern": "top-bar",
+    "footer_pattern": "standard",
+    "section_order": [
+      "hero",
+      "meta",
+      "category",
+      "content",
+      "footer"
+    ],
+    "created_at": "2026-04-19T20:49:53.815816+00:00",
+    "metadata": {}
+  },
+  {
+    "id": "b3b649c0",
+    "name": "Claude Opus 4.7 Benchmarks Explained",
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "source_path": "",
+    "business_type": "custom",
+    "description": "The website has a header with navigation links, a hero section with a title and subtitle, a features section with three sections, a testimonials section, a call-to-action section, and a footer with social media links.",
+    "page_structure": [
+      {
+        "slug": "index",
+        "title": "Home",
+        "sections": [
+          "nav",
+          "hero",
+          "features",
+          "cta",
+          "footer"
+        ]
+      }
+    ],
+    "component_ids": [],
+    "style": {
+      "name": "",
+      "description": "",
+      "css_classes": [],
+      "color_scheme": {},
+      "font_stack": "",
+      "spacing": ""
+    },
+    "nav_pattern": "top-bar",
+    "footer_pattern": "standard",
+    "section_order": [
+      "hero",
+      "features",
+      "testimonials",
+      "cta",
+      "footer"
+    ],
+    "created_at": "2026-04-19T21:03:38.221767+00:00",
+    "metadata": {}
+  },
+  {
+    "id": "0e9ae498",
+    "name": "test",
+    "source_url": "https://example.com",
+    "source_path": "",
+    "business_type": "custom",
+    "description": "Brief description of the site layout",
+    "page_structure": [
+      {
+        "slug": "index",
+        "title": "Home",
+        "sections": [
+          "nav",
+          "hero",
+          "features",
+          "cta",
+          "footer"
+        ]
+      }
+    ],
+    "component_ids": [],
+    "style": {
+      "name": "style-name",
+      "description": "Brief style description",
+      "css_classes": [
+        "key",
+        "css",
+        "classes",
+        "used"
+      ],
+      "color_scheme": {
+        "primary": "#007bff",
+        "secondary": "#6c757d",
+        "accent": "#f89112",
+        "background": "#fde6ec",
+        "text": "#333333"
+      },
+      "font_stack": "sans-serif / serif / mono",
+      "spacing": "normal"
+    },
+    "nav_pattern": "top-bar",
+    "footer_pattern": "standard",
+    "section_order": [
+      "nav",
+      "hero",
+      "features",
+      "testimonials",
+      "cta",
+      "footer"
+    ],
+    "created_at": "2026-04-19T21:36:27.550751+00:00",
+    "metadata": {}
+  },
+  {
+    "id": "449b3e99",
+    "name": "test",
+    "source_url": "https://example.com",
+    "source_path": "",
+    "business_type": "custom",
+    "description": "This website has a simple layout with a top-bar navigation pattern, standard footer, and a list of pages with their sections in order.",
+    "page_structure": [
+      {
+        "slug": "index",
+        "title": "Home",
+        "sections": [
+          "nav",
+          "hero",
+          "features",
+          "cta",
+          "footer"
+        ]
+      }
+    ],
+    "component_ids": [],
+    "style": {
+      "name": "style-name",
+      "description": "Brief style description",
+      "css_classes": [
+        "tailwind"
+      ],
+      "color_scheme": {
+        "primary": "#007bff",
+        "secondary": "#4caf50",
+        "accent": "#f44336",
+        "background": "#f2f2f2",
+        "text": "#333"
+      },
+      "font_stack": "sans-serif / serif / mono",
+      "spacing": "normal"
+    },
+    "nav_pattern": "top-bar",
+    "footer_pattern": "standard",
+    "section_order": [
+      "nav",
+      "hero",
+      "features",
+      "testimonials",
+      "cta",
+      "footer"
+    ],
+    "created_at": "2026-04-19T21:36:31.701555+00:00",
+    "metadata": {}
+  },
+  {
+    "id": "1d91280a",
+    "name": "Business",
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "source_path": "",
+    "business_type": "custom",
+    "description": "Blog post layout with a hero section, table of contents, and sections for coding capabilities, SWE-bench Verified, SWE-bench Pro, Terminal-Bench 2.0, agentic capabilities, MCP-Atlas (Scaled tool use), Finance Agent v1.1, OSWorld-Verified (Computer use), BrowseComp (Agentic search), and reasoning capabilities.",
+    "page_structure": [
+      {
+        "slug": "claude-opus-4-7-benchmarks-explained",
+        "title": "Claude Opus 4.7 Benchmarks Explained",
+        "sections": [
+          "hero",
+          "table_of_contents",
+          "coding_capabilities",
+          "SWE-bench_Verified",
+          "SWE-bench_Pro",
+          "Terminal-Bench_2.0",
+          "agentic_capabilities",
+          "MCP-Atlas_(Scaled_tool_use)",
+          "Finance_Agent_v1.1",
+          "OSWorld-Verified_(Computer_use)",
+          "BrowseComp_(Agentic_search)",
+          "reasoning_capabilities"
+        ]
+      }
+    ],
+    "component_ids": [],
+    "style": {
+      "name": "",
+      "description": "",
+      "css_classes": [],
+      "color_scheme": {},
+      "font_stack": "",
+      "spacing": ""
+    },
+    "nav_pattern": "top-bar",
+    "footer_pattern": "standard",
+    "section_order": [
+      "hero",
+      "table_of_contents",
+      "coding_capabilities",
+      "SWE-bench_Verified",
+      "SWE-bench_Pro",
+      "Terminal-Bench_2.0",
+      "agentic_capabilities",
+      "MCP-Atlas_(Scaled_tool_use)",
+      "Finance_Agent_v1.1",
+      "OSWorld-Verified_(Computer_use)",
+      "BrowseComp_(Agentic_search)",
+      "reasoning_capabilities"
+    ],
+    "created_at": "2026-04-19T21:54:10.419022+00:00",
+    "metadata": {}
+  },
+  {
+    "id": "b8be2c17",
+    "name": "Business",
+    "source_url": "https://www.vellum.ai/blog/claude-opus-4-7-benchmarks-explained",
+    "source_path": "",
+    "business_type": "custom",
+    "description": "",
+    "page_structure": [],
+    "component_ids": [],
+    "style": {
+      "name": "",
+      "description": "",
+      "css_classes": [],
+      "color_scheme": {},
+      "font_stack": "",
+      "spacing": ""
+    },
+    "nav_pattern": "top-bar",
+    "footer_pattern": "standard",
+    "section_order": [],
+    "created_at": "2026-04-19T21:54:13.821166+00:00",
+    "metadata": {}
+  },
+  {
+    "id": "cf116272",
+    "name": "Business",
+    "source_url": "https://9animetv.to/watch/to-your-eternity-season-3-19929?ep=169042",
+    "source_path": "",
+    "business_type": "custom",
+    "description": "A website with a header, main content and footer sections. The header contains a navigation menu with subcategories. The main content has a hero section, followed by features, testimonials, call-to-action and footer sections.",
+    "page_structure": [
+      {
+        "slug": "index",
+        "title": "Home",
+        "sections": [
+          "header",
+          "main",
+          "footer"
+        ]
+      }
+    ],
+    "component_ids": [],
+    "style": {
+      "name": "",
+      "description": "",
+      "css_classes": [],
+      "color_scheme": {},
+      "font_stack": "",
+      "spacing": ""
+    },
+    "nav_pattern": "top-bar",
+    "footer_pattern": "standard",
+    "section_order": [
+      "header",
+      "main",
+      "footer"
+    ],
+    "created_at": "2026-04-20T03:58:18.094891+00:00",
+    "metadata": {}
+  }
+]

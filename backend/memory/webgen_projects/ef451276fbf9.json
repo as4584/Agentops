@@ -1,0 +1,200 @@
+{
+  "id": "ef451276fbf9",
+  "created_at": "2026-04-20T00:15:18.412284+00:00",
+  "updated_at": "2026-04-20T00:18:27.642933+00:00",
+  "status": "ready",
+  "brief": {
+    "business_name": "fitness",
+    "business_type": "custom",
+    "tagline": "",
+    "description": "can you make a fitness website called buff babies3",
+    "services": [],
+    "target_audience": "",
+    "tone": "professional",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": [],
+    "clone_url": null,
+    "cloned_html": null,
+    "cloned_screenshot": null,
+    "cloned_tokens": {}
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - Buff Babies3",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "1a623c20",
+          "name": "hero",
+          "component_type": "hero-centered",
+          "content": {
+            "headline": "Suggested headline text",
+            "subtitle": "Suggested subtitle"
+          },
+          "html": "<section class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\" aria-label=\"Home\">\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both;\">Suggested headline text</h1>\n  <p>Suggested subtitle</p>\n  <a href=\"index.html\">{{cta_text}}</a>\n</section>",
+          "order": 0
+        },
+        {
+          "id": "ceb3e115",
+          "name": "features",
+          "component_type": "features-list",
+          "content": {
+            "items": [
+              {
+                "headline": "Feature 1",
+                "description": "Description of feature 1"
+              },
+              {
+                "headline": "Feature 2",
+                "description": "Description of feature 2"
+              }
+            ]
+          },
+          "html": "<section>\n  <h2>Features</h2>\n  <div class=\"container mx-auto px-6 py-8 md:px-10\">\n    <div class=\"grid grid-cols-1 gap-6 lg:grid-cols-2\">\n      <!-- Feature card -->\n      <article class=\"glass-card shadow-lg rounded-lg\">\n        <h3 class=\"text-xl font-semibold mb-4\">Feature 1</h3>\n        <p class=\"text-gray-700 leading-relaxed mt-2 mb-6\">Description of feature 1.</p>\n        <button role=\"button\" aria-label=\"Get started\" type=\"button\" class=\"btn bg-primary text-white hover:bg-secondary hover:text-white transition-all duration-300\">Start Now</button>\n      </article>\n      \n      <!-- Feature card -->\n      <article class=\"glass-card shadow-lg rounded-lg\">\n        <h3 class=\"text-xl font-semibold mb-4\">Feature 2</h3>\n        <p class=\"text-gray-700 leading-relaxed mt-2 mb-6\">Description of feature 2.</p>\n        <button role=\"button\" aria-label=\"Get started\" type=\"button\" class=\"btn bg-primary text-white hover:bg-secondary hover:text-white transition-all duration-300\">Start Now</button>\n      </article>\n    </div>\n  </div>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "f327385d",
+          "name": "testimonials",
+          "component_type": "testimonials-list",
+          "content": {
+            "items": [
+              {
+                "name": "John Doe",
+                "rating": 5,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+              },
+              {
+                "name": "Jane Smith",
+                "rating": 4.5,
+                "description": "Nulla facilisi."
+              }
+            ]
+          },
+          "html": "<header style=\"background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%)\">\n    <h1 style=\"background: linear-gradient(90deg,var(--color-primary),var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;\" class=\"font-poppins text-6xl mb-14\">Testimonials</h1>\n</header>\n<nav class=\"bg-white shadow-md py-6 px-8 flex items-center justify-between\">\n    <a href=\"index.html\" aria-label=\"Home\">Home</a>\n    <button role=\"button\" aria-label=\"Back to top\" class=\"btn btn-secondary\">Back to Top</button>\n</nav>\n<section class=\"pt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4\">\n    <article>\n        <h2 class=\"font-poppins mb-2 text-lg\">John Doe</h2>\n        <p class=\"text-gray-700\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n        <div class=\"mt-6 bg-white border border-gray-300 rounded shadow-sm p-4 flex items-center justify-between\">\n            <span class=\"text-gray-500 font-poppins text-xs mr-2\">Rating: </span>\n            <span class=\"bg-primary text-white font-bold px-2 py-1 rounded\">5/5</span>\n        </div>\n    </article>\n    <article>\n        <h2 class=\"font-poppins mb-2 text-lg\">Jane Smith</h2>\n        <p class=\"text-gray-700\">Nulla facilisi.</p>\n        <div class=\"mt-6 bg-white border border-gray-300 rounded shadow-sm p-4 flex items-center justify-between\">\n            <span class=\"text-gray-500 font-poppins text-xs mr-2\">Rating: </span>\n            <span class=\"bg-secondary text-white font-bold px-2 py-1 rounded\">4.5/5</span>\n        </div>\n    </article>\n</section>\n<footer class=\"bg-white shadow-md py-6 px-8 flex items-center justify-between\">\n    <a href=\"#\" aria-label=\"Phone\">Phone: 123-4567890</a>\n    <a href=\"#\" aria-label=\"Email\">Email: info@example.com</a>\n</footer>",
+          "order": 2
+        },
+        {
+          "id": "cc5a7b34",
+          "name": "cta",
+          "component_type": "call-to-action",
+          "content": {
+            "button_text": "Suggested button text"
+          },
+          "html": "<section class=\"hero_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <div class=\"container mx-auto px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 xl:px-20\">\n    <div class=\"flex items-center justify-center\">\n      <h1 class=\"text-5xl font-bold text-primary dark:text-white mb-4 sm:mb-8\">Welcome to our Fitness Studio!</h1>\n      <div class=\"bg-gradient-to-r from-primary to-secondary to-[var(--color-accent)] w-full h-24 sm:h-32\"></div>\n    </div>\n    <div class=\"flex flex-wrap\">\n      <div class=\"w-full sm:w-1/3 mb-6 sm:mb-0 glass-card transition-transform duration-300 hover:-translate-y-2 shadow-md\">\n        <div class=\"bg-gray-100 p-4 rounded-lg\">\n          <h2 class=\"text-xl font-bold mb-2 text-primary dark:text-white\">Service 1</h2>\n          <p class=\"text-lg text-gray-800 dark:text-white\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet.</p>\n        </div>\n      </div>\n      <div class=\"w-full sm:w-1/3 mb-6 sm:mb-0 glass-card transition-transform duration-300 hover:-translate-y-2 shadow-md\">\n        <div class=\"bg-gray-100 p-4 rounded-lg\">\n          <h2 class=\"text-xl font-bold mb-2 text-primary dark:text-white\">Service 2</h2>\n          <p class=\"text-lg text-gray-800 dark:text-white\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet.</p>\n        </div>\n      </div>\n      <div class=\"w-full sm:w-1/3 mb-6 sm:mb-0 glass-card transition-transform duration-300 hover:-translate-y-2 shadow-md\">\n        <div class=\"bg-gray-100 p-4 rounded-lg\">\n          <h2 class=\"text-xl font-bold mb-2 text-primary dark:text-white\">Service 3</h2>\n          <p class=\"text-lg text-gray-800 dark:text-white\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet.</p>\n        </div>\n      </div>\n    </div>\n  </div>\n</section>\n<nav class=\"bg-gray-200 p-4 sticky top-0 z-10\">\n  <ul class=\"list-none flex items-center justify-between space-x-8\">\n    <li><a href=\"#\" class=\"text-primary hover:text-[var(--color-accent)] transition-colors duration-200\"><span class=\"font-bold text-lg\">Home</span></a></li>\n  </ul>\n</nav>\n<header class=\"bg-gray-900 text-white py-6\">\n  <div class=\"container mx-auto px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 xl:px-20\">\n    <h1 class=\"text-3xl font-bold mb-4 text-white\">Our Services</h1>\n  </div>\n</header>\n<main class=\"container mx-auto px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 xl:px-20\">",
+          "order": 3
+        }
+      ],
+      "seo": {
+        "title": "Buff Babies3 - Home",
+        "meta_description": "Get fit with Buff Babies3. Various fitness services available. Join us today!",
+        "keywords": [
+          "fitness",
+          "services",
+          "home"
+        ],
+        "og_title": "Buff Babies3 - Home",
+        "og_description": "Join Buff Babies3 for a better, healthier you. Get fit with our various fitness services.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org/",
+          "@type": "LocalBusiness",
+          "name": "Buff Babies3",
+          "url": "https://www.buffbabies3.com/index",
+          "telephone": "+1-555-555-5555",
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "opens": "09:00",
+            "closes": "21:00"
+          }
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What is Buff Babies3?",
+            "a": "Buff Babies3 is a fitness website that offers various services to help people achieve their fitness goals."
+          },
+          {
+            "q": "Who is Buff Babies3 for?",
+            "a": "Buff Babies3 is for anyone looking to improve their fitness, whether they are beginners or experienced athletes."
+          },
+          {
+            "q": "What services does Buff Babies3 offer?",
+            "a": "Buff Babies3 offers a variety of services, including personal training, group classes, nutrition coaching, and more."
+          },
+          {
+            "q": "How can I get started with Buff Babies3?",
+            "a": "You can get started with Buff Babies3 by visiting their website, where you can learn more about their services and sign up for an account."
+          },
+          {
+            "q": "What sets Buff Babies3 apart from other fitness websites?",
+            "a": "Buff Babies3 stands out for its personalized approach to fitness, with experienced trainers who work closely with clients to develop customized plans that meet their unique needs and goals."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "fitness",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Buff Babies3 is a fitness website that offers various services to help people achieve their fitness goals. With experienced trainers and personalized plans, Buff Babies3 stands out as a top choice for anyone looking to improve their health and wellness.",
+        "topic_cluster": "Fitness",
+        "related_topics": [
+          "Personal Training",
+          "Group Classes",
+          "Nutrition Coaching",
+          "Wellness",
+          "Health"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - Buff Babies3</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Get fit with Buff Babies3. Various fitness services available. Join us today!\">\n  <meta name=\"keywords\" content=\"fitness, services, home\">\n  <meta property=\"og:title\" content=\"Buff Babies3 - Home\">\n  <meta property=\"og:description\" content=\"Join Buff Babies3 for a better, healthier you. Get fit with our various fitness services.\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Buff Babies3\",\n  \"url\": \"https://www.buffbabies3.com/index\",\n  \"telephone\": \"+1-555-555-5555\",\n  \"openingHoursSpecification\": {\n    \"@type\": \"OpeningHoursSpecification\",\n    \"dayOfWeek\": [\n      \"Monday\",\n      \"Tuesday\",\n      \"Wednesday\",\n      \"Thursday\",\n      \"Friday\",\n      \"Saturday\"\n    ],\n    \"opens\": \"09:00\",\n    \"closes\": \"21:00\"\n  }\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What is Buff Babies3?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Buff Babies3 is a fitness website that offers various services to help people achieve their fitness goals.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Who is Buff Babies3 for?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Buff Babies3 is for anyone looking to improve their fitness, whether they are beginners or experienced athletes.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What services does Buff Babies3 offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Buff Babies3 offers a variety of services, including personal training, group classes, nutrition coaching, and more.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I get started with Buff Babies3?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"You can get started with Buff Babies3 by visiting their website, where you can learn more about their services and sign up for an account.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What sets Buff Babies3 apart from other fitness websites?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Buff Babies3 stands out for its personalized approach to fitness, with experienced trainers who work closely with clients to develop customized plans that meet their unique needs and goals.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<section class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\" aria-label=\"Home\">\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both;\">Suggested headline text</h1>\n  <p>Suggested subtitle</p>\n  <a href=\"index.html\">{{cta_text}}</a>\n</section>\n\n<section>\n  <h2>Features</h2>\n  <div class=\"container mx-auto px-6 py-8 md:px-10\">\n    <div class=\"grid grid-cols-1 gap-6 lg:grid-cols-2\">\n      <!-- Feature card -->\n      <article class=\"glass-card shadow-lg rounded-lg\">\n        <h3 class=\"text-xl font-semibold mb-4\">Feature 1</h3>\n        <p class=\"text-gray-700 leading-relaxed mt-2 mb-6\">Description of feature 1.</p>\n        <button role=\"button\" aria-label=\"Get started\" type=\"button\" class=\"btn bg-primary text-white hover:bg-secondary hover:text-white transition-all duration-300\">Start Now</button>\n      </article>\n      \n      <!-- Feature card -->\n      <article class=\"glass-card shadow-lg rounded-lg\">\n        <h3 class=\"text-xl font-semibold mb-4\">Feature 2</h3>\n        <p class=\"text-gray-700 leading-relaxed mt-2 mb-6\">Description of feature 2.</p>\n        <button role=\"button\" aria-label=\"Get started\" type=\"button\" class=\"btn bg-primary text-white hover:bg-secondary hover:text-white transition-all duration-300\">Start Now</button>\n      </article>\n    </div>\n  </div>\n</section>\n\n<header style=\"background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%)\">\n    <h1 style=\"background: linear-gradient(90deg,var(--color-primary),var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;\" class=\"font-poppins text-6xl mb-14\">Testimonials</h1>\n</header>\n<nav class=\"bg-white shadow-md py-6 px-8 flex items-center justify-between\">\n    <a href=\"index.html\" aria-label=\"Home\">Home</a>\n    <button role=\"button\" aria-label=\"Back to top\" class=\"btn btn-secondary\">Back to Top</button>\n</nav>\n<section class=\"pt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4\">\n    <article>\n        <h2 class=\"font-poppins mb-2 text-lg\">John Doe</h2>\n        <p class=\"text-gray-700\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n        <div class=\"mt-6 bg-white border border-gray-300 rounded shadow-sm p-4 flex items-center justify-between\">\n            <span class=\"text-gray-500 font-poppins text-xs mr-2\">Rating: </span>\n            <span class=\"bg-primary text-white font-bold px-2 py-1 rounded\">5/5</span>\n        </div>\n    </article>\n    <article>\n        <h2 class=\"font-poppins mb-2 text-lg\">Jane Smith</h2>\n        <p class=\"text-gray-700\">Nulla facilisi.</p>\n        <div class=\"mt-6 bg-white border border-gray-300 rounded shadow-sm p-4 flex items-center justify-between\">\n            <span class=\"text-gray-500 font-poppins text-xs mr-2\">Rating: </span>\n            <span class=\"bg-secondary text-white font-bold px-2 py-1 rounded\">4.5/5</span>\n        </div>\n    </article>\n</section>\n<footer class=\"bg-white shadow-md py-6 px-8 flex items-center justify-between\">\n    <a href=\"#\" aria-label=\"Phone\">Phone: 123-4567890</a>\n    <a href=\"#\" aria-label=\"Email\">Email: info@example.com</a>\n</footer>\n\n<section class=\"hero_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <div class=\"container mx-auto px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 xl:px-20\">\n    <div class=\"flex items-center justify-center\">\n      <h1 class=\"text-5xl font-bold text-primary dark:text-white mb-4 sm:mb-8\">Welcome to our Fitness Studio!</h1>\n      <div class=\"bg-gradient-to-r from-primary to-secondary to-[var(--color-accent)] w-full h-24 sm:h-32\"></div>\n    </div>\n    <div class=\"flex flex-wrap\">\n      <div class=\"w-full sm:w-1/3 mb-6 sm:mb-0 glass-card transition-transform duration-300 hover:-translate-y-2 shadow-md\">\n        <div class=\"bg-gray-100 p-4 rounded-lg\">\n          <h2 class=\"text-xl font-bold mb-2 text-primary dark:text-white\">Service 1</h2>\n          <p class=\"text-lg text-gray-800 dark:text-white\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet.</p>\n        </div>\n      </div>\n      <div class=\"w-full sm:w-1/3 mb-6 sm:mb-0 glass-card transition-transform duration-300 hover:-translate-y-2 shadow-md\">\n        <div class=\"bg-gray-100 p-4 rounded-lg\">\n          <h2 class=\"text-xl font-bold mb-2 text-primary dark:text-white\">Service 2</h2>\n          <p class=\"text-lg text-gray-800 dark:text-white\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet.</p>\n        </div>\n      </div>\n      <div class=\"w-full sm:w-1/3 mb-6 sm:mb-0 glass-card transition-transform duration-300 hover:-translate-y-2 shadow-md\">\n        <div class=\"bg-gray-100 p-4 rounded-lg\">\n          <h2 class=\"text-xl font-bold mb-2 text-primary dark:text-white\">Service 3</h2>\n          <p class=\"text-lg text-gray-800 dark:text-white\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet.</p>\n        </div>\n      </div>\n    </div>\n  </div>\n</section>\n<nav class=\"bg-gray-200 p-4 sticky top-0 z-10\">\n  <ul class=\"list-none flex items-center justify-between space-x-8\">\n    <li><a href=\"#\" class=\"text-primary hover:text-[var(--color-accent)] transition-colors duration-200\"><span class=\"font-bold text-lg\">Home</span></a></li>\n  </ul>\n</nav>\n<header class=\"bg-gray-900 text-white py-6\">\n  <div class=\"container mx-auto px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 xl:px-20\">\n    <h1 class=\"text-3xl font-bold mb-4 text-white\">Our Services</h1>\n  </div>\n</header>\n<main class=\"container mx-auto px-4 py-8 sm:px-6 sm:py-12 md:px-8 lg:px-16 xl:px-20\">\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What is Buff Babies3?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Buff Babies3 is a fitness website that offers various services to help people achieve their fitness goals.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Who is Buff Babies3 for?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Buff Babies3 is for anyone looking to improve their fitness, whether they are beginners or experienced athletes.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What services does Buff Babies3 offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Buff Babies3 offers a variety of services, including personal training, group classes, nutrition coaching, and more.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I get started with Buff Babies3?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">You can get started with Buff Babies3 by visiting their website, where you can learn more about their services and sign up for an account.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What sets Buff Babies3 apart from other fitness websites?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Buff Babies3 stands out for its personalized approach to fitness, with experienced trainers who work closely with clients to develop customized plans that meet their unique needs and goals.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    }
+  ],
+  "template_ids": [
+    "3c077ad4"
+  ],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/fitness",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n",
+  "sitemap_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://fitness.com/index.html</loc>\n    <priority>1.0</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>",
+  "robots_txt": "User-agent: *\nAllow: /\nSitemap: https://fitness.com/sitemap.xml\n",
+  "errors": [
+    "[index] Multiple <h1> tags found (4)",
+    "[index][llm] Missing call-to-action button"
+  ],
+  "metadata": {
+    "design_context": {
+      "style_name": "Soft UI Evolution",
+      "primary_color": "#2563EB",
+      "secondary_color": "#3B82F6",
+      "accent_color": "#EA580C",
+      "heading_font": "Poppins",
+      "body_font": "Open Sans"
+    },
+    "ux_scores": {
+      "index": 95
+    }
+  },
+  "sources": []
+}

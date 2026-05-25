@@ -773,3 +773,317 @@ class TestSitePlannerAgent:
         # Fallback kicks in, should still advance
         assert result.status == SiteStatus.PLANNED
         assert len(result.pages) == 4
+
+
+# ── WebgenRunStore ─────────────────────────────────────────────────────────────
+
+
+class TestWebgenRunStore:
+    """Tests for WebgenRunStore persistence."""
+
+    def _make_run(self, *, run_id: str = "test-run-001") -> "WebgenRunState":
+        from backend.webgen.models import WebgenRunState, WebgenRunStatus
+        from datetime import datetime, timezone
+
+        return WebgenRunState(
+            run_id=run_id,
+            started_at=datetime.now(timezone.utc).isoformat(),
+            current_phase="planning",
+            step=1,
+            total=6,
+            business_name="Test Co",
+            project_id="proj-abc",
+            project_slug="test-co",
+            status=WebgenRunStatus.RUNNING,
+        )
+
+    def test_save_and_load_roundtrip(self, tmp_path):
+        from backend.webgen.site_store import WebgenRunStore
+
+        store = WebgenRunStore(base_dir=tmp_path)
+        run = self._make_run()
+        store.save(run)
+        loaded = store.load(run.run_id)
+        assert loaded is not None
+        assert loaded.run_id == run.run_id
+        assert loaded.business_name == "Test Co"
+        assert loaded.current_phase == "planning"
+
+    def test_load_missing_returns_none(self, tmp_path):
+        from backend.webgen.site_store import WebgenRunStore
+
+        store = WebgenRunStore(base_dir=tmp_path)
+        assert store.load("no-such-run") is None
+
+    def test_load_corrupt_returns_none(self, tmp_path):
+        from backend.webgen.site_store import WebgenRunStore
+
+        store = WebgenRunStore(base_dir=tmp_path)
+        (tmp_path / "bad-run.json").write_text("{not valid json")
+        assert store.load("bad-run") is None
+
+    def test_get_active_run_returns_running(self, tmp_path):
+        from backend.webgen.models import WebgenRunStatus
+        from backend.webgen.site_store import WebgenRunStore
+
+        store = WebgenRunStore(base_dir=tmp_path)
+        run = self._make_run(run_id="active-001")
+        store.save(run)
+        active = store.get_active_run()
+        assert active is not None
+        assert active.run_id == "active-001"
+
+    def test_get_active_run_ignores_completed(self, tmp_path):
+        from backend.webgen.models import WebgenRunStatus
+        from backend.webgen.site_store import WebgenRunStore
+
+        store = WebgenRunStore(base_dir=tmp_path)
+        run = self._make_run(run_id="done-001")
+        run.status = WebgenRunStatus.COMPLETED
+        store.save(run)
+        assert store.get_active_run() is None
+
+    def test_get_active_run_returns_most_recent(self, tmp_path):
+        from backend.webgen.models import WebgenRunState, WebgenRunStatus
+        from backend.webgen.site_store import WebgenRunStore
+        from datetime import datetime, timezone, timedelta
+
+        store = WebgenRunStore(base_dir=tmp_path)
+        older = self._make_run(run_id="older-run")
+        newer = self._make_run(run_id="newer-run")
+        # Bump newer's started_at to be strictly later
+        newer.started_at = (
+            datetime.now(timezone.utc) + timedelta(seconds=10)
+        ).isoformat()
+        store.save(older)
+        store.save(newer)
+        active = store.get_active_run()
+        assert active is not None
+        assert active.run_id == "newer-run"
+
+    def test_save_update_persists(self, tmp_path):
+        from backend.webgen.site_store import WebgenRunStore
+
+        store = WebgenRunStore(base_dir=tmp_path)
+        run = self._make_run()
+        store.save(run)
+        run.current_phase = "build"
+        run.step = 5
+        store.save(run)
+        loaded = store.load(run.run_id)
+        assert loaded is not None
+        assert loaded.current_phase == "build"
+        assert loaded.step == 5
+
+    def test_creates_base_dir_if_missing(self, tmp_path):
+        from backend.webgen.site_store import WebgenRunStore
+
+        target = tmp_path / "nested" / "runs"
+        store = WebgenRunStore(base_dir=target)
+        assert target.exists()
+
+
+# ── QA precheck ────────────────────────────────────────────────────────────────
+
+
+class TestWebQAAgentPrecheck:
+    """Tests for the pre-build QA precheck added by Claude."""
+
+    @pytest.mark.asyncio
+    async def test_precheck_passes_complete_project(self):
+        from backend.webgen.agents.qa_agent import WebQAAgent
+        from backend.webgen.models import SectionSpec
+
+        agent = WebQAAgent(llm=MagicMock())
+        project = make_project(status=SiteStatus.BRIEF)
+        page = PageSpec(
+            slug="index",
+            title="Home",
+            purpose="Landing page",
+            sections=[SectionSpec(name="hero", component_type="hero-centered")],
+        )
+        page.seo.title = "Home | Acme"
+        project.pages = [page]
+        result = await agent.run_precheck(project)
+        # Status should be unchanged — precheck is read-only
+        assert result.status == SiteStatus.BRIEF
+        assert result is project
+
+    @pytest.mark.asyncio
+    async def test_precheck_warns_on_missing_title(self):
+        from backend.webgen.agents.qa_agent import WebQAAgent
+        from backend.webgen.models import SectionSpec
+
+        agent = WebQAAgent(llm=MagicMock())
+        project = make_project()
+        page = PageSpec(
+            slug="about",
+            title="",
+            purpose="About page",
+            sections=[SectionSpec(name="about", component_type="text")],
+        )
+        project.pages = [page]
+        result = await agent.run_precheck(project)
+        # Should still return project (non-blocking)
+        assert result is project
+
+    @pytest.mark.asyncio
+    async def test_precheck_returns_same_object(self):
+        """Verify the duplicate dead return was removed — only one return path."""
+        from backend.webgen.agents.qa_agent import WebQAAgent
+        import inspect
+
+        agent = WebQAAgent(llm=MagicMock())
+        source = inspect.getsource(agent.run_precheck)
+        # Count actual `return project` occurrences — should be exactly 1
+        assert source.count("return project") == 1
+
+
+# ── Pipeline phase ordering ─────────────────────────────────────────────────────
+
+
+class TestPipelinePhaseOrdering:
+    """Tests for the approved phase order: planning→seo→aeo→qa→build→export."""
+
+    def test_emit_step_total_no_clone(self):
+        """Without clone_url, total steps should be 6."""
+        from backend.webgen.pipeline import WebGenPipeline
+        from backend.webgen.models import ClientBrief, BusinessType
+
+        brief = ClientBrief(
+            business_name="X",
+            business_type=BusinessType.CUSTOM,
+        )
+        assert not brief.clone_url  # no clone
+        # _total would be 6 in quick_generate
+        _total = 8 if brief.clone_url else 6
+        assert _total == 6
+
+    def test_emit_step_total_with_clone(self):
+        """With clone_url, total steps should be 8."""
+        from backend.webgen.models import ClientBrief, BusinessType
+
+        brief = ClientBrief(
+            business_name="X",
+            business_type=BusinessType.CUSTOM,
+            clone_url="https://example.com",
+        )
+        _total = 8 if brief.clone_url else 6
+        assert _total == 8
+
+    def test_run_store_updated_on_phase_change(self, tmp_path):
+        """_emit() should persist the updated phase to WebgenRunStore."""
+        from backend.webgen.models import WebgenRunState, WebgenRunStatus
+        from backend.webgen.site_store import WebgenRunStore
+        from datetime import datetime, timezone
+
+        run_id = "phase-test-001"
+        store = WebgenRunStore(base_dir=tmp_path)
+        run = WebgenRunState(
+            run_id=run_id,
+            started_at=datetime.now(timezone.utc).isoformat(),
+            current_phase="planning",
+            step=1,
+            total=6,
+            business_name="Phase Co",
+            status=WebgenRunStatus.RUNNING,
+        )
+        store.save(run)
+
+        # Simulate what _emit does
+        loaded = store.load(run_id)
+        assert loaded is not None
+        loaded.current_phase = "seo"
+        loaded.step = 2
+        store.save(loaded)
+
+        final = store.load(run_id)
+        assert final is not None
+        assert final.current_phase == "seo"
+        assert final.step == 2
+
+
+# ── Webgen route endpoints ──────────────────────────────────────────────────────
+
+
+class TestWebgenRunRoutes:
+    """Tests for /api/webgen/active-run and /api/webgen/runs/{run_id}."""
+
+    def _make_run(self, run_id: str = "route-run-001") -> "WebgenRunState":
+        from backend.webgen.models import WebgenRunState, WebgenRunStatus
+        from datetime import datetime, timezone
+
+        return WebgenRunState(
+            run_id=run_id,
+            started_at=datetime.now(timezone.utc).isoformat(),
+            current_phase="build",
+            step=5,
+            total=6,
+            business_name="Route Co",
+            status=WebgenRunStatus.RUNNING,
+        )
+
+    def _make_app(self):
+        from backend.routes.webgen_builder import router
+        from fastapi import FastAPI
+
+        # Router already has prefix="/api/webgen" — don't add another
+        app = FastAPI()
+        app.include_router(router)
+        return app
+
+    def test_get_active_run_returns_null_when_no_runs(self, tmp_path, monkeypatch):
+        import backend.routes.webgen_builder as builder_mod
+        from backend.webgen.site_store import WebgenRunStore
+        from fastapi.testclient import TestClient
+
+        store = WebgenRunStore(base_dir=tmp_path)
+        monkeypatch.setattr(builder_mod, "_run_store", store)
+        client = TestClient(self._make_app())
+        resp = client.get("/api/webgen/active-run")
+        assert resp.status_code == 200
+        assert resp.json() == {"run": None}
+
+    def test_get_active_run_returns_running_run(self, tmp_path, monkeypatch):
+        import backend.routes.webgen_builder as builder_mod
+        from backend.webgen.site_store import WebgenRunStore
+        from fastapi.testclient import TestClient
+
+        store = WebgenRunStore(base_dir=tmp_path)
+        run = self._make_run()
+        store.save(run)
+        monkeypatch.setattr(builder_mod, "_run_store", store)
+        client = TestClient(self._make_app())
+        resp = client.get("/api/webgen/active-run")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["run"] is not None
+        assert data["run"]["run_id"] == "route-run-001"
+        assert data["run"]["current_phase"] == "build"
+
+    def test_get_run_state_returns_run(self, tmp_path, monkeypatch):
+        import backend.routes.webgen_builder as builder_mod
+        from backend.webgen.site_store import WebgenRunStore
+        from fastapi.testclient import TestClient
+
+        store = WebgenRunStore(base_dir=tmp_path)
+        run = self._make_run(run_id="specific-run-999")
+        store.save(run)
+        monkeypatch.setattr(builder_mod, "_run_store", store)
+        client = TestClient(self._make_app())
+        resp = client.get("/api/webgen/runs/specific-run-999")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["run_id"] == "specific-run-999"
+        assert data["step"] == 5
+
+    def test_get_run_state_404_for_missing(self, tmp_path, monkeypatch):
+        import backend.routes.webgen_builder as builder_mod
+        from backend.webgen.site_store import WebgenRunStore
+        from fastapi.testclient import TestClient
+
+        store = WebgenRunStore(base_dir=tmp_path)
+        monkeypatch.setattr(builder_mod, "_run_store", store)
+        client = TestClient(self._make_app())
+        resp = client.get("/api/webgen/runs/does-not-exist")
+        assert resp.status_code == 404

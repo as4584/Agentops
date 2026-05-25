@@ -422,3 +422,11 @@
 - **Risk Assessment:** MEDIUM
 - **Impacted Subsystems:** Auto-routing, knowledge retrieval, business-profile intake, startup/reindex flows, release evidence, runtime inventory
 - **Documentation Updated:** YES
+
+### 2026-04-19T20:29:17.677359+00:00
+- **Agent:** soul_core
+- **Files Modified:** docs/SOURCE_OF_TRUTH.md
+- **Reason:** 
+- **Risk Assessment:** MEDIUM
+- **Impacted Subsystems:** documentation
+- **Documentation Updated:** YES

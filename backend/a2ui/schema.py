@@ -25,7 +25,10 @@ from __future__ import annotations
 
 import re
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from typing import Annotated, Any, Literal  # noqa: F401 — Annotated used in field definitions
 
 from pydantic import BaseModel, Field, field_validator, model_validator

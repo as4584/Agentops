@@ -14,6 +14,7 @@ import { useEffect, useState, useCallback, useRef, FormEvent } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import {
+  ActionIcon,
   AppShell,
   Badge,
   Box,
@@ -78,6 +79,7 @@ import {
   IconThumbUp,
   IconThumbDown,
   IconTools,
+  IconTrash,
   IconX,
 } from '@tabler/icons-react';
 
@@ -103,6 +105,7 @@ import {
   type ProjectEntry,
 } from '@/lib/api';
 import LLMHealthPanel from '@/components/panels/LLMHealthPanel';
+import OrchestrationHub from '@/components/OrchestrationHub';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -113,7 +116,7 @@ const DashboardLayout = dynamic(() => import('@/components/DashboardLayout'), {
   ssr: false,
 });
 
-const OrchestrationHub = dynamic(() => import('@/components/OrchestrationHub'), {
+const MLTrainingWorkbench = dynamic(() => import('@/components/ml/MLTrainingWorkbench'), {
   ssr: false,
 });
 
@@ -127,11 +130,9 @@ const TIER_LABELS: Record<number, string> = {
 const AGENT_TIER: Record<string, number> = {
   soul_core: 0,
   devops_agent: 1, monitor_agent: 1, self_healer_agent: 1,
-  code_review_agent: 2, security_agent: 2, data_agent: 2,
-  prompt_engineer: 2, token_optimizer: 2, curriculum_advisor: 2,
-  vocabulary_coach: 2, career_intel: 2, accreditation_advisor: 2,
-  pedagogy_agent: 2, comms_agent: 3, cs_agent: 3, it_agent: 3,
-  knowledge_agent: 3,
+  code_review_agent: 2, security_agent: 2, data_agent: 2, coding_agent: 2,
+  comms_agent: 3, cs_agent: 3, it_agent: 3,
+  knowledge_agent: 3, ocr_agent: 3,
 };
 
 // ---------------------------------------------------------------------------
@@ -242,13 +243,7 @@ export default function DashboardPage() {
   // LLM state
   const [llmStats, setLlmStats] = useState<LLMStats | null>(null);
   const [llmCapacity, setLlmCapacity] = useState<LLMCapacity | null>(null);
-
-  // ML state
-  const [mlEvalSummary, setMlEvalSummary] = useState<{ total_cases: number; avg_score: number; pass_rate: number; by_dimension: Record<string, number>; by_model: Record<string, unknown> } | null>(null);
-  const [mlEvalResults, setMlEvalResults] = useState<Array<{ case_id: string; task_type: string; model: string; score: number; pass_fail: boolean; timestamp: string }>>([]);
-  const [mlAbExperiments, setMlAbExperiments] = useState<Array<{ experiment_id: string; name: string; status: string; variants: unknown[] }>>([]);
-  const [mlGoldenTasks, setMlGoldenTasks] = useState<Array<{ task_id: string; task_type: string; description: string; difficulty: string }>>([]);
-  const [mlTrainingFiles, setMlTrainingFiles] = useState<{ files: Array<{ name: string; size_bytes: number; line_count: number }>; total_files: number; total_lines: number } | null>(null);
+  const [orBalance, setOrBalance] = useState<{ configured: boolean; total_credits_usd: number | null; total_usage_usd: number; remaining_usd: number | null; percent_used: number | null; error?: string } | null>(null);
 
   // Projects state
   const [projects, setProjects] = useState<ProjectEntry[]>([]);
@@ -264,6 +259,7 @@ export default function DashboardPage() {
   const [gradeData, setGradeData] = useState<{ overall_score: number; visual_quality: number; clarity: number; conversion_strength: number; mobile_confidence: number; pass_fail: boolean; notes: string }>({ overall_score: 7, visual_quality: 7, clarity: 7, conversion_strength: 7, mobile_confidence: 7, pass_fail: true, notes: '' });
   const [submittingGrade, setSubmittingGrade] = useState(false);
   const [gradeSubmitted, setGradeSubmitted] = useState(false);
+  const [deletingProject, setDeletingProject] = useState<string | null>(null);
 
   // Agent detail
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
@@ -291,14 +287,8 @@ export default function DashboardPage() {
       try { const st = await api.status(); setAgentStates(st.agents); } catch {}
       try { setLlmStats(await api.llmStats()); } catch {}
       try { setLlmCapacity(await api.llmCapacity()); } catch {}
+      try { setOrBalance(await api.openrouterBalance()); } catch {}
       try { const p = await api.projects(); setProjects(p.projects); setProjectTypes(p.types); } catch {}
-
-      // ML data
-      try { setMlEvalSummary(await api.mlEvalSummary()); } catch {}
-      try { setMlEvalResults(await api.mlEvalResults(20)); } catch {}
-      try { setMlAbExperiments(await api.mlAbExperiments()); } catch {}
-      try { setMlGoldenTasks(await api.mlGoldenTasks()); } catch {}
-      try { setMlTrainingFiles(await api.mlTrainingFiles()); } catch {}
 
       if (a.length > 0 && !a.some((ag) => ag.agent_id === chatAgent)) setChatAgent(a[0].agent_id);
     } catch (e) {
@@ -307,7 +297,43 @@ export default function DashboardPage() {
     }
   }, [chatAgent]);
 
-  useEffect(() => { fetchData(); const i = setInterval(fetchData, POLL_INTERVAL); return () => clearInterval(i); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+    // Pause polling while the tab is hidden to reduce backend load.
+    const i = setInterval(() => { if (!document.hidden) fetchData(); }, POLL_INTERVAL);
+    const onVisible = () => { if (!document.hidden) fetchData(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { clearInterval(i); document.removeEventListener('visibilitychange', onVisible); };
+  }, [fetchData]);
+
+  // Immediately refresh projects when OrchestrationHub signals a webgen completion
+  useEffect(() => {
+    const refreshHandler = async () => {
+      try { const p = await api.projects(); setProjects(p.projects); setProjectTypes(p.types); } catch {}
+    };
+    const navHandler = async (e: Event) => {
+      const detail = (e as CustomEvent).detail as { projectSlug?: string; projectId?: string } | undefined;
+      setActiveTab('projects');
+      if (!detail?.projectSlug && !detail?.projectId) return;
+      try {
+        const p = await api.projects();
+        setProjects(p.projects);
+        setProjectTypes(p.types);
+        // Prefer stable UUID match first, then fall back to webgen_dir slug
+        const match =
+          (detail.projectId && p.projects.find(proj => proj.id === detail.projectId)) ||
+          (detail.projectSlug && p.projects.find(proj => proj.webgen_dir === detail.projectSlug)) ||
+          undefined;
+        if (match) loadProjectFiles(match);
+      } catch {}
+    };
+    window.addEventListener('agentop:webgen-complete', refreshHandler);
+    window.addEventListener('agentop:open-projects', navHandler);
+    return () => {
+      window.removeEventListener('agentop:webgen-complete', refreshHandler);
+      window.removeEventListener('agentop:open-projects', navHandler);
+    };
+  }, []);
 
   // ── Soul actions ───────────────────────────────────────────────────────
   const triggerReflection = async () => {
@@ -361,7 +387,7 @@ export default function DashboardPage() {
         setLiveEvents(prev => [...prev.slice(-99), { type: e.type, data, timestamp: data.timestamp || new Date().toISOString() }]);
       } catch {}
     };
-    ['task_created','task_started','task_completed','task_failed','tool_start','tool_end','llm_response','agent_active','agent_idle'].forEach(t => es.addEventListener(t, handleEvent));
+    ['task_created','task_started','task_completed','task_failed','tool_start','tool_end','llm_response','agent_active','agent_idle','REACT_STEP'].forEach(t => es.addEventListener(t, handleEvent));
     es.onerror = () => setSseConnected(false);
     return () => { es.close(); setSseConnected(false); };
   }, [connected]);
@@ -408,6 +434,23 @@ export default function DashboardPage() {
       });
       setGradeSubmitted(true);
     } catch {} finally { setSubmittingGrade(false); }
+  };
+
+  const handleDeleteProject = async (project: ProjectEntry, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!window.confirm(`Delete "${project.name}"?\n\nThis will permanently remove all files. This cannot be undone.`)) return;
+    setDeletingProject(project.id);
+    try {
+      await api.deleteProject(project.id, project.type);
+      setProjects(prev => prev.filter(p => !(p.id === project.id && p.type === project.type)));
+      if (selectedProject?.id === project.id && selectedProject?.type === project.type) {
+        setSelectedProject(null); setProjectFiles([]); setSelectedFileContent(null); setSelectedFileForContent(null);
+      }
+    } catch (err) {
+      alert(`Failed to delete: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setDeletingProject(null);
+    }
   };
 
   const isWebgenProject = (p: ProjectEntry) => p.type === 'webgen' || p.type === 'webgen_project';
@@ -459,6 +502,12 @@ export default function DashboardPage() {
                 <>
                   <Badge variant="dot" color={health.llm_available ? 'green' : 'red'} size="lg">
                     LLM: {health.llm_available ? 'Connected' : 'Offline'}
+                  </Badge>
+                  <Badge variant="light" color={health.runtime_profile === 'minimal' ? 'gray' : health.runtime_profile === 'studio' ? 'violet' : 'blue'} size="lg">
+                    Profile: {health.runtime_profile}
+                  </Badge>
+                  <Badge variant="light" color={health.retrieval_mode === 'deep_index' ? 'orange' : 'teal'} size="lg">
+                    Retrieval: {health.retrieval_mode}
                   </Badge>
                   <Text size="xs" c="dimmed" ff="monospace">Uptime: {Math.round(health.uptime_seconds)}s</Text>
                 </>
@@ -580,7 +629,24 @@ export default function DashboardPage() {
                     <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }} mb="lg">
                       <StatCard label="Total Requests" value={fmt.num(llmStats.stats.total_requests)} color="var(--mantine-color-agentop-5)" onClick={() => setActiveTab('tokens')} />
                       <StatCard label="Tokens (in + out)" value={fmt.num(llmStats.tokens.total)} color="var(--mantine-color-green-5)" />
-                      <StatCard label="Cost (USD)" value={`$${llmStats.budget.spent_usd.toFixed(4)}`} color="var(--mantine-color-yellow-5)" />
+                      <StatCard
+                        label="OR Balance"
+                        value={
+                          orBalance && !orBalance.error && orBalance.remaining_usd !== null
+                            ? `$${orBalance.remaining_usd.toFixed(2)} left`
+                            : orBalance?.error ? 'OR error'
+                            : llmStats ? `~$${llmStats.budget.spent_usd.toFixed(4)} spent`
+                            : '—'
+                        }
+                        color={
+                          orBalance && !orBalance.error && orBalance.remaining_usd !== null
+                            ? orBalance.remaining_usd < 1 ? 'var(--mantine-color-red-5)'
+                              : orBalance.remaining_usd < 5 ? 'var(--mantine-color-yellow-5)'
+                              : 'var(--mantine-color-violet-5)'
+                            : 'var(--mantine-color-yellow-5)'
+                        }
+                        onClick={() => setActiveTab('tokens')}
+                      />
                       <StatCard label="Avg Latency" value={`${llmStats.stats.avg_latency_ms.toFixed(0)}ms`} color="var(--mantine-color-agentop-5)" />
                     </SimpleGrid>
                   </>
@@ -600,13 +666,38 @@ export default function DashboardPage() {
                       <Stack gap={2}>
                         {liveEvents.slice(-20).map((ev, i) => {
                           const isError = ev.type === 'task_failed';
-                          const color = isError ? 'red' : ev.type === 'llm_response' ? 'blue' : ev.type === 'task_completed' ? 'green' : 'dimmed';
+                          const isReactStep = ev.type === 'REACT_STEP';
+                          const isLlmResponse = ev.type === 'llm_response';
+                          const color = isError ? 'red' : isLlmResponse ? 'blue' : ev.type === 'task_completed' ? 'green' : isReactStep ? 'violet' : 'dimmed';
+                          const answeringModel = String(ev.data.answering_model || ev.data.model || '');
+                          const runtimeModel = String(ev.data.runtime_model || '');
+                          const executionRole = String(ev.data.execution_role || '');
+                          const modelSource = String(ev.data.model_source || '');
+                          const detail = isReactStep
+                            ? (ev.data.thought as string || '')
+                            : isLlmResponse
+                              ? answeringModel || String(ev.data.detail || '')
+                              : String(ev.data.tool_name || ev.data.detail || ev.data.model || '');
+                          const secondaryDetail = isLlmResponse
+                            ? [
+                                runtimeModel && runtimeModel !== answeringModel ? `runtime ${runtimeModel}` : '',
+                                executionRole ? `role ${executionRole}` : '',
+                                modelSource ? `source ${modelSource}` : '',
+                              ].filter(Boolean).join(' | ')
+                            : '';
                           return (
                             <Group key={i} gap="xs" wrap="nowrap" px="xs" py={2}>
                               <Text size="xs" ff="monospace" c="dimmed" style={{ flexShrink: 0, width: 60 }}>{new Date(ev.timestamp).toLocaleTimeString()}</Text>
                               <Badge size="xs" color={color} variant="light" style={{ flexShrink: 0 }}>{ev.type}</Badge>
                               {ev.data.agent_id ? <Badge size="xs" variant="outline" style={{ flexShrink: 0 }}>{String(ev.data.agent_id)}</Badge> : null}
-                              <Text size="xs" c="dimmed" truncate>{String(ev.data.tool_name || ev.data.detail || ev.data.model || '')}</Text>
+                              <Box style={{ minWidth: 0, flex: 1 }}>
+                                <Text size="xs" c="dimmed" truncate>{detail}</Text>
+                                {secondaryDetail ? (
+                                  <Text size="xs" c="dimmed" ff="monospace" truncate style={{ opacity: 0.75 }}>
+                                    {secondaryDetail}
+                                  </Text>
+                                ) : null}
+                              </Box>
                             </Group>
                           );
                         })}
@@ -621,7 +712,7 @@ export default function DashboardPage() {
               {/* COMMAND TAB — Mission Control Org-Chart                      */}
               {/* ============================================================ */}
               <Tabs.Panel value="command">
-                <OrchestrationHub agents={agents} />
+                <OrchestrationHub agents={agents} onOpenProjects={() => setActiveTab('projects')} />
               </Tabs.Panel>
 
               {/* ============================================================ */}
@@ -938,6 +1029,16 @@ export default function DashboardPage() {
                                 Open Site
                               </Button>
                             )}
+                            <ActionIcon
+                              variant="light"
+                              color="red"
+                              size="md"
+                              loading={deletingProject === selectedProject.id}
+                              onClick={(e) => handleDeleteProject(selectedProject, e)}
+                              title="Delete project"
+                            >
+                              <IconTrash size={16} />
+                            </ActionIcon>
                           </Group>
                         </Group>
 
@@ -1093,7 +1194,19 @@ export default function DashboardPage() {
                       <Card shadow="sm" withBorder>
                         <Group justify="space-between" mb="md">
                           <div><Title order={3}>{selectedProject.name}</Title><Text size="xs" c="dimmed" ff="monospace">{selectedProject.path}</Text></div>
-                          <Badge color={projectTypeInfo(selectedProject.type).color} size="lg">{projectTypeInfo(selectedProject.type).label}</Badge>
+                          <Group gap="xs">
+                            <Badge color={projectTypeInfo(selectedProject.type).color} size="lg">{projectTypeInfo(selectedProject.type).label}</Badge>
+                            <ActionIcon
+                              variant="light"
+                              color="red"
+                              size="md"
+                              loading={deletingProject === selectedProject.id}
+                              onClick={(e) => handleDeleteProject(selectedProject, e)}
+                              title="Delete project"
+                            >
+                              <IconTrash size={16} />
+                            </ActionIcon>
+                          </Group>
                         </Group>
                         <SimpleGrid cols={4} mb="md">
                           <Paper p="sm" withBorder ta="center"><Text size="xl" fw={700} c="agentop">{selectedProject.file_count || projectFiles.length}</Text><Text size="xs" c="dimmed">Files</Text></Paper>
@@ -1136,9 +1249,21 @@ export default function DashboardPage() {
                     ) : (
                       filteredProjects.map(project => (
                         <Card key={`${project.type}-${project.id}`} shadow="sm" withBorder style={{ cursor: 'pointer' }} onClick={() => loadProjectFiles(project)}>
-                          <Group justify="space-between" mb={4}>
-                            <Text fw={700}>{project.name}</Text>
-                            <Badge size="sm" color={projectTypeInfo(project.type).color}>{projectTypeInfo(project.type).label}</Badge>
+                          <Group justify="space-between" mb={4} wrap="nowrap">
+                            <Text fw={700} truncate style={{ flex: 1 }}>{project.name}</Text>
+                            <Group gap={4} wrap="nowrap" style={{ flexShrink: 0 }}>
+                              <Badge size="sm" color={projectTypeInfo(project.type).color}>{projectTypeInfo(project.type).label}</Badge>
+                              <ActionIcon
+                                size="sm"
+                                variant="subtle"
+                                color="red"
+                                loading={deletingProject === project.id}
+                                onClick={(e) => handleDeleteProject(project, e)}
+                                title="Delete project"
+                              >
+                                <IconTrash size={14} />
+                              </ActionIcon>
+                            </Group>
                           </Group>
                           <Text size="xs" c="dimmed" ff="monospace" mb="sm">{project.id}</Text>
                           <Stack gap={4}>
@@ -1160,6 +1285,68 @@ export default function DashboardPage() {
               <Tabs.Panel value="tokens">
                 <Title order={4} mb="md">Token Usage &amp; LLM Capacity</Title>
 
+                {/* ── Real OpenRouter account balance ── */}
+                {orBalance && (
+                  <Card shadow="sm" withBorder mb="lg" style={{
+                    borderTop: '2px solid var(--mantine-color-violet-5)',
+                    background: orBalance.error ? 'var(--mantine-color-dark-7)' : 'var(--mantine-color-dark-8)',
+                  }}>
+                    <Group justify="space-between" mb="xs" wrap="nowrap">
+                      <Group gap={8} wrap="nowrap">
+                        <ThemeIcon size="sm" variant="light" color="violet"><IconCloud size={14} /></ThemeIcon>
+                        <Text fw={700} size="sm" c="violet">OpenRouter Account Balance</Text>
+                        <Badge size="xs" color={orBalance.configured ? 'green' : 'red'} variant="light">
+                          {orBalance.configured ? 'API KEY SET' : 'NOT CONFIGURED'}
+                        </Badge>
+                      </Group>
+                      {!orBalance.error && orBalance.remaining_usd !== null && (
+                        <Text size="xs" c="dimmed">live</Text>
+                      )}
+                    </Group>
+
+                    {orBalance.error ? (
+                      <Text size="sm" c="dimmed">{orBalance.error}</Text>
+                    ) : (
+                      <SimpleGrid cols={{ base: 2, sm: 4 }}>
+                        <div>
+                          <Text size="xs" c="dimmed" tt="uppercase" fw={600}>Credits Purchased</Text>
+                          <Text size="xl" fw={800} ff="monospace" c="violet">
+                            {orBalance.total_credits_usd !== null ? `$${orBalance.total_credits_usd.toFixed(2)}` : '—'}
+                          </Text>
+                        </div>
+                        <div>
+                          <Text size="xs" c="dimmed" tt="uppercase" fw={600}>Used (This Key)</Text>
+                          <Text size="xl" fw={800} ff="monospace" c="yellow">
+                            ${orBalance.total_usage_usd.toFixed(4)}
+                          </Text>
+                        </div>
+                        <div>
+                          <Text size="xs" c="dimmed" tt="uppercase" fw={600}>Remaining</Text>
+                          <Text size="xl" fw={800} ff="monospace" c={
+                            orBalance.remaining_usd === null ? 'dimmed'
+                              : orBalance.remaining_usd < 1 ? 'red'
+                              : orBalance.remaining_usd < 5 ? 'yellow'
+                              : 'green'
+                          }>
+                            {orBalance.remaining_usd !== null ? `$${orBalance.remaining_usd.toFixed(2)}` : '—'}
+                          </Text>
+                        </div>
+                        <div>
+                          <Text size="xs" c="dimmed" tt="uppercase" fw={600}>% Used</Text>
+                          <Text size="xl" fw={800} ff="monospace" c={
+                            orBalance.percent_used === null ? 'dimmed'
+                              : orBalance.percent_used > 90 ? 'red'
+                              : orBalance.percent_used > 70 ? 'yellow'
+                              : 'green'
+                          }>
+                            {orBalance.percent_used !== null ? `${orBalance.percent_used.toFixed(1)}%` : '—'}
+                          </Text>
+                        </div>
+                      </SimpleGrid>
+                    )}
+                  </Card>
+                )}
+
                 {llmStats ? (
                   <>
                     <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }} mb="lg">
@@ -1168,6 +1355,58 @@ export default function DashboardPage() {
                       <StatCard label="Total Tokens" value={fmt.num(llmStats.tokens.total)} color="var(--mantine-color-yellow-5)" />
                       <StatCard label="Avg Latency" value={`${llmStats.stats.avg_latency_ms.toFixed(0)}ms`} color="var(--mantine-color-agentop-5)" />
                     </SimpleGrid>
+
+                    {/* Local vs Cloud token split */}
+                    <Grid mb="lg">
+                      <Grid.Col span={{ base: 12, md: 6 }}>
+                        <Card shadow="sm" withBorder h="100%">
+                          <Group gap="xs" mb="sm">
+                            <ThemeIcon size="sm" variant="light" color="green"><IconCpu size={14} /></ThemeIcon>
+                            <Text fw={600} size="sm" tt="uppercase" c="dimmed">Local (Ollama · Free)</Text>
+                          </Group>
+                          <Stack gap="xs">
+                            <Group justify="space-between"><Text size="sm" c="dimmed">Input tokens</Text><Text size="sm" fw={700} ff="monospace" c="green">{fmt.num(llmStats.tokens.local_in ?? 0)}</Text></Group>
+                            <Group justify="space-between"><Text size="sm" c="dimmed">Output tokens</Text><Text size="sm" fw={700} ff="monospace" c="green">{fmt.num(llmStats.tokens.local_out ?? 0)}</Text></Group>
+                            <Group justify="space-between"><Text size="sm" c="dimmed">Total</Text><Text size="sm" fw={700} ff="monospace" c="green">{fmt.num(llmStats.tokens.local_total ?? 0)}</Text></Group>
+                          </Stack>
+                        </Card>
+                      </Grid.Col>
+                      <Grid.Col span={{ base: 12, md: 6 }}>
+                        <Card shadow="sm" withBorder h="100%">
+                          <Group gap="xs" mb="sm">
+                            <ThemeIcon size="sm" variant="light" color="yellow"><IconCloud size={14} /></ThemeIcon>
+                            <Text fw={600} size="sm" tt="uppercase" c="dimmed">Cloud (OpenRouter · Paid)</Text>
+                          </Group>
+                          <Stack gap="xs">
+                            <Group justify="space-between"><Text size="sm" c="dimmed">Input tokens</Text><Text size="sm" fw={700} ff="monospace" c="yellow">{fmt.num(llmStats.tokens.cloud_in ?? 0)}</Text></Group>
+                            <Group justify="space-between"><Text size="sm" c="dimmed">Output tokens</Text><Text size="sm" fw={700} ff="monospace" c="yellow">{fmt.num(llmStats.tokens.cloud_out ?? 0)}</Text></Group>
+                            <Group justify="space-between"><Text size="sm" c="dimmed">Total</Text><Text size="sm" fw={700} ff="monospace" c="yellow">{fmt.num(llmStats.tokens.cloud_total ?? 0)}</Text></Group>
+                            <Group justify="space-between"><Text size="sm" c="dimmed">Est. cost</Text><Text size="sm" fw={700} ff="monospace" c="red">${llmStats.budget.spent_usd.toFixed(4)}</Text></Group>
+                          </Stack>
+                        </Card>
+                      </Grid.Col>
+                    </Grid>
+
+                    {/* API Integrations status */}
+                    {llmStats.api_keys && (
+                      <Card shadow="sm" withBorder mb="lg">
+                        <Text fw={600} size="sm" tt="uppercase" c="dimmed" mb="sm">Integrations</Text>
+                        <SimpleGrid cols={{ base: 2, sm: 3, md: 6 }}>
+                          {(Object.entries(llmStats.api_keys) as [string, boolean][]).map(([key, configured]) => (
+                            <Paper key={key} p="xs" withBorder>
+                              <Stack gap={4} align="center">
+                                <Badge
+                                  size="sm"
+                                  color={configured ? 'green' : 'red'}
+                                  variant="filled"
+                                >{configured ? '✓ configured' : '✗ missing'}</Badge>
+                                <Text size="xs" fw={600} tt="capitalize">{key}</Text>
+                              </Stack>
+                            </Paper>
+                          ))}
+                        </SimpleGrid>
+                      </Card>
+                    )}
 
                     {/* Budget */}
                     <Card shadow="sm" withBorder mb="lg">
@@ -1353,147 +1592,7 @@ export default function DashboardPage() {
               {/* ML LAB TAB                                                    */}
               {/* ============================================================ */}
               <Tabs.Panel value="ml">
-                {/* Summary Stats */}
-                <SimpleGrid cols={{ base: 2, md: 4 }} mb="lg">
-                  <StatCard label="Eval Cases" value={mlEvalSummary?.total_cases ?? 0} color="var(--mantine-color-agentop-5)" />
-                  <StatCard label="Avg Score" value={mlEvalSummary ? `${(mlEvalSummary.avg_score * 100).toFixed(1)}%` : '—'} color="var(--mantine-color-blue-5)" />
-                  <StatCard label="Pass Rate" value={mlEvalSummary ? `${(mlEvalSummary.pass_rate * 100).toFixed(1)}%` : '—'} color="var(--mantine-color-green-5)" />
-                  <StatCard label="Training Files" value={mlTrainingFiles?.total_files ?? 0} color="var(--mantine-color-yellow-5)" />
-                </SimpleGrid>
-
-                <Grid mb="lg">
-                  {/* Training Data */}
-                  <Grid.Col span={{ base: 12, md: 6 }}>
-                    <Card shadow="sm" withBorder h="100%">
-                      <Group justify="space-between" mb="sm">
-                        <Text fw={600} size="sm" tt="uppercase" c="dimmed">Training Data</Text>
-                        {mlTrainingFiles && <Badge size="xs" variant="light">{fmt.num(mlTrainingFiles.total_lines)} total lines</Badge>}
-                      </Group>
-                      {!mlTrainingFiles || mlTrainingFiles.files.length === 0 ? (
-                        <Text c="dimmed" ta="center" py="xl" size="sm">No training files found in data/training/</Text>
-                      ) : (
-                        <ScrollArea h={260}>
-                          <Table striped highlightOnHover fz="xs">
-                            <Table.Thead>
-                              <Table.Tr><Table.Th>File</Table.Th><Table.Th style={{ textAlign: 'right' }}>Lines</Table.Th><Table.Th style={{ textAlign: 'right' }}>Size</Table.Th></Table.Tr>
-                            </Table.Thead>
-                            <Table.Tbody>
-                              {mlTrainingFiles.files.map(f => (
-                                <Table.Tr key={f.name}>
-                                  <Table.Td><Group gap={6}><IconFileText size={14} /><Text size="xs">{f.name}</Text></Group></Table.Td>
-                                  <Table.Td style={{ textAlign: 'right' }}><Text size="xs" ff="monospace">{fmt.num(f.line_count)}</Text></Table.Td>
-                                  <Table.Td style={{ textAlign: 'right' }}><Text size="xs" ff="monospace">{fmt.size(f.size_bytes)}</Text></Table.Td>
-                                </Table.Tr>
-                              ))}
-                            </Table.Tbody>
-                          </Table>
-                        </ScrollArea>
-                      )}
-                    </Card>
-                  </Grid.Col>
-
-                  {/* Dimension Scores */}
-                  <Grid.Col span={{ base: 12, md: 6 }}>
-                    <Card shadow="sm" withBorder h="100%">
-                      <Text fw={600} size="sm" tt="uppercase" c="dimmed" mb="sm">Eval Dimensions</Text>
-                      {!mlEvalSummary || !mlEvalSummary.by_dimension || Object.keys(mlEvalSummary.by_dimension).length === 0 ? (
-                        <Text c="dimmed" ta="center" py="xl" size="sm">No evaluation data yet</Text>
-                      ) : (
-                        <Stack gap="sm">
-                          {Object.entries(mlEvalSummary.by_dimension).map(([dim, score]) => (
-                            <div key={dim}>
-                              <Group justify="space-between" mb={4}>
-                                <Text size="xs" tt="capitalize">{dim.replace(/_/g, ' ')}</Text>
-                                <Text size="xs" ff="monospace" fw={600}>{(Number(score) * 100).toFixed(1)}%</Text>
-                              </Group>
-                              <Progress value={Number(score) * 100} size="sm" color={Number(score) >= 0.8 ? 'green' : Number(score) >= 0.5 ? 'yellow' : 'red'} />
-                            </div>
-                          ))}
-                        </Stack>
-                      )}
-                    </Card>
-                  </Grid.Col>
-                </Grid>
-
-                {/* Recent Eval Results */}
-                <Title order={4} mb="sm">Recent Evaluations</Title>
-                <Card shadow="sm" withBorder mb="lg">
-                  {mlEvalResults.length === 0 ? (
-                    <Text c="dimmed" ta="center" py="md" size="sm">No evaluation results yet</Text>
-                  ) : (
-                    <ScrollArea>
-                      <Table striped highlightOnHover withTableBorder fz="xs">
-                        <Table.Thead>
-                          <Table.Tr><Table.Th>Case</Table.Th><Table.Th>Type</Table.Th><Table.Th>Model</Table.Th><Table.Th>Score</Table.Th><Table.Th>Result</Table.Th><Table.Th>Time</Table.Th></Table.Tr>
-                        </Table.Thead>
-                        <Table.Tbody>
-                          {mlEvalResults.map((r, i) => (
-                            <Table.Tr key={i}>
-                              <Table.Td><Text size="xs" ff="monospace">{r.case_id}</Text></Table.Td>
-                              <Table.Td><Badge size="xs" variant="light">{r.task_type}</Badge></Table.Td>
-                              <Table.Td><Text size="xs">{r.model}</Text></Table.Td>
-                              <Table.Td><Text size="xs" ff="monospace" fw={600} c={r.score >= 0.8 ? 'green' : r.score >= 0.5 ? 'yellow' : 'red'}>{(r.score * 100).toFixed(0)}%</Text></Table.Td>
-                              <Table.Td>
-                                <Badge size="xs" color={r.pass_fail ? 'green' : 'red'}>{r.pass_fail ? 'PASS' : 'FAIL'}</Badge>
-                              </Table.Td>
-                              <Table.Td><Text size="xs" c="dimmed">{fmt.time(r.timestamp)}</Text></Table.Td>
-                            </Table.Tr>
-                          ))}
-                        </Table.Tbody>
-                      </Table>
-                    </ScrollArea>
-                  )}
-                </Card>
-
-                {/* A/B Experiments & Golden Tasks */}
-                <Grid>
-                  <Grid.Col span={{ base: 12, md: 6 }}>
-                    <Title order={4} mb="sm">A/B Experiments</Title>
-                    <Card shadow="sm" withBorder>
-                      {mlAbExperiments.length === 0 ? (
-                        <Text c="dimmed" ta="center" py="md" size="sm">No experiments yet</Text>
-                      ) : (
-                        <Stack gap="xs">
-                          {mlAbExperiments.map(exp => (
-                            <Paper key={exp.experiment_id} p="sm" withBorder>
-                              <Group justify="space-between">
-                                <div>
-                                  <Text size="sm" fw={600}>{exp.name}</Text>
-                                  <Text size="xs" c="dimmed" ff="monospace">{exp.experiment_id}</Text>
-                                </div>
-                                <Badge color={exp.status === 'running' ? 'green' : exp.status === 'completed' ? 'blue' : 'gray'}>{exp.status}</Badge>
-                              </Group>
-                              <Text size="xs" c="dimmed" mt={4}>{exp.variants.length} variant{exp.variants.length !== 1 ? 's' : ''}</Text>
-                            </Paper>
-                          ))}
-                        </Stack>
-                      )}
-                    </Card>
-                  </Grid.Col>
-
-                  <Grid.Col span={{ base: 12, md: 6 }}>
-                    <Title order={4} mb="sm">Golden Tasks</Title>
-                    <Card shadow="sm" withBorder>
-                      {mlGoldenTasks.length === 0 ? (
-                        <Text c="dimmed" ta="center" py="md" size="sm">No golden tasks defined</Text>
-                      ) : (
-                        <ScrollArea h={300}>
-                          <Stack gap="xs">
-                            {mlGoldenTasks.map(gt => (
-                              <Paper key={gt.task_id} p="sm" withBorder>
-                                <Group justify="space-between" mb={4}>
-                                  <Badge size="xs" variant="light">{gt.task_type}</Badge>
-                                  <Badge size="xs" color={gt.difficulty === 'hard' ? 'red' : gt.difficulty === 'medium' ? 'yellow' : 'green'}>{gt.difficulty}</Badge>
-                                </Group>
-                                <Text size="xs">{gt.description}</Text>
-                              </Paper>
-                            ))}
-                          </Stack>
-                        </ScrollArea>
-                      )}
-                    </Card>
-                  </Grid.Col>
-                </Grid>
+                <MLTrainingWorkbench />
               </Tabs.Panel>
 
               {/* ============================================================ */}

@@ -1,0 +1,264 @@
+{
+  "id": "86552a53c762",
+  "created_at": "2026-04-18T00:35:28.725353+00:00",
+  "updated_at": "2026-04-18T00:42:37.814292+00:00",
+  "status": "generated",
+  "brief": {
+    "business_name": "laundry business",
+    "business_type": "custom",
+    "tagline": "",
+    "description": "make me a website for a laundry business https://github.com/chenglou/pretext use this to create effects and use more then 3 colors for the website and use the prompt optimzer to get better results",
+    "services": [],
+    "target_audience": "",
+    "tone": "professional",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": []
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - {business_name}",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "bf2d1af0",
+          "name": "hero",
+          "component_type": "hero-centered",
+          "content": {
+            "headline": "Suggested headline text",
+            "subtitle": "Suggested subtitle"
+          },
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "9d1a1812",
+          "name": "about",
+          "component_type": "section-with-image",
+          "content": {
+            "headline": "About Us",
+            "subtitle": "Learn more about our laundry business"
+          },
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "6edb99d9",
+          "name": "services",
+          "component_type": "section-with-cards",
+          "content": {
+            "headline": "Our Services",
+            "subtitle": "Choose the right service for your needs"
+          },
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "71f8f940",
+          "name": "contact",
+          "component_type": "section-with-form",
+          "content": {
+            "headline": "Contact Us",
+            "subtitle": "Get in touch with us for more information"
+          },
+          "html": "<nav>\n  <a href=\"index.html\">Home</a>\n  <a href=\"services.html\">Services</a>\n  <a href=\"contact.html\">Contact</a>\n</nav>\n<header style=\"background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%)\">\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both; background: linear-gradient(90deg,var(--color-primary),var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">Contact Us</h1>\n  <h2>Get in touch with us for more information</h2>\n</header>\n<main class=\"container mx-auto p-6 lg:p-8\">\n  <div class=\"flex flex-col items-center gap-4 mb-4\">\n    <a href=\"#\" role=\"button\" aria-label=\"Phone\"><span class=\"block w-24 h-24 rounded-full bg-gray-50 border border-gray-300 shadow\"></span><span class=\"absolute inset-y-1/2 left-1/2 transform translate-x-1/2 text-lg font-bold leading-tight text-gray-700 dark:text-gray-400\">Phone</span></a>\n    <a href=\"#\" role=\"button\" aria-label=\"Email\"><span class=\"block w-24 h-24 rounded-full bg-gray-50 border border-gray-300 shadow\"></span><span class=\"absolute inset-y-1/2 left-1/2 transform translate-x-1/2 text-lg font-bold leading-tight text-gray-700 dark:text-gray-400\">Email</span></a>\n  </div>\n  <form class=\"bg-white rounded shadow p-8 flex flex-col gap-4 mb-4\">\n    <label for=\"name\" class=\"font-semibold text-gray-700 dark:text-gray-400\">Name</label>\n    <input type=\"text\" id=\"name\" name=\"name\" placeholder=\"Enter your name\" required class=\"w-full p-3 border border-gray-300 rounded shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 dark:focus:border-gray-700 dark:focus:ring-gray-600\" />\n    <label for=\"email\" class=\"font-semibold text-gray-700 dark:text-gray-400\">Email</label>\n    <input type=\"email\" id=\"email\" name=\"email\" placeholder=\"Enter your email address\" required class=\"w-full p-3 border border-gray-300 rounded shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 dark:focus:border-gray-700 dark:focus:ring-gray-600\" />\n    <label for=\"message\" class=\"font-semibold text-gray-700 dark:text-gray-400\">Message</label>\n    <textarea id=\"message\" name=\"message\" placeholder=\"Enter your message\" required rows=\"5\" class=\"w-full p-3 border border-gray-300 rounded shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 dark:focus:border-gray-700 dark:focus:ring-gray-600\"></textarea>\n    <div class=\"flex justify-end\">\n      <button type=\"submit\" aria-label=\"Submit\">Submit</button>\n    </div>\n  </form>\n  <section class=\"bg-white rounded shadow p-8 mb-4 grid grid-cols-1 lg:grid-cols-2 gap-4\">\n    <div>\n      <h3 class=\"font-semibold text-gray-700 dark:text-gray-400\">Phone</h3>\n      <p>+1 (555) 123-4567</p>\n    </div>\n    <div>\n      <h3 class=\"font-semibold text-gray-700 dark:text-gray-400\">Email</h3>\n      <a href=\"#\" aria-label=\"Email\"><span class=\"block w-24 h-24 rounded-full bg-gray-50 border border-gray-300 shadow\"></span><span class=\"absolute inset-y-1/2 left-1/2 transform translate-x-1/2 text-lg font-bold leading-tight text-gray-700 dark:text-gray-400\">Email</span></a>\n      <p>info@laundrybusiness.com</p>\n    </div>\n  </section>\n</main>\n<footer class=\"bg-gray-100 p-8 text-center\">\n  <p>&copy; 2023 Laundry Business | All Rights Reserved</p>\n</footer>",
+          "order": 3
+        }
+      ],
+      "seo": {
+        "title": "",
+        "meta_description": "",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - {business_name}</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n\n\n\n\n\n\n<nav>\n  <a href=\"index.html\">Home</a>\n  <a href=\"services.html\">Services</a>\n  <a href=\"contact.html\">Contact</a>\n</nav>\n<header style=\"background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%)\">\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both; background: linear-gradient(90deg,var(--color-primary),var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">Contact Us</h1>\n  <h2>Get in touch with us for more information</h2>\n</header>\n<main class=\"container mx-auto p-6 lg:p-8\">\n  <div class=\"flex flex-col items-center gap-4 mb-4\">\n    <a href=\"#\" role=\"button\" aria-label=\"Phone\"><span class=\"block w-24 h-24 rounded-full bg-gray-50 border border-gray-300 shadow\"></span><span class=\"absolute inset-y-1/2 left-1/2 transform translate-x-1/2 text-lg font-bold leading-tight text-gray-700 dark:text-gray-400\">Phone</span></a>\n    <a href=\"#\" role=\"button\" aria-label=\"Email\"><span class=\"block w-24 h-24 rounded-full bg-gray-50 border border-gray-300 shadow\"></span><span class=\"absolute inset-y-1/2 left-1/2 transform translate-x-1/2 text-lg font-bold leading-tight text-gray-700 dark:text-gray-400\">Email</span></a>\n  </div>\n  <form class=\"bg-white rounded shadow p-8 flex flex-col gap-4 mb-4\">\n    <label for=\"name\" class=\"font-semibold text-gray-700 dark:text-gray-400\">Name</label>\n    <input type=\"text\" id=\"name\" name=\"name\" placeholder=\"Enter your name\" required class=\"w-full p-3 border border-gray-300 rounded shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 dark:focus:border-gray-700 dark:focus:ring-gray-600\" />\n    <label for=\"email\" class=\"font-semibold text-gray-700 dark:text-gray-400\">Email</label>\n    <input type=\"email\" id=\"email\" name=\"email\" placeholder=\"Enter your email address\" required class=\"w-full p-3 border border-gray-300 rounded shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 dark:focus:border-gray-700 dark:focus:ring-gray-600\" />\n    <label for=\"message\" class=\"font-semibold text-gray-700 dark:text-gray-400\">Message</label>\n    <textarea id=\"message\" name=\"message\" placeholder=\"Enter your message\" required rows=\"5\" class=\"w-full p-3 border border-gray-300 rounded shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 dark:focus:border-gray-700 dark:focus:ring-gray-600\"></textarea>\n    <div class=\"flex justify-end\">\n      <button type=\"submit\" aria-label=\"Submit\">Submit</button>\n    </div>\n  </form>\n  <section class=\"bg-white rounded shadow p-8 mb-4 grid grid-cols-1 lg:grid-cols-2 gap-4\">\n    <div>\n      <h3 class=\"font-semibold text-gray-700 dark:text-gray-400\">Phone</h3>\n      <p>+1 (555) 123-4567</p>\n    </div>\n    <div>\n      <h3 class=\"font-semibold text-gray-700 dark:text-gray-400\">Email</h3>\n      <a href=\"#\" aria-label=\"Email\"><span class=\"block w-24 h-24 rounded-full bg-gray-50 border border-gray-300 shadow\"></span><span class=\"absolute inset-y-1/2 left-1/2 transform translate-x-1/2 text-lg font-bold leading-tight text-gray-700 dark:text-gray-400\">Email</span></a>\n      <p>info@laundrybusiness.com</p>\n    </div>\n  </section>\n</main>\n<footer class=\"bg-gray-100 p-8 text-center\">\n  <p>&copy; 2023 Laundry Business | All Rights Reserved</p>\n</footer>\n\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    },
+    {
+      "slug": "services",
+      "title": "Services - {business_name}",
+      "purpose": "Page detailing the services offered by the business",
+      "sections": [
+        {
+          "id": "1de457a2",
+          "name": "overview",
+          "component_type": "section-with-headline",
+          "content": {
+            "headline": "Overview of Services",
+            "subtitle": "A brief description of the services we offer"
+          },
+          "html": "<section class=\"bg-gradient-to-br from-primary to-secondary transition duration-1000 ease\">\n  <div class=\"container mx-auto px-4 py-8 lg:px-6 lg:py-12 flex flex-col items-center justify-between gap-8 sm:gap-16 lg:gap-24 xl:gap-32\">\n    <h1 class=\"text-5xl font-bold text-primary mb-10 lg:mb-16\" style=\"animation: fadeInUp 0.8s ease-out both;\">Overview of Services</h1>\n    <div class=\"flex flex-col items-center gap-4 sm:gap-8 lg:gap-12 xl:gap-16\">\n      <p class=\"text-lg text-gray-700 mb-4 lg:mb-8\" style=\"animation: fadeInUp 0.4s ease-in-out both;\">A brief description of the services we offer.</p>\n      <div class=\"flex flex-wrap gap-4 sm:gap-8 lg:gap-12 xl:gap-16\">\n        <button role=\"button\" aria-label=\"Service 1\" class=\"btn btn-primary hover:bg-secondary text-white border-none font-bold py-3 px-4 rounded sm:px-6 sm:py-4 lg:px-8 lg:py-6 xl:px-10 xl:py-8\">Service 1</button>\n        <button role=\"button\" aria-label=\"Service 2\" class=\"btn btn-primary hover:bg-secondary text-white border-none font-bold py-3 px-4 rounded sm:px-6 sm:py-4 lg:px-8 lg:py-6 xl:px-10 xl:py-8\">Service 2</button>\n        <button role=\"button\" aria-label=\"Service 3\" class=\"btn btn-primary hover:bg-secondary text-white border-none font-bold py-3 px-4 rounded sm:px-6 sm:py-4 lg:px-8 lg:py-6 xl:px-10 xl:py-8\">Service 3</button>\n      </div>\n    </div>\n  </div>\n</section>",
+          "order": 0
+        },
+        {
+          "id": "138676c4",
+          "name": "wash-and-fold",
+          "component_type": "section-with-description",
+          "content": {
+            "headline": "Wash & Fold",
+            "subtitle": "Our wash and fold service is perfect for busy individuals"
+          },
+          "html": "<section class=\"bg-gradient-to-r from-primary-500 to-secondary-500 py-12 text-center md:text-left\">\n  <h1 class=\"w-full mb-8 font-poppins text-3xl lg:text-4xl leading-normal md:text-start\">Wash & Fold</h1>\n  <div class=\"md:hidden w-full h-[calc(100vh-6rem)] md:block md:w-2/3 mb-8 md:mb-0\">\n    <img src=\"/path/to/image\" alt=\"\" class=\"max-w-full h-auto rounded-lg shadow\">\n  </div>\n  <p class=\"text-body leading-relaxed text-left mb-4\">Our wash and fold service is perfect for busy individuals. Trust us to take care of your laundry needs so you can focus on more important things.</p>\n  <div class=\"md:hidden w-full h-[calc(100vh-6rem)] md:block md:w-2/3 mb-8 md:mb-0\">\n    <img src=\"/path/to/image\" alt=\"\" class=\"max-w-full h-auto rounded-lg shadow\">\n  </div>\n  <h2 class=\"font-poppins text-xl mb-4 md:text-start\">Features</h2>\n  <div class=\"flex flex-wrap md:flex-nowrap gap-4 md:gap-0 lg:flex-col\">\n    <div class=\"w-full md:w-1/3 bg-white rounded-lg glass-card transition hover:-translate-y-2 duration-300 shadow-md\">\n      <img src=\"/path/to/image\" alt=\"\" class=\"max-w-full h-auto rounded-lg\">\n      <h3 class=\"font-poppins text-accent mb-2\">Fast Turnaround Time</h3>\n      <p class=\"text-body leading-relaxed\">We understand that time is of the essence, which is why we offer a fast turnaround time for all our services.</p>\n    </div>\n    <div class=\"w-full md:w-1/3 bg-white rounded-lg glass-card transition hover:-translate-y-2 duration-300 shadow-md\">\n      <img src=\"/path/to/image\" alt=\"\" class=\"max-w-full h-auto rounded-lg\">\n      <h3 class=\"font-poppins text-accent mb-2\">High-Quality Service</h3>\n      <p class=\"text-body leading-relaxed\">We pride ourselves on offering high-quality service to each and every one of our customers. Our team of experienced professionals will take care of your laundry needs with the utmost care and attention to detail.</p>\n    </div>\n    <div class=\"w-full md:w-1/3 bg-white rounded-lg glass-card transition hover:-translate-y-2 duration-300 shadow-md\">\n      <img src=\"/path/to/image\" alt=\"\" class=\"max-w-full h-auto rounded-lg\">\n      <h3 class=\"font-poppins text-accent mb-2\">Affordable Prices</h3>\n      <p class=\"text-body leading-relaxed\">We believe that everyone deserves access to high-quality laundry services at affordable prices. That's why we offer competitive pricing on all our services, without compromising on quality.</p>\n    </div>\n  </div>\n  <button type=\"button\" role=\"button\" aria-label=\"Contact Us\">Contact Us</button>\n  <nav class=\"md:hidden w-full h-[calc(100vh-6rem)] md:block md:w-2/3 mb-8 md:mb-0\">\n    <img src=\"/path/to/image\" alt=\"\" class=\"max-w-full h-auto rounded-lg shadow\">\n  </nav>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "c098377e",
+          "name": "dry-cleaning",
+          "component_type": "section-with-description",
+          "content": {
+            "headline": "Dry Cleaning",
+            "subtitle": "Our dry cleaning service uses only the best products and techniques"
+          },
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "9c36a209",
+          "name": "ironing",
+          "component_type": "section-with-description",
+          "content": {
+            "headline": "Ironing",
+            "subtitle": "Get your clothes looking crisp and wrinkle-free"
+          },
+          "html": "",
+          "order": 3
+        }
+      ],
+      "seo": {
+        "title": "",
+        "meta_description": "",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Services - {business_name}</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<section class=\"bg-gradient-to-br from-primary to-secondary transition duration-1000 ease\">\n  <div class=\"container mx-auto px-4 py-8 lg:px-6 lg:py-12 flex flex-col items-center justify-between gap-8 sm:gap-16 lg:gap-24 xl:gap-32\">\n    <h1 class=\"text-5xl font-bold text-primary mb-10 lg:mb-16\" style=\"animation: fadeInUp 0.8s ease-out both;\">Overview of Services</h1>\n    <div class=\"flex flex-col items-center gap-4 sm:gap-8 lg:gap-12 xl:gap-16\">\n      <p class=\"text-lg text-gray-700 mb-4 lg:mb-8\" style=\"animation: fadeInUp 0.4s ease-in-out both;\">A brief description of the services we offer.</p>\n      <div class=\"flex flex-wrap gap-4 sm:gap-8 lg:gap-12 xl:gap-16\">\n        <button role=\"button\" aria-label=\"Service 1\" class=\"btn btn-primary hover:bg-secondary text-white border-none font-bold py-3 px-4 rounded sm:px-6 sm:py-4 lg:px-8 lg:py-6 xl:px-10 xl:py-8\">Service 1</button>\n        <button role=\"button\" aria-label=\"Service 2\" class=\"btn btn-primary hover:bg-secondary text-white border-none font-bold py-3 px-4 rounded sm:px-6 sm:py-4 lg:px-8 lg:py-6 xl:px-10 xl:py-8\">Service 2</button>\n        <button role=\"button\" aria-label=\"Service 3\" class=\"btn btn-primary hover:bg-secondary text-white border-none font-bold py-3 px-4 rounded sm:px-6 sm:py-4 lg:px-8 lg:py-6 xl:px-10 xl:py-8\">Service 3</button>\n      </div>\n    </div>\n  </div>\n</section>\n\n<section class=\"bg-gradient-to-r from-primary-500 to-secondary-500 py-12 text-center md:text-left\">\n  <h1 class=\"w-full mb-8 font-poppins text-3xl lg:text-4xl leading-normal md:text-start\">Wash & Fold</h1>\n  <div class=\"md:hidden w-full h-[calc(100vh-6rem)] md:block md:w-2/3 mb-8 md:mb-0\">\n    <img src=\"/path/to/image\" alt=\"\" class=\"max-w-full h-auto rounded-lg shadow\">\n  </div>\n  <p class=\"text-body leading-relaxed text-left mb-4\">Our wash and fold service is perfect for busy individuals. Trust us to take care of your laundry needs so you can focus on more important things.</p>\n  <div class=\"md:hidden w-full h-[calc(100vh-6rem)] md:block md:w-2/3 mb-8 md:mb-0\">\n    <img src=\"/path/to/image\" alt=\"\" class=\"max-w-full h-auto rounded-lg shadow\">\n  </div>\n  <h2 class=\"font-poppins text-xl mb-4 md:text-start\">Features</h2>\n  <div class=\"flex flex-wrap md:flex-nowrap gap-4 md:gap-0 lg:flex-col\">\n    <div class=\"w-full md:w-1/3 bg-white rounded-lg glass-card transition hover:-translate-y-2 duration-300 shadow-md\">\n      <img src=\"/path/to/image\" alt=\"\" class=\"max-w-full h-auto rounded-lg\">\n      <h3 class=\"font-poppins text-accent mb-2\">Fast Turnaround Time</h3>\n      <p class=\"text-body leading-relaxed\">We understand that time is of the essence, which is why we offer a fast turnaround time for all our services.</p>\n    </div>\n    <div class=\"w-full md:w-1/3 bg-white rounded-lg glass-card transition hover:-translate-y-2 duration-300 shadow-md\">\n      <img src=\"/path/to/image\" alt=\"\" class=\"max-w-full h-auto rounded-lg\">\n      <h3 class=\"font-poppins text-accent mb-2\">High-Quality Service</h3>\n      <p class=\"text-body leading-relaxed\">We pride ourselves on offering high-quality service to each and every one of our customers. Our team of experienced professionals will take care of your laundry needs with the utmost care and attention to detail.</p>\n    </div>\n    <div class=\"w-full md:w-1/3 bg-white rounded-lg glass-card transition hover:-translate-y-2 duration-300 shadow-md\">\n      <img src=\"/path/to/image\" alt=\"\" class=\"max-w-full h-auto rounded-lg\">\n      <h3 class=\"font-poppins text-accent mb-2\">Affordable Prices</h3>\n      <p class=\"text-body leading-relaxed\">We believe that everyone deserves access to high-quality laundry services at affordable prices. That's why we offer competitive pricing on all our services, without compromising on quality.</p>\n    </div>\n  </div>\n  <button type=\"button\" role=\"button\" aria-label=\"Contact Us\">Contact Us</button>\n  <nav class=\"md:hidden w-full h-[calc(100vh-6rem)] md:block md:w-2/3 mb-8 md:mb-0\">\n    <img src=\"/path/to/image\" alt=\"\" class=\"max-w-full h-auto rounded-lg shadow\">\n  </nav>\n</section>\n\n\n\n\n\n</body>\n</html>",
+      "nav_label": "Services",
+      "nav_order": 2
+    },
+    {
+      "slug": "contact",
+      "title": "Contact Us - {business_name}",
+      "purpose": "Page for users to get in touch with the business",
+      "sections": [
+        {
+          "id": "57172dae",
+          "name": "contact-form",
+          "component_type": "section-with-form",
+          "content": {
+            "headline": "Contact Us",
+            "subtitle": "Fill out the form below to get in touch with us"
+          },
+          "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Contact Us</title>\n    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.1.5/tailwind.min.css\">\n    <style>\n        /* Hero section */\n        .hero {\n            animation: fadeInUp 0.8s ease-out both;\n            position: relative;\n            overflow: hidden;\n        }\n\n        /* Sub-elements staggered delay */\n        .hero h1, .hero p {\n            animation-delay: 0.2s, 0.4s;\n        }\n\n        /* Linear gradient background */\n        .hero {\n            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%);\n        }\n\n        /* Multi-stop gradient on h1 */\n        .hero h1 {\n            background: linear-gradient(90deg,var(--color-primary),var(--color-accent));\n            -webkit-background-clip: text;\n            -webkit-text-fill-color: transparent;\n        }\n\n        /* Glass card service/feature cards */\n        .glass-card {\n            border-radius: 10px;\n            overflow: hidden;\n            transition: transform 0.3s ease-in-out;\n        }\n\n        .glass-card:hover {\n            transform: translateY(-2px);\n        }\n\n        /* Button and nav link transitions */\n        button, a.btn {\n            transition-all: duration-300 hover:scale-105 hover:shadow-xl;\n        }\n\n        a:hover {\n            text-decoration: none;\n        }\n\n        /* Contact form */\n        .contact-form {\n            display: flex;\n            flex-direction: column;\n            max-width: 600px;\n            margin: auto;\n            padding: 2rem;\n        }\n\n        label {\n            font-weight: bold;\n        }\n\n        input, textarea {\n            width: 100%;\n            padding: 0.5rem;\n            margin-bottom: 1rem;\n            border-radius: 4px;\n            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n        }\n\n        button[type=\"submit\"] {\n            background-color: var(--color-primary);\n            color: white;\n            padding: 0.5rem 1rem;\n            border: none;\n            cursor: pointer;\n            font-weight: bold;\n            border-radius: 4px;\n        }\n\n        /* Improved shadows */\n        .focus {\n            outline: none;\n            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Modern (200-300ms) */\n        .modern {\n            transition: all 0.2s ease-in-out;\n        }\n    </style>\n</head>\n<body>\n    <nav class=\"bg-gray-800 py-4\">\n        <a href=\"#\" class=\"text-white font-semibold px-4\">Home</a>\n        <a href=\"#\" class=\"text-white font-semibold px-4\">Services</a>\n        <a href=\"#\" class=\"text-white font-semibold px-4\">Contact</a>\n    </nav>",
+          "order": 0
+        },
+        {
+          "id": "44c11f18",
+          "name": "location",
+          "component_type": "section-with-description",
+          "content": {
+            "headline": "Location",
+            "subtitle": "Our laundry business is located at {address}"
+          },
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "2ccc70ed",
+          "name": "hours",
+          "component_type": "section-with-description",
+          "content": {
+            "headline": "Hours of Operation",
+            "subtitle": "We are open from {hours}"
+          },
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "209b2575",
+          "name": "phone",
+          "component_type": "section-with-description",
+          "content": {
+            "headline": "Phone Number",
+            "subtitle": "You can reach us at {phone}"
+          },
+          "html": "",
+          "order": 3
+        }
+      ],
+      "seo": {
+        "title": "",
+        "meta_description": "",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Contact Us - {business_name}</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Contact Us</title>\n    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.1.5/tailwind.min.css\">\n    <style>\n        /* Hero section */\n        .hero {\n            animation: fadeInUp 0.8s ease-out both;\n            position: relative;\n            overflow: hidden;\n        }\n\n        /* Sub-elements staggered delay */\n        .hero h1, .hero p {\n            animation-delay: 0.2s, 0.4s;\n        }\n\n        /* Linear gradient background */\n        .hero {\n            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%);\n        }\n\n        /* Multi-stop gradient on h1 */\n        .hero h1 {\n            background: linear-gradient(90deg,var(--color-primary),var(--color-accent));\n            -webkit-background-clip: text;\n            -webkit-text-fill-color: transparent;\n        }\n\n        /* Glass card service/feature cards */\n        .glass-card {\n            border-radius: 10px;\n            overflow: hidden;\n            transition: transform 0.3s ease-in-out;\n        }\n\n        .glass-card:hover {\n            transform: translateY(-2px);\n        }\n\n        /* Button and nav link transitions */\n        button, a.btn {\n            transition-all: duration-300 hover:scale-105 hover:shadow-xl;\n        }\n\n        a:hover {\n            text-decoration: none;\n        }\n\n        /* Contact form */\n        .contact-form {\n            display: flex;\n            flex-direction: column;\n            max-width: 600px;\n            margin: auto;\n            padding: 2rem;\n        }\n\n        label {\n            font-weight: bold;\n        }\n\n        input, textarea {\n            width: 100%;\n            padding: 0.5rem;\n            margin-bottom: 1rem;\n            border-radius: 4px;\n            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n        }\n\n        button[type=\"submit\"] {\n            background-color: var(--color-primary);\n            color: white;\n            padding: 0.5rem 1rem;\n            border: none;\n            cursor: pointer;\n            font-weight: bold;\n            border-radius: 4px;\n        }\n\n        /* Improved shadows */\n        .focus {\n            outline: none;\n            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n        }\n\n        /* Modern (200-300ms) */\n        .modern {\n            transition: all 0.2s ease-in-out;\n        }\n    </style>\n</head>\n<body>\n    <nav class=\"bg-gray-800 py-4\">\n        <a href=\"#\" class=\"text-white font-semibold px-4\">Home</a>\n        <a href=\"#\" class=\"text-white font-semibold px-4\">Services</a>\n        <a href=\"#\" class=\"text-white font-semibold px-4\">Contact</a>\n    </nav>\n\n\n\n\n\n\n\n</body>\n</html>",
+      "nav_label": "Contact",
+      "nav_order": 3
+    }
+  ],
+  "template_ids": [],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/laundry-business",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n",
+  "sitemap_xml": "",
+  "robots_txt": "",
+  "errors": [],
+  "metadata": {
+    "design_context": {
+      "style_name": "Soft UI Evolution",
+      "primary_color": "#2563EB",
+      "secondary_color": "#3B82F6",
+      "accent_color": "#EA580C",
+      "heading_font": "Poppins",
+      "body_font": "Open Sans"
+    }
+  }
+}

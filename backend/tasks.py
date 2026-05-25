@@ -23,7 +23,10 @@ import threading
 from collections import deque
 from collections.abc import Generator
 from contextlib import contextmanager
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from pathlib import Path
 from typing import Any
 
@@ -91,7 +94,7 @@ class TaskTracker:
             conn.close()
 
     def _init_db(self) -> None:
-        """Create the tasks table if it does not exist."""
+        """Create the tasks, conversations, and messages tables if they do not exist."""
         with self._db_conn() as conn:
             conn.execute(
                 """
@@ -111,6 +114,47 @@ class TaskTracker:
                 """
             )
             conn.execute("CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks (created_at DESC)")
+
+            # Conversation durability — persists chat threads across restarts
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS conversations (
+                    conversation_id TEXT PRIMARY KEY,
+                    agent_id TEXT NOT NULL DEFAULT '',
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                )
+                """
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_conv_agent ON conversations (agent_id, updated_at DESC)"
+            )
+
+            # Message log — append-only per conversation
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS messages (
+                    message_id TEXT PRIMARY KEY,
+                    conversation_id TEXT NOT NULL REFERENCES conversations(conversation_id),
+                    run_id TEXT,
+                    role TEXT NOT NULL DEFAULT 'user',
+                    content TEXT NOT NULL DEFAULT '',
+                    agent_id TEXT NOT NULL DEFAULT '',
+                    timestamp TEXT NOT NULL,
+                    ordo_trace_json TEXT,
+                    message_meta_json TEXT
+                )
+                """
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_msg_conv ON messages (conversation_id, timestamp ASC)"
+            )
+            columns = {
+                str(row["name"])
+                for row in conn.execute("PRAGMA table_info(messages)").fetchall()
+            }
+            if "message_meta_json" not in columns:
+                conn.execute("ALTER TABLE messages ADD COLUMN message_meta_json TEXT")
 
     def _load_from_db(self) -> None:
         """Seed the in-memory deque with the most recent tasks from SQLite."""
@@ -366,6 +410,161 @@ class TaskTracker:
             if task["id"] == task_id:
                 return task
         return None
+
+    # ----- Conversation / Message Durability -----
+
+    def create_or_attach_conversation(
+        self,
+        agent_id: str,
+        conversation_id: str | None = None,
+    ) -> str:
+        """Return conversation_id — creates a new row if conversation_id is None or unknown."""
+        import uuid as _uuid
+
+        now = datetime.now(UTC).isoformat()
+        if conversation_id:
+            # Check if it already exists
+            try:
+                with self._db_conn() as conn:
+                    row = conn.execute(
+                        "SELECT conversation_id FROM conversations WHERE conversation_id = ?",
+                        (conversation_id,),
+                    ).fetchone()
+                    if row:
+                        # Touch updated_at
+                        conn.execute(
+                            "UPDATE conversations SET updated_at = ? WHERE conversation_id = ?",
+                            (now, conversation_id),
+                        )
+                        return conversation_id
+            except Exception:
+                pass
+
+        # Create a new conversation
+        new_id = conversation_id or f"conv_{_uuid.uuid4().hex[:12]}"
+        try:
+            with self._db_conn() as conn:
+                conn.execute(
+                    "INSERT OR IGNORE INTO conversations (conversation_id, agent_id, created_at, updated_at) VALUES (?, ?, ?, ?)",
+                    (new_id, agent_id, now, now),
+                )
+        except Exception:
+            pass
+        return new_id
+
+    def append_message(
+        self,
+        conversation_id: str,
+        role: str,
+        content: str,
+        agent_id: str = "",
+        run_id: str | None = None,
+        ordo_trace: dict[str, Any] | None = None,
+        message_meta: dict[str, Any] | None = None,
+    ) -> str:
+        """Persist a message and return its stable message_id."""
+        import uuid as _uuid
+
+        message_id = f"msg_{_uuid.uuid4().hex[:16]}"
+        timestamp = datetime.now(UTC).isoformat()
+        ordo_json = json.dumps(ordo_trace) if ordo_trace else None
+        meta_json = json.dumps(message_meta) if message_meta else None
+        try:
+            with self._db_conn() as conn:
+                conn.execute(
+                    """
+                    INSERT INTO messages
+                        (
+                            message_id,
+                            conversation_id,
+                            run_id,
+                            role,
+                            content,
+                            agent_id,
+                            timestamp,
+                            ordo_trace_json,
+                            message_meta_json
+                        )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        message_id,
+                        conversation_id,
+                        run_id,
+                        role,
+                        content,
+                        agent_id,
+                        timestamp,
+                        ordo_json,
+                        meta_json,
+                    ),
+                )
+                conn.execute(
+                    "UPDATE conversations SET updated_at = ? WHERE conversation_id = ?",
+                    (timestamp, conversation_id),
+                )
+        except Exception:
+            pass
+        return message_id
+
+    def get_messages(
+        self,
+        conversation_id: str,
+        limit: int = 100,
+    ) -> list[dict[str, Any]]:
+        """Return messages for a conversation oldest-first, up to *limit*."""
+        try:
+            with self._db_conn() as conn:
+                rows = conn.execute(
+                    """
+                    SELECT message_id, conversation_id, run_id, role, content,
+                           agent_id, timestamp, ordo_trace_json, message_meta_json
+                    FROM messages
+                    WHERE conversation_id = ?
+                    ORDER BY timestamp ASC
+                    LIMIT ?
+                    """,
+                    (conversation_id, limit),
+                ).fetchall()
+            result = []
+            for row in rows:
+                entry: dict[str, Any] = dict(row)
+                if entry.get("ordo_trace_json"):
+                    try:
+                        entry["ordo_trace"] = json.loads(entry["ordo_trace_json"])
+                    except Exception:
+                        entry["ordo_trace"] = None
+                if entry.get("message_meta_json"):
+                    try:
+                        meta = json.loads(entry["message_meta_json"])
+                        if isinstance(meta, dict):
+                            entry.update(meta)
+                    except Exception:
+                        pass
+                del entry["ordo_trace_json"]
+                del entry["message_meta_json"]
+                result.append(entry)
+            return result
+        except Exception:
+            return []
+
+    def get_active_conversation(self, agent_id: str) -> dict[str, Any] | None:
+        """Return the most recently updated conversation for *agent_id*, or None."""
+        try:
+            with self._db_conn() as conn:
+                row = conn.execute(
+                    """
+                    SELECT conversation_id, agent_id, created_at, updated_at
+                    FROM conversations
+                    WHERE agent_id = ?
+                    ORDER BY updated_at DESC
+                    LIMIT 1
+                    """,
+                    (agent_id,),
+                ).fetchone()
+            return dict(row) if row else None
+        except Exception:
+            return None
 
 
 # Module-level singleton

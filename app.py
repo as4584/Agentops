@@ -219,8 +219,13 @@ def main() -> None:
             print("    → ollama serve")
 
     # ---- Start Backend ----
+    # IMPORTANT: All local backend instances MUST go through port_guard so the
+    # registry stays accurate and collisions are detected explicitly.  Silent
+    # port-fallback is intentionally removed — if something else owns 8000 the
+    # operator must resolve it manually rather than having two backends on
+    # different ports that the frontend doesn't know about.
     print("\n🚀 Starting backend...")
-    backend_port = 8000
+    backend_port = int(os.environ.get("BACKEND_PORT", "8000"))
     if _is_port_open(backend_port) and _is_healthy(backend_port, "/health"):
         print(f"  ✓ Backend already running and healthy on :{backend_port}")
     else:
@@ -228,14 +233,22 @@ def main() -> None:
             owner = _get_process_using_port(backend_port)
             owner_cmd = owner.get("command", "") if owner else ""
             if owner and _is_agentop_owned_process(owner_cmd):
-                print(f"  ⚠ Port {backend_port} occupied by stale Agentop process — killing")
-                _kill_port(backend_port)
+                print(f"  ⚠ Port {backend_port} occupied by stale Agentop process — killing via port_guard")
+                subprocess.run(
+                    [sys.executable, "-m", "backend.port_guard", "kill", str(backend_port)],
+                    cwd=str(ROOT),
+                )
+                time.sleep(0.5)
             else:
-                print(f"  ⚠ Port {backend_port} occupied by non-Agentop process; selecting fallback port")
-                backend_port = _find_available_port(backend_port, 8765, 8799)
-                print(f"  → Backend fallback port: :{backend_port}")
+                print(
+                    f"  ✗ Port {backend_port} is owned by a non-Agentop process (PID {owner.get('pid', '?') if owner else '?'}).\n"
+                    f"    Free it first:  python -m backend.port_guard kill {backend_port}\n"
+                    f"    Or override:    BACKEND_PORT=<n> python app.py  (must be in 8100-8999 range)"
+                )
+                sys.exit(1)
         _start_process(
-            [sys.executable, "-m", "uvicorn", "backend.server:app", "--host", "127.0.0.1", "--port", str(backend_port)],
+            [sys.executable, "-m", "backend.port_guard", "serve", "backend.server:app",
+             "--host", "127.0.0.1", "--port", str(backend_port)],
             cwd=ROOT,
             label="backend",
         )

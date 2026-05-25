@@ -1,0 +1,337 @@
+{
+  "id": "a67dcc7ffbe3",
+  "created_at": "2026-04-20T00:02:51.502461+00:00",
+  "updated_at": "2026-04-20T00:04:53.511395+00:00",
+  "status": "planned",
+  "brief": {
+    "business_name": "fitness",
+    "business_type": "custom",
+    "tagline": "",
+    "description": "can you make a fitness website called buff babies",
+    "services": [],
+    "target_audience": "",
+    "tone": "professional",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": [],
+    "clone_url": null,
+    "cloned_html": null,
+    "cloned_screenshot": null,
+    "cloned_tokens": {}
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - fitness",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "6d3bd9dc",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "0fc3da5e",
+          "name": "hero",
+          "component_type": "hero",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "4b3f2b3d",
+          "name": "features",
+          "component_type": "features",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "5dc67ebe",
+          "name": "testimonials",
+          "component_type": "testimonials",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "79611e11",
+          "name": "cta",
+          "component_type": "cta",
+          "content": {},
+          "html": "",
+          "order": 4
+        },
+        {
+          "id": "3f57d149",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 5
+        }
+      ],
+      "seo": {
+        "title": "",
+        "meta_description": "",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "",
+      "nav_label": "Home",
+      "nav_order": 1
+    },
+    {
+      "slug": "about",
+      "title": "About Us - fitness",
+      "purpose": "Company story and team",
+      "sections": [
+        {
+          "id": "3df20f24",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "d4679d53",
+          "name": "hero-small",
+          "component_type": "hero-small",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "a3ea4499",
+          "name": "story",
+          "component_type": "story",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "2ef28086",
+          "name": "team",
+          "component_type": "team",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "e192b3cc",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "",
+        "meta_description": "",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "",
+      "nav_label": "About Us",
+      "nav_order": 2
+    },
+    {
+      "slug": "services",
+      "title": "Services - fitness",
+      "purpose": "Service offerings",
+      "sections": [
+        {
+          "id": "7b89c024",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "84cde42c",
+          "name": "hero-small",
+          "component_type": "hero-small",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "ea0ac367",
+          "name": "services-grid",
+          "component_type": "services-grid",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "d5de5936",
+          "name": "cta",
+          "component_type": "cta",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "5f87daaa",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "",
+        "meta_description": "",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "",
+      "nav_label": "Services",
+      "nav_order": 3
+    },
+    {
+      "slug": "contact",
+      "title": "Contact - fitness",
+      "purpose": "Contact form and info",
+      "sections": [
+        {
+          "id": "a6bc896f",
+          "name": "nav",
+          "component_type": "nav",
+          "content": {},
+          "html": "",
+          "order": 0
+        },
+        {
+          "id": "377c00ef",
+          "name": "hero-small",
+          "component_type": "hero-small",
+          "content": {},
+          "html": "",
+          "order": 1
+        },
+        {
+          "id": "501d43b1",
+          "name": "contact-form",
+          "component_type": "contact-form",
+          "content": {},
+          "html": "",
+          "order": 2
+        },
+        {
+          "id": "7797fc34",
+          "name": "map",
+          "component_type": "map",
+          "content": {},
+          "html": "",
+          "order": 3
+        },
+        {
+          "id": "c44e6d20",
+          "name": "footer",
+          "component_type": "footer",
+          "content": {},
+          "html": "",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "",
+        "meta_description": "",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "",
+      "nav_label": "Contact",
+      "nav_order": 4
+    }
+  ],
+  "template_ids": [
+    "3c077ad4"
+  ],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/fitness",
+  "global_css": "",
+  "sitemap_xml": "",
+  "robots_txt": "",
+  "errors": [],
+  "metadata": {
+    "design_context": {
+      "style_name": "Soft UI Evolution",
+      "primary_color": "#2563EB",
+      "secondary_color": "#3B82F6",
+      "accent_color": "#EA580C",
+      "heading_font": "Poppins",
+      "body_font": "Open Sans"
+    }
+  },
+  "sources": []
+}

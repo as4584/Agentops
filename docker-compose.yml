@@ -35,7 +35,7 @@ services:
       ollama:
         condition: service_started
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "sh", "-c", "curl -f http://localhost:${BACKEND_PORT:-8000}/health"]
       interval: 30s
       timeout: 10s
       start_period: 60s
@@ -47,13 +47,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - AGENTOP_API_URL=http://backend:8000
+        - AGENTOP_API_URL=http://backend:${BACKEND_PORT:-8000}
     container_name: agentop-frontend
     restart: unless-stopped
     ports:
       - "127.0.0.1:3007:3007"
     environment:
-      - AGENTOP_API_URL=http://backend:8000
+      - AGENTOP_API_URL=http://backend:${BACKEND_PORT:-8000}
       - AGENTOP_API_SECRET=${AGENTOP_API_SECRET}
     depends_on:
       backend:

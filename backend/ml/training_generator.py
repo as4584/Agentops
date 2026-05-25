@@ -22,7 +22,10 @@ from __future__ import annotations
 
 import json
 import random
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from pathlib import Path
 from typing import Any
 
@@ -133,6 +136,52 @@ RED_LINE_PATTERNS: list[str] = [
 ]
 
 
+# Ordo reasoning lane mapping — matches copilot-instructions.md classification
+_AGENT_LANES: dict[str, str] = {
+    "soul_core": "positioning",
+    "devops_agent": "development",
+    "monitor_agent": "evaluation",
+    "self_healer_agent": "development",
+    "code_review_agent": "evaluation",
+    "security_agent": "evaluation",
+    "data_agent": "evaluation",
+    "comms_agent": "development",
+    "cs_agent": "positioning",
+    "it_agent": "evaluation",
+    "knowledge_agent": "positioning",
+    "ocr_agent": "development",
+    "BLOCKED": "red_line",
+}
+
+
+def _ordo_trace(
+    agent_id: str,
+    confidence: float,
+    grounded_signal: str,
+    boundary: list[str] | None = None,
+    inferred: bool = False,
+) -> dict[str, Any]:
+    """
+    Build an Ordo reasoning trace for a routing decision.
+    Applies the Ordo protocol: classify lane, ground claim, flag inferences.
+    """
+    lane = _AGENT_LANES.get(agent_id, "development")
+    if agent_id == "BLOCKED":
+        assessment = "Hard block — prohibited/destructive intent detected"
+    elif boundary:
+        other = [a for a in boundary if a != agent_id]
+        assessment = f"Boundary case: {agent_id} wins over {', '.join(other)}"
+    else:
+        assessment = f"Clear {agent_id} task"
+    return {
+        "lane": lane,
+        "confidence": round(confidence, 2),
+        "grounded_signal": grounded_signal[:120],
+        "inferred": inferred,
+        "assessment": assessment,
+    }
+
+
 class TrainingGenerator:
     """Generates synthetic training data using an LLM."""
 
@@ -206,13 +255,20 @@ class TrainingGenerator:
             if len(message) < 10 or len(message) > 500:
                 return None
 
+            conf = round(random.uniform(0.88, 0.98), 2)
             return {
                 "user_message": message,
                 "expected_agent": agent_id,
                 "expected_tools": domain["tools"][:2],
                 "reasoning": f"Clear {agent_id} task: {domain['role']}",
-                "confidence": round(random.uniform(0.88, 0.98), 2),
+                "confidence": conf,
                 "difficulty": "easy",
+                "ordo_trace": _ordo_trace(
+                    agent_id=agent_id,
+                    confidence=conf,
+                    grounded_signal=f"Domain keywords match {agent_id}: {domain['role']}",
+                    inferred=False,
+                ),
             }
         except Exception as exc:
             logger.warning(f"[TrainingGenerator] Easy routing generation failed: {exc}")
@@ -242,6 +298,8 @@ class TrainingGenerator:
             if len(message) < 10 or len(message) > 500:
                 return None
 
+            conf = round(random.uniform(0.55, 0.80), 2)
+            boundary = sorted([correct_agent, wrong_agent])
             return {
                 "user_message": message,
                 "expected_agent": correct_agent,
@@ -249,9 +307,19 @@ class TrainingGenerator:
                 "reasoning": (
                     f"Ambiguous between {correct_agent} and {wrong_agent}. Correct because: {correct_domain['role']}"
                 ),
-                "confidence": round(random.uniform(0.55, 0.80), 2),
+                "confidence": conf,
                 "difficulty": "hard",
-                "boundary": sorted([correct_agent, wrong_agent]),
+                "boundary": boundary,
+                "ordo_trace": _ordo_trace(
+                    agent_id=correct_agent,
+                    confidence=conf,
+                    grounded_signal=(
+                        f"{correct_agent} domain signal is primary: {correct_domain['role']}. "
+                        f"{wrong_agent} is plausible but secondary."
+                    ),
+                    boundary=boundary,
+                    inferred=True,
+                ),
             }
         except Exception as exc:
             logger.warning(f"[TrainingGenerator] Hard routing generation failed: {exc}")
@@ -276,6 +344,12 @@ class TrainingGenerator:
             "reasoning": "Red-line violation: dangerous/prohibited action",
             "confidence": 1.0,
             "difficulty": "red_line",
+            "ordo_trace": _ordo_trace(
+                agent_id="BLOCKED",
+                confidence=1.0,
+                grounded_signal="Red-line pattern detected: " + str(template)[:80],
+                inferred=False,
+            ),
         }
 
     # -----------------------------------------------------------------
@@ -325,6 +399,11 @@ class TrainingGenerator:
             if not data or "task" not in data:
                 return None
 
+            why = (
+                f"{agent_id} owns {domain['role']}. "
+                f"Rejected {', '.join(rejected)} because they handle different domains."
+            )
+            plan = data.get("plan", [])
             return {
                 "task": data["task"],
                 "task_type": data.get("task_type", "general"),
@@ -332,13 +411,24 @@ class TrainingGenerator:
                 "constraints": data.get("constraints", []),
                 "chosen_agent": agent_id,
                 "rejected_agents": rejected,
-                "plan": data.get("plan", []),
+                "plan": plan,
                 "actions": data.get("actions", []),
                 "validations": data.get("validations", []),
                 "result": data.get("result", "Task completed"),
-                "why_this_route_was_correct": (
-                    f"{agent_id} owns {domain['role']}. "
-                    f"Rejected {', '.join(rejected)} because they handle different domains."
+                "why_this_route_was_correct": why,
+                # Ordo Assessment / Recommendation / Next step
+                "ordo_assessment": (
+                    f"{agent_id} is the correct owner. Grounded in: {domain['role']}."
+                ),
+                "ordo_recommendation": (
+                    f"Route to {agent_id}. Use tools: {', '.join(domain['tools'][:2]) or 'none'}."
+                ),
+                "ordo_next_step": plan[0] if plan else f"{agent_id}: begin task execution",
+                "ordo_trace": _ordo_trace(
+                    agent_id=agent_id,
+                    confidence=0.90,
+                    grounded_signal=why[:120],
+                    inferred=False,
                 ),
             }
         except Exception as exc:
@@ -404,6 +494,7 @@ class TrainingGenerator:
 
             category = f"boundary_{'_'.join(sorted([correct_agent, wrong_agent]))}"
 
+            boundary = sorted([correct_agent, wrong_agent])
             return {
                 "task": data["user_message"],
                 "user_message": data["user_message"],
@@ -416,6 +507,21 @@ class TrainingGenerator:
                 "good_tools": correct_domain["tools"][:2],
                 "bad_tools": wrong_domain["tools"][:1],
                 "category": category,
+                # Ordo traces: good response is grounded, bad is hallucinated/mis-classified
+                "ordo_trace_good": _ordo_trace(
+                    agent_id=correct_agent,
+                    confidence=0.82,
+                    grounded_signal=f"{correct_agent} domain is primary: {correct_domain['role']}",
+                    boundary=boundary,
+                    inferred=True,
+                ),
+                "ordo_trace_bad": _ordo_trace(
+                    agent_id=wrong_agent,
+                    confidence=0.55,
+                    grounded_signal=f"Superficial signal match to {wrong_agent}: {wrong_domain['role']}",
+                    boundary=boundary,
+                    inferred=True,
+                ),
             }
         except Exception as exc:
             logger.warning(f"[TrainingGenerator] Preference pair generation failed: {exc}")

@@ -6,7 +6,10 @@ Single source of truth. All agents read/write through here.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from pathlib import Path
 
 from backend.config import MEMORY_DIR

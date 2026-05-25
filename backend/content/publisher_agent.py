@@ -20,7 +20,10 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 
 from backend.config import MEMORY_DIR
 from backend.content.base_agent import ContentAgent

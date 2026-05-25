@@ -8,7 +8,10 @@ Tests: JobStore, VideoJob, IdeaIntakeAgent, ScriptWriterAgent,
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -491,14 +494,15 @@ class TestCaptionAgent:
         result = await agent.run()
         assert result == []
 
-    def test_get_duration_no_ffprobe(self, mock_llm, tmp_path):
+    @pytest.mark.asyncio
+    async def test_get_duration_no_ffprobe(self, mock_llm, tmp_path):
         from backend.content.caption_agent import CaptionAgent
 
         fake_video = tmp_path / "vid.mp4"
         fake_video.write_bytes(b"\x00" * 100)
 
         with patch("subprocess.run", side_effect=FileNotFoundError):
-            duration = CaptionAgent._get_duration(fake_video)
+            duration = await CaptionAgent._get_duration(fake_video)
         assert duration == 0.0  # returns 0.0 on failure
 
     def test_generate_srt_creates_file(self, mock_llm, tmp_path):

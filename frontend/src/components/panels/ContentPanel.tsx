@@ -93,9 +93,15 @@ const ContentPanel: FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/content/calendar`);
+      // Use jobs filtered to scheduled/approved for the calendar view
+      const res = await fetch(`${API_BASE}/content/jobs`);
       if (!res.ok) throw new Error(`${res.status}`);
-      setCalendar(await res.json());
+      const all: Job[] = await res.json();
+      setCalendar(
+        all
+          .filter(j => ['scheduled', 'approved', 'posted'].includes(j.status))
+          .map(j => ({ ...j, scheduled_time: null })),
+      );
     } catch (e: unknown) {
       setError((e as Error).message);
     } finally {
@@ -107,7 +113,7 @@ const ContentPanel: FC = () => {
 
   const runPipeline = async () => {
     try {
-      await fetch(`${API_BASE}/content/run`, { method: 'POST' });
+      await fetch(`${API_BASE}/content/run/full`, { method: 'POST' });
       await fetchJobs();
     } catch {
       /* silent */
@@ -116,7 +122,7 @@ const ContentPanel: FC = () => {
 
   const approveJob = async (id: string) => {
     try {
-      await fetch(`${API_BASE}/content/jobs/${id}/approve`, { method: 'POST' });
+      await fetch(`${API_BASE}/content/jobs/${id}/approve`, { method: 'PATCH' });
       await fetchJobs();
     } catch {
       /* silent */
@@ -127,7 +133,7 @@ const ContentPanel: FC = () => {
     if (!rejectJobId || !rejectReason.trim()) return;
     try {
       await fetch(`${API_BASE}/content/jobs/${rejectJobId}/reject`, {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: rejectReason }),
       });

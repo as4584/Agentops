@@ -11,7 +11,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from backend.webgen.models import SiteProject
+from backend.webgen.models import SiteProject, WebgenRunState, WebgenRunStatus
 
 
 def _atomic_write_json(path: Path, data: object) -> None:
@@ -79,3 +79,49 @@ class SiteStore:
             path.unlink()
             return True
         return False
+
+
+class WebgenRunStore:
+    """
+    Persistent store for WebgenRunState instances (one JSON file per run_id).
+
+    Storage layout:
+        base_dir/
+            {run_id}.json
+    """
+
+    def __init__(self, base_dir: str | Path | None = None) -> None:
+        if base_dir is None:
+            base_dir = Path(__file__).resolve().parent.parent / "memory" / "webgen_runs"
+        self.base_dir = Path(base_dir)
+        self.base_dir.mkdir(parents=True, exist_ok=True)
+
+    def save(self, run: WebgenRunState) -> None:
+        """Save / update a run snapshot atomically."""
+        path = self.base_dir / f"{run.run_id}.json"
+        _atomic_write_json(path, run.model_dump())
+
+    def load(self, run_id: str) -> WebgenRunState | None:
+        """Load a run by ID."""
+        path = self.base_dir / f"{run_id}.json"
+        if not path.exists():
+            return None
+        try:
+            data = json.loads(path.read_text())
+            return WebgenRunState(**data)
+        except Exception:
+            return None
+
+    def get_active_run(self) -> WebgenRunState | None:
+        """Return the most recently started run with RUNNING status, if any."""
+        runs: list[WebgenRunState] = []
+        for path in self.base_dir.glob("*.json"):
+            try:
+                data = json.loads(path.read_text())
+                runs.append(WebgenRunState(**data))
+            except Exception:
+                continue
+        running = [r for r in runs if r.status == WebgenRunStatus.RUNNING]
+        if not running:
+            return None
+        return max(running, key=lambda r: r.started_at)

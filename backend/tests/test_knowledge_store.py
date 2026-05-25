@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import math
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -272,23 +273,23 @@ class TestDiskPersistence:
     def test_load_from_disk_no_file(self, store):
         store._dir.mkdir(parents=True, exist_ok=True)
         # Index file doesn't exist
-        loaded = store._load_from_disk("somesig")
+        loaded = store._load_from_disk("somesig", "fast_context")
         assert loaded is False
 
     def test_load_from_disk_wrong_signature(self, store):
         store._dir.mkdir(parents=True, exist_ok=True)
-        payload = {"signature": "oldsig", "items": [{"id": "1"}]}
+        payload = {"signature": "oldsig", "mode": "fast_context", "items": [{"id": "1"}]}
         store._index_path.write_text(json.dumps(payload))
 
-        loaded = store._load_from_disk("newsig")
+        loaded = store._load_from_disk("newsig", "fast_context")
         assert loaded is False
 
     def test_load_from_disk_matching_signature(self, store):
         store._dir.mkdir(parents=True, exist_ok=True)
-        payload = {"signature": "exact_sig", "items": [{"id": "1", "path": "x.md"}]}
+        payload = {"signature": "exact_sig", "mode": "fast_context", "items": [{"id": "1", "path": "x.md"}]}
         store._index_path.write_text(json.dumps(payload))
 
-        loaded = store._load_from_disk("exact_sig")
+        loaded = store._load_from_disk("exact_sig", "fast_context")
         assert loaded is True
         assert len(store._items) == 1
 
@@ -296,7 +297,7 @@ class TestDiskPersistence:
         store._dir.mkdir(parents=True, exist_ok=True)
         store._index_path.write_text("{ not valid json")
 
-        loaded = store._load_from_disk("anysig")
+        loaded = store._load_from_disk("anysig", "fast_context")
         assert loaded is False
 
     def test_save_to_disk_creates_file(self, store):
@@ -322,6 +323,7 @@ class TestEnsureIndex:
         sig = store._compute_signature()
         payload = {
             "signature": sig,
+            "mode": "fast_context",
             "items": [{"id": "1", "path": "x.md", "chunk_index": 0, "text": "cached", "embedding": [0.1]}],
         }
         store._index_path.write_text(json.dumps(payload))
@@ -343,3 +345,46 @@ class TestEnsureIndex:
 
         assert isinstance(stats, dict)
         assert "chunks" in stats
+
+    async def test_search_does_not_build_index_without_allow_build(self, store, mock_llm):
+        store._items = []
+        with patch.object(store, "_collect_documents", side_effect=AssertionError("should not build index")):
+            results = await store.search("query", allow_build=False, mode="fast_context")
+
+        assert results == []
+
+    async def test_collect_documents_fast_context_only_uses_docs(self, store):
+        fake_root = Path("/tmp/agentop-test-root")
+        fake_docs_dir = fake_root / "docs"
+        fake_backend_dir = fake_root / "backend"
+        fake_frontend_dir = fake_root / "frontend" / "src"
+        fake_docs = fake_docs_dir / "guide.md"
+        fake_backend = fake_backend_dir / "server.py"
+        fake_frontend = fake_frontend_dir / "app.tsx"
+
+        def fake_exists(self):
+            return self in {fake_docs_dir, fake_backend_dir, fake_frontend_dir}
+
+        def fake_rglob(self, pattern):
+            if self == fake_docs_dir:
+                return [fake_docs]
+            if self == fake_backend_dir:
+                return [fake_backend]
+            if self == fake_frontend_dir:
+                return [fake_frontend]
+            return []
+
+        def fake_is_file(self):
+            return self in {fake_docs, fake_backend, fake_frontend}
+
+        def fake_read_text(self, encoding=None, errors=None):
+            return f"content for {self.name}"
+
+        with patch("backend.knowledge.PROJECT_ROOT", fake_root), \
+             patch.object(Path, "exists", fake_exists), \
+             patch.object(Path, "rglob", fake_rglob), \
+             patch.object(Path, "is_file", fake_is_file), \
+             patch.object(Path, "read_text", fake_read_text):
+            docs = store._collect_documents("fast_context")
+
+        assert docs == [{"path": "docs/guide.md", "content": "content for guide.md"}]

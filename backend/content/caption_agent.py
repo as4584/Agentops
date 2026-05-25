@@ -6,6 +6,8 @@ Uses FFmpeg (local). No cloud dependency.
 
 from __future__ import annotations
 
+import asyncio
+import functools
 import json
 import subprocess
 from pathlib import Path
@@ -35,9 +37,9 @@ class CaptionAgent(ContentAgent):
 
         srt_path = self._generate_srt(job)
         output_path = VIDEO_DIR / f"{job.job_id}_captioned.mp4"
-        self._burn_captions(input_video, srt_path, output_path)
+        await self._burn_captions(input_video, srt_path, output_path)
 
-        duration = self._get_duration(output_path)
+        duration = await self._get_duration(output_path)
         logger.info(f"[{self.name}] Captioned: {output_path} ({duration:.1f}s)")
 
         updated = self.store.transition_job(
@@ -79,7 +81,7 @@ class CaptionAgent(ContentAgent):
         ms = int((seconds % 1) * 1000)
         return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
-    def _burn_captions(self, input_v: Path, srt: Path, output: Path) -> None:
+    async def _burn_captions(self, input_v: Path, srt: Path, output: Path) -> None:
         sub_filter = (
             f"subtitles='{srt}':"
             f"force_style='FontSize={self.FONT_SIZE},"
@@ -114,15 +116,19 @@ class CaptionAgent(ContentAgent):
             "+faststart",
             str(output),
         ]
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        result = await asyncio.to_thread(
+            functools.partial(subprocess.run, cmd, capture_output=True, text=True, timeout=300)
+        )
         if result.returncode != 0:
             raise RuntimeError(f"FFmpeg failed: {result.stderr[:300]}")
 
     @staticmethod
-    def _get_duration(path: Path) -> float:
+    async def _get_duration(path: Path) -> float:
         try:
             cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", str(path)]
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            r = await asyncio.to_thread(
+                functools.partial(subprocess.run, cmd, capture_output=True, text=True, timeout=30)
+            )
             return float(json.loads(r.stdout).get("format", {}).get("duration", 0))
         except Exception:
             return 0.0

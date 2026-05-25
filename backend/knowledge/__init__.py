@@ -15,14 +15,17 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from backend.config import MEMORY_DIR, PROJECT_ROOT
+from backend.config import MEMORY_DIR, PROJECT_ROOT, RETRIEVAL_MODE
 from backend.llm import OllamaClient
 from backend.ocr import OCR_EXTENSIONS
 from backend.ocr import extract_text as ocr_extract_text
 from backend.utils import logger
+
+UTC_TZ = timezone.utc  # noqa: UP017
 
 
 class KnowledgeVectorStore:
@@ -32,22 +35,32 @@ class KnowledgeVectorStore:
         self.llm = llm_client
         self._dir = MEMORY_DIR / "knowledge"
         self._index_path = self._dir / "vectors.json"
+        self._meta_path = self._dir / "vectors.meta.json"
         self._profiles_path = self._dir / "business_profiles.json"
         self._dir.mkdir(parents=True, exist_ok=True)
         self._items: list[dict[str, Any]] = []
         self._business_profiles: list[dict[str, Any]] = []
         self._signature: str = ""
+        self._index_mode: str = RETRIEVAL_MODE
         self._loaded = False
         self._load_business_profiles()
 
-    async def ensure_index(self, force_rebuild: bool = False) -> None:
+    async def ensure_index(self, force_rebuild: bool = False, mode: str | None = None) -> None:
         """Load or build the vector index if needed."""
-        current_signature = self._compute_signature()
+        active_mode = mode or RETRIEVAL_MODE
+        current_signature = self._compute_signature(active_mode)
 
-        if not force_rebuild and self._load_from_disk(current_signature):
+        if not force_rebuild and self._load_from_disk(current_signature, active_mode):
             return
 
-        docs = self._collect_documents()
+        if not force_rebuild:
+            self._loaded = False
+            self._items = []
+            self._signature = current_signature
+            self._index_mode = active_mode
+            return
+
+        docs = self._collect_documents(active_mode)
 
         # Augment with OCR-extracted content for PDFs and images.
         # _collect_documents returns a sentinel {"ocr": True} for these files;
@@ -91,6 +104,7 @@ class KnowledgeVectorStore:
 
         self._items = items
         self._signature = current_signature
+        self._index_mode = active_mode
         self._loaded = True
         self._save_to_disk()
         logger.info(f"Knowledge index built: files={len(docs)}, chunks={len(items)}")
@@ -100,9 +114,15 @@ class KnowledgeVectorStore:
         await self.ensure_index(force_rebuild=True)
         return self.stats()
 
-    async def search(self, query: str, top_k: int = 4) -> list[dict[str, Any]]:
+    async def search(
+        self,
+        query: str,
+        top_k: int = 4,
+        allow_build: bool = False,
+        mode: str | None = None,
+    ) -> list[dict[str, Any]]:
         """Retrieve top-k semantically similar chunks for a query."""
-        await self.ensure_index()
+        await self.ensure_index(force_rebuild=allow_build, mode=mode)
         if not self._items:
             return []
 
@@ -185,13 +205,18 @@ class KnowledgeVectorStore:
         scored.sort(key=lambda x: x["score"], reverse=True)
         return scored[:top_k]
 
-    def _collect_documents(self) -> list[dict[str, str]]:
+    def _collect_documents(self, mode: str = RETRIEVAL_MODE) -> list[dict[str, str]]:
         """Collect project docs/code eligible for indexing."""
-        roots = [
-            PROJECT_ROOT / "docs",
-            PROJECT_ROOT / "backend",
-            PROJECT_ROOT / "frontend" / "src",
-        ]
+        if mode == "deep_index":
+            roots = [
+                PROJECT_ROOT / "docs",
+                PROJECT_ROOT / "backend",
+                PROJECT_ROOT / "frontend" / "src",
+            ]
+        else:
+            roots = [
+                PROJECT_ROOT / "docs",
+            ]
         text_suffixes = {".md", ".py", ".ts", ".tsx", ".txt"}
         # PDFs are resolved later in ensure_index via OCR (async).
         ocr_suffixes = {s for s in OCR_EXTENSIONS if s == ".pdf"}
@@ -246,10 +271,10 @@ class KnowledgeVectorStore:
             start = max(0, end - overlap)
         return chunks
 
-    def _compute_signature(self) -> str:
+    def _compute_signature(self, mode: str = RETRIEVAL_MODE) -> str:
         """Compute a deterministic signature of indexable files."""
         hasher = hashlib.sha256()
-        roots = [
+        roots = [PROJECT_ROOT / "docs"] if mode != "deep_index" else [
             PROJECT_ROOT / "docs",
             PROJECT_ROOT / "backend",
             PROJECT_ROOT / "frontend" / "src",
@@ -270,9 +295,10 @@ class KnowledgeVectorStore:
             hasher.update(rel.encode("utf-8"))
             hasher.update(str(stat.st_size).encode("utf-8"))
             hasher.update(str(stat.st_mtime_ns).encode("utf-8"))
+        hasher.update(mode.encode("utf-8"))
         return hasher.hexdigest()
 
-    def _load_from_disk(self, signature: str) -> bool:
+    def _load_from_disk(self, signature: str, mode: str) -> bool:
         """Load persisted index if signature matches."""
         if not self._index_path.exists():
             return False
@@ -281,11 +307,12 @@ class KnowledgeVectorStore:
         except Exception:
             return False
 
-        if payload.get("signature") != signature:
+        if payload.get("signature") != signature or payload.get("mode") != mode:
             return False
 
         self._items = payload.get("items", [])
         self._signature = signature
+        self._index_mode = mode
         self._loaded = True
         logger.info(f"Knowledge index loaded from disk: chunks={len(self._items)}")
         return True
@@ -294,9 +321,20 @@ class KnowledgeVectorStore:
         """Persist index for fast startup on next run."""
         payload = {
             "signature": self._signature,
+            "mode": self._index_mode,
             "items": self._items,
         }
         self._index_path.write_text(json.dumps(payload))
+        self._meta_path.write_text(
+            json.dumps(
+                {
+                    "signature": self._signature,
+                    "mode": self._index_mode,
+                    "updated_at": datetime.now(UTC_TZ).isoformat(),
+                    "chunks": len(self._items),
+                }
+            )
+        )
 
     def _load_business_profiles(self) -> None:
         """Load persisted business profile vectors from disk."""
@@ -318,11 +356,14 @@ class KnowledgeVectorStore:
         """Return index statistics for diagnostics endpoints."""
         file_size_bytes = self._index_path.stat().st_size if self._index_path.exists() else 0
         profiles_size_bytes = self._profiles_path.stat().st_size if self._profiles_path.exists() else 0
+        stale = self._index_path.exists() and self._compute_signature(self._index_mode) != self._signature
         return {
             "chunks": len(self._items),
             "file_size_bytes": file_size_bytes,
             "business_profile_vectors": len(self._business_profiles),
             "business_profiles_size_bytes": profiles_size_bytes,
+            "index_present": int(self._index_path.exists()),
+            "stale": int(stale),
         }
 
 

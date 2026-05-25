@@ -1,0 +1,171 @@
+{
+  "id": "af3e07f45e58",
+  "created_at": "2026-04-21T22:03:26.964884+00:00",
+  "updated_at": "2026-04-21T22:07:07.369628+00:00",
+  "status": "ready",
+  "brief": {
+    "business_name": "about hamburgers",
+    "business_type": "custom",
+    "tagline": "",
+    "description": "lets generate a website about hamburgers",
+    "services": [],
+    "target_audience": "",
+    "tone": "professional",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": [],
+    "clone_url": null,
+    "cloned_html": null,
+    "cloned_screenshot": null,
+    "cloned_tokens": {}
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - Hamburgers",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "703b4f66",
+          "name": "hero",
+          "component_type": "hero-centered",
+          "content": {
+            "headline": "Best burgers in town",
+            "subtitle": "Indulge in our juicy and flavorful burgers"
+          },
+          "html": "<section class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both;\">Best burgers in town</h1>\n  <p>Indulge in our juicy and flavorful burgers</p>\n  <a href=\"\" aria-label=\"Home\" class=\"btn glass-card hover:-translate-y-2 transition-transform duration-300\">Learn More</a>\n</section>",
+          "order": 0
+        },
+        {
+          "id": "0c7afd51",
+          "name": "features",
+          "component_type": "features-list",
+          "content": {
+            "headline": "Our features",
+            "description": "Here's what makes our burgers special"
+          },
+          "html": "<section>\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both\">Our Features</h1>\n  <div class=\"container mx-auto px-4 md:px-6 lg:px-8 xl:px-10\">\n    <article class=\"w-full mt-8 mb-12 md:mb-16 lg:mb-20 xl:mb-24\">\n      <div class=\"glass-card\">\n        <h2 style=\"background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">Fresh Ingredients</h2>\n        <p>We source only the freshest ingredients to ensure our burgers taste amazing.</p>\n      </div>\n    </article>\n    <article class=\"w-full mt-8 mb-12 md:mb-16 lg:mb-20 xl:mb-24\">\n      <div class=\"glass-card\">\n        <h2 style=\"background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%)\">Customizable</h2>\n        <p>You can customize your burger to your liking with a variety of toppings and sauces.</p>\n      </div>\n    </article>\n    <article class=\"w-full mt-8 mb-12 md:mb-16 lg:mb-20 xl:mb-24\">\n      <div class=\"glass-card\">\n        <h2 style=\"background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">Sustainable</h2>\n        <p>We are committed to sustainable practices in all aspects of our business.</p>\n      </div>\n    </article>\n  </div>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "4d7be85c",
+          "name": "menu",
+          "component_type": "menu-grid",
+          "content": {
+            "headline": "Our menu",
+            "description": "Explore our selection of burgers and sides"
+          },
+          "html": "<nav class=\"fixed bottom-0 left-0 right-0 bg-white shadow-md\">\n  <ul class=\"px-8 py-4 flex justify-between items-center space-x-6\">\n    <li>\n      <a href=\"#\" aria-label=\"Home\" class=\"btn btn-secondary font-semibold text-black hover:bg-gray-100\">Home</a>\n    </li>\n  </ul>\n</nav>\n<header class=\"bg-gradient-to-r from-primary to-secondary py-8 relative px-6 lg:px-24 flex items-center justify-between text-white space-x-6\">\n  <h1 class=\"font-poppins font-semibold md:text-5xl text-3xl leading-tight tracking-widest text-left\">Our menu</h1>\n  <div class=\"hidden lg:block w-full h-screen bg-white opacity-70\"></div>\n</header>\n<main class=\"container mx-auto px-6 py-8 lg:py-24 space-y-12\">\n  <section class=\"md:grid md:grid-cols-2 lg:grid-cols-3 gap-4\">\n    <article class=\"glass-card hover:-translate-y-2 transition-transform duration-300\">\n      <div class=\"w-full h-64 overflow-hidden rounded-lg shadow-md\">\n        <img src=\"burger1.jpg\" alt=\"\" class=\"w-full h-full object-cover\">\n      </div>\n      <h2 class=\"font-poppins font-semibold text-primary\">Burger One</h2>\n      <div class=\"px-4 py-2\">\n        <p class=\"text-gray-700\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n        <button role=\"button\" aria-label=\"Order now\">Order Now</button>\n      </div>\n    </article>\n    <article class=\"glass-card hover:-translate-y-2 transition-transform duration-300\">\n      <div class=\"w-full h-64 overflow-hidden rounded-lg shadow-md\">\n        <img src=\"burger2.jpg\" alt=\"\" class=\"w-full h-full object-cover\">\n      </div>\n      <h2 class=\"font-poppins font-semibold text-primary\">Burger Two</h2>\n      <div class=\"px-4 py-2\">\n        <p class=\"text-gray-700\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n        <button role=\"button\" aria-label=\"Order now\">Order Now</button>\n      </div>\n    </article>\n    <!-- More articles -->\n  </section>\n  <footer class=\"bg-gray-900 py-8 text-white relative flex items-center justify-between space-x-6\">\n    <a href=\"#\" aria-label=\"Phone\" class=\"text-lg font-semibold text-white hover:text-gray-300\">Phone: (123) 456-7890</a>\n    <a href=\"#\" aria-label=\"Email\" class=\"text-lg font-semibold text-white hover:text-gray-300\">Email: info@example.com</a>\n  </footer>\n</main>",
+          "order": 2
+        },
+        {
+          "id": "e719728d",
+          "name": "reviews",
+          "component_type": "testimonials-carousel",
+          "content": {
+            "headline": "What people say",
+            "description": "Hear from our satisfied customers"
+          },
+          "html": "<section class=\"bg-gradient-to-br from-primary to-secondary py-8\" role=\"section\">\n  <div class=\"container mx-auto px-6 lg:px-12\">\n    <h1 class=\"text-4xl font-bold leading-tight text-white mb-8\" style=\"animation: fadeInUp 0.8s ease-out both;\">What people say</h1>\n    <div class=\"carousel carousel-container\">\n      <div class=\"carousel__inner relative w-full min-h-screen h-[calc(100vh-2rem)] overflow-hidden flex items-center justify-center\">\n        <!-- TESTIMONIALS -->\n        <!-- SLIDE 1 -->\n        <div class=\"carousel__slide flex items-center text-white w-full min-h-screen lg:min-h-0 h-[calc(100vh-2rem)] overflow-hidden\">\n          <div class=\"container mx-auto px-6 lg:px-12\">\n            <div class=\"flex flex-col items-center space-y-8\">\n              <blockquote class=\"text-lg font-medium mb-6\" aria-label=\"Quote from John Doe\">\u201cLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel commodo erat.\u201d</blockquote>\n              <p class=\"font-body text-white mb-6\" aria-label=\"Author Name John Doe\">By John Doe</p>\n            </div>\n          </div>\n        </div>\n\n        <!-- SLIDE 2 -->\n        <div class=\"carousel__slide flex items-center text-white w-full min-h-screen lg:min-h-0 h-[calc(100vh-2rem)] overflow-hidden\">\n          <div class=\"container mx-auto px-6 lg:px-12\">\n            <div class=\"flex flex-col items-center space-y-8\">\n              <blockquote class=\"text-lg font-medium mb-6\" aria-label=\"Quote from Jane Smith\">\u201cLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel commodo erat.\u201d</blockquote>\n              <p class=\"font-body text-white mb-6\" aria-label=\"Author Name Jane Smith\">By Jane Smith</p>\n            </div>\n          </div>\n        </div>\n\n        <!-- SLIDE 3 -->\n        <div class=\"carousel__slide flex items-center text-white w-full min-h-screen lg:min-h-0 h-[calc(100vh-2rem)] overflow-hidden\">\n          <div class=\"container mx-auto px-6 lg:px-12\">\n            <div class=\"flex flex-col items-center space-y-8\">\n              <blockquote class=\"text-lg font-medium mb-6\" aria-label=\"Quote from Tom Johnson\">\u201cLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel commodo erat.\u201d</blockquote>\n              <p class=\"font-body text-white mb-6\" aria-label=\"Author Name Tom Johnson\">By Tom Johnson</p>\n            </div>\n          </div>\n        </div>\n      </div>\n\n      <!-- SLIDE CONTROLS -->\n      <button class=\"carousel__btn absolute top-0 left-0 z-10 w-full h-full\" aria-label=\"Carousel Prev\">Previous</button>\n      <button class=\"carousel__btn absolute top-0 right-0 z-10 w-full h-full\" aria-label=\"Carousel Next\">Next</button>\n    </div>\n  </div>\n</section>",
+          "order": 3
+        },
+        {
+          "id": "4f2f3a95",
+          "name": "cta",
+          "component_type": "cta-button",
+          "content": {
+            "text": "Order now",
+            "description": "Place an order for your favorite burger"
+          },
+          "html": "<section>\n  <h1 class=\"text-3xl font-semibold leading-tight text-primary\">Order now</h1>\n  <nav>\n    <a href=\"#\" aria-label=\"Home\">Home</a>\n    <a href=\"#\" aria-label=\"About us\">About us</a>\n    <a href=\"#\" aria-label=\"Contact us\">Contact us</a>\n  </nav>\n  <main class=\"flex flex-col items-center justify-center gap-8\">\n    <article class=\"glass-card text-white bg-transparent hover:-translate-y-2 transition-transform duration-300\">\n      <h2>Our burgers</h2>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac velit vel nibh interdum ultrices.</p>\n    </article>\n    <article class=\"glass-card text-white bg-transparent hover:-translate-y-2 transition-transform duration-300\">\n      <h2>Our fries</h2>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac velit vel nibh interdum ultrices.</p>\n    </article>\n    <article class=\"glass-card text-white bg-transparent hover:-translate-y-2 transition-transform duration-300\">\n      <h2>Our drinks</h2>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac velit vel nibh interdum ultrices.</p>\n    </article>\n  </main>\n  <footer class=\"bg-gradient-to-r from-primary to-secondary text-white py-8\">\n    <nav>\n      <a href=\"#\" aria-label=\"Phone\">Phone</a>\n      <a href=\"#\" aria-label=\"Email\">Email</a>\n    </nav>\n  </footer>\n</section>",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "Home - Hamburgers | about hamburgers",
+        "meta_description": "lets generate a website about hamburgers",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What are your hours of operation?",
+            "a": "We are open from 11am to 9pm, Monday through Sunday."
+          },
+          {
+            "q": "Do you offer vegetarian options?",
+            "a": "Yes, we have a variety of vegetarian burgers and sides available."
+          },
+          {
+            "q": "Can I customize my burger?",
+            "a": "Absolutely! You can choose from a variety of toppings and sauces to make your burger just the way you like it."
+          },
+          {
+            "q": "What kind of burgers do you serve?",
+            "a": "We offer classic beef burgers, as well as turkey, chicken, and even vegan options. Our burgers are made with fresh, high-quality ingredients."
+          },
+          {
+            "q": "Do you have any deals or promotions?",
+            "a": "Yes, we often have specials and discounts available. Check our website or sign up for our email list to stay updated on our current offers."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "about hamburgers",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Welcome to our Hamburgers restaurant, where we serve delicious burgers made with the freshest ingredients. Our menu features a variety of options, including vegetarian and customizable burgers. We also offer sides, salads, and desserts to complete your meal. Visit us today for a satisfying and enjoyable dining experience!",
+        "topic_cluster": "Hamburgers",
+        "related_topics": [
+          "Burger ingredients",
+          "Vegetarian options",
+          "Customizable burgers",
+          "Sides and salads",
+          "Desserts"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - Hamburgers</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"lets generate a website about hamburgers\">\n  <meta property=\"og:type\" content=\"website\">\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What are your hours of operation?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"We are open from 11am to 9pm, Monday through Sunday.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Do you offer vegetarian options?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, we have a variety of vegetarian burgers and sides available.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Can I customize my burger?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Absolutely! You can choose from a variety of toppings and sauces to make your burger just the way you like it.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What kind of burgers do you serve?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"We offer classic beef burgers, as well as turkey, chicken, and even vegan options. Our burgers are made with fresh, high-quality ingredients.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Do you have any deals or promotions?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, we often have specials and discounts available. Check our website or sign up for our email list to stay updated on our current offers.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<section class=\"inter_fe8b9d92-module__LINzvG__variable dm_mono_226b0351-module__zrJzjG__variable antialiased\">\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both;\">Best burgers in town</h1>\n  <p>Indulge in our juicy and flavorful burgers</p>\n  <a href=\"\" aria-label=\"Home\" class=\"btn glass-card hover:-translate-y-2 transition-transform duration-300\">Learn More</a>\n</section>\n\n<section>\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both\">Our Features</h1>\n  <div class=\"container mx-auto px-4 md:px-6 lg:px-8 xl:px-10\">\n    <article class=\"w-full mt-8 mb-12 md:mb-16 lg:mb-20 xl:mb-24\">\n      <div class=\"glass-card\">\n        <h2 style=\"background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">Fresh Ingredients</h2>\n        <p>We source only the freshest ingredients to ensure our burgers taste amazing.</p>\n      </div>\n    </article>\n    <article class=\"w-full mt-8 mb-12 md:mb-16 lg:mb-20 xl:mb-24\">\n      <div class=\"glass-card\">\n        <h2 style=\"background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 60%, #0f172a 100%)\">Customizable</h2>\n        <p>You can customize your burger to your liking with a variety of toppings and sauces.</p>\n      </div>\n    </article>\n    <article class=\"w-full mt-8 mb-12 md:mb-16 lg:mb-20 xl:mb-24\">\n      <div class=\"glass-card\">\n        <h2 style=\"background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">Sustainable</h2>\n        <p>We are committed to sustainable practices in all aspects of our business.</p>\n      </div>\n    </article>\n  </div>\n</section>\n\n<nav class=\"fixed bottom-0 left-0 right-0 bg-white shadow-md\">\n  <ul class=\"px-8 py-4 flex justify-between items-center space-x-6\">\n    <li>\n      <a href=\"#\" aria-label=\"Home\" class=\"btn btn-secondary font-semibold text-black hover:bg-gray-100\">Home</a>\n    </li>\n  </ul>\n</nav>\n<header class=\"bg-gradient-to-r from-primary to-secondary py-8 relative px-6 lg:px-24 flex items-center justify-between text-white space-x-6\">\n  <h1 class=\"font-poppins font-semibold md:text-5xl text-3xl leading-tight tracking-widest text-left\">Our menu</h1>\n  <div class=\"hidden lg:block w-full h-screen bg-white opacity-70\"></div>\n</header>\n<main class=\"container mx-auto px-6 py-8 lg:py-24 space-y-12\">\n  <section class=\"md:grid md:grid-cols-2 lg:grid-cols-3 gap-4\">\n    <article class=\"glass-card hover:-translate-y-2 transition-transform duration-300\">\n      <div class=\"w-full h-64 overflow-hidden rounded-lg shadow-md\">\n        <img src=\"burger1.jpg\" alt=\"\" class=\"w-full h-full object-cover\">\n      </div>\n      <h2 class=\"font-poppins font-semibold text-primary\">Burger One</h2>\n      <div class=\"px-4 py-2\">\n        <p class=\"text-gray-700\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n        <button role=\"button\" aria-label=\"Order now\">Order Now</button>\n      </div>\n    </article>\n    <article class=\"glass-card hover:-translate-y-2 transition-transform duration-300\">\n      <div class=\"w-full h-64 overflow-hidden rounded-lg shadow-md\">\n        <img src=\"burger2.jpg\" alt=\"\" class=\"w-full h-full object-cover\">\n      </div>\n      <h2 class=\"font-poppins font-semibold text-primary\">Burger Two</h2>\n      <div class=\"px-4 py-2\">\n        <p class=\"text-gray-700\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n        <button role=\"button\" aria-label=\"Order now\">Order Now</button>\n      </div>\n    </article>\n    <!-- More articles -->\n  </section>\n  <footer class=\"bg-gray-900 py-8 text-white relative flex items-center justify-between space-x-6\">\n    <a href=\"#\" aria-label=\"Phone\" class=\"text-lg font-semibold text-white hover:text-gray-300\">Phone: (123) 456-7890</a>\n    <a href=\"#\" aria-label=\"Email\" class=\"text-lg font-semibold text-white hover:text-gray-300\">Email: info@example.com</a>\n  </footer>\n</main>\n\n<section class=\"bg-gradient-to-br from-primary to-secondary py-8\" role=\"section\">\n  <div class=\"container mx-auto px-6 lg:px-12\">\n    <h1 class=\"text-4xl font-bold leading-tight text-white mb-8\" style=\"animation: fadeInUp 0.8s ease-out both;\">What people say</h1>\n    <div class=\"carousel carousel-container\">\n      <div class=\"carousel__inner relative w-full min-h-screen h-[calc(100vh-2rem)] overflow-hidden flex items-center justify-center\">\n        <!-- TESTIMONIALS -->\n        <!-- SLIDE 1 -->\n        <div class=\"carousel__slide flex items-center text-white w-full min-h-screen lg:min-h-0 h-[calc(100vh-2rem)] overflow-hidden\">\n          <div class=\"container mx-auto px-6 lg:px-12\">\n            <div class=\"flex flex-col items-center space-y-8\">\n              <blockquote class=\"text-lg font-medium mb-6\" aria-label=\"Quote from John Doe\">\u201cLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel commodo erat.\u201d</blockquote>\n              <p class=\"font-body text-white mb-6\" aria-label=\"Author Name John Doe\">By John Doe</p>\n            </div>\n          </div>\n        </div>\n\n        <!-- SLIDE 2 -->\n        <div class=\"carousel__slide flex items-center text-white w-full min-h-screen lg:min-h-0 h-[calc(100vh-2rem)] overflow-hidden\">\n          <div class=\"container mx-auto px-6 lg:px-12\">\n            <div class=\"flex flex-col items-center space-y-8\">\n              <blockquote class=\"text-lg font-medium mb-6\" aria-label=\"Quote from Jane Smith\">\u201cLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel commodo erat.\u201d</blockquote>\n              <p class=\"font-body text-white mb-6\" aria-label=\"Author Name Jane Smith\">By Jane Smith</p>\n            </div>\n          </div>\n        </div>\n\n        <!-- SLIDE 3 -->\n        <div class=\"carousel__slide flex items-center text-white w-full min-h-screen lg:min-h-0 h-[calc(100vh-2rem)] overflow-hidden\">\n          <div class=\"container mx-auto px-6 lg:px-12\">\n            <div class=\"flex flex-col items-center space-y-8\">\n              <blockquote class=\"text-lg font-medium mb-6\" aria-label=\"Quote from Tom Johnson\">\u201cLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel commodo erat.\u201d</blockquote>\n              <p class=\"font-body text-white mb-6\" aria-label=\"Author Name Tom Johnson\">By Tom Johnson</p>\n            </div>\n          </div>\n        </div>\n      </div>\n\n      <!-- SLIDE CONTROLS -->\n      <button class=\"carousel__btn absolute top-0 left-0 z-10 w-full h-full\" aria-label=\"Carousel Prev\">Previous</button>\n      <button class=\"carousel__btn absolute top-0 right-0 z-10 w-full h-full\" aria-label=\"Carousel Next\">Next</button>\n    </div>\n  </div>\n</section>\n\n<section>\n  <h1 class=\"text-3xl font-semibold leading-tight text-primary\">Order now</h1>\n  <nav>\n    <a href=\"#\" aria-label=\"Home\">Home</a>\n    <a href=\"#\" aria-label=\"About us\">About us</a>\n    <a href=\"#\" aria-label=\"Contact us\">Contact us</a>\n  </nav>\n  <main class=\"flex flex-col items-center justify-center gap-8\">\n    <article class=\"glass-card text-white bg-transparent hover:-translate-y-2 transition-transform duration-300\">\n      <h2>Our burgers</h2>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac velit vel nibh interdum ultrices.</p>\n    </article>\n    <article class=\"glass-card text-white bg-transparent hover:-translate-y-2 transition-transform duration-300\">\n      <h2>Our fries</h2>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac velit vel nibh interdum ultrices.</p>\n    </article>\n    <article class=\"glass-card text-white bg-transparent hover:-translate-y-2 transition-transform duration-300\">\n      <h2>Our drinks</h2>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac velit vel nibh interdum ultrices.</p>\n    </article>\n  </main>\n  <footer class=\"bg-gradient-to-r from-primary to-secondary text-white py-8\">\n    <nav>\n      <a href=\"#\" aria-label=\"Phone\">Phone</a>\n      <a href=\"#\" aria-label=\"Email\">Email</a>\n    </nav>\n  </footer>\n</section>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What are your hours of operation?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">We are open from 11am to 9pm, Monday through Sunday.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Do you offer vegetarian options?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, we have a variety of vegetarian burgers and sides available.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Can I customize my burger?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Absolutely! You can choose from a variety of toppings and sauces to make your burger just the way you like it.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What kind of burgers do you serve?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">We offer classic beef burgers, as well as turkey, chicken, and even vegan options. Our burgers are made with fresh, high-quality ingredients.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Do you have any deals or promotions?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, we often have specials and discounts available. Check our website or sign up for our email list to stay updated on our current offers.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    }
+  ],
+  "template_ids": [
+    "3c077ad4"
+  ],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/about-hamburgers",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n",
+  "sitemap_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://abouthamburgers.com/index.html</loc>\n    <priority>1.0</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>",
+  "robots_txt": "User-agent: *\nAllow: /\nSitemap: https://abouthamburgers.com/sitemap.xml\n",
+  "errors": [
+    "[index] Multiple <h1> tags found (5)",
+    "[index] Missing og:title meta tag"
+  ],
+  "metadata": {
+    "design_context": {
+      "style_name": "Soft UI Evolution",
+      "primary_color": "#2563EB",
+      "secondary_color": "#3B82F6",
+      "accent_color": "#EA580C",
+      "heading_font": "Poppins",
+      "body_font": "Open Sans"
+    },
+    "ux_scores": {
+      "index": 89
+    }
+  },
+  "sources": []
+}

@@ -282,6 +282,26 @@ class BrowserSession:
         self._log_action("browser_screenshot", {"path": str(dest)})
         return {"ok": True, "path": str(dest)}
 
+    async def get_html(self) -> str:
+        """Return the current page's full HTML. Used by WebGen clone pipeline."""
+        await self._ensure_started()
+        self._touch()
+        html = await self._page.content()
+        self._log_action("browser_get_html", {"length": len(html)})
+        return html
+
+    async def evaluate_js(self, script: str) -> Any:
+        """Run a JS expression in the page and return the JSON-serialisable result.
+
+        Restricted to read-only inspection (computed styles, document metrics).
+        Caller is responsible for keeping the script side-effect-free.
+        """
+        await self._ensure_started()
+        self._touch()
+        result = await self._page.evaluate(script)
+        self._log_action("browser_evaluate", {"script_len": len(script)})
+        return result
+
     async def upload_file(self, selector: str, file_path: str) -> dict[str, Any]:
         """Set files on a file input element."""
         await self._ensure_started()

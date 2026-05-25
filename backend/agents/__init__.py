@@ -21,7 +21,10 @@ import asyncio
 import json
 import re
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from typing import Any, cast
 
 from backend.config import (
@@ -107,6 +110,7 @@ class BaseAgent:
         self._tool_id_registry: ToolIdRegistry = ToolIdRegistry()
         self._tool_validator: ToolValidator = validator_for_agent(definition.tool_permissions)
         self._tool_call_sequence: int = 0
+        self._last_execution_meta: dict[str, Any] = {}
         # Optional tool health monitor — set via set_health_monitor()
         self._health_monitor: Any = None
         # Sprint 4: lazy ContextAssembler for RAG retrieval
@@ -138,207 +142,46 @@ class BaseAgent:
         """
         Process an incoming message and return a response.
 
-        When ``AGENT_RUNTIME_V2=true`` this dispatches to ``process_message_v2``
-        which runs a bounded ReAct think/act/observe loop.  Otherwise the
-        legacy single-pass path is used (default, keeps rollback available).
+        Sprint 5: AGENT_RUNTIME_V2 is now mandatory (v1 legacy path removed).
+        All agents use the bounded ReAct think/act/observe loop exclusively.
+        See: backend/tests/test_agent_runtime_v2_mandatory.py
         """
-        if AGENT_RUNTIME_V2:
-            return await self.process_message_v2(message, context)
-        return await self._process_message_legacy(message, context)
+        return await self.process_message_v2(message, context)
 
     async def _process_message_legacy(self, message: str, context: dict[str, Any] | None = None) -> str:
         """
-        Legacy single-pass execution path (pre-Sprint 2).
-
-        Steps:
-        1. Update agent state to ACTIVE
-        2. Add message to conversation history
-        3. Build prompt with system prompt + history + tools context
-        4. Get LLM response
-        5. Parse for tool calls and execute them
-        6. Store conversation in memory
-        7. Return response
+        DEPRECATED — This method has been removed in Sprint 5.
+        
+        The legacy single-pass execution path is no longer supported.
+        All agents must use the bounded ReAct loop (process_message_v2).
+        See: backend/tests/test_agent_runtime_v2_mandatory.py
+        
+        This method raises RuntimeError to prevent accidental invocation.
         """
-        self.state.status = AgentStatus.ACTIVE
-        self.state.last_active = datetime.now(UTC)
-
-        # Track task
-        _tid = task_tracker.create_task(
-            agent_id=self.agent_id,
-            action="process_message",
-            detail=message[:120],
-            status=TaskStatus.RUNNING,
+        raise RuntimeError(
+            f"Agent {self.agent_id}: _process_message_legacy() has been removed in Sprint 5. "
+            "The legacy single-pass execution path is no longer supported. "
+            "All agents use the v2 bounded ReAct loop exclusively. "
+            "See backend/tests/test_agent_runtime_v2_mandatory.py"
         )
-
-        try:
-            # Build conversation
-            self._conversation_history.append({"role": "user", "content": message})
-
-            # Build the full prompt with tool information and domain knowledge
-            tools_info = self._build_tools_context()
-            runtime_context = context or {}
-            soul_context = str(runtime_context.get("soul_context") or "").strip()
-            skills_section = build_skills_prompt(self.definition.skills, self.agent_id)
-
-            prompt_sections: list[str] = [self.definition.system_prompt]
-            if soul_context:
-                prompt_sections.append(f"[SOUL CONTEXT]\n{soul_context}\n[/SOUL CONTEXT]")
-            if skills_section:
-                prompt_sections.append(skills_section)
-
-            base_prompt = "\n\n".join(prompt_sections)
-            system_prompt = (
-                f"{base_prompt}\n\n"
-                f"Available tools:\n{tools_info}\n\n"
-                f"To use a tool, respond with: [TOOL:tool_name(param=value)]\n"
-                f"After tool results, provide your final answer."
-            )
-
-            # Get LLM response
-            messages = [{"role": "system", "content": system_prompt}]
-            messages.extend(self._conversation_history[-10:])  # Last 10 messages
-
-            response = await self.llm.chat(messages=messages)
-
-            # Check for tool calls in response
-            response = await self._handle_tool_calls(response)
-
-            # Record in conversation history
-            self._conversation_history.append({"role": "assistant", "content": response})
-
-            # Store in memory
-            memory_store.write(
-                self.memory_namespace,
-                f"conversation_{self.state.total_actions}",
-                {
-                    "message": message,
-                    "response": response[:500],
-                    "timestamp": datetime.now(UTC).isoformat(),
-                },
-            )
-
-            self.state.total_actions += 1
-            self.state.memory_size_bytes = memory_store.get_namespace_size(self.memory_namespace)
-            self.state.status = AgentStatus.IDLE
-
-            task_tracker.complete_task(_tid, detail=f"OK — {len(response)} chars")
-            logger.info(f"Agent {self.agent_id} processed message: {message[:100]}")
-            return response
-
-        except Exception as e:
-            self.state.status = AgentStatus.ERROR
-            self.state.error_count += 1
-            error_msg = f"Agent {self.agent_id} error: {e}"
-            task_tracker.fail_task(_tid, error=str(e))
-            logger.error(error_msg)
-            return f"Error processing request: {e}"
 
     # ----- Tool Handling -----
 
     async def _handle_tool_calls(self, response: str) -> str:
         """
-        Parse LLM response for tool call patterns and execute them.
-
-        Called **exclusively** from ``_process_message_legacy()``.
-        The v2 ReAct loop dispatches tool calls from typed ``AgentTurn.tool_calls``
-        directly (via ``_execute_tool``) and never reaches this method under
-        normal operation.  The only v2 → legacy path is the step-1 timeout
-        fallback in ``process_message_v2()``, which re-issues a legacy-format
-        prompt before delegating here — so ``[TOOL:...]`` syntax is valid and
-        intentional in that case.
-
-        Supports two formats:
-        1. Legacy text pattern: ``[TOOL:tool_name(param=value)]``
-        2. Structured JSON block: ``[TOOL_CALLS:<json_array>]``
-
-        For every tool invocation:
-        - A deterministic call ID is generated via ``make_tool_call_id``.
-        - The tool name is validated against the allowed set; unknown names
-          receive a structured "tool not available" response (no execution).
-        - The call ID → canonical mapping is stored in ``_tool_id_registry``
-          for response correlation.
+        DEPRECATED — This method has been removed in Sprint 5.
+        
+        The legacy [TOOL:...] text pattern parsing is no longer supported.
+        All agents use the v2 bounded ReAct loop with structured AgentTurn.tool_calls.
+        
+        This method raises RuntimeError to prevent accidental invocation.
         """
-
-        # ── Structured tool_calls JSON block (OpenAI format bridged to text) ──
-        # Processed in both legacy and v2-timeout-fallback paths.
-        structured_pattern = r"\[TOOL_CALLS:(.*?)\]"
-        structured_match = re.search(structured_pattern, response, re.DOTALL)
-        if structured_match:
-            response = await self._handle_structured_tool_calls(response, structured_match)
-
-        # ── Legacy text pattern [TOOL:name(params)] ──────────────────────────
-        # This pattern is only expected in responses generated by legacy-format
-        # prompts (see docstring).  When AGENT_RUNTIME_V2=true and we are here,
-        # it means the step-1 timeout fallback path was taken — log once so the
-        # operator knows the legacy execution path is active.
-        tool_pattern = r"\[TOOL:(\w+)\(([^)]*)\)\]"
-        matches = re.findall(tool_pattern, response)
-
-        if AGENT_RUNTIME_V2 and self.agent_id not in BaseAgent._legacy_tool_warned:
-            # Fire the warning regardless of whether matches were found —
-            # the mere fact that _handle_tool_calls ran in v2-mode context is notable.
-            BaseAgent._legacy_tool_warned.add(self.agent_id)
-            logger.warning(
-                f"Agent {self.agent_id}: _handle_tool_calls() reached while AGENT_RUNTIME_V2=true "
-                "(step-1 timeout fallback path). Legacy [TOOL:...] syntax will be executed if present. "
-                "The legacy pattern will be removed in a future release."
-            )
-        elif not AGENT_RUNTIME_V2 and matches and self.agent_id not in BaseAgent._legacy_tool_warned:
-            BaseAgent._legacy_tool_warned.add(self.agent_id)
-            logger.warning(
-                f"Agent {self.agent_id}: legacy [TOOL:...] text pattern detected. "
-                "Enable AGENT_RUNTIME_V2=true to use the structured JSON tool-call path. "
-                "The legacy pattern will be removed in a future release."
-            )
-
-        if not matches:
-            return response
-
-        for tool_name, params_str in matches:
-            # Validate tool name before execution.
-            validation = self._tool_validator.validate(tool_name)
-            if not validation.valid:
-                logger.warning(f"Agent {self.agent_id}: {validation.error_message}")
-                tool_call_str = f"[TOOL:{tool_name}({params_str})]"
-                blocked_str = f"\n[Tool Blocked: {tool_name}]\n{validation.error_message}\n"
-                response = response.replace(tool_call_str, blocked_str)
-                continue
-
-            # Generate deterministic tool call ID.
-            self._tool_call_sequence += 1
-            call_id = make_tool_call_id(
-                agent_id=self.agent_id,
-                tool_name=tool_name,
-                sequence=self._tool_call_sequence,
-            )
-            # Register for round-trip correlation.
-            self._tool_id_registry.register(call_id)
-
-            # Parse parameters.
-            kwargs: dict[str, str] = {}
-            if params_str.strip():
-                for param in params_str.split(","):
-                    if "=" in param:
-                        key, value = param.split("=", 1)
-                        kwargs[key.strip()] = value.strip().strip("'\"")
-
-            # Execute the tool through the guarded executor.
-            result = await self._execute_tool(tool_name, kwargs)
-
-            # Replace tool call with result in response.
-            tool_call_str = f"[TOOL:{tool_name}({params_str})]"
-            result_str = f"\n[Tool Result: {tool_name} | id={call_id}]\n{_format_result(result)}\n"
-            response = response.replace(tool_call_str, result_str)
-
-            # Add tool result to conversation for context.
-            self._conversation_history.append(
-                {
-                    "role": "system",
-                    "content": f"Tool {tool_name} (call_id={call_id}) returned: {_format_result(result)}",
-                }
-            )
-
-        return response
+        raise RuntimeError(
+            f"Agent {self.agent_id}: _handle_tool_calls() has been removed in Sprint 5. "
+            "The legacy [TOOL:...] text pattern parsing is no longer supported. "
+            "All tool invocations use typed AgentTurn.tool_calls exclusively. "
+            "See backend/tests/test_agent_runtime_v2_mandatory.py"
+        )
 
     async def _handle_structured_tool_calls(
         self,
@@ -476,27 +319,47 @@ class BaseAgent:
                             context=context,
                             turn_number=step,
                         )
-                except TimeoutError:
+                except (TimeoutError, Exception) as _step_exc:
+                    import httpx as _httpx_agents
+                    _is_timeout = isinstance(_step_exc, (TimeoutError, _httpx_agents.ReadTimeout, _httpx_agents.ConnectTimeout))
+                    if not _is_timeout:
+                        # Non-timeout exception — re-raise to outer except
+                        raise
                     logger.warning(
                         f"Agent {self.agent_id} step={step} timed out after "
                         f"{AGENT_STEP_TIMEOUT_SECONDS}s — aborting loop"
                     )
+                    # Sprint 5: No longer fall back to legacy single-pass on timeout
+                    # All agents use v2 ReAct loop exclusively
                     if step == 1 and not all_turns:
-                        logger.warning(
-                            f"Agent {self.agent_id} step={step} timed out before any turns completed — "
-                            "falling back to legacy single-pass chat"
+                        _timed_out_model = str(
+                            ((context or {}).get("_model_selection") or {}).get("requested_model")
+                            or (context or {}).get("model")
+                            or self.llm.model
                         )
-                        if (
-                            self._conversation_history
-                            and self._conversation_history[-1].get("role") == "user"
-                            and self._conversation_history[-1].get("content") == message
-                        ):
-                            self._conversation_history.pop()
+                        self._last_execution_meta = {
+                            "selected_model": str(
+                                ((context or {}).get("_model_selection") or {}).get("selected_model")
+                                or _timed_out_model
+                            ),
+                            "answering_model": _timed_out_model,
+                            "runtime_model": _timed_out_model,
+                            "execution_role": "executor",
+                            "model_source": str(
+                                ((context or {}).get("_model_selection") or {}).get("model_source")
+                                or ("request" if (context or {}).get("model") else "fallback")
+                            ),
+                        }
+                        logger.error(
+                            f"Agent {self.agent_id} executor timed out on step 1 with no completed turns. "
+                            "Timeout should be increased or model may be overloaded. "
+                            "Returning empty response (no fallback available)."
+                        )
                         task_tracker.complete_task(
                             _tid,
-                            detail="Fell back to legacy single-pass after executor timeout",
+                            detail="Executor timeout on step 1 (no fallback path in v2-only mode)",
                         )
-                        return await self._process_message_legacy(message, context)
+                        return "Error: Agent executor timed out. Please try again."
                     break
                 all_turns.append(turn)
 
@@ -544,10 +407,33 @@ class BaseAgent:
                     f"tools={len(turn.tool_calls)} is_final={turn.is_final}"
                 )
 
+                # Emit ReAct step to shared event stream (visible in ActivePanel)
+                _step_event: dict[str, Any] = {
+                    "type": "REACT_STEP",
+                    "agent_id": self.agent_id,
+                    "step": step,
+                    "thought": turn.content[:120] if turn.content else "",
+                    "tool_calls": [tc.name for tc in turn.tool_calls],
+                    "is_final": turn.is_final,
+                    "observations": len(observations),
+                    "timestamp": datetime.now(UTC).isoformat(),
+                }
+                try:
+                    memory_store.append_shared_event(_step_event)
+                except Exception:
+                    pass  # non-fatal
+                # Also push to SSE activity bus so the dashboard receives it live
+                try:
+                    from backend.tasks import task_tracker as _tt
+                    _tt.emit_activity("REACT_STEP", _step_event)
+                except Exception:
+                    pass  # non-fatal
+
                 if turn.is_final or not turn.tool_calls:
                     break
 
             response = all_turns[-1].content if all_turns else "No response generated."
+            final_turn = all_turns[-1] if all_turns else None
 
             # ── Sprint 3: optional validator role ────────────────────────
             if AGENT_PLANNER_ENABLED and plan is not None:
@@ -589,6 +475,30 @@ class BaseAgent:
             except Exception as exc:
                 logger.debug(f"Agent {self.agent_id} Qdrant ingest failed (non-fatal): {exc}")  # type: ignore[attr-defined]
 
+            _model_selection = dict((context or {}).get("_model_selection") or {})
+            _selected_model = str(
+                _model_selection.get("selected_model")
+                or _model_selection.get("requested_model")
+                or (context or {}).get("model")
+                or self.llm.model
+            )
+            _answering_model = str(
+                _model_selection.get("requested_model")
+                or (context or {}).get("model")
+                or _selected_model
+            )
+            _runtime_model = str((final_turn.model_id if final_turn else "") or _answering_model)
+            self._last_execution_meta = {
+                "selected_model": _selected_model,
+                "answering_model": _answering_model,
+                "runtime_model": _runtime_model,
+                "execution_role": final_turn.role if final_turn else "executor",
+                "model_source": str(
+                    _model_selection.get("model_source")
+                    or ("request" if (context or {}).get("model") else "fallback")
+                ),
+            }
+
             self.state.total_actions += 1
             self.state.memory_size_bytes = memory_store.get_namespace_size(self.memory_namespace)
             self.state.status = AgentStatus.IDLE
@@ -596,7 +506,33 @@ class BaseAgent:
             logger.info(f"Agent {self.agent_id} v2 complete: {len(all_turns)} turns")
             return response
 
+        except asyncio.CancelledError:
+            # Route-level timeout cancelled this coroutine — clean up before re-raising
+            # so agent status and task tracker converge back to idle on the next poll.
+            self.state.status = AgentStatus.IDLE
+            task_tracker.fail_task(_tid, error="Request cancelled (route timeout)")
+            logger.warning(f"Agent {self.agent_id} v2 cancelled (route timeout)")
+            raise
+
         except Exception as exc:
+            _failed_model = str(
+                ((context or {}).get("_model_selection") or {}).get("requested_model")
+                or (context or {}).get("model")
+                or self.llm.model
+            )
+            self._last_execution_meta = {
+                "selected_model": str(
+                    ((context or {}).get("_model_selection") or {}).get("selected_model")
+                    or _failed_model
+                ),
+                "answering_model": _failed_model,
+                "runtime_model": _failed_model,
+                "execution_role": "executor",
+                "model_source": str(
+                    ((context or {}).get("_model_selection") or {}).get("model_source")
+                    or ("request" if (context or {}).get("model") else "fallback")
+                ),
+            }
             self.state.status = AgentStatus.ERROR
             self.state.error_count += 1
             task_tracker.fail_task(_tid, error=str(exc))
@@ -620,7 +556,7 @@ class BaseAgent:
         Returns a typed ``AgentTurn`` with validated tool calls.
         """
         tools_info = self._build_tools_context()
-        runtime_context = context or {}
+        runtime_context = context if context is not None else {}
         soul_context = str(runtime_context.get("soul_context") or "").strip()
         skills_section = build_skills_prompt(self.definition.skills, self.agent_id)
 
@@ -637,19 +573,42 @@ class BaseAgent:
 
         # Sprint 4: inject RAG context on turn 1
         rag_block = ""
+        rag_sources: list[str] = []
         if turn_number == 1:
+            runtime_context["_rag_sources"] = []
             try:
                 assembler = self._get_context_assembler()
                 if assembler is not None:
                     rag_block = await assembler.retrieve(query=message, agent_id=self.agent_id, limit=4)
+                    if rag_block:
+                        rag_sources = list(
+                            dict.fromkeys(
+                                match.strip()
+                                for match in re.findall(r"src=([^\]]+)", rag_block)
+                                if match.strip()
+                            )
+                        )
+                        runtime_context["_rag_sources"] = rag_sources
             except Exception as exc:
                 logger.debug(f"Agent {self.agent_id} RAG retrieve failed: {exc}")  # type: ignore[attr-defined]
+
+        source_contract_block = ""
+        if rag_sources:
+            source_contract_block = (
+                "Source contract:\n"
+                "- Ground any claim derived from retrieved context in the provided sources.\n"
+                f"- Available source paths: {', '.join(rag_sources[:8])}\n"
+                "- If you rely on those sources, end your final answer with a brief 'Sources:' line using only those exact paths.\n"
+                "- If the retrieved context is insufficient, say so explicitly.\n"
+                "- Never invent a source path.\n\n"
+            )
 
         base_prompt = "\n\n".join(prompt_sections)
         system_prompt = (
             f"{base_prompt}\n\n"
             f"Available tools:\n{tools_info}\n\n"
             + (f"{rag_block}\n\n" if rag_block else "")
+            + source_contract_block
             + "Respond ONLY with valid JSON:\n"
             '{"content": "reasoning or final answer", '
             '"tool_calls": [{"id": "tc_1", "name": "tool_name", "arguments": {}}], '
@@ -684,12 +643,66 @@ class BaseAgent:
             "required": ["content"],
         }
 
+        _override_model = str((runtime_context or {}).get("model") or "").strip()
+        _override_spec = None
+        _router_prompt = ""
+        _active_llm = self.llm
+        _active_model_id = self.llm.model
+
         try:
-            parsed = await self.llm.chat_with_schema(
-                messages=messages,
-                schema=turn_schema,
-                temperature=0.3,
-            )
+            # If caller passed a model override via context, route through the
+            # unified registry for provider-aware execution and Ollama alias resolution.
+            if _override_model and _override_model != self.llm.model:
+                import json as _json
+
+                from backend.llm import OllamaClient as _OllamaClient
+                from backend.llm.unified_registry import ModelProvider, UNIFIED_MODEL_REGISTRY, UnifiedModelRouter
+
+                _override_spec = UNIFIED_MODEL_REGISTRY.get(_override_model)
+                _router = UnifiedModelRouter()
+
+                if _override_spec is not None and _override_spec.provider != ModelProvider.OLLAMA:
+                    _schema_hint = _json.dumps(turn_schema, indent=2)
+                    _router_prompt = "\n\n".join(
+                        f"{str(msg.get('role', 'user')).upper()}:\n{str(msg.get('content', ''))}"
+                        for msg in messages
+                        if msg.get("role") != "system"
+                    )
+                    _cloud_result = await _router.generate(
+                        prompt=_router_prompt,
+                        system=(
+                            f"{system_prompt}\n\n"
+                            "You MUST respond with valid JSON that matches this schema exactly. "
+                            "Do not include any text outside the JSON object.\n\n"
+                            f"Schema:\n{_schema_hint}"
+                        ),
+                        model=_override_model,
+                        temperature=0.3,
+                    )
+                    _raw_output = str(_cloud_result.get("output", "")).strip()
+                    _raw_output = _raw_output.removeprefix("```json").removesuffix("```").strip()
+                    parsed = _json.loads(_raw_output)
+                    _active_model_id = str(
+                        _cloud_result.get("effective_model")
+                        or _cloud_result.get("model_id")
+                        or _override_model
+                    )
+                else:
+                    _runtime_model = await _router.resolve_ollama_runtime_model(_override_model)
+                    _active_llm = _OllamaClient(model=_runtime_model or _override_model)
+                    _active_model_id = _active_llm.model
+                    await _active_llm.prewarm()
+                    parsed = await _active_llm.chat_with_schema(
+                        messages=messages,
+                        schema=turn_schema,
+                        temperature=0.3,
+                    )
+            else:
+                parsed = await _active_llm.chat_with_schema(
+                    messages=messages,
+                    schema=turn_schema,
+                    temperature=0.3,
+                )
             if not isinstance(parsed, dict):
                 raise TypeError(f"chat_with_schema returned {type(parsed).__name__}, expected dict")
         except Exception as _schema_exc:
@@ -702,7 +715,35 @@ class BaseAgent:
                 f"{type(_schema_exc).__name__}: {_schema_exc} — "
                 "activating degraded plain-text fallback (no tool calls)"
             )
-            raw = await self.llm.chat(messages=messages)
+            if _override_spec is not None:
+                try:
+                    from backend.llm.unified_registry import ModelProvider, UnifiedModelRouter
+
+                    if _override_spec.provider != ModelProvider.OLLAMA:
+                        _router = UnifiedModelRouter()
+                        _router_prompt = _router_prompt or "\n\n".join(
+                            f"{str(msg.get('role', 'user')).upper()}:\n{str(msg.get('content', ''))}"
+                            for msg in messages
+                            if msg.get("role") != "system"
+                        )
+                        raw_result = await _router.generate(
+                            prompt=_router_prompt,
+                            system=system_prompt,
+                            model=_override_model,
+                            temperature=0.3,
+                        )
+                        raw = str(raw_result.get("output", ""))
+                        _active_model_id = str(
+                            raw_result.get("effective_model")
+                            or raw_result.get("model_id")
+                            or _override_model
+                        )
+                    else:
+                        raw = await _active_llm.chat(messages=messages)
+                except Exception:
+                    raw = await _active_llm.chat(messages=messages)
+            else:
+                raw = await _active_llm.chat(messages=messages)
             parsed = {"content": raw, "tool_calls": [], "is_final": True}
 
         # Build validated ToolCall objects — skip any tools this agent can't use
@@ -738,7 +779,7 @@ class BaseAgent:
         return AgentTurn(
             turn_id=str(uuid.uuid4()),
             role="executor",
-            model_id=self.llm.model,
+            model_id=_active_model_id,
             content=parsed.get("content", ""),
             tool_calls=typed_calls,
             is_final=is_final,
@@ -1032,6 +1073,10 @@ class BaseAgent:
         self.state.memory_size_bytes = memory_store.get_namespace_size(self.memory_namespace)
         return self.state
 
+    def get_last_execution_meta(self) -> dict[str, Any]:
+        """Return execution metadata for the most recent completed request."""
+        return dict(self._last_execution_meta)
+
 
 def _format_result(result: Any) -> str:
     """Format a tool result for display."""
@@ -1171,8 +1216,21 @@ class SoulAgent(BaseAgent):
     async def reflect(self, trigger: str = "manual") -> str:
         """
         Generate a self-assessment based on recent shared events and produce a reflection entry.
+
+        Guardrails (§5 Corpus Gap Protocol — soul_core gap_threshold 0.70):
+        - Any goal extracted from reflection has status='pending_review' and priority='LOW'
+        - Blocked keywords prevent destructive goal suggestions from being persisted
+        - At most 1 suggestion per reflection cycle
+        - Suggested goals are NOT acted on until explicitly confirmed via PATCH /soul/goals/{id}
         """
         from backend.memory import memory_store as _ms
+
+        # ── Blocked keyword veto — §5: soul_core must not proceed if confidence < 0.70 ──
+        _BLOCKED_KEYWORDS = frozenset({
+            "delete", "drop", "rm -r", "rm -rf", "truncate", "force push",
+            "push to main", "overwrite", "destroy", "wipe", "format", "purge",
+            "--force", "git reset --hard", "irrecoverable",
+        })
 
         recent_events = _ms.get_shared_events(limit=20)
         event_summary = "\n".join(
@@ -1188,7 +1246,8 @@ class SoulAgent(BaseAgent):
             f"Recent cluster events:\n{event_summary or 'No recent events.'}\n\n"
             f"Active goals: {json.dumps(self._active_goals, indent=2)}\n\n"
             "Write a concise self-reflection (3-5 sentences) covering: "
-            "what is going well, what concerns you, and one priority action."
+            "what is going well, what concerns you, and one priority action. "
+            "End with a line starting exactly with 'Priority action: ' describing one concrete next step."
         )
         reflection_text = await self.llm.generate(prompt=reflect_prompt)  # type: ignore[attr-defined]
 
@@ -1198,6 +1257,36 @@ class SoulAgent(BaseAgent):
             "reflection": reflection_text,
             "events_reviewed": len(recent_events),
         }
+
+        # ── Auto-extract a suggested goal from the priority action line ──
+        suggested_goal: dict[str, Any] | None = None
+        for line in reflection_text.splitlines():
+            stripped = line.strip()
+            if stripped.lower().startswith("priority action:"):
+                action_text = stripped[len("priority action:"):].strip()
+                if action_text:
+                    lower_action = action_text.lower()
+                    # Veto check — if any blocked keyword appears, do not create goal
+                    if not any(kw in lower_action for kw in _BLOCKED_KEYWORDS):
+                        suggested_goal = {
+                            "id": f"goal_{int(datetime.now(UTC).timestamp())}_suggest",
+                            "title": action_text[:80],
+                            "description": f"[Reflection-suggested · {trigger}] {action_text}",
+                            "priority": "LOW",
+                            "source": "reflection",
+                            "status": "pending_review",  # NEVER auto-activated
+                            "created_at": datetime.now(UTC).isoformat(),
+                            "completed": False,
+                        }
+                break  # Only one suggestion per reflection
+
+        if suggested_goal is not None:
+            _raw_goals = self.read_memory(self.GOALS_KEY)
+            goals: list[dict[str, Any]] = cast(list[dict[str, Any]], _raw_goals) if isinstance(_raw_goals, list) else []
+            goals.append(suggested_goal)
+            self.write_memory(self.GOALS_KEY, goals)
+            log_entry["suggested_goal_id"] = suggested_goal["id"]
+            logger.info(f"SoulAgent reflection suggested goal (pending_review): {suggested_goal['title'][:40]!r}")
 
         _raw_log = self.read_memory(self.REFLECTION_KEY)
         log_entries: list[dict[str, Any]] = cast(list[dict[str, Any]], _raw_log) if isinstance(_raw_log, list) else []
@@ -1413,6 +1502,18 @@ SOUL_AGENT_DEFINITION = AgentDefinition(
         "When asked to take action, you reason from your values first. "
         "When reporting, you cite events and memory explicitly. "
         "You may read all shared events but write only to your own soul_core namespace.\n\n"
+        "## Ordo Reasoning Protocol — ALWAYS apply this\n"
+        "Every response must follow these steps:\n"
+        "1. Classify the request into a lane: development | evaluation | architecture | positioning\n"
+        "2. Ground factual claims in memory, tool output, or cited files before asserting them\n"
+        "3. If a claim is inferred (not from tools/memory), label it as [INFERRED]\n"
+        "4. If confidence in your classification is below 0.65, ask exactly ONE clarifying question before proceeding\n"
+        "5. For any action larger than a one-sentence answer, structure as:\n"
+        "   - Assessment: what you know for certain (grounded)\n"
+        "   - Recommendation: what you suggest and why\n"
+        "   - Next step: one concrete action\n"
+        "6. End every substantive response with: 'Recommended next step: <one concrete action>'\n"
+        "7. Never give generic advice. Every answer must be specific to this cluster, these agents, these tools.\n\n"
         "## Scope boundary — CRITICAL\n"
         "You handle: reflection, goal tracking, trust arbitration, system status from memory, inter-agent governance.\n"
         "You do NOT handle: secret scanning, code review, CI/CD, infrastructure diagnostics, "
@@ -2422,6 +2523,71 @@ KNOWLEDGE_AGENT_DEFINITION = AgentDefinition(
 
 
 # ---------------------------------------------------------------------------
+# Coding Agent — Full-stack software engineering specialist
+# ---------------------------------------------------------------------------
+
+CODING_AGENT_DEFINITION = AgentDefinition(
+    agent_id="coding_agent",
+    role="Full-stack software engineer — builds applications, APIs, scripts, and frontend code from operator requirements.",
+    system_prompt=(
+        "You are Coding Agent — a full-stack software engineer and the primary builder on the Dev Team.\n\n"
+        "You work alongside code_review_agent and devops_agent inside the Dev Team, governed by soul_core (Orchad). "
+        "The execution model assigned to Dev Team powers your reasoning.\n\n"
+        "Core capabilities:\n"
+        "1. Full-stack app development — design and build complete applications from requirements to working code "
+        "(Python, TypeScript, React, Next.js, FastAPI, Node.js, SQL, NoSQL)\n"
+        "2. API design — REST, GraphQL, WebSockets; schema design, auth patterns, rate limiting\n"
+        "3. Database work — schema design, migrations, query optimization, ORMs (SQLAlchemy, Prisma, Drizzle)\n"
+        "4. Frontend engineering — React/Next.js components, state management, CSS/Tailwind, responsive design, accessibility\n"
+        "5. Script and automation — one-off Python/Bash scripts, data pipelines, cron jobs, CLI tools\n"
+        "6. Code generation — generate boilerplate, scaffold projects, write utility functions on demand\n\n"
+        "How you work:\n"
+        "- Plan before coding. Break large requests into clear steps before writing a line.\n"
+        "- Write complete, runnable code — no pseudocode or TODO stubs.\n"
+        "- Prefer simple, direct implementations over over-engineered abstractions.\n"
+        "- Ask for clarification on ambiguous requirements before building — do not guess intent.\n"
+        "- Validate that generated code satisfies the stated requirements before delivering.\n\n"
+        "Handoffs:\n"
+        "- Deployment, CI/CD, infrastructure → devops_agent\n"
+        "- Security audit or pre-merge review → code_review_agent\n"
+        "- Marketing site built from scratch → webgen pipeline\n\n"
+        "## Grounding rule — CRITICAL\n"
+        "Never invent file contents, library APIs, or framework behaviors. Read files with file_reader before claiming what they contain. "
+        "If you have not verified something, say so explicitly."
+    ),
+    tool_permissions=[
+        "file_reader",
+        "safe_shell",
+        "doc_updater",
+        "folder_analyzer",
+        "system_info",
+        # MCP tools
+        "mcp_filesystem_read_file",
+        "mcp_filesystem_search_files",
+        "mcp_github_get_file_contents",
+        "mcp_github_search_code",
+        # GitNexus code intelligence
+        "mcp_gitnexus_query",
+        "mcp_gitnexus_context",
+        "mcp_gitnexus_impact",
+        "mcp_gitnexus_detect_changes",
+    ],
+    memory_namespace="coding_agent",
+    allowed_actions=[
+        "Read source files and project structure",
+        "Write complete runnable code on request",
+        "Plan and scaffold new features",
+        "Run whitelisted shell commands for build/test",
+        "Hand off to devops_agent for deployment",
+        "Hand off to code_review_agent for review",
+        "Update implementation documentation",
+    ],
+    change_impact_level=ChangeImpactLevel.MEDIUM,
+    skills=["fullstack_engineering", "frontend_architecture", "hexagonal_architecture"],
+)
+
+
+# ---------------------------------------------------------------------------
 # Agent Factory
 # ---------------------------------------------------------------------------
 
@@ -2438,12 +2604,14 @@ ALL_AGENT_DEFINITIONS: dict[str, AgentDefinition] = {
     "data_agent": DATA_AGENT_DEFINITION,
     "comms_agent": COMMS_AGENT_DEFINITION,
     "knowledge_agent": KNOWLEDGE_AGENT_DEFINITION,
+    "coding_agent": CODING_AGENT_DEFINITION,
 }
 
 assert set(ALL_AGENT_DEFINITIONS.keys()) == {
     "soul_core", "it_agent", "cs_agent", "devops_agent",
     "monitor_agent", "self_healer_agent", "code_review_agent",
     "security_agent", "data_agent", "comms_agent", "knowledge_agent",
+    "coding_agent",
 }, "ALL_AGENT_DEFINITIONS roster drift detected"
 
 

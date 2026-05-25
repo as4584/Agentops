@@ -6,7 +6,10 @@ Coordinates all agents from brief → deployed site.
 
 from __future__ import annotations
 
-from datetime import UTC
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from pathlib import Path
 from typing import Any
 
@@ -23,7 +26,7 @@ from backend.webgen.agents.site_planner import SitePlannerAgent
 from backend.webgen.agents.template_learner import TemplateLearnerAgent
 from backend.webgen.agents.ux_scorer import passes_quality_gate, score_html
 from backend.webgen.models import ClientBrief, SiteProject, SiteStatus
-from backend.webgen.site_store import SiteStore
+from backend.webgen.site_store import SiteStore, WebgenRunStore
 from backend.webgen.template_store import TemplateStore
 from sandbox.session_manager import SandboxSession
 
@@ -161,6 +164,60 @@ class WebGenPipeline:
         """Learn a template from raw HTML content."""
         return await self.template_learner.learn_from_html(html, source_name, business_type, name)
 
+    async def clone_url(self, url: str, business_name: str = "") -> dict[str, Any]:
+        """Clone a public URL: capture HTML, screenshot, and design tokens.
+
+        Uses the headless BrowserSession (Playwright) to render the page, then
+        runs a small JS expression to extract dominant colors and fonts from
+        ``getComputedStyle`` on top-level elements. Returns a dict with keys:
+        ``html``, ``screenshot_path``, ``tokens``, ``title``, ``final_url``.
+        """
+        from backend.browser.session import BrowserSession
+
+        session = BrowserSession(agent_id="webgen_cloner")
+        try:
+            await session.start()
+            nav = await session.navigate(url)
+            html = await session.get_html()
+            shot = await session.screenshot(
+                relative_path=f"clone_{business_name or 'site'}_{int(__import__('time').time())}.png"
+            )
+            tokens_js = (
+                "(() => {\n"
+                "  const root = getComputedStyle(document.documentElement);\n"
+                "  const body = getComputedStyle(document.body);\n"
+                "  const h1 = document.querySelector('h1');\n"
+                "  const h1Style = h1 ? getComputedStyle(h1) : null;\n"
+                "  const btn = document.querySelector('button, .btn, a.button, [class*=button]');\n"
+                "  const btnStyle = btn ? getComputedStyle(btn) : null;\n"
+                "  return {\n"
+                "    bg: body.backgroundColor,\n"
+                "    fg: body.color,\n"
+                "    bodyFont: body.fontFamily,\n"
+                "    headingFont: h1Style ? h1Style.fontFamily : body.fontFamily,\n"
+                "    accent: btnStyle ? btnStyle.backgroundColor : root.getPropertyValue('--accent') || '',\n"
+                "    title: document.title,\n"
+                "  };\n"
+                "})()"
+            )
+            try:
+                tokens = await session.evaluate_js(tokens_js)
+            except Exception as exc:  # pragma: no cover — best-effort extraction
+                logger.warning(f"[WebGenPipeline.clone_url] token extraction failed: {exc}")
+                tokens = {}
+            logger.info(
+                f"[WebGenPipeline] Cloned {url} → {len(html)} bytes, screenshot={shot.get('path')}"
+            )
+            return {
+                "html": html,
+                "screenshot_path": shot.get("path"),
+                "tokens": tokens or {},
+                "title": nav.get("title", ""),
+                "final_url": nav.get("url", url),
+            }
+        finally:
+            await session.close()
+
     # ── Project lifecycle ────────────────────────────────
 
     def create(self, brief: ClientBrief, base_url: str = "") -> SiteProject:
@@ -214,7 +271,11 @@ class WebGenPipeline:
         if SANDBOX_ENFORCEMENT_ENABLED and self._is_local_llm():
             released, path = self._release_via_sandbox(project, files, quality_checks)
             if released:
-                project.advance(SiteStatus.READY)
+                # Use direct assignment — project may be in any terminal state (GENERATED,
+                # QA_PASS, etc.) depending on which phases ran, so advance() would reject
+                # transitions that skip intermediate states.
+                project.status = SiteStatus.READY
+                project.updated_at = datetime.now(UTC).isoformat()
                 self.site_store.save(project)
                 logger.info(f"[WebGenPipeline] Exported via sandbox release: {path}")
             return path
@@ -322,13 +383,77 @@ class WebGenPipeline:
         base_url: str = "",
         export: bool = True,
         quality_checks: dict[str, bool] | None = None,
+        run_id: str | None = None,
+        run_store: WebgenRunStore | None = None,
     ) -> SiteProject:
         """
         Run the full pipeline from brief to exported site.
 
         This is the main entry point for automated site generation.
+        Phase order: clone_recon → clone_learn → planning → seo → aeo → qa → build → export
         """
         logger.info(f"[WebGenPipeline] Starting full pipeline for: {brief.business_name}")
+
+        # Determine total steps (with or without clone phases)
+        _has_clone = bool(brief.clone_url)
+        _total = 8 if _has_clone else 6
+
+        # Helper: emit progress SSE and update persisted run state
+        def _emit(phase: str, step: int, detail: str = "") -> None:
+            try:
+                from datetime import datetime as _dt
+                from backend.tasks import task_tracker as _tt
+                _now = _dt.now(UTC).isoformat()
+                _tt.emit_activity("WEBGEN_PROGRESS", {
+                    "phase": phase,
+                    "business_name": brief.business_name,
+                    "step": step,
+                    "total": _total,
+                    "detail": detail,
+                    "run_id": run_id or "",
+                    "timestamp": _now,
+                })
+                if run_id and run_store:
+                    _run = run_store.load(run_id)
+                    if _run:
+                        _run.current_phase = phase
+                        _run.step = step
+                        _run.total = _total
+                        _run.last_event_at = _now
+                        run_store.save(_run)
+            except Exception as _exc:
+                logger.debug(f"[WebGenPipeline] _emit({phase}) failed (non-fatal): {_exc}")
+
+        # ── Optional URL clone phase — runs before planning when brief.clone_url set ──
+        if brief.clone_url:
+            _emit("clone_recon", 1, f"Cloning {brief.clone_url}")
+            try:
+                clone_data = await self.clone_url(brief.clone_url, brief.business_name)
+                brief.cloned_html = clone_data.get("html")
+                brief.cloned_screenshot = clone_data.get("screenshot_path")
+                brief.cloned_tokens = clone_data.get("tokens") or {}
+                if not brief.business_name and clone_data.get("title"):
+                    brief.business_name = str(clone_data["title"])[:60].strip() or "Cloned Site"
+                # Apply cloned tokens to brief.colors so the design advisor sees them
+                t = brief.cloned_tokens
+                if isinstance(t, dict):
+                    if t.get("accent"):
+                        brief.colors.setdefault("primary", str(t["accent"]))
+                    if t.get("bg"):
+                        brief.colors.setdefault("background", str(t["bg"]))
+                _emit("clone_learn", 2, "Learning template from cloned HTML")
+                if brief.cloned_html:
+                    try:
+                        await self.learn_html(
+                            brief.cloned_html,
+                            source_name=brief.clone_url,
+                            business_type=brief.business_type.value,
+                            name=brief.business_name or "Cloned Site",
+                        )
+                    except Exception as exc:
+                        logger.warning(f"[WebGenPipeline] learn_html on clone failed: {exc}")
+            except Exception as exc:
+                logger.warning(f"[WebGenPipeline] clone_url failed for {brief.clone_url}: {exc}")
 
         # Get design context from UI/UX CSVs (no LLM calls)
         design_ctx = self.design_advisor.advise(brief)
@@ -347,12 +472,61 @@ class WebGenPipeline:
         self.planner.design_ctx = design_ctx  # type: ignore[assignment]
         self.generator.design_ctx = design_ctx  # type: ignore[assignment]
 
-        # Plan → Generate → SEO → AEO → QA
+        # ── Phase order: Plan → SEO strategy → AEO strategy → QA precheck → Build → Export ──
+        # Steps 1–6 (no clone) or 3–8 (with clone)
+        _plan_step = 3 if _has_clone else 1
+        _emit("planning", _plan_step, "Generating site structure")
         project = await self.plan(project)
-        project = await self.generate(project)
-        project = await self.seo(project)
-        project = await self.aeo(project)
-        project = await self.qa(project)
+
+        _emit("seo", _plan_step + 1, f"Building SEO strategy for {len(project.pages)} pages")
+        project = await self.seo_agent.run_strategy(project)
+        self.site_store.save(project)
+
+        _emit("aeo", _plan_step + 2, f"Building AEO strategy for {len(project.pages)} pages")
+        project = await self.aeo_agent.run_strategy(project)
+        self.site_store.save(project)
+
+        _emit("qa", _plan_step + 3, "Validating content specifications")
+        project = await self.qa_agent.run_precheck(project)
+
+        # ── Build: generate HTML then apply SEO/AEO injections + HTML QA ──
+        _emit("build", _plan_step + 4, f"Building {len(project.pages)} pages")
+        project = await self.generate(project)  # PLANNED → GENERATING → GENERATED
+
+        # Apply SEO HTML injection + sitemap/robots (moved from seo_agent.run())
+        brief_ref = project.brief
+        base_url_seo = project.metadata.get(
+            "base_url",
+            f"https://{brief_ref.business_name.lower().replace(' ', '')}.com"
+        )
+        project.sitemap_xml = self.seo_agent._generate_sitemap(project.pages, base_url_seo)
+        project.robots_txt = self.seo_agent._generate_robots(base_url_seo)
+        for page in project.pages:
+            if page.html:
+                page.html = self.seo_agent._inject_seo(page.html, page.seo, brief_ref)
+        project.advance(SiteStatus.SEO_PASS)
+
+        # Apply AEO HTML injection (moved from aeo_agent.run())
+        for page in project.pages:
+            if page.html:
+                page.html = self.aeo_agent._inject_aeo(page.html, page.aeo, brief_ref)
+        project.advance(SiteStatus.AEO_PASS)
+
+        # HTML structural QA (moved from qa_agent.run())
+        _qa_issues: list[str] = []
+        _ux_scores: dict[str, int] = {}
+        for page in project.pages:
+            _page_issues = self.qa_agent._check_page(page)
+            if _page_issues:
+                _qa_issues.extend(f"[{page.slug}] {i}" for i in _page_issues)
+            if page.html:
+                _ux = score_html(page.html)
+                _ux_scores[page.slug] = _ux.total
+        project.errors = _qa_issues
+        if _ux_scores:
+            project.metadata["ux_scores"] = _ux_scores
+        project.advance(SiteStatus.QA_PASS)
+        self.site_store.save(project)
 
         # ── Critique-regen loop ──────────────────────────────────────────────
         regen_threshold = 70
@@ -417,6 +591,7 @@ class WebGenPipeline:
             logger.info(f"[WebGenPipeline] Wrote {len(_dpo_pairs)} DPO pairs → {_dpo_path.name}")
 
         if export:
+            _emit("export", _total, "Saving site files")
             self.export(project, quality_checks=quality_checks)
             # Save to gallery
             from backend.webgen.gallery import save_iteration as _save_gallery

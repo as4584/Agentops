@@ -48,6 +48,21 @@ class AEOAgent(WebAgentBase):
         logger.info(f"[{self.name}] AEO optimization complete")
         return project
 
+    async def run_strategy(self, project: SiteProject) -> SiteProject:
+        """Pre-build: generate AEO profiles for each page without mutating HTML.
+
+        Populates ``page.aeo`` on every PageSpec so the build stage can inject
+        the markup during or after HTML generation.  Does NOT advance the
+        project status — the status remains PLANNED.
+        """
+        brief = project.brief
+        logger.info(f"[{self.name}] Building AEO strategy for {len(project.pages)} pages")
+        for page in project.pages:
+            aeo = await self._generate_aeo_profile(page, brief)
+            page.aeo = aeo
+        logger.info(f"[{self.name}] AEO strategy complete")
+        return project
+
     async def _generate_aeo_profile(self, page: PageSpec, brief) -> AEOProfile:
         """Generate AEO metadata for a page via LLM."""
         prompt = f"""Generate Answer Engine Optimization (AEO) content for this page:

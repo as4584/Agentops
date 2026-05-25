@@ -12,6 +12,8 @@ Optional: HeyGen API if HEYGEN_API_KEY is set.
 
 from __future__ import annotations
 
+import asyncio
+import functools
 import shutil
 import subprocess
 from pathlib import Path
@@ -56,17 +58,17 @@ class AvatarVideoAgent(ContentAgent):
 
         # Try local backends
         if self._has_sadtalker():
-            success = self._generate_sadtalker(audio_path, video_path)
+            success = await self._generate_sadtalker(audio_path, video_path)
         elif self._has_wav2lip():
-            success = self._generate_wav2lip(audio_path, video_path)
+            success = await self._generate_wav2lip(audio_path, video_path)
 
         # Try Docker SadTalker (no host model download required)
         if not success:
-            success = self._generate_docker_sadtalker(audio_path, video_path)
+            success = await self._generate_docker_sadtalker(audio_path, video_path)
 
         # Fallback: static image + audio composite
         if not success:
-            success = self._generate_static_composite(audio_path, video_path)
+            success = await self._generate_static_composite(audio_path, video_path)
 
         if not success:
             raise RuntimeError(
@@ -96,7 +98,7 @@ class AvatarVideoAgent(ContentAgent):
     def _has_docker(self) -> bool:
         return shutil.which("docker") is not None
 
-    def _generate_docker_sadtalker(self, audio: Path, output: Path) -> bool:
+    async def _generate_docker_sadtalker(self, audio: Path, output: Path) -> bool:
         """
         Run SadTalker via Docker — no model download required on the host.
         Image: vinthony/sadtalker (pulls automatically on first run).
@@ -130,7 +132,9 @@ class AvatarVideoAgent(ContentAgent):
                 "--preprocess",
                 "crop",
             ]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+            result = await asyncio.to_thread(
+                functools.partial(subprocess.run, cmd, capture_output=True, text=True, timeout=600)
+            )
             if result.returncode == 0 and output.exists():
                 logger.info(f"[{self.name}] Docker SadTalker success")
                 return True
@@ -140,7 +144,7 @@ class AvatarVideoAgent(ContentAgent):
             logger.warning(f"[{self.name}] Docker SadTalker error: {e}")
             return False
 
-    def _generate_sadtalker(self, audio: Path, output: Path) -> bool:
+    async def _generate_sadtalker(self, audio: Path, output: Path) -> bool:
         """Generate talking-head video using SadTalker (local)."""
         if not AVATAR_IMAGE_PATH.exists():
             logger.warning(f"[{self.name}] No avatar image at {AVATAR_IMAGE_PATH}")
@@ -158,7 +162,9 @@ class AvatarVideoAgent(ContentAgent):
                 "--preprocess",
                 "crop",
             ]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            result = await asyncio.to_thread(
+                functools.partial(subprocess.run, cmd, capture_output=True, text=True, timeout=300)
+            )
             if result.returncode == 0:
                 logger.info(f"[{self.name}] SadTalker success")
                 return True
@@ -168,7 +174,7 @@ class AvatarVideoAgent(ContentAgent):
             logger.warning(f"[{self.name}] SadTalker error: {e}")
             return False
 
-    def _generate_wav2lip(self, audio: Path, output: Path) -> bool:
+    async def _generate_wav2lip(self, audio: Path, output: Path) -> bool:
         """Generate lip-synced video using Wav2Lip (local)."""
         if not AVATAR_IMAGE_PATH.exists():
             return False
@@ -182,12 +188,14 @@ class AvatarVideoAgent(ContentAgent):
                 "--outfile",
                 str(output),
             ]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            result = await asyncio.to_thread(
+                functools.partial(subprocess.run, cmd, capture_output=True, text=True, timeout=300)
+            )
             return result.returncode == 0
         except Exception:
             return False
 
-    def _generate_static_composite(self, audio: Path, output: Path) -> bool:
+    async def _generate_static_composite(self, audio: Path, output: Path) -> bool:
         """
         Fallback: Compose a static image (or color background)
         with audio into a 9:16 video using FFmpeg.
@@ -198,7 +206,7 @@ class AvatarVideoAgent(ContentAgent):
 
         try:
             # Get audio duration
-            duration = self._get_audio_duration(audio)
+            duration = await self._get_audio_duration(audio)
 
             if AVATAR_IMAGE_PATH.exists():
                 # Use creator avatar image
@@ -249,7 +257,9 @@ class AvatarVideoAgent(ContentAgent):
                     str(output),
                 ]
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+            result = await asyncio.to_thread(
+                functools.partial(subprocess.run, cmd, capture_output=True, text=True, timeout=120)
+            )
             if result.returncode == 0 and output.exists():
                 logger.info(f"[{self.name}] Static composite success")
                 return True
@@ -259,7 +269,7 @@ class AvatarVideoAgent(ContentAgent):
             logger.warning(f"[{self.name}] Static composite error: {e}")
             return False
 
-    def _get_audio_duration(self, audio_path: Path) -> float:
+    async def _get_audio_duration(self, audio_path: Path) -> float:
         """Get audio duration in seconds via ffprobe."""
         try:
             cmd = [
@@ -273,7 +283,9 @@ class AvatarVideoAgent(ContentAgent):
             ]
             import json
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            result = await asyncio.to_thread(
+                functools.partial(subprocess.run, cmd, capture_output=True, text=True, timeout=10)
+            )
             data = json.loads(result.stdout)
             return float(data.get("format", {}).get("duration", 30))
         except Exception:

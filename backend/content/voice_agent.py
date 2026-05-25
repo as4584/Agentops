@@ -12,6 +12,8 @@ Default: CosyVoice 2 — runs entirely on your machine.
 
 from __future__ import annotations
 
+import asyncio
+import functools
 import shutil
 import subprocess
 from pathlib import Path
@@ -65,16 +67,16 @@ class VoiceAgent(ContentAgent):
         success = False
 
         if self._has_cosyvoice():
-            success = self._generate_cosyvoice(spoken_text, audio_path)
+            success = await self._generate_cosyvoice(spoken_text, audio_path)
 
         if not success and self._has_piper():
-            success = self._generate_piper(spoken_text, audio_path)
+            success = await self._generate_piper(spoken_text, audio_path)
 
         if not success and self._has_coqui():
-            success = self._generate_coqui(spoken_text, audio_path)
+            success = await self._generate_coqui(spoken_text, audio_path)
 
         if not success and self._has_espeak():
-            success = self._generate_espeak(spoken_text, audio_path)
+            success = await self._generate_espeak(spoken_text, audio_path)
 
         if not success:
             raise RuntimeError(
@@ -138,7 +140,7 @@ class VoiceAgent(ContentAgent):
     def _has_espeak(self) -> bool:
         return shutil.which("espeak-ng") is not None or shutil.which("espeak") is not None
 
-    def _generate_cosyvoice(self, text: str, output: Path) -> bool:
+    async def _generate_cosyvoice(self, text: str, output: Path) -> bool:
         """Generate audio using Qwen CosyVoice 2 (local, open-source)."""
         try:
             import torchaudio
@@ -170,7 +172,7 @@ class VoiceAgent(ContentAgent):
             logger.warning(f"[{self.name}] CosyVoice error: {e}")
             return False
 
-    def _generate_piper(self, text: str, output: Path) -> bool:
+    async def _generate_piper(self, text: str, output: Path) -> bool:
         """Generate audio using Piper TTS (fully local)."""
         try:
             cmd = [
@@ -180,12 +182,15 @@ class VoiceAgent(ContentAgent):
                 "--output_file",
                 str(output),
             ]
-            result = subprocess.run(
-                cmd,
-                input=text,
-                capture_output=True,
-                text=True,
-                timeout=60,
+            result = await asyncio.to_thread(
+                functools.partial(
+                    subprocess.run,
+                    cmd,
+                    input=text,
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                )
             )
             if result.returncode == 0 and output.exists():
                 logger.info(f"[{self.name}] Piper TTS success")
@@ -196,7 +201,7 @@ class VoiceAgent(ContentAgent):
             logger.warning(f"[{self.name}] Piper error: {e}")
             return False
 
-    def _generate_coqui(self, text: str, output: Path) -> bool:
+    async def _generate_coqui(self, text: str, output: Path) -> bool:
         """Generate audio using Coqui TTS (local, supports cloning)."""
         try:
             from TTS.api import TTS as CoquiTTS
@@ -209,12 +214,14 @@ class VoiceAgent(ContentAgent):
             logger.warning(f"[{self.name}] Coqui error: {e}")
             return False
 
-    def _generate_espeak(self, text: str, output: Path) -> bool:
+    async def _generate_espeak(self, text: str, output: Path) -> bool:
         """Generate audio using eSpeak-NG (basic but always available)."""
         try:
             espeak = shutil.which("espeak-ng") or shutil.which("espeak")
             cmd = [espeak, "-w", str(output), text]
-            result = subprocess.run(cmd, capture_output=True, timeout=30)  # type: ignore[arg-type]
+            result = await asyncio.to_thread(
+                functools.partial(subprocess.run, cmd, capture_output=True, timeout=30)  # type: ignore[arg-type]
+            )
             if result.returncode == 0 and output.exists():
                 logger.info(f"[{self.name}] eSpeak TTS success")
                 return True

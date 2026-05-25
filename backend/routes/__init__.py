@@ -40,6 +40,7 @@ def register_all_routes(app: FastAPI, gateway_enabled: bool = False) -> None:
     from backend.routes.ml_webgen import router as ml_webgen_router
     from backend.routes.network import router as network_router
     from backend.routes.news import router as news_router
+    from backend.routes.discord_history import router as discord_history_router
     from backend.routes.sandbox import router as sandbox_router
     from backend.routes.schedule_routes import router as scheduler_router
     from backend.routes.security_alerts import router as security_alerts_router
@@ -79,6 +80,7 @@ def register_all_routes(app: FastAPI, gateway_enabled: bool = False) -> None:
     app.include_router(security_alerts_router)
     app.include_router(network_router)
     app.include_router(news_router)
+    app.include_router(discord_history_router)
     app.include_router(studio_router)
 
     if gateway_enabled:

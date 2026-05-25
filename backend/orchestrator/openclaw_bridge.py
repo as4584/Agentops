@@ -22,7 +22,10 @@ import json
 import logging
 import os
 import time
-from datetime import UTC
+from datetime import timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from enum import Enum
 from typing import Any
 

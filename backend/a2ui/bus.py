@@ -9,10 +9,12 @@ Responsibilities
 - Deliver events to WS ``canvas`` channel via ``ws_hub``.
 - Provide clear / state query helpers.
 - Support per-agent component allowlists (Sprint 5.5).
+- GC stale sessions after TTL expiry (standby RAM management).
 """
 
 from __future__ import annotations
 
+import time
 from typing import Any
 
 from backend.a2ui.schema import A2UIMessage
@@ -20,6 +22,7 @@ from backend.config import (
     A2UI_ALLOWED_AGENTS,
     A2UI_MAX_EVENTS_PER_SESSION,
     A2UI_MAX_WIDGETS_PER_TARGET,
+    A2UI_SESSION_TTL_SECONDS,
 )
 from backend.utils import logger
 from backend.websocket.hub import ws_hub  # noqa: E402 — placed after logger to respect init order
@@ -52,6 +55,8 @@ class A2UIBus:
         self._event_counts: dict[str, int] = {}
         # canvas state: session_id -> target -> widget_id -> message dict
         self._canvas: dict[str, dict[str, dict[str, dict[str, Any]]]] = {}
+        # last-activity timestamps for GC (monotonic clock)
+        self._session_last_active: dict[str, float] = {}
 
     # ------------------------------------------------------------------
     # Emit
@@ -92,6 +97,7 @@ class A2UIBus:
 
         # Increment event count
         self._event_counts[msg.session_id] = count + 1
+        self._session_last_active[msg.session_id] = time.monotonic()
 
         # Broadcast over WS hub
         sent = await ws_hub.broadcast(
@@ -172,6 +178,31 @@ class A2UIBus:
     def _check_permission(self, agent_id: str) -> None:
         if A2UI_ALLOWED_AGENTS and agent_id not in A2UI_ALLOWED_AGENTS:
             raise A2UIPermissionError(f"Agent '{agent_id}' is not in A2UI_ALLOWED_AGENTS.")
+
+    def gc_stale_sessions(self, ttl_seconds: int | None = None) -> int:
+        """Remove state for sessions that have been idle longer than *ttl_seconds*.
+
+        Called periodically from the server lifespan GC task.  Returns the
+        number of sessions that were purged.
+        """
+        max_age = ttl_seconds if ttl_seconds is not None else A2UI_SESSION_TTL_SECONDS
+        cutoff = time.monotonic() - max_age
+        stale = [
+            sid
+            for sid, last in self._session_last_active.items()
+            if last < cutoff
+        ]
+        for sid in stale:
+            self._seq.pop(sid, None)
+            self._event_counts.pop(sid, None)
+            self._canvas.pop(sid, None)
+            self._session_last_active.pop(sid, None)
+        if stale:
+            logger.info(
+                "a2ui_gc",
+                extra={"event_type": "a2ui_gc", "sessions_purged": len(stale)},
+            )
+        return len(stale)
 
 
 # ---------------------------------------------------------------------------

@@ -2,6 +2,7 @@ import { API_BASE } from '@/lib/api';
 import React, { useEffect, useState } from 'react';
 import { Stack, Group, Text, Badge, ScrollArea, Box, ActionIcon } from '@mantine/core';
 import { IconRefresh, IconPlayerPlay, IconPlayerStop } from '@tabler/icons-react';
+import { useAdaptivePolling } from '@/lib/useAdaptivePolling';
 
 interface Agent {
   id: string;
@@ -22,6 +23,11 @@ interface StreamEvent {
   type: string;
   agent_id: string | null;
   detail: string;
+  // ReAct step fields
+  step?: number;
+  thought?: string;
+  tool_calls?: string[];
+  is_final?: boolean;
 }
 
 const statusColor = (s: string) =>
@@ -52,9 +58,9 @@ export default function ActivePanel() {
     } catch {}
   };
 
+  useAdaptivePolling({ intervalMs: 15000, onTick: fetchAll });
+
   useEffect(() => {
-    fetchAll();
-    const iv = setInterval(fetchAll, 5000);
     const es = new EventSource(`${API_BASE}/stream/activity`);
     es.onmessage = (e) => {
       try {
@@ -62,7 +68,7 @@ export default function ActivePanel() {
         setEvents((prev) => [ev, ...prev].slice(0, 50));
       } catch {}
     };
-    return () => { clearInterval(iv); es.close(); };
+    return () => { es.close(); };
   }, []);
 
   return (
@@ -119,8 +125,22 @@ export default function ActivePanel() {
                 <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
                   {new Date(ev.timestamp).toLocaleTimeString()}
                 </Text>
-                <Badge size="xs" variant="outline">{ev.type}</Badge>
-                <Text size="xs" lineClamp={1}>{ev.detail}</Text>
+                {ev.type === 'REACT_STEP' ? (
+                  <>
+                    <Badge size="xs" color={ev.is_final ? 'teal' : 'blue'} variant="light">
+                      {ev.agent_id} ›{ev.step}
+                    </Badge>
+                    {ev.tool_calls && ev.tool_calls.length > 0 && (
+                      <Badge size="xs" color="orange" variant="dot">{ev.tool_calls.join(',')}</Badge>
+                    )}
+                    <Text size="xs" c="dimmed" lineClamp={1}>{ev.thought}</Text>
+                  </>
+                ) : (
+                  <>
+                    <Badge size="xs" variant="outline">{ev.type}</Badge>
+                    <Text size="xs" lineClamp={1}>{ev.detail}</Text>
+                  </>
+                )}
               </Group>
             ))}
           </Stack>

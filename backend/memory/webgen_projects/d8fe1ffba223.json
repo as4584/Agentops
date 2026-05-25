@@ -1,0 +1,429 @@
+{
+  "id": "d8fe1ffba223",
+  "created_at": "2026-04-19T21:32:51.704682+00:00",
+  "updated_at": "2026-04-19T22:05:16.043627+00:00",
+  "status": "ready",
+  "brief": {
+    "business_name": "test",
+    "business_type": "custom",
+    "tagline": "",
+    "description": "tacos",
+    "services": [],
+    "target_audience": "",
+    "tone": "professional",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": [],
+    "clone_url": null,
+    "cloned_html": null,
+    "cloned_screenshot": null,
+    "cloned_tokens": {}
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - Tacos",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "3e8f3f91",
+          "name": "hero",
+          "component_type": "hero-centered",
+          "content": {
+            "headline": "Indulge in the best tacos",
+            "subtitle": "Experience our fresh and delicious tacos"
+          },
+          "html": "<section class=\"hero-centered glass-container\">\n  <div class=\"w-full flex flex-col justify-center items-center h-screen\">\n    <h1 style=\"animation: fadeInUp 0.8s ease-out both\" aria-label=\"Indulge in the best tacos\">Indulge in the best tacos</h1>\n    <div class=\"mt-4 flex w-full text-lg\">\n      <p style=\"font-weight: bold;\">Experience our fresh and delicious tacos</p>\n    </div>\n    <button role=\"button\" class=\"btn btn-primary mt-8\">Order Now</button>\n  </div>\n</section>",
+          "order": 0
+        },
+        {
+          "id": "bbc826db",
+          "name": "about",
+          "component_type": "section-about",
+          "content": {
+            "headline": "About us",
+            "subtitle": "Our passion for tacos started with a simple recipe and grew into a beloved family business"
+          },
+          "html": "<section class=\"w-full h-screen flex items-center justify-center py-20 md:py-48 bg-gradient-to-r from-primary to-secondary\">\n    <div class=\"max-w-6xl mx-auto px-4 sm:px-6 lg:px-8\">\n        <h1 class=\"text-5xl font-bold text-white mb-2\" aria-label=\"About us\">About us</h1>\n        <p class=\"text-lg text-gray-300 leading-relaxed mb-8\">Our passion for tacos started with a simple recipe and grew into a beloved family business.</p>\n        <div class=\"grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8 md:flex-row md:items-center md:justify-between\">\n            <div class=\"bg-white shadow rounded-lg glass-card w-full sm:w-auto py-4 px-6 text-gray-700 hover:-translate-y-2 transition-transform duration-300\">\n                <h2 class=\"text-xl font-bold mb-1\">Service 1</h2>\n                <p class=\"text-sm leading-relaxed\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.</p>\n            </div>\n            <div class=\"bg-white shadow rounded-lg glass-card w-full sm:w-auto py-4 px-6 text-gray-700 hover:-translate-y-2 transition-transform duration-300\">\n                <h2 class=\"text-xl font-bold mb-1\">Service 2</h2>\n                <p class=\"text-sm leading-relaxed\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.</p>\n            </div>\n            <div class=\"bg-white shadow rounded-lg glass-card w-full sm:w-auto py-4 px-6 text-gray-700 hover:-translate-y-2 transition-transform duration-300\">\n                <h2 class=\"text-xl font-bold mb-1\">Service 3</h2>\n                <p class=\"text-sm leading-relaxed\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.</p>\n            </div>\n        </div>\n        <nav class=\"bg-white shadow rounded-lg px-6 py-4 text-gray-700\">\n            <a href=\"index.html\" class=\"block text-lg font-bold text-primary hover:text-primary transition-colors duration-200\">Home</a>\n            <a href=\"menu.html\" class=\"block text-lg font-bold text-primary hover:text-primary transition-colors duration-200\">Menu</a>\n            <a href=\"reviews.html\" class=\"block text-lg font-bold text-primary hover:text-primary transition-colors duration-200\">Reviews</a>\n            <a href=\"contact.html\" class=\"block text-lg font-bold text-primary hover:text-primary transition-colors duration-200\">Contact</a>\n        </nav>\n        <div class=\"mt-4 flex items-center justify-between sm:hidden md:block\">\n            <button type=\"button\" class=\"btn bg-accent text-white font-bold py-2 px-4 rounded shadow transition hover:-translate-y-2 transition-transform duration-300\">Call us</button>\n            <button type=\"button\" class=\"btn bg-accent text-white font-bold py-2 px-4 rounded shadow transition hover:-translate-y-2 transition-transform duration-300\">Email us</button>\n        </div>\n    </div>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "0b7c2467",
+          "name": "menu",
+          "component_type": "section-menu",
+          "content": {
+            "headline": "Our Menu",
+            "subtitle": "Explore our selection of mouthwatering tacos"
+          },
+          "html": "<nav>\n  <button class=\"btn\" aria-label=\"Home\">Home</button>\n  <button class=\"btn\" aria-label=\"Menu\">Menu</button>\n  <button class=\"btn\" aria-label=\"Reviews\">Reviews</button>\n  <button class=\"btn\" aria-label=\"Contact\">Contact</button>\n</nav>\n\n<header style=\"background: linear-gradient(135deg, #2563EB 0%, #3B82F6 60%, #0f172a 100%);\">\n  <h1 class=\"text-4xl font-bold leading-normal text-white\" style=\"background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">\n    Our Menu\n  </h1>\n</header>\n\n<main class=\"max-w-screen-sm mx-auto px-4 pt-8 relative overflow-hidden\">\n  <div class=\"absolute inset-y-0 left-0 w-full h-2/3 bg-gradient-to-r from-white to-gray-100\" style=\"opacity: 0.5\"></div>\n  <div class=\"flex flex-wrap gap-6\">\n    <section class=\"w-full md:w-1/2 p-4\">\n      <h2 class=\"text-3xl font-bold mb-4\">Explore our selection of mouthwatering tacos</h2>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac nisl eget lorem ullamcorper ultrices.</p>\n      <a href=\"#\" class=\"btn\">Learn More</a>\n    </section>\n    <section class=\"w-full md:w-1/2 p-4\">\n      <h2 class=\"text-3xl font-bold mb-4\">Fresh ingredients, unforgettable flavors</h2>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac nisl eget lorem ullamcorper ultrices.</p>\n      <a href=\"#\" class=\"btn\">Explore</a>\n    </section>\n    <section class=\"w-full md:w-1/2 p-4\">\n      <h2 class=\"text-3xl font-bold mb-4\">Customize your taco</h2>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac nisl eget lorem ullamcorper ultrices.</p>\n      <a href=\"#\" class=\"btn\">Create Your Own</a>\n    </section>\n  </div>\n</main>",
+          "order": 2
+        },
+        {
+          "id": "aa07c204",
+          "name": "reviews",
+          "component_type": "section-reviews",
+          "content": {
+            "headline": "What people are saying",
+            "subtitle": "Hear from our satisfied customers"
+          },
+          "html": "<nav class=\"fixed top-0 left-0 w-full bg-white shadow\">\n  <a href=\"index.html\" aria-label=\"Home\">Home</a>\n  <a href=\"menu.html\" aria-label=\"Menu\">Menu</a>\n  <a href=\"reviews.html\" aria-label=\"Reviews\">Reviews</a>\n  <a href=\"contact.html\" aria-label=\"Contact\">Contact</a>\n</nav>\n\n<header class=\"bg-gradient-to-br from-primary-500 to-secondary-500 text-white py-6\">\n  <h1 class=\"text-3xl font-poppins uppercase mb-2\">What people are saying</h1>\n  <h2 class=\"text-xl font-poppins mb-4\">Hear from our satisfied customers</h2>\n</header>\n\n<main>\n  <section aria-labelledby=\"reviewsHeading\" id=\"reviewsHeading\">\n    <h2 id=\"reviewsHeading\" class=\"text-3xl font-poppins mb-4\">Reviews</h2>\n    <div class=\"flex flex-wrap gap-6 mb-10\">\n      <article class=\"bg-gray-100 rounded shadow glass-card transition duration-300 hover:-translate-y-2\">\n        <p class=\"px-4 py-5 text-sm leading-loose\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut velit auctor, ullamcorper felis eget, scelerisque est.</p>\n        <div class=\"flex justify-between items-center mt-2\">\n          <span class=\"font-poppins text-xs\">- John Doe</span>\n          <button aria-label=\"Read more\" type=\"button\" class=\"btn btn-primary\">Read More</button>\n        </div>\n      </article>\n      <article class=\"bg-gray-100 rounded shadow glass-card transition duration-300 hover:-translate-y-2\">\n        <p class=\"px-4 py-5 text-sm leading-loose\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut velit auctor, ullamcorper felis eget, scelerisque est.</p>\n        <div class=\"flex justify-between items-center mt-2\">\n          <span class=\"font-poppins text-xs\">- Jane Smith</span>\n          <button aria-label=\"Read more\" type=\"button\" class=\"btn btn-primary\">Read More</button>\n        </div>\n      </article>\n    </div>\n  </section>\n  <footer class=\"bg-white py-6 text-center\">\n    <p>&copy; 2023 Test. All rights reserved.</p>\n  </footer>\n</main>",
+          "order": 3
+        },
+        {
+          "id": "1118c44b",
+          "name": "contact",
+          "component_type": "section-contact",
+          "content": {
+            "headline": "Get in touch",
+            "subtitle": "Contact us for more information or to place an order"
+          },
+          "html": "<section role=\"contact\" aria-label=\"Contact us\">\n  <header>\n    <h1 style=\"animation: fadeInUp 0.8s ease-out both;\">Get in touch</h1>\n    <nav class=\"hidden md:block\">\n      <a href=\"#\" class=\"btn\" aria-label=\"Home\">Home</a>\n      <a href=\"#\" class=\"btn\" aria-label=\"Menu\">Menu</a>\n      <a href=\"#\" class=\"btn\" aria-label=\"Reviews\">Reviews</a>\n      <a href=\"#\" class=\"btn\" aria-label=\"Contact\">Contact</a>\n    </nav>\n  </header>\n  <main class=\"px-4 py-8 md:px-6 md:py-12 grid gap-8 lg:grid-cols-2 lg:gap-4\">\n    <article>\n      <h2>Phone</h2>\n      <p class=\"text-gray-700 dark:text-gray-300\">555-1234</p>\n    </article>\n    <article>\n      <h2>Email</h2>\n      <form action=\"#\" method=\"post\">\n        <input type=\"email\" class=\"w-full px-4 py-2 rounded-lg border bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-300 focus:ring focus:outline-none focus:shadow-outline\" placeholder=\"example@email.com\">\n        <button type=\"submit\" class=\"w-full px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-800 focus:ring focus:outline-none focus:shadow-outline\">Send</button>\n      </form>\n    </article>\n  </main>\n  <footer class=\"hidden md:block text-gray-600 dark:text-gray-300 mt-4 md:mt-0\">\n    <p>&copy; 2023 Test. All rights reserved.</p>\n  </footer>\n</section>",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "Tacos - Home | test",
+        "meta_description": "Experience the best tacos in town! Visit our home page to learn more and order now.",
+        "keywords": [
+          "tacos",
+          "food",
+          "restaurant"
+        ],
+        "og_title": "Tacos - Home | test",
+        "og_description": "Discover the best tacos in town! Visit our home page to learn more and order now.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org/",
+          "@type": "LocalBusiness",
+          "name": "test",
+          "url": "https://www.example.com/index",
+          "telephone": "+1-555-1234",
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "opensAt": "09:00",
+            "closesAt": "21:00"
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Main St.",
+            "addressLocality": "Anytown",
+            "addressRegion": "CA",
+            "postalCode": "12345",
+            "addressCountry": "US"
+          },
+          "openingHours": {
+            "@type": "OpeningHours",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "opensAt": "09:00",
+            "closesAt": "21:00"
+          },
+          "services": [
+            {
+              "@type": "Service",
+              "name": "Tacos"
+            }
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "test",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - Tacos</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Experience the best tacos in town! Visit our home page to learn more and order now.\">\n  <meta name=\"keywords\" content=\"tacos, food, restaurant\">\n  <meta property=\"og:title\" content=\"Tacos - Home | test\">\n  <meta property=\"og:description\" content=\"Discover the best tacos in town! Visit our home page to learn more and order now.\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"test\",\n  \"url\": \"https://www.example.com/index\",\n  \"telephone\": \"+1-555-1234\",\n  \"openingHoursSpecification\": {\n    \"@type\": \"OpeningHoursSpecification\",\n    \"dayOfWeek\": [\n      \"Monday\",\n      \"Tuesday\",\n      \"Wednesday\",\n      \"Thursday\",\n      \"Friday\",\n      \"Saturday\"\n    ],\n    \"opensAt\": \"09:00\",\n    \"closesAt\": \"21:00\"\n  },\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"123 Main St.\",\n    \"addressLocality\": \"Anytown\",\n    \"addressRegion\": \"CA\",\n    \"postalCode\": \"12345\",\n    \"addressCountry\": \"US\"\n  },\n  \"openingHours\": {\n    \"@type\": \"OpeningHours\",\n    \"dayOfWeek\": [\n      \"Monday\",\n      \"Tuesday\",\n      \"Wednesday\",\n      \"Thursday\",\n      \"Friday\",\n      \"Saturday\"\n    ],\n    \"opensAt\": \"09:00\",\n    \"closesAt\": \"21:00\"\n  },\n  \"services\": [\n    {\n      \"@type\": \"Service\",\n      \"name\": \"Tacos\"\n    }\n  ]\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<section class=\"hero-centered glass-container\">\n  <div class=\"w-full flex flex-col justify-center items-center h-screen\">\n    <h1 style=\"animation: fadeInUp 0.8s ease-out both\" aria-label=\"Indulge in the best tacos\">Indulge in the best tacos</h1>\n    <div class=\"mt-4 flex w-full text-lg\">\n      <p style=\"font-weight: bold;\">Experience our fresh and delicious tacos</p>\n    </div>\n    <button role=\"button\" class=\"btn btn-primary mt-8\">Order Now</button>\n  </div>\n</section>\n\n<section class=\"w-full h-screen flex items-center justify-center py-20 md:py-48 bg-gradient-to-r from-primary to-secondary\">\n    <div class=\"max-w-6xl mx-auto px-4 sm:px-6 lg:px-8\">\n        <h1 class=\"text-5xl font-bold text-white mb-2\" aria-label=\"About us\">About us</h1>\n        <p class=\"text-lg text-gray-300 leading-relaxed mb-8\">Our passion for tacos started with a simple recipe and grew into a beloved family business.</p>\n        <div class=\"grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8 md:flex-row md:items-center md:justify-between\">\n            <div class=\"bg-white shadow rounded-lg glass-card w-full sm:w-auto py-4 px-6 text-gray-700 hover:-translate-y-2 transition-transform duration-300\">\n                <h2 class=\"text-xl font-bold mb-1\">Service 1</h2>\n                <p class=\"text-sm leading-relaxed\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.</p>\n            </div>\n            <div class=\"bg-white shadow rounded-lg glass-card w-full sm:w-auto py-4 px-6 text-gray-700 hover:-translate-y-2 transition-transform duration-300\">\n                <h2 class=\"text-xl font-bold mb-1\">Service 2</h2>\n                <p class=\"text-sm leading-relaxed\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.</p>\n            </div>\n            <div class=\"bg-white shadow rounded-lg glass-card w-full sm:w-auto py-4 px-6 text-gray-700 hover:-translate-y-2 transition-transform duration-300\">\n                <h2 class=\"text-xl font-bold mb-1\">Service 3</h2>\n                <p class=\"text-sm leading-relaxed\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.</p>\n            </div>\n        </div>\n        <nav class=\"bg-white shadow rounded-lg px-6 py-4 text-gray-700\">\n            <a href=\"index.html\" class=\"block text-lg font-bold text-primary hover:text-primary transition-colors duration-200\">Home</a>\n            <a href=\"menu.html\" class=\"block text-lg font-bold text-primary hover:text-primary transition-colors duration-200\">Menu</a>\n            <a href=\"reviews.html\" class=\"block text-lg font-bold text-primary hover:text-primary transition-colors duration-200\">Reviews</a>\n            <a href=\"contact.html\" class=\"block text-lg font-bold text-primary hover:text-primary transition-colors duration-200\">Contact</a>\n        </nav>\n        <div class=\"mt-4 flex items-center justify-between sm:hidden md:block\">\n            <button type=\"button\" class=\"btn bg-accent text-white font-bold py-2 px-4 rounded shadow transition hover:-translate-y-2 transition-transform duration-300\">Call us</button>\n            <button type=\"button\" class=\"btn bg-accent text-white font-bold py-2 px-4 rounded shadow transition hover:-translate-y-2 transition-transform duration-300\">Email us</button>\n        </div>\n    </div>\n</section>\n\n<nav>\n  <button class=\"btn\" aria-label=\"Home\">Home</button>\n  <button class=\"btn\" aria-label=\"Menu\">Menu</button>\n  <button class=\"btn\" aria-label=\"Reviews\">Reviews</button>\n  <button class=\"btn\" aria-label=\"Contact\">Contact</button>\n</nav>\n\n<header style=\"background: linear-gradient(135deg, #2563EB 0%, #3B82F6 60%, #0f172a 100%);\">\n  <h1 class=\"text-4xl font-bold leading-normal text-white\" style=\"background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent\">\n    Our Menu\n  </h1>\n</header>\n\n<main class=\"max-w-screen-sm mx-auto px-4 pt-8 relative overflow-hidden\">\n  <div class=\"absolute inset-y-0 left-0 w-full h-2/3 bg-gradient-to-r from-white to-gray-100\" style=\"opacity: 0.5\"></div>\n  <div class=\"flex flex-wrap gap-6\">\n    <section class=\"w-full md:w-1/2 p-4\">\n      <h2 class=\"text-3xl font-bold mb-4\">Explore our selection of mouthwatering tacos</h2>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac nisl eget lorem ullamcorper ultrices.</p>\n      <a href=\"#\" class=\"btn\">Learn More</a>\n    </section>\n    <section class=\"w-full md:w-1/2 p-4\">\n      <h2 class=\"text-3xl font-bold mb-4\">Fresh ingredients, unforgettable flavors</h2>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac nisl eget lorem ullamcorper ultrices.</p>\n      <a href=\"#\" class=\"btn\">Explore</a>\n    </section>\n    <section class=\"w-full md:w-1/2 p-4\">\n      <h2 class=\"text-3xl font-bold mb-4\">Customize your taco</h2>\n      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac nisl eget lorem ullamcorper ultrices.</p>\n      <a href=\"#\" class=\"btn\">Create Your Own</a>\n    </section>\n  </div>\n</main>\n\n<nav class=\"fixed top-0 left-0 w-full bg-white shadow\">\n  <a href=\"index.html\" aria-label=\"Home\">Home</a>\n  <a href=\"menu.html\" aria-label=\"Menu\">Menu</a>\n  <a href=\"reviews.html\" aria-label=\"Reviews\">Reviews</a>\n  <a href=\"contact.html\" aria-label=\"Contact\">Contact</a>\n</nav>\n\n<header class=\"bg-gradient-to-br from-primary-500 to-secondary-500 text-white py-6\">\n  <h1 class=\"text-3xl font-poppins uppercase mb-2\">What people are saying</h1>\n  <h2 class=\"text-xl font-poppins mb-4\">Hear from our satisfied customers</h2>\n</header>\n\n<main>\n  <section aria-labelledby=\"reviewsHeading\" id=\"reviewsHeading\">\n    <h2 id=\"reviewsHeading\" class=\"text-3xl font-poppins mb-4\">Reviews</h2>\n    <div class=\"flex flex-wrap gap-6 mb-10\">\n      <article class=\"bg-gray-100 rounded shadow glass-card transition duration-300 hover:-translate-y-2\">\n        <p class=\"px-4 py-5 text-sm leading-loose\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut velit auctor, ullamcorper felis eget, scelerisque est.</p>\n        <div class=\"flex justify-between items-center mt-2\">\n          <span class=\"font-poppins text-xs\">- John Doe</span>\n          <button aria-label=\"Read more\" type=\"button\" class=\"btn btn-primary\">Read More</button>\n        </div>\n      </article>\n      <article class=\"bg-gray-100 rounded shadow glass-card transition duration-300 hover:-translate-y-2\">\n        <p class=\"px-4 py-5 text-sm leading-loose\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ut velit auctor, ullamcorper felis eget, scelerisque est.</p>\n        <div class=\"flex justify-between items-center mt-2\">\n          <span class=\"font-poppins text-xs\">- Jane Smith</span>\n          <button aria-label=\"Read more\" type=\"button\" class=\"btn btn-primary\">Read More</button>\n        </div>\n      </article>\n    </div>\n  </section>\n  <footer class=\"bg-white py-6 text-center\">\n    <p>&copy; 2023 Test. All rights reserved.</p>\n  </footer>\n</main>\n\n<section role=\"contact\" aria-label=\"Contact us\">\n  <header>\n    <h1 style=\"animation: fadeInUp 0.8s ease-out both;\">Get in touch</h1>\n    <nav class=\"hidden md:block\">\n      <a href=\"#\" class=\"btn\" aria-label=\"Home\">Home</a>\n      <a href=\"#\" class=\"btn\" aria-label=\"Menu\">Menu</a>\n      <a href=\"#\" class=\"btn\" aria-label=\"Reviews\">Reviews</a>\n      <a href=\"#\" class=\"btn\" aria-label=\"Contact\">Contact</a>\n    </nav>\n  </header>\n  <main class=\"px-4 py-8 md:px-6 md:py-12 grid gap-8 lg:grid-cols-2 lg:gap-4\">\n    <article>\n      <h2>Phone</h2>\n      <p class=\"text-gray-700 dark:text-gray-300\">555-1234</p>\n    </article>\n    <article>\n      <h2>Email</h2>\n      <form action=\"#\" method=\"post\">\n        <input type=\"email\" class=\"w-full px-4 py-2 rounded-lg border bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-300 focus:ring focus:outline-none focus:shadow-outline\" placeholder=\"example@email.com\">\n        <button type=\"submit\" class=\"w-full px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-800 focus:ring focus:outline-none focus:shadow-outline\">Send</button>\n      </form>\n    </article>\n  </main>\n  <footer class=\"hidden md:block text-gray-600 dark:text-gray-300 mt-4 md:mt-0\">\n    <p>&copy; 2023 Test. All rights reserved.</p>\n  </footer>\n</section>\n\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    },
+    {
+      "slug": "menu",
+      "title": "Menu - Tacos",
+      "purpose": "Page showcasing the menu items",
+      "sections": [
+        {
+          "id": "67991006",
+          "name": "tacos",
+          "component_type": "section-menu-items",
+          "content": {
+            "headline": "Our Tacos",
+            "subtitle": "Explore our selection of delicious tacos"
+          },
+          "html": "<nav>\n  <h2 class=\"text-4xl font-bold text-[var(--color-primary)]\">Our Tacos</h2>\n  <a href=\"index.html\" role=\"button\" aria-label=\"Home\">Home</a>\n  <a href=\"menu.html\" role=\"button\" aria-label=\"Menu\">Menu</a>\n  <a href=\"reviews.html\" role=\"button\" aria-label=\"Reviews\">Reviews</a>\n  <a href=\"contact.html\" role=\"button\" aria-label=\"Contact\">Contact</a>\n</nav>\n<header class=\"bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)], -webkit-background-clip:text, -webkit-text-fill-color:transparent h1 text-4xl font-bold py-8\">\n  <h2 class=\"text-[var(--color-accent)]\">Explore our selection of delicious tacos</h2>\n</header>\n<main class=\"container mx-auto px-4 py-8 lg:py-16\">\n  <section class=\"flex flex-col gap-8 mb-16\">\n    <h2 class=\"text-3xl font-bold text-[var(--color-primary)] mb-4\">Tacos</h2>\n    <p class=\"text-lg leading-loose mb-4\">Our tacos are made with the freshest ingredients and traditional recipes.</p>\n    <button role=\"button\" aria-label=\"Order now\" class=\"btn btn-primary\">Order Now</button>\n  </section>\n  <section class=\"flex flex-col gap-8 mb-16\">\n    <h2 class=\"text-3xl font-bold text-[var(--color-primary)] mb-4\">Features</h2>\n    <p class=\"text-lg leading-loose mb-4\">Our tacos come with a variety of toppings and sauces to suit your taste.</p>\n    <button role=\"button\" aria-label=\"Explore more\" class=\"btn btn-secondary\">Explore More</button>\n  </section>\n  <section class=\"flex flex-col gap-8 mb-16\">\n    <h2 class=\"text-3xl font-bold text-[var(--color-primary)] mb-4\">Reviews</h2>\n    <p class=\"text-lg leading-loose mb-4\">Here's what our customers have to say about our tacos.</p>\n    <button role=\"button\" aria-label=\"Read reviews\" class=\"btn btn-accent\">Read Reviews</button>\n  </section>\n</main>\n<footer>\n  &copy; 2023 Test. All rights reserved.\n</footer>",
+          "order": 0
+        },
+        {
+          "id": "fe29b45b",
+          "name": "sides",
+          "component_type": "section-menu-items",
+          "content": {
+            "headline": "Sides",
+            "subtitle": "Complement your tacos with our selection of sides"
+          },
+          "html": "<section class=\"container mx-auto my-6\">\n  <header class=\"bg-gradient-to-r from-primary-500 to-secondary-500 py-8 text-center\">\n    <h1 class=\"text-4xl font-bold mb-4\" style=\"animation: fadeInUp 0.8s ease-out both; animation-delay: 0s\">Sides</h1>\n    <nav class=\"mt-6 flex justify-between items-center\">\n      <a href=\"#\" aria-label=\"Home\">Home</a>\n      <a href=\"#\" aria-label=\"Menu\">Menu</a>\n      <a href=\"#\" aria-label=\"Reviews\">Reviews</a>\n      <a href=\"#\" aria-label=\"Contact\">Contact</a>\n    </nav>\n  </header>\n  <main class=\"mt-6 flex flex-wrap gap-4\">\n    <article class=\"w-full sm:w-1/2 bg-white glass-card hover:-translate-y-2 transition-transform duration-300\">\n      <h2 class=\"text-primary-500 font-bold mb-4\">Tostadas</h2>\n      <p>Crispy tostada shells filled with fresh ingredients.</p>\n      <button class=\"btn btn-primary\" role=\"button\" aria-label=\"Order Tostadas\">Order Now</button>\n    </article>\n    <article class=\"w-full sm:w-1/2 bg-white glass-card hover:-translate-y-2 transition-transform duration-300\">\n      <h2 class=\"text-primary-500 font-bold mb-4\">Guacamole</h2>\n      <p>Fresh avocado, lime, and cilantro blended to perfection.</p>\n      <button class=\"btn btn-primary\" role=\"button\" aria-label=\"Order Guacamole\">Order Now</button>\n    </article>\n    <article class=\"w-full sm:w-1/2 bg-white glass-card hover:-translate-y-2 transition-transform duration-300\">\n      <h2 class=\"text-primary-500 font-bold mb-4\">Coleslaw</h2>\n      <p>Fresh cabbage and carrot slaw with a tangy dressing.</p>\n      <button class=\"btn btn-primary\" role=\"button\" aria-label=\"Order Coleslaw\">Order Now</button>\n    </article>\n  </main>\n  <footer class=\"bg-gray-200 py-8 text-center\">\n    <nav class=\"mt-6 flex justify-between items-center\">\n      <a href=\"#\" aria-label=\"Home\">Home</a>\n      <a href=\"#\" aria-label=\"Menu\">Menu</a>\n      <a href=\"#\" aria-label=\"Reviews\">Reviews</a>\n      <a href=\"#\" aria-label=\"Contact\">Contact</a>\n    </nav>\n  </footer>\n</section>",
+          "order": 1
+        },
+        {
+          "id": "fbc2a273",
+          "name": "drinks",
+          "component_type": "section-menu-items",
+          "content": {
+            "headline": "Drinks",
+            "subtitle": "Quench your thirst with our selection of drinks"
+          },
+          "html": "<nav>\n  <a href=\"index.html\" aria-label=\"Home\">Home</a>\n  <a href=\"menu.html\" aria-label=\"Menu\">Menu</a>\n  <a href=\"reviews.html\" aria-label=\"Reviews\">Reviews</a>\n  <a href=\"contact.html\" aria-label=\"Contact\">Contact</a>\n</nav>\n\n<header class=\"bg-gradient-to-r from-primary-500 to-secondary-500 py-8 text-white font-bold text-xl\">\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both;\">Drinks</h1>\n  <p class=\"mt-4\">Quench your thirst with our selection of drinks</p>\n</header>\n\n<main class=\"container mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16 xl:px-0 xl:py-20\">\n  <section class=\"mb-8\">\n    <h2 class=\"font-semibold mb-4\">Featured Drinks</h2>\n    <div class=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4\">\n      <article class=\"glass-card hover:shadow-2xl\">\n        <img src=\"https://via.placeholder.com/500x300\" alt=\"Drink Image 1\" class=\"w-full h-auto object-cover\">\n        <div class=\"p-4 text-white\">\n          <h3 class=\"font-bold mb-2\">Drink Name 1</h3>\n          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n        </div>\n      </article>\n      <article class=\"glass-card hover:shadow-2xl\">\n        <img src=\"https://via.placeholder.com/500x300\" alt=\"Drink Image 2\" class=\"w-full h-auto object-cover\">\n        <div class=\"p-4 text-white\">\n          <h3 class=\"font-bold mb-2\">Drink Name 2</h3>\n          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n        </div>\n      </article>\n      <!-- Add more articles with the glass-card class -->\n    </div>\n  </section>\n\n  <section class=\"mb-8\">\n    <h2 class=\"font-semibold mb-4\">Our Drinks</h2>\n    <ul class=\"list-none grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4\">\n      <li>\n        <article class=\"glass-card hover:shadow-2xl\">\n          <img src=\"https://via.placeholder.com/500x300\" alt=\"Drink Image 3\" class=\"w-full h-auto object-cover\">\n          <div class=\"p-4 text-white\">\n            <h3 class=\"font-bold mb-2\">Drink Name 3</h3>\n            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n          </div>\n        </article>\n      </li>\n      <!-- Add more articles with the glass-card class -->\n    </ul>\n  </section>\n</main>",
+          "order": 2
+        }
+      ],
+      "seo": {
+        "title": "Menu - Tacos | Test",
+        "meta_description": "Discover our delicious taco menu at Test. Try our classic tacos or create your own.",
+        "keywords": [
+          "tacos",
+          "menu",
+          "food"
+        ],
+        "og_title": "Test - Menu - Tacos",
+        "og_description": "Try our fresh and flavorful tacos at Test. Visit us now!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org/",
+          "@type": "LocalBusiness",
+          "name": "Test",
+          "url": "https://www.test.com/menu-tacos",
+          "telephone": "+1234567890",
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "opens": "12:00",
+            "closes": "22:00"
+          }
+        }
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "test",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Menu - Tacos</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Discover our delicious taco menu at Test. Try our classic tacos or create your own.\">\n  <meta name=\"keywords\" content=\"tacos, menu, food\">\n  <meta property=\"og:title\" content=\"Test - Menu - Tacos\">\n  <meta property=\"og:description\" content=\"Try our fresh and flavorful tacos at Test. Visit us now!\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Test\",\n  \"url\": \"https://www.test.com/menu-tacos\",\n  \"telephone\": \"+1234567890\",\n  \"openingHoursSpecification\": {\n    \"@type\": \"OpeningHoursSpecification\",\n    \"dayOfWeek\": [\n      \"Monday\",\n      \"Tuesday\",\n      \"Wednesday\",\n      \"Thursday\",\n      \"Friday\",\n      \"Saturday\"\n    ],\n    \"opens\": \"12:00\",\n    \"closes\": \"22:00\"\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<nav>\n  <h2 class=\"text-4xl font-bold text-[var(--color-primary)]\">Our Tacos</h2>\n  <a href=\"index.html\" role=\"button\" aria-label=\"Home\">Home</a>\n  <a href=\"menu.html\" role=\"button\" aria-label=\"Menu\">Menu</a>\n  <a href=\"reviews.html\" role=\"button\" aria-label=\"Reviews\">Reviews</a>\n  <a href=\"contact.html\" role=\"button\" aria-label=\"Contact\">Contact</a>\n</nav>\n<header class=\"bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)], -webkit-background-clip:text, -webkit-text-fill-color:transparent h1 text-4xl font-bold py-8\">\n  <h2 class=\"text-[var(--color-accent)]\">Explore our selection of delicious tacos</h2>\n</header>\n<main class=\"container mx-auto px-4 py-8 lg:py-16\">\n  <section class=\"flex flex-col gap-8 mb-16\">\n    <h2 class=\"text-3xl font-bold text-[var(--color-primary)] mb-4\">Tacos</h2>\n    <p class=\"text-lg leading-loose mb-4\">Our tacos are made with the freshest ingredients and traditional recipes.</p>\n    <button role=\"button\" aria-label=\"Order now\" class=\"btn btn-primary\">Order Now</button>\n  </section>\n  <section class=\"flex flex-col gap-8 mb-16\">\n    <h2 class=\"text-3xl font-bold text-[var(--color-primary)] mb-4\">Features</h2>\n    <p class=\"text-lg leading-loose mb-4\">Our tacos come with a variety of toppings and sauces to suit your taste.</p>\n    <button role=\"button\" aria-label=\"Explore more\" class=\"btn btn-secondary\">Explore More</button>\n  </section>\n  <section class=\"flex flex-col gap-8 mb-16\">\n    <h2 class=\"text-3xl font-bold text-[var(--color-primary)] mb-4\">Reviews</h2>\n    <p class=\"text-lg leading-loose mb-4\">Here's what our customers have to say about our tacos.</p>\n    <button role=\"button\" aria-label=\"Read reviews\" class=\"btn btn-accent\">Read Reviews</button>\n  </section>\n</main>\n<footer>\n  &copy; 2023 Test. All rights reserved.\n</footer>\n\n<section class=\"container mx-auto my-6\">\n  <header class=\"bg-gradient-to-r from-primary-500 to-secondary-500 py-8 text-center\">\n    <h1 class=\"text-4xl font-bold mb-4\" style=\"animation: fadeInUp 0.8s ease-out both; animation-delay: 0s\">Sides</h1>\n    <nav class=\"mt-6 flex justify-between items-center\">\n      <a href=\"#\" aria-label=\"Home\">Home</a>\n      <a href=\"#\" aria-label=\"Menu\">Menu</a>\n      <a href=\"#\" aria-label=\"Reviews\">Reviews</a>\n      <a href=\"#\" aria-label=\"Contact\">Contact</a>\n    </nav>\n  </header>\n  <main class=\"mt-6 flex flex-wrap gap-4\">\n    <article class=\"w-full sm:w-1/2 bg-white glass-card hover:-translate-y-2 transition-transform duration-300\">\n      <h2 class=\"text-primary-500 font-bold mb-4\">Tostadas</h2>\n      <p>Crispy tostada shells filled with fresh ingredients.</p>\n      <button class=\"btn btn-primary\" role=\"button\" aria-label=\"Order Tostadas\">Order Now</button>\n    </article>\n    <article class=\"w-full sm:w-1/2 bg-white glass-card hover:-translate-y-2 transition-transform duration-300\">\n      <h2 class=\"text-primary-500 font-bold mb-4\">Guacamole</h2>\n      <p>Fresh avocado, lime, and cilantro blended to perfection.</p>\n      <button class=\"btn btn-primary\" role=\"button\" aria-label=\"Order Guacamole\">Order Now</button>\n    </article>\n    <article class=\"w-full sm:w-1/2 bg-white glass-card hover:-translate-y-2 transition-transform duration-300\">\n      <h2 class=\"text-primary-500 font-bold mb-4\">Coleslaw</h2>\n      <p>Fresh cabbage and carrot slaw with a tangy dressing.</p>\n      <button class=\"btn btn-primary\" role=\"button\" aria-label=\"Order Coleslaw\">Order Now</button>\n    </article>\n  </main>\n  <footer class=\"bg-gray-200 py-8 text-center\">\n    <nav class=\"mt-6 flex justify-between items-center\">\n      <a href=\"#\" aria-label=\"Home\">Home</a>\n      <a href=\"#\" aria-label=\"Menu\">Menu</a>\n      <a href=\"#\" aria-label=\"Reviews\">Reviews</a>\n      <a href=\"#\" aria-label=\"Contact\">Contact</a>\n    </nav>\n  </footer>\n</section>\n\n<nav>\n  <a href=\"index.html\" aria-label=\"Home\">Home</a>\n  <a href=\"menu.html\" aria-label=\"Menu\">Menu</a>\n  <a href=\"reviews.html\" aria-label=\"Reviews\">Reviews</a>\n  <a href=\"contact.html\" aria-label=\"Contact\">Contact</a>\n</nav>\n\n<header class=\"bg-gradient-to-r from-primary-500 to-secondary-500 py-8 text-white font-bold text-xl\">\n  <h1 style=\"animation: fadeInUp 0.8s ease-out both;\">Drinks</h1>\n  <p class=\"mt-4\">Quench your thirst with our selection of drinks</p>\n</header>\n\n<main class=\"container mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16 xl:px-0 xl:py-20\">\n  <section class=\"mb-8\">\n    <h2 class=\"font-semibold mb-4\">Featured Drinks</h2>\n    <div class=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4\">\n      <article class=\"glass-card hover:shadow-2xl\">\n        <img src=\"https://via.placeholder.com/500x300\" alt=\"Drink Image 1\" class=\"w-full h-auto object-cover\">\n        <div class=\"p-4 text-white\">\n          <h3 class=\"font-bold mb-2\">Drink Name 1</h3>\n          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n        </div>\n      </article>\n      <article class=\"glass-card hover:shadow-2xl\">\n        <img src=\"https://via.placeholder.com/500x300\" alt=\"Drink Image 2\" class=\"w-full h-auto object-cover\">\n        <div class=\"p-4 text-white\">\n          <h3 class=\"font-bold mb-2\">Drink Name 2</h3>\n          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n        </div>\n      </article>\n      <!-- Add more articles with the glass-card class -->\n    </div>\n  </section>\n\n  <section class=\"mb-8\">\n    <h2 class=\"font-semibold mb-4\">Our Drinks</h2>\n    <ul class=\"list-none grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4\">\n      <li>\n        <article class=\"glass-card hover:shadow-2xl\">\n          <img src=\"https://via.placeholder.com/500x300\" alt=\"Drink Image 3\" class=\"w-full h-auto object-cover\">\n          <div class=\"p-4 text-white\">\n            <h3 class=\"font-bold mb-2\">Drink Name 3</h3>\n            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>\n          </div>\n        </article>\n      </li>\n      <!-- Add more articles with the glass-card class -->\n    </ul>\n  </section>\n</main>\n\n</body>\n</html>",
+      "nav_label": "Menu",
+      "nav_order": 2
+    },
+    {
+      "slug": "reviews",
+      "title": "Reviews - Tacos",
+      "purpose": "Page showcasing customer reviews",
+      "sections": [
+        {
+          "id": "12db2801",
+          "name": "testimonials",
+          "component_type": "section-testimonials",
+          "content": {
+            "headline": "Testimonials",
+            "subtitle": "Hear from our satisfied customers"
+          },
+          "html": "<nav>\n  <a href=\"index.html\">Home</a>\n  <a href=\"menu.html\">Menu</a>\n  <a href=\"reviews.html\">Reviews</a>\n  <a href=\"contact.html\">Contact</a>\n</nav>\n\n<header>\n  <h1 class=\"text-4xl font-bold leading-tight text-[var(--color-primary)] animation-fadeInUp duration-2s\">Testimonials</h1>\n  <h2 class=\"text-xl font-semibold mb-8 text-[var(--color-secondary)]\">Hear from our satisfied customers</h2>\n</header>\n\n<main class=\"container mx-auto px-4 py-8 mt-10\">\n  <section>\n    <h2 class=\"text-3xl font-bold mb-6 text-[var(--color-accent)]\">Featured Testimonials</h2>\n    <div class=\"grid grid-cols-1 lg:grid-cols-2 gap-4\">\n      <div class=\"glass-card transition-all duration-300 hover:-translate-y-2 shadow-lg\">\n        <img src=\"testimonial1.jpg\" alt=\"\" width=\"300\" height=\"250\" loading=\"lazy\">\n        <div class=\"p-4\">\n          <h3 class=\"text-xl font-bold mb-2 text-[var(--color-secondary)]\">John Smith</h3>\n          <p class=\"mb-0 text-[var(--color-body)]\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel augue in arcu bibendum commodo.</p>\n        </div>\n      </div>\n      <div class=\"glass-card transition-all duration-300 hover:-translate-y-2 shadow-lg\">\n        <img src=\"testimonial2.jpg\" alt=\"\" width=\"300\" height=\"250\" loading=\"lazy\">\n        <div class=\"p-4\">\n          <h3 class=\"text-xl font-bold mb-2 text-[var(--color-secondary)]\">Jane Doe</h3>\n          <p class=\"mb-0 text-[var(--color-body)]\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel augue in arcu bibendum commodo.</p>\n        </div>\n      </div>\n    </div>\n  </section>\n  <section>\n    <h2 class=\"text-3xl font-bold mb-6 text-[var(--color-accent)]\">More Testimonials</h2>\n    <div class=\"grid grid-cols-1 lg:grid-cols-2 gap-4\">\n      <div class=\"glass-card transition-all duration-300 hover:-translate-y-2 shadow-lg\">\n        <img src=\"testimonial3.jpg\" alt=\"\" width=\"300\" height=\"250\" loading=\"lazy\">\n        <div class=\"p-4\">\n          <h3 class=\"text-xl font-bold mb-2 text-[var(--color-secondary)]\">Mike Johnson</h3>\n          <p class=\"mb-0 text-[var(--color-body)]\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel augue in arcu bibendum commodo.</p>\n        </div>\n      </div>\n      <div class=\"glass-card transition-all duration-300 hover:-translate-y-2 shadow-lg\">\n        <img src=\"testimonial4.jpg\" alt=\"\" width=\"300\" height=\"250\" loading=\"lazy\">\n        <div class=\"p-4\">\n          <h3 class=\"text-xl font-bold mb-2 text-[var(--color-secondary)]\">Laura Brown</h3>\n          <p class=\"mb-0 text-[var(--color-body)]\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel augue in arcu bibendum commodo.</p>\n        </div>\n      </div>\n    </div>\n  </section>\n</main>",
+          "order": 0
+        }
+      ],
+      "seo": {
+        "title": "Reviews - Tacos | test",
+        "meta_description": "tacos",
+        "keywords": [],
+        "og_title": "",
+        "og_description": "",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "",
+        "schema_json_ld": {}
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What are the hours of operation?",
+            "a": "The restaurant is open from 11am to 9pm."
+          },
+          {
+            "q": "Do you offer vegetarian options?",
+            "a": "Yes, we have several vegetarian taco options available."
+          },
+          {
+            "q": "Can I order online for pickup?",
+            "a": "Yes, you can place an order online and pick it up at the restaurant."
+          },
+          {
+            "q": "Do you deliver food?",
+            "a": "We do not offer delivery service at this time."
+          },
+          {
+            "q": "What is your address?",
+            "a": "Our address is 123 Main Street, Anytown USA."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "test",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Test is a taco restaurant located in Anytown USA. We offer a variety of tacos made with fresh ingredients and traditional spices.",
+        "topic_cluster": "Tacos",
+        "related_topics": [
+          "Mexican cuisine",
+          "Street food",
+          "Fast casual dining"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Reviews - Tacos</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"tacos\">\n  <meta property=\"og:type\" content=\"website\">\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What are the hours of operation?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"The restaurant is open from 11am to 9pm.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Do you offer vegetarian options?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, we have several vegetarian taco options available.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Can I order online for pickup?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Yes, you can place an order online and pick it up at the restaurant.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Do you deliver food?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"We do not offer delivery service at this time.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What is your address?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Our address is 123 Main Street, Anytown USA.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<nav>\n  <a href=\"index.html\">Home</a>\n  <a href=\"menu.html\">Menu</a>\n  <a href=\"reviews.html\">Reviews</a>\n  <a href=\"contact.html\">Contact</a>\n</nav>\n\n<header>\n  <h1 class=\"text-4xl font-bold leading-tight text-[var(--color-primary)] animation-fadeInUp duration-2s\">Testimonials</h1>\n  <h2 class=\"text-xl font-semibold mb-8 text-[var(--color-secondary)]\">Hear from our satisfied customers</h2>\n</header>\n\n<main class=\"container mx-auto px-4 py-8 mt-10\">\n  <section>\n    <h2 class=\"text-3xl font-bold mb-6 text-[var(--color-accent)]\">Featured Testimonials</h2>\n    <div class=\"grid grid-cols-1 lg:grid-cols-2 gap-4\">\n      <div class=\"glass-card transition-all duration-300 hover:-translate-y-2 shadow-lg\">\n        <img src=\"testimonial1.jpg\" alt=\"\" width=\"300\" height=\"250\" loading=\"lazy\">\n        <div class=\"p-4\">\n          <h3 class=\"text-xl font-bold mb-2 text-[var(--color-secondary)]\">John Smith</h3>\n          <p class=\"mb-0 text-[var(--color-body)]\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel augue in arcu bibendum commodo.</p>\n        </div>\n      </div>\n      <div class=\"glass-card transition-all duration-300 hover:-translate-y-2 shadow-lg\">\n        <img src=\"testimonial2.jpg\" alt=\"\" width=\"300\" height=\"250\" loading=\"lazy\">\n        <div class=\"p-4\">\n          <h3 class=\"text-xl font-bold mb-2 text-[var(--color-secondary)]\">Jane Doe</h3>\n          <p class=\"mb-0 text-[var(--color-body)]\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel augue in arcu bibendum commodo.</p>\n        </div>\n      </div>\n    </div>\n  </section>\n  <section>\n    <h2 class=\"text-3xl font-bold mb-6 text-[var(--color-accent)]\">More Testimonials</h2>\n    <div class=\"grid grid-cols-1 lg:grid-cols-2 gap-4\">\n      <div class=\"glass-card transition-all duration-300 hover:-translate-y-2 shadow-lg\">\n        <img src=\"testimonial3.jpg\" alt=\"\" width=\"300\" height=\"250\" loading=\"lazy\">\n        <div class=\"p-4\">\n          <h3 class=\"text-xl font-bold mb-2 text-[var(--color-secondary)]\">Mike Johnson</h3>\n          <p class=\"mb-0 text-[var(--color-body)]\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel augue in arcu bibendum commodo.</p>\n        </div>\n      </div>\n      <div class=\"glass-card transition-all duration-300 hover:-translate-y-2 shadow-lg\">\n        <img src=\"testimonial4.jpg\" alt=\"\" width=\"300\" height=\"250\" loading=\"lazy\">\n        <div class=\"p-4\">\n          <h3 class=\"text-xl font-bold mb-2 text-[var(--color-secondary)]\">Laura Brown</h3>\n          <p class=\"mb-0 text-[var(--color-body)]\">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel augue in arcu bibendum commodo.</p>\n        </div>\n      </div>\n    </div>\n  </section>\n</main>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What are the hours of operation?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">The restaurant is open from 11am to 9pm.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Do you offer vegetarian options?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, we have several vegetarian taco options available.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Can I order online for pickup?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Yes, you can place an order online and pick it up at the restaurant.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Do you deliver food?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">We do not offer delivery service at this time.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What is your address?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Our address is 123 Main Street, Anytown USA.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Reviews",
+      "nav_order": 3
+    },
+    {
+      "slug": "contact",
+      "title": "Contact - Tacos",
+      "purpose": "Page for contacting the business",
+      "sections": [
+        {
+          "id": "57e51b6e",
+          "name": "form",
+          "component_type": "section-contact-form",
+          "content": {
+            "headline": "Get in touch",
+            "subtitle": "Contact us for more information or to place an order"
+          },
+          "html": "<section id=\"contact\">\n  <div class=\"container mx-auto px-4 py-8 md:py-12 lg:px-6 lg:py-14 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10 sm:gap-y-20\">\n    <div class=\"bg-white shadow rounded-lg overflow-hidden p-8 text-center md:text-left\">\n      <h1 class=\"font-poppins font-medium lg:text-4xl text-3xl mb-6 text-gray-900\" style=\"animation: fadeInUp 0.8s ease-out both\">Get in touch</h1>\n      <div class=\"grid grid-cols-2 gap-x-8 md:gap-y-20 sm:gap-y-24\">\n        <div class=\"bg-gradient-to-r from-brand-primary to-brand-secondary w-full p-6 rounded-lg shadow-lg text-white flex items-center justify-center min-h-screen flex-1 md:flex-none\">\n          <h2 class=\"font-poppins font-semibold text-xl mb-4 text-gray-900\">Contact us</h2>\n          <div class=\"text-sm mb-4\">For more information or to place an order, fill out the form below.</div>\n        </div>\n        <div class=\"bg-white rounded-lg shadow-lg p-6 flex items-center justify-center min-h-screen flex-1 md:flex-none\">\n          <h2 class=\"font-poppins font-semibold text-xl mb-4 text-gray-900\">Form</h2>\n          <form method=\"POST\" action=\"#\" class=\"w-full max-w-lg p-6\">\n            <div class=\"mb-4\">\n              <label for=\"name\" class=\"block font-semibold mb-1 text-gray-800\">Name</label>\n              <input type=\"text\" id=\"name\" name=\"name\" required placeholder=\"Enter your name\" class=\"bg-white rounded-lg border w-full py-2 px-3 focus:border-blue-500 focus:ring-blue-500 text-gray-900 transition duration-300 hover:focus:ring-opacity-75\">\n            </div>\n            <div class=\"mb-4\">\n              <label for=\"email\" class=\"block font-semibold mb-1 text-gray-800\">Email</label>\n              <input type=\"email\" id=\"email\" name=\"email\" required placeholder=\"Enter your email address\" class=\"bg-white rounded-lg border w-full py-2 px-3 focus:border-blue-500 focus:ring-blue-500 text-gray-900 transition duration-300 hover:focus:ring-opacity-75\">\n            </div>\n            <div class=\"mb-4\">\n              <label for=\"phone\" class=\"block font-semibold mb-1 text-gray-800\">Phone</label>\n              <input type=\"tel\" id=\"phone\" name=\"phone\" placeholder=\"Enter your phone number\" class=\"bg-white rounded-lg border w-full py-2 px-3 focus:border-blue-500 focus:ring-blue-500 text-gray-900 transition duration-300 hover:focus:ring-opacity-75\">\n            </div>\n            <div class=\"mb-4\">\n              <label for=\"message\" class=\"block font-semibold mb-1 text-gray-800\">Message</label>\n              <textarea id=\"message\" name=\"message\" required placeholder=\"Enter your message\" class=\"bg-white rounded-lg border w-full py-2 px-3 focus:border-blue-500 focus:ring-blue-500 text-gray-900 transition duration-300 hover:focus:ring-opacity-75\"></textarea>\n            </div>\n            <button type=\"submit\" class=\"bg-brand-accent hover:bg-brand-accent-dark py-2 px-4 rounded text-white font-semibold font-poppins transition duration-300\">Send</button>\n          </form>\n        </div>\n      </div>\n    </div>\n  </div>\n</section>",
+          "order": 0
+        }
+      ],
+      "seo": {
+        "title": "Contact Tacos - Test",
+        "meta_description": "Get in touch with us for delicious tacos! Contact us now.",
+        "keywords": [
+          "tacos",
+          "contact",
+          "business"
+        ],
+        "og_title": "Contact Tacos - Test",
+        "og_description": "Get in touch with us for delicious tacos! Contact us now.",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org/",
+          "name": "Test Tacos",
+          "url": "https://www.testtacos.com/contact",
+          "telephone": "+1-555-555-5555",
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "opens": "09:00",
+            "closes": "21:00"
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Main St.",
+            "addressLocality": "Anytown",
+            "addressRegion": "CA",
+            "postalCode": "12345",
+            "addressCountry": "US"
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+1-555-555-5555",
+            "contactType": "customer service"
+          }
+        }
+      },
+      "aeo": {
+        "faq_pairs": [],
+        "speakable_selectors": [],
+        "entity_name": "test",
+        "entity_type": "",
+        "entity_description": "",
+        "topic_cluster": "",
+        "related_topics": []
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Contact - Tacos</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Get in touch with us for delicious tacos! Contact us now.\">\n  <meta name=\"keywords\" content=\"tacos, contact, business\">\n  <meta property=\"og:title\" content=\"Contact Tacos - Test\">\n  <meta property=\"og:description\" content=\"Get in touch with us for delicious tacos! Contact us now.\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"name\": \"Test Tacos\",\n  \"url\": \"https://www.testtacos.com/contact\",\n  \"telephone\": \"+1-555-555-5555\",\n  \"openingHoursSpecification\": {\n    \"@type\": \"OpeningHoursSpecification\",\n    \"dayOfWeek\": [\n      \"Monday\",\n      \"Tuesday\",\n      \"Wednesday\",\n      \"Thursday\",\n      \"Friday\",\n      \"Saturday\",\n      \"Sunday\"\n    ],\n    \"opens\": \"09:00\",\n    \"closes\": \"21:00\"\n  },\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"123 Main St.\",\n    \"addressLocality\": \"Anytown\",\n    \"addressRegion\": \"CA\",\n    \"postalCode\": \"12345\",\n    \"addressCountry\": \"US\"\n  },\n  \"contactPoint\": {\n    \"@type\": \"ContactPoint\",\n    \"telephone\": \"+1-555-555-5555\",\n    \"contactType\": \"customer service\"\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<section id=\"contact\">\n  <div class=\"container mx-auto px-4 py-8 md:py-12 lg:px-6 lg:py-14 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-10 sm:gap-y-20\">\n    <div class=\"bg-white shadow rounded-lg overflow-hidden p-8 text-center md:text-left\">\n      <h1 class=\"font-poppins font-medium lg:text-4xl text-3xl mb-6 text-gray-900\" style=\"animation: fadeInUp 0.8s ease-out both\">Get in touch</h1>\n      <div class=\"grid grid-cols-2 gap-x-8 md:gap-y-20 sm:gap-y-24\">\n        <div class=\"bg-gradient-to-r from-brand-primary to-brand-secondary w-full p-6 rounded-lg shadow-lg text-white flex items-center justify-center min-h-screen flex-1 md:flex-none\">\n          <h2 class=\"font-poppins font-semibold text-xl mb-4 text-gray-900\">Contact us</h2>\n          <div class=\"text-sm mb-4\">For more information or to place an order, fill out the form below.</div>\n        </div>\n        <div class=\"bg-white rounded-lg shadow-lg p-6 flex items-center justify-center min-h-screen flex-1 md:flex-none\">\n          <h2 class=\"font-poppins font-semibold text-xl mb-4 text-gray-900\">Form</h2>\n          <form method=\"POST\" action=\"#\" class=\"w-full max-w-lg p-6\">\n            <div class=\"mb-4\">\n              <label for=\"name\" class=\"block font-semibold mb-1 text-gray-800\">Name</label>\n              <input type=\"text\" id=\"name\" name=\"name\" required placeholder=\"Enter your name\" class=\"bg-white rounded-lg border w-full py-2 px-3 focus:border-blue-500 focus:ring-blue-500 text-gray-900 transition duration-300 hover:focus:ring-opacity-75\">\n            </div>\n            <div class=\"mb-4\">\n              <label for=\"email\" class=\"block font-semibold mb-1 text-gray-800\">Email</label>\n              <input type=\"email\" id=\"email\" name=\"email\" required placeholder=\"Enter your email address\" class=\"bg-white rounded-lg border w-full py-2 px-3 focus:border-blue-500 focus:ring-blue-500 text-gray-900 transition duration-300 hover:focus:ring-opacity-75\">\n            </div>\n            <div class=\"mb-4\">\n              <label for=\"phone\" class=\"block font-semibold mb-1 text-gray-800\">Phone</label>\n              <input type=\"tel\" id=\"phone\" name=\"phone\" placeholder=\"Enter your phone number\" class=\"bg-white rounded-lg border w-full py-2 px-3 focus:border-blue-500 focus:ring-blue-500 text-gray-900 transition duration-300 hover:focus:ring-opacity-75\">\n            </div>\n            <div class=\"mb-4\">\n              <label for=\"message\" class=\"block font-semibold mb-1 text-gray-800\">Message</label>\n              <textarea id=\"message\" name=\"message\" required placeholder=\"Enter your message\" class=\"bg-white rounded-lg border w-full py-2 px-3 focus:border-blue-500 focus:ring-blue-500 text-gray-900 transition duration-300 hover:focus:ring-opacity-75\"></textarea>\n            </div>\n            <button type=\"submit\" class=\"bg-brand-accent hover:bg-brand-accent-dark py-2 px-4 rounded text-white font-semibold font-poppins transition duration-300\">Send</button>\n          </form>\n        </div>\n      </div>\n    </div>\n  </div>\n</section>\n\n</body>\n</html>",
+      "nav_label": "Contact",
+      "nav_order": 4
+    }
+  ],
+  "template_ids": [
+    "3c077ad4"
+  ],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/test",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n",
+  "sitemap_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://test.com/index.html</loc>\n    <priority>1.0</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://test.com/menu.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://test.com/reviews.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>https://test.com/contact.html</loc>\n    <priority>0.8</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>",
+  "robots_txt": "User-agent: *\nAllow: /\nSitemap: https://test.com/sitemap.xml\n",
+  "errors": [
+    "[index] Multiple <h1> tags found (5)",
+    "[menu] Multiple <h1> tags found (2)",
+    "[reviews] Missing og:title meta tag",
+    "[index][llm] Missing call-to-action button",
+    "[index][llm] Placeholder text found: Home - Tacos"
+  ],
+  "metadata": {
+    "design_context": {
+      "style_name": "Soft UI Evolution",
+      "primary_color": "#2563EB",
+      "secondary_color": "#3B82F6",
+      "accent_color": "#EA580C",
+      "heading_font": "Poppins",
+      "body_font": "Open Sans"
+    },
+    "ux_scores": {
+      "index": 94,
+      "menu": 91,
+      "reviews": 78,
+      "contact": 70
+    }
+  },
+  "sources": []
+}

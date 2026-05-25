@@ -29,9 +29,12 @@ import sys
 import tempfile
 import time
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 
 # Port registry file location
 PORT_REGISTRY_PATH = Path("/tmp/agentop-port-registry.json")

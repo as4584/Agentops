@@ -274,7 +274,23 @@ class ChatRequest(BaseModel):
 
     agent_id: str = Field(..., description="Target agent ID")
     message: str = Field(..., description="User message")
+    model: str | None = Field(None, description="Optional model override for this request")
     context: dict[str, Any] = Field(default_factory=dict, description="Optional context")
+    # Conversation continuity — omit to start a new conversation
+    conversation_id: str | None = Field(
+        None,
+        description="Existing conversation ID to attach to. New conversation created when omitted.",
+    )
+
+
+class OrdoTrace(BaseModel):
+    """Ordo reasoning trace — shows how an agent classified and grounded its response."""
+
+    lane: str = Field(..., description="Classification lane: development|evaluation|architecture|positioning|support|ops|security|data|comms|soul")
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Routing confidence 0–1")
+    grounded_signal: str = Field(..., description="What the agent used to ground its answer (tool output, memory, or corpus)")
+    inferred: bool = Field(False, description="True if the answer was inferred rather than directly observed")
+    assessment: str = Field(..., description="One-sentence epistemic assessment of the response quality")
 
 
 class ChatResponse(BaseModel):
@@ -285,6 +301,20 @@ class ChatResponse(BaseModel):
     tool_calls: list[ToolExecutionRecord] = Field(default_factory=list)
     drift_status: DriftStatus = DriftStatus.GREEN
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC_TZ))
+    ordo_trace: OrdoTrace | None = Field(None, description="Ordo reasoning trace for this response")
+    # Conversation continuity
+    conversation_id: str | None = Field(None, description="Conversation this message belongs to")
+    run_id: str | None = Field(None, description="Execution run ID for replay")
+    message_id: str | None = Field(None, description="Stable message ID within the conversation")
+    sources: list[str] = Field(default_factory=list, description="Retrieved source paths backing the response")
+    # Execution truth — surfaces routing tier and answering model so the UI shows reality
+    selected_model: str | None = Field(None, description="Operator-selected logical model for the target team")
+    answering_model: str | None = Field(None, description="Logical model that produced the final reply")
+    runtime_model: str | None = Field(None, description="Exact runtime model invoked, including quantized variants")
+    execution_role: str | None = Field(None, description="Which execution role produced the final answer")
+    model_source: str | None = Field(None, description="How the model was chosen: request | team_default | agent_override | fallback")
+    model_used: str | None = Field(None, description="Compatibility alias for answering_model")
+    routing_method: str | None = Field(None, description="Routing tier that picked the agent: c_fast | lex | keyword | direct")
 
 
 class IntakeStartRequest(BaseModel):
@@ -353,6 +383,8 @@ class SystemStatus(BaseModel):
     recent_logs: list[ToolExecutionRecord] = Field(default_factory=list)
     total_tool_executions: int = 0
     uptime_seconds: float = 0.0
+    runtime_profile: str = "operator"
+    retrieval_mode: str = "fast_context"
 
 
 # ---------------------------------------------------------------------------

@@ -847,8 +847,12 @@ RECOMMENDED_AGENT_MODELS: dict[str, list[dict[str, Any]]] = {
         {"model": "phi4:latest", "reason": "Excellent STEM/technical reasoning"},
     ],
     "soul_core": [
-        {"model": "llama3.1:8b", "reason": "Best balance of reasoning + conversation for governance"},
-        {"model": "llama3.3:70b", "reason": "Top-tier reasoning if VRAM allows"},
+        {"model": "qwen2.5-coder:7b", "reason": "Default — supports tool calls, fast (~1s), 128K context, reliable orchestration"},
+        {"model": "qwen2.5:7b", "reason": "Strong general reasoning + tools, slightly slower"},
+        {"model": "claude-sonnet", "reason": "Cloud — best overall reasoning + tool use, $3/$15 per M tokens"},
+        {"model": "kimi-k2", "reason": "Cloud cheap — $0.60/M, excellent for orchestration / planning"},
+        {"model": "llama3.1:8b", "reason": "Local fallback if qwen unavailable"},
+        # Note: 'lex' / 'lex-v2' / 'lex-v3' are routers, NOT chat models — do not select for Orchad chat.
     ],
     "devops_agent": [
         {"model": "deepseek-coder-v2:latest", "reason": "128K context for large configs + strong code"},

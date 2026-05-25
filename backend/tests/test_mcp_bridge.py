@@ -306,7 +306,10 @@ async def test_call_tool_cli_failure_returns_error(monkeypatch):
 
 
 import importlib  # noqa: E402
-from datetime import UTC, datetime, timedelta  # noqa: E402
+from datetime import datetime, timedelta, timezone  # noqa: E402
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 
 
 def _make_meta(

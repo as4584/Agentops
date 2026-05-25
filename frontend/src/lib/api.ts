@@ -72,6 +72,8 @@ export interface SystemStatus {
   recent_logs: ToolLog[];
   total_tool_executions: number;
   uptime_seconds: number;
+  runtime_profile: string;
+  retrieval_mode: string;
 }
 
 export interface ChatResponse {
@@ -79,6 +81,41 @@ export interface ChatResponse {
   message: string;
   drift_status: string;
   timestamp: string;
+  ordo_trace?: {
+    lane: string;
+    confidence: number;
+    grounded_signal: string;
+    inferred: boolean;
+    assessment: string;
+  };
+  conversation_id?: string;
+  run_id?: string;
+  message_id?: string;
+  sources?: string[];
+  selected_model?: string;
+  answering_model?: string;
+  runtime_model?: string;
+  execution_role?: string;
+  model_source?: string;
+  // Execution truth — surfaces routing tier and answering model
+  model_used?: string;
+  routing_method?: string;
+}
+
+export interface TeamModelPreference {
+  team_id: string;
+  label: string;
+  selected_model?: string | null;
+  default_model?: string | null;
+  agent_ids: string[];
+  resolved_agent_models: Record<string, string>;
+  read_only: boolean;
+  help_text?: string;
+}
+
+export interface ModelPreferencesResponse {
+  teams: Record<string, TeamModelPreference>;
+  agent_overrides: Record<string, string>;
 }
 
 export interface HealthCheck {
@@ -87,6 +124,8 @@ export interface HealthCheck {
   drift_status: string;
   uptime_seconds: number;
   timestamp: string;
+  runtime_profile: string;
+  retrieval_mode: string;
 }
 
 export interface KnowledgeReindexResponse {
@@ -149,6 +188,30 @@ export interface CampaignGenerateResponse {
   };
 }
 
+/** Structured API error — preserves the JSON payload from the backend (e.g. request_id). */
+export class ApiError extends Error {
+  readonly status: number;
+  readonly payload: Record<string, unknown>;
+
+  constructor(message: string, status: number, payload: Record<string, unknown>) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.payload = payload;
+  }
+
+  /** The backend request_id, if present in the error payload. */
+  get requestId(): string | undefined {
+    return typeof this.payload.request_id === 'string' ? this.payload.request_id : undefined;
+  }
+
+  /** The backend detail or error message, if present. */
+  get detail(): string | undefined {
+    const d = this.payload.detail ?? this.payload.error;
+    return typeof d === 'string' ? d : undefined;
+  }
+}
+
 async function fetchAPI<T>(path: string, options?: RequestInit): Promise<T> {
   const baseHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -162,7 +225,14 @@ async function fetchAPI<T>(path: string, options?: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`API error ${res.status}: ${text}`);
+    let payload: Record<string, unknown> = { raw: text };
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        payload = parsed as Record<string, unknown>;
+      }
+    } catch { /* not JSON — keep raw */ }
+    throw new ApiError(`API error ${res.status}`, res.status, payload);
   }
   return res.json();
 }
@@ -202,6 +272,30 @@ export interface TaskStats {
   running: number;
   completed: number;
   failed: number;
+}
+
+export interface ConversationMessage {
+  message_id: string;
+  conversation_id: string;
+  run_id?: string | null;
+  role: 'user' | 'assistant';
+  content: string;
+  agent_id: string;
+  timestamp: string;
+  selected_model?: string | null;
+  answering_model?: string | null;
+  runtime_model?: string | null;
+  execution_role?: string | null;
+  model_source?: string | null;
+  model_used?: string | null;
+  routing_method?: string | null;
+  ordo_trace?: {
+    lane: string;
+    confidence: number;
+    grounded_signal: string;
+    inferred: boolean;
+    assessment: string;
+  } | null;
 }
 
 export interface AgentVisualSnapshot {
@@ -307,6 +401,22 @@ export interface LLMStats {
     total_in: number;
     total_out: number;
     total: number;
+    // Local (Ollama) vs cloud (OpenRouter) split
+    local_in: number;
+    local_out: number;
+    local_total: number;
+    cloud_in: number;
+    cloud_out: number;
+    cloud_total: number;
+  };
+  // Configured integration API key status (boolean only — no secrets exposed)
+  api_keys?: {
+    openrouter: boolean;
+    elevenlabs: boolean;
+    fal: boolean;
+    tiktok: boolean;
+    github: boolean;
+    facebook: boolean;
   };
   circuit_states?: Record<string, {
     model_id: string;
@@ -416,6 +526,21 @@ export interface WebgenProjectItem {
   output_dir: string;
 }
 
+export interface WebgenRunState {
+  run_id: string;
+  started_at: string;
+  current_phase: string;
+  step: number;
+  total: number;
+  business_name: string;
+  clone_url: string;
+  project_id: string;
+  project_slug: string;
+  status: 'running' | 'completed' | 'failed';
+  last_event_at: string;
+  error: string;
+}
+
 export interface CustomerService {
   id: string;
   type: string;
@@ -487,10 +612,18 @@ export const api = {
   memoryAgents: () => fetchAPI<{ agents: AgentMemoryUsage[]; total_size_bytes: number; total_size_mb: number }>('/memory/agents'),
   memoryNamespace: (ns: string) => fetchAPI<{ namespace: string; data: Record<string, unknown>; size_bytes: number; size_mb: number }>(`/memory/${ns}`),
   events: (limit = 50) => fetchAPI<Record<string, unknown>[]>(`/events?limit=${limit}`),
-  chat: (agentId: string, message: string) =>
+  chat: (agentId: string, message: string, model?: string, conversationId?: string, signal?: AbortSignal) =>
     fetchAPI<ChatResponse>('/chat', {
       method: 'POST',
-      body: JSON.stringify({ agent_id: agentId, message }),
+      body: JSON.stringify({ agent_id: agentId, message, ...(model ? { model } : {}), ...(conversationId ? { conversation_id: conversationId } : {}) }),
+      signal,
+    }),
+  modelPreferences: () =>
+    fetchAPI<ModelPreferencesResponse>('/model-preferences'),
+  setTeamModelPreference: (teamId: string, modelId: string) =>
+    fetchAPI<TeamModelPreference>(`/model-preferences/teams/${encodeURIComponent(teamId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ model_id: modelId }),
     }),
   // Soul endpoints
   soulReflect: (trigger = 'manual') =>
@@ -504,6 +637,11 @@ export const api = {
   // Task activity
   tasks: (limit = 50) =>
     fetchAPI<{ tasks: TaskItem[]; stats: TaskStats }>(`/tasks?limit=${limit}`),
+  // Conversation history
+  activeConversation: (agentId = 'soul_core') =>
+    fetchAPI<{ conversation_id: string | null; messages: ConversationMessage[]; agent_id?: string; created_at?: string; updated_at?: string }>(`/conversations/active?agent_id=${encodeURIComponent(agentId)}`),
+  conversationMessages: (conversationId: string, limit = 100) =>
+    fetchAPI<ConversationMessage[]>(`/conversations/${conversationId}/messages?limit=${limit}`),
   // LLM model knowledge
   models: () =>
     fetchAPI<{ models: LLMModel[]; available_locally: string[]; total_known: number; agent_recommendations: Record<string, any[]> }>('/models'),
@@ -521,6 +659,14 @@ export const api = {
   llmCapacity: () => fetchAPI<LLMCapacity>('/llm/capacity'),
   llmEstimate: (promptTokens = 500, maxTokens = 2048) =>
     fetchAPI<LLMEstimate>(`/llm/estimate?prompt_tokens=${promptTokens}&max_tokens=${maxTokens}`),
+  openrouterBalance: () => fetchAPI<{
+    configured: boolean;
+    total_credits_usd: number | null;
+    total_usage_usd: number;
+    remaining_usd: number | null;
+    percent_used: number | null;
+    error?: string;
+  }>('/llm/openrouter/balance'),
   // Projects
   projects: () => fetchAPI<ProjectsResponse>('/projects'),
   projectFiles: (projectId: string, projectType = 'webgen') =>
@@ -528,6 +674,11 @@ export const api = {
   projectFileContent: (projectId: string, filePath: string, projectType = 'webgen') =>
     fetchAPI<{ content: string; path: string; size_bytes: number }>(
       `/projects/${projectId}/files/content?path=${encodeURIComponent(filePath)}&project_type=${projectType}`
+    ),
+  deleteProject: (projectId: string, projectType: string) =>
+    fetchAPI<{ deleted: boolean; id: string; type: string }>(
+      `/projects/${projectId}?project_type=${projectType}`,
+      { method: 'DELETE' }
     ),
   // Customer operations
   customers: () => fetchAPI<CustomerRecord[]>('/api/customers/'),
@@ -559,6 +710,7 @@ export const api = {
     target_audience?: string;
     tone?: string;
     customer_id?: string;
+    clone_url?: string;
   }) =>
     fetchAPI<WebgenGenerateResponse>('/api/webgen/generate', {
       method: 'POST',
@@ -569,6 +721,8 @@ export const api = {
     fetchAPI<{ project_id: string; status: string; business_name: string; project_slug: string; preview_file: string; output_dir: string; html: string; deployed_url: string }>(
       `/api/webgen/projects/${projectId}`
     ),
+  webgenActiveRun: () => fetchAPI<{ run: WebgenRunState | null }>('/api/webgen/active-run'),
+  webgenRun: (runId: string) => fetchAPI<WebgenRunState>(`/api/webgen/runs/${runId}`),
   webgenSavePage: (projectId: string, html: string) =>
     fetchAPI<{ project_id: string; saved_file: string; status: string }>(`/api/webgen/projects/${projectId}/page`, {
       method: 'PUT',

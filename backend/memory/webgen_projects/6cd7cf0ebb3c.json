@@ -1,0 +1,231 @@
+{
+  "id": "6cd7cf0ebb3c",
+  "created_at": "2026-04-17T22:18:03.533013+00:00",
+  "updated_at": "2026-04-17T22:20:28.980478+00:00",
+  "status": "ready",
+  "brief": {
+    "business_name": "Bubble Up",
+    "business_type": "custom",
+    "tagline": "",
+    "description": "A test",
+    "services": [],
+    "target_audience": "",
+    "tone": "professional",
+    "colors": {},
+    "logo_url": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "social_links": {},
+    "competitors": [],
+    "special_features": [],
+    "pages_requested": []
+  },
+  "pages": [
+    {
+      "slug": "index",
+      "title": "Home - Bubble Up",
+      "purpose": "Main landing page",
+      "sections": [
+        {
+          "id": "585e296f",
+          "name": "hero",
+          "component_type": "hero-centered",
+          "content": {
+            "headline": "Welcome to Bubble Up",
+            "subtitle": "Your destination for unique and innovative solutions"
+          },
+          "html": "<header class=\"bg-gradient-to-br from-indigo-600 to-blue-900 h-screen flex items-center justify-center text-white\">\n  <div class=\"text-center\">\n    <h1 style=\"animation: fadeInUp 0.8s ease-out both\" class=\"text-4xl font-bold mb-2\">Welcome to Bubble Up</h1>\n    <p class=\"text-lg mb-6\">Your destination for unique and innovative solutions</p>\n    <button role=\"button\" aria-label=\"Get Started\" class=\"bg-white text-indigo-600 px-8 py-3 rounded hover:scale-105 hover:shadow-xl transition-all duration-300\">Get Started</button>\n  </div>\n</header>",
+          "order": 0
+        },
+        {
+          "id": "d1d618a0",
+          "name": "about-us",
+          "component_type": "text-section",
+          "content": {
+            "title": "About Us",
+            "body": "At Bubble Up, we are dedicated to delivering exceptional services that exceed expectations. Our team of experts is passionate about creating memorable experiences for our clients."
+          },
+          "html": "<section id=\"about-us\" class=\"bg-[var(--color-primary)] text-white py-24\">\n  <div class=\"container mx-auto px-4\">\n    <header>\n      <h1 class=\"text-4xl font-bold leading-tight mb-8\" style=\"animation: fadeInUp 0.8s ease-out both\">About Us</h1>\n    </header>\n    <main class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n      <article class=\"glass-card p-8\">\n        <h2 class=\"text-xl font-bold mb-4\">Our Mission</h2>\n        <p class=\"mb-6\">At Bubble Up, we are dedicated to delivering exceptional services that exceed expectations.</p>\n        <button role=\"button\" aria-label=\"Learn More About Our Mission\" class=\"btn bg-[var(--color-accent)] text-white px-4 py-2 rounded hover:scale-105 hover:shadow-xl\">Learn More</button>\n      </article>\n      <article class=\"glass-card p-8\">\n        <h2 class=\"text-xl font-bold mb-4\">Our Team</h2>\n        <p class=\"mb-6\">Our team of experts is passionate about creating memorable experiences for our clients.</p>\n        <button role=\"button\" aria-label=\"Meet Our Team\" class=\"btn bg-[var(--color-accent)] text-white px-4 py-2 rounded hover:scale-105 hover:shadow-xl\">Meet Our Team</button>\n      </article>\n      <article class=\"glass-card p-8\">\n        <h2 class=\"text-xl font-bold mb-4\">Our Services</h2>\n        <p class=\"mb-6\">We offer a variety of services tailored to meet your unique needs.</p>\n        <button role=\"button\" aria-label=\"View Our Services\" class=\"btn bg-[var(--color-accent)] text-white px-4 py-2 rounded hover:scale-105 hover:shadow-xl\">View Our Services</button>\n      </article>\n    </main>\n  </div>\n</section>\n\n<style>\n  .glass-card {\n    backdrop-filter: blur(10px);\n    background-color: rgba(255, 255, 255, 0.3);\n    border-radius: 8px;\n    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);\n    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;\n  }\n\n  .glass-card:hover {\n    transform: translateY(-2px);\n    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);\n  }\n\n  .btn {\n    transition: all 0.3s ease-in-out;\n  }\n\n  .btn:hover {\n    transform: scale(1.05);\n    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);\n  }\n</style>",
+          "order": 1
+        },
+        {
+          "id": "eb744e0c",
+          "name": "services",
+          "component_type": "grid-section",
+          "content": {
+            "title": "Our Services",
+            "items": [
+              {
+                "icon": "service-icon-1",
+                "title": "Service 1",
+                "description": "Description of Service 1"
+              },
+              {
+                "icon": "service-icon-2",
+                "title": "Service 2",
+                "description": "Description of Service 2"
+              }
+            ]
+          },
+          "html": "<section class=\"bg-[#2563EB] py-20\">\n  <header>\n    <h1 class=\"text-white text-center font-bold mb-8\" style=\"animation: fadeInUp 0.8s ease-out both;\">Our Services</h1>\n  </header>\n  <main class=\"container mx-auto px-4\">\n    <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n      <article class=\"glass-card p-6 shadow-lg rounded-lg hover:-translate-y-2 transition-transform duration-300\">\n        <img src=\"/path/to/service-icon-1.png\" alt=\"Service 1 Icon\" class=\"w-12 h-12 mb-4\">\n        <h3 class=\"text-xl font-bold mb-2\">Service 1</h3>\n        <p class=\"text-gray-700 mb-4\">Description of Service 1</p>\n        <button role=\"button\" aria-label=\"Learn More about Service 1\" class=\"bg-white text-primary border border-primary px-4 py-2 rounded hover:scale-105 hover:shadow-xl transition-all duration-300\">Learn More</button>\n      </article>\n      <article class=\"glass-card p-6 shadow-lg rounded-lg hover:-translate-y-2 transition-transform duration-300\">\n        <img src=\"/path/to/service-icon-2.png\" alt=\"Service 2 Icon\" class=\"w-12 h-12 mb-4\">\n        <h3 class=\"text-xl font-bold mb-2\">Service 2</h3>\n        <p class=\"text-gray-700 mb-4\">Description of Service 2</p>\n        <button role=\"button\" aria-label=\"Learn More about Service 2\" class=\"bg-white text-primary border border-primary px-4 py-2 rounded hover:scale-105 hover:shadow-xl transition-all duration-300\">Learn More</button>\n      </article>\n    </div>\n  </main>\n</section>\n\n<style>\n@keyframes fadeInUp {\n  from {\n    opacity: 0;\n    transform: translateY(20px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n.glass-card {\n  backdrop-filter: blur(10px);\n  border-radius: 16px;\n}\n</style>",
+          "order": 2
+        },
+        {
+          "id": "ea44cc97",
+          "name": "testimonials",
+          "component_type": "testimonial-section",
+          "content": {
+            "title": "What Our Clients Say",
+            "items": [
+              {
+                "quote": "Bubble Up exceeded our expectations. They delivered on time and went above and beyond.",
+                "author": "Client Name"
+              },
+              {
+                "quote": "Their customer service is exceptional. I highly recommend them!",
+                "author": "Another Client Name"
+              }
+            ]
+          },
+          "html": "<section id=\"testimonials\" class=\"bg-[#f9fafb] py-24\">\n  <div class=\"container mx-auto px-6\">\n    <header>\n      <h1 class=\"text-3xl font-bold text-center mb-8\" style=\"animation: fadeInUp 0.8s ease-out both\">What Our Clients Say</h1>\n    </header>\n    <main>\n      <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n        <article class=\"glass-card p-6 shadow-lg rounded-md text-center\">\n          <blockquote class=\"text-xl mb-4\">Bubble Up exceeded our expectations. They delivered on time and went above and beyond.</blockquote>\n          <footer>- Client Name</footer>\n        </article>\n        <article class=\"glass-card p-6 shadow-lg rounded-md text-center\">\n          <blockquote class=\"text-xl mb-4\">Their customer service is exceptional. I highly recommend them!</blockquote>\n          <footer>- Another Client Name</footer>\n        </article>\n      </div>\n    </main>\n  </div>\n</section>",
+          "order": 3
+        },
+        {
+          "id": "8f0459cf",
+          "name": "contact",
+          "component_type": "form-section",
+          "content": {
+            "title": "Get in Touch",
+            "fields": [
+              {
+                "type": "text",
+                "label": "Name"
+              },
+              {
+                "type": "email",
+                "label": "Email"
+              },
+              {
+                "type": "textarea",
+                "label": "Message"
+              }
+            ],
+            "button_text": "Send Message"
+          },
+          "html": "<section id=\"contact\" class=\"bg-[#f9fafb] py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 style=\"animation: fadeInUp 0.8s ease-out both\" class=\"text-3xl font-bold mb-10 text-center\">Get in Touch</h2>\n    <form class=\"max-w-md mx-auto space-y-4\">\n      <div>\n        <label for=\"name\" class=\"block text-sm font-medium text-gray-700\">Name</label>\n        <input id=\"name\" type=\"text\" name=\"name\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email</label>\n        <input id=\"email\" type=\"email\" name=\"email\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"message\" class=\"block text-sm font-medium text-gray-700\">Message</label>\n        <textarea id=\"message\" name=\"message\" rows=\"4\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\"></textarea>\n      </div>\n      <button type=\"submit\" role=\"button\" aria-label=\"Send Message\" class=\"w-full bg-[#2563EB] text-white py-2 px-4 rounded-md hover:bg-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 hover:scale-105 hover:shadow-xl\">Send Message</button>\n    </form>\n  </div>\n</section>",
+          "order": 4
+        }
+      ],
+      "seo": {
+        "title": "Bubble Up - Your Custom Solutions Partner",
+        "meta_description": "Find custom solutions with Bubble Up. Contact us now for more information!",
+        "keywords": [
+          "custom solutions",
+          "bubble up",
+          "services"
+        ],
+        "og_title": "Bubble Up: Custom Solutions for Your Needs",
+        "og_description": "Discover how Bubble Up can help you with your custom solutions. Contact us today!",
+        "og_image": "",
+        "canonical_url": "",
+        "schema_type": "LocalBusiness",
+        "schema_json_ld": {
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          "name": "Bubble Up",
+          "description": "Find custom solutions with Bubble Up.",
+          "url": "https://www.bubbleup.com/",
+          "telephone": "+1234567890",
+          "email": "info@bubbleup.com",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 Main St",
+            "addressLocality": "Anytown",
+            "addressRegion": "CA",
+            "postalCode": "12345"
+          },
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday"
+              ],
+              "opens": "09:00",
+              "closes": "17:00"
+            }
+          ]
+        }
+      },
+      "aeo": {
+        "faq_pairs": [
+          {
+            "q": "What services does Bubble Up offer?",
+            "a": "Bubble Up provides a variety of services tailored to meet your specific needs."
+          },
+          {
+            "q": "How can I contact Bubble Up for assistance?",
+            "a": "You can reach out to Bubble Up by visiting their website or calling their customer support line."
+          },
+          {
+            "q": "What sets Bubble Up apart from other businesses in the area?",
+            "a": "Bubble Up stands out with its commitment to providing exceptional service and innovative solutions."
+          },
+          {
+            "q": "Where is Bubble Up located?",
+            "a": "Bubble Up is based in [Location], making it easily accessible for local residents and businesses."
+          },
+          {
+            "q": "How can I book a service with Bubble Up?",
+            "a": "To book a service, simply visit their website or call their booking line to schedule your appointment."
+          }
+        ],
+        "speakable_selectors": [
+          "#hero h1",
+          "#hero p",
+          ".faq-answer"
+        ],
+        "entity_name": "Bubble Up",
+        "entity_type": "LocalBusiness",
+        "entity_description": "Bubble Up is a leading local business offering diverse services designed to enhance efficiency and satisfaction for its clients.",
+        "topic_cluster": "Services",
+        "related_topics": [
+          "Customer Support",
+          "Innovation",
+          "Community Engagement",
+          "Sustainability",
+          "Technology"
+        ]
+      },
+      "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Home - Bubble Up</title>\n  <meta name=\"description\" content=\"\">\n  <script src=\"https://cdn.tailwindcss.com\"></script>\n  <link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@300;400;500&display=swap\" rel=\"stylesheet\">\n  <style>\n/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n  </style>\n\n  <meta name=\"description\" content=\"Find custom solutions with Bubble Up. Contact us now for more information!\">\n  <meta name=\"keywords\" content=\"custom solutions, bubble up, services\">\n  <meta property=\"og:title\" content=\"Bubble Up: Custom Solutions for Your Needs\">\n  <meta property=\"og:description\" content=\"Discover how Bubble Up can help you with your custom solutions. Contact us today!\">\n  <meta property=\"og:type\" content=\"website\">\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"LocalBusiness\",\n  \"name\": \"Bubble Up\",\n  \"description\": \"Find custom solutions with Bubble Up.\",\n  \"url\": \"https://www.bubbleup.com/\",\n  \"telephone\": \"+1234567890\",\n  \"email\": \"info@bubbleup.com\",\n  \"address\": {\n    \"@type\": \"PostalAddress\",\n    \"streetAddress\": \"123 Main St\",\n    \"addressLocality\": \"Anytown\",\n    \"addressRegion\": \"CA\",\n    \"postalCode\": \"12345\"\n  },\n  \"openingHoursSpecification\": [\n    {\n      \"@type\": \"OpeningHoursSpecification\",\n      \"dayOfWeek\": [\n        \"Monday\",\n        \"Tuesday\",\n        \"Wednesday\",\n        \"Thursday\",\n        \"Friday\"\n      ],\n      \"opens\": \"09:00\",\n      \"closes\": \"17:00\"\n    }\n  ]\n}\n  </script>\n\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What services does Bubble Up offer?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bubble Up provides a variety of services tailored to meet your specific needs.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I contact Bubble Up for assistance?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"You can reach out to Bubble Up by visiting their website or calling their customer support line.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"What sets Bubble Up apart from other businesses in the area?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bubble Up stands out with its commitment to providing exceptional service and innovative solutions.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"Where is Bubble Up located?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"Bubble Up is based in [Location], making it easily accessible for local residents and businesses.\"\n      }\n    },\n    {\n      \"@type\": \"Question\",\n      \"name\": \"How can I book a service with Bubble Up?\",\n      \"acceptedAnswer\": {\n        \"@type\": \"Answer\",\n        \"text\": \"To book a service, simply visit their website or call their booking line to schedule your appointment.\"\n      }\n    }\n  ]\n}\n  </script>\n  <script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"speakable\": {\n    \"@type\": \"SpeakableSpecification\",\n    \"cssSelector\": [\n      \"#hero h1\",\n      \"#hero p\",\n      \".faq-answer\"\n    ]\n  }\n}\n  </script>\n</head>\n<body class=\"min-h-screen bg-white\">\n\n<header class=\"bg-gradient-to-br from-indigo-600 to-blue-900 h-screen flex items-center justify-center text-white\">\n  <div class=\"text-center\">\n    <h1 style=\"animation: fadeInUp 0.8s ease-out both\" class=\"text-4xl font-bold mb-2\">Welcome to Bubble Up</h1>\n    <p class=\"text-lg mb-6\">Your destination for unique and innovative solutions</p>\n    <button role=\"button\" aria-label=\"Get Started\" class=\"bg-white text-indigo-600 px-8 py-3 rounded hover:scale-105 hover:shadow-xl transition-all duration-300\">Get Started</button>\n  </div>\n</header>\n\n<section id=\"about-us\" class=\"bg-[var(--color-primary)] text-white py-24\">\n  <div class=\"container mx-auto px-4\">\n    <header>\n      <h1 class=\"text-4xl font-bold leading-tight mb-8\" style=\"animation: fadeInUp 0.8s ease-out both\">About Us</h1>\n    </header>\n    <main class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n      <article class=\"glass-card p-8\">\n        <h2 class=\"text-xl font-bold mb-4\">Our Mission</h2>\n        <p class=\"mb-6\">At Bubble Up, we are dedicated to delivering exceptional services that exceed expectations.</p>\n        <button role=\"button\" aria-label=\"Learn More About Our Mission\" class=\"btn bg-[var(--color-accent)] text-white px-4 py-2 rounded hover:scale-105 hover:shadow-xl\">Learn More</button>\n      </article>\n      <article class=\"glass-card p-8\">\n        <h2 class=\"text-xl font-bold mb-4\">Our Team</h2>\n        <p class=\"mb-6\">Our team of experts is passionate about creating memorable experiences for our clients.</p>\n        <button role=\"button\" aria-label=\"Meet Our Team\" class=\"btn bg-[var(--color-accent)] text-white px-4 py-2 rounded hover:scale-105 hover:shadow-xl\">Meet Our Team</button>\n      </article>\n      <article class=\"glass-card p-8\">\n        <h2 class=\"text-xl font-bold mb-4\">Our Services</h2>\n        <p class=\"mb-6\">We offer a variety of services tailored to meet your unique needs.</p>\n        <button role=\"button\" aria-label=\"View Our Services\" class=\"btn bg-[var(--color-accent)] text-white px-4 py-2 rounded hover:scale-105 hover:shadow-xl\">View Our Services</button>\n      </article>\n    </main>\n  </div>\n</section>\n\n<style>\n  .glass-card {\n    backdrop-filter: blur(10px);\n    background-color: rgba(255, 255, 255, 0.3);\n    border-radius: 8px;\n    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);\n    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;\n  }\n\n  .glass-card:hover {\n    transform: translateY(-2px);\n    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);\n  }\n\n  .btn {\n    transition: all 0.3s ease-in-out;\n  }\n\n  .btn:hover {\n    transform: scale(1.05);\n    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);\n  }\n</style>\n\n<section class=\"bg-[#2563EB] py-20\">\n  <header>\n    <h1 class=\"text-white text-center font-bold mb-8\" style=\"animation: fadeInUp 0.8s ease-out both;\">Our Services</h1>\n  </header>\n  <main class=\"container mx-auto px-4\">\n    <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n      <article class=\"glass-card p-6 shadow-lg rounded-lg hover:-translate-y-2 transition-transform duration-300\">\n        <img src=\"/path/to/service-icon-1.png\" alt=\"Service 1 Icon\" class=\"w-12 h-12 mb-4\">\n        <h3 class=\"text-xl font-bold mb-2\">Service 1</h3>\n        <p class=\"text-gray-700 mb-4\">Description of Service 1</p>\n        <button role=\"button\" aria-label=\"Learn More about Service 1\" class=\"bg-white text-primary border border-primary px-4 py-2 rounded hover:scale-105 hover:shadow-xl transition-all duration-300\">Learn More</button>\n      </article>\n      <article class=\"glass-card p-6 shadow-lg rounded-lg hover:-translate-y-2 transition-transform duration-300\">\n        <img src=\"/path/to/service-icon-2.png\" alt=\"Service 2 Icon\" class=\"w-12 h-12 mb-4\">\n        <h3 class=\"text-xl font-bold mb-2\">Service 2</h3>\n        <p class=\"text-gray-700 mb-4\">Description of Service 2</p>\n        <button role=\"button\" aria-label=\"Learn More about Service 2\" class=\"bg-white text-primary border border-primary px-4 py-2 rounded hover:scale-105 hover:shadow-xl transition-all duration-300\">Learn More</button>\n      </article>\n    </div>\n  </main>\n</section>\n\n<style>\n@keyframes fadeInUp {\n  from {\n    opacity: 0;\n    transform: translateY(20px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n.glass-card {\n  backdrop-filter: blur(10px);\n  border-radius: 16px;\n}\n</style>\n\n<section id=\"testimonials\" class=\"bg-[#f9fafb] py-24\">\n  <div class=\"container mx-auto px-6\">\n    <header>\n      <h1 class=\"text-3xl font-bold text-center mb-8\" style=\"animation: fadeInUp 0.8s ease-out both\">What Our Clients Say</h1>\n    </header>\n    <main>\n      <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6\">\n        <article class=\"glass-card p-6 shadow-lg rounded-md text-center\">\n          <blockquote class=\"text-xl mb-4\">Bubble Up exceeded our expectations. They delivered on time and went above and beyond.</blockquote>\n          <footer>- Client Name</footer>\n        </article>\n        <article class=\"glass-card p-6 shadow-lg rounded-md text-center\">\n          <blockquote class=\"text-xl mb-4\">Their customer service is exceptional. I highly recommend them!</blockquote>\n          <footer>- Another Client Name</footer>\n        </article>\n      </div>\n    </main>\n  </div>\n</section>\n\n<section id=\"contact\" class=\"bg-[#f9fafb] py-24\">\n  <div class=\"container mx-auto px-6\">\n    <h2 style=\"animation: fadeInUp 0.8s ease-out both\" class=\"text-3xl font-bold mb-10 text-center\">Get in Touch</h2>\n    <form class=\"max-w-md mx-auto space-y-4\">\n      <div>\n        <label for=\"name\" class=\"block text-sm font-medium text-gray-700\">Name</label>\n        <input id=\"name\" type=\"text\" name=\"name\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"email\" class=\"block text-sm font-medium text-gray-700\">Email</label>\n        <input id=\"email\" type=\"email\" name=\"email\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\">\n      </div>\n      <div>\n        <label for=\"message\" class=\"block text-sm font-medium text-gray-700\">Message</label>\n        <textarea id=\"message\" name=\"message\" rows=\"4\" required class=\"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm\"></textarea>\n      </div>\n      <button type=\"submit\" role=\"button\" aria-label=\"Send Message\" class=\"w-full bg-[#2563EB] text-white py-2 px-4 rounded-md hover:bg-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 hover:scale-105 hover:shadow-xl\">Send Message</button>\n    </form>\n  </div>\n</section>\n\n\n  <section id=\"faq\" class=\"max-w-3xl mx-auto px-4 py-16\">\n    <h2 class=\"text-3xl font-bold text-center mb-8\">Frequently Asked Questions</h2>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What services does Bubble Up offer?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bubble Up provides a variety of services tailored to meet your specific needs.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I contact Bubble Up for assistance?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">You can reach out to Bubble Up by visiting their website or calling their customer support line.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">What sets Bubble Up apart from other businesses in the area?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bubble Up stands out with its commitment to providing exceptional service and innovative solutions.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">Where is Bubble Up located?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">Bubble Up is based in [Location], making it easily accessible for local residents and businesses.</p>\n    </details>\n    <details class=\"border-b border-gray-200 py-4\">\n      <summary class=\"cursor-pointer font-semibold text-lg text-gray-800\">How can I book a service with Bubble Up?</summary>\n      <p class=\"faq-answer mt-2 text-gray-600\">To book a service, simply visit their website or call their booking line to schedule your appointment.</p>\n    </details>\n  </section>\n</body>\n</html>",
+      "nav_label": "Home",
+      "nav_order": 1
+    }
+  ],
+  "template_ids": [],
+  "output_dir": "/root/studio/testing/Agentop/output/webgen/bubble-up",
+  "global_css": "/* WebGen Global Styles */\n:root {\n  --color-primary: #2563EB;\n  --color-secondary: #3B82F6;\n  --color-accent: #EA580C;\n  --color-bg: #F8FAFC;\n  --color-fg: #1E293B;\n  --font-heading: 'Poppins', system-ui, -apple-system, sans-serif;\n  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;\n}\n\nbody {\n  font-family: var(--font-body);\n  color: #1f2937;\n  line-height: 1.6;\n}\n\nh1, h2, h3, h4, h5, h6 {\n  font-family: var(--font-heading);\n  line-height: 1.2;\n}\n\na {\n  color: var(--color-primary);\n  text-decoration: none;\n}\n\na:hover {\n  text-decoration: underline;\n}\n\n.btn-primary {\n  background-color: var(--color-primary);\n  color: white;\n  padding: 0.75rem 1.5rem;\n  border-radius: 0.5rem;\n  font-weight: 600;\n  transition: background-color 0.2s;\n}\n\n.btn-primary:hover {\n  background-color: var(--color-secondary);\n  transform: scale(1.05);\n  box-shadow: 0 20px 40px rgba(0,0,0,0.2);\n}\n\n/* \u2500\u2500 Premium animation keyframes \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@keyframes fadeInUp {\n  from { opacity: 0; transform: translateY(32px); }\n  to   { opacity: 1; transform: translateY(0); }\n}\n\n@keyframes slideInLeft {\n  from { opacity: 0; transform: translateX(-40px); }\n  to   { opacity: 1; transform: translateX(0); }\n}\n\n@keyframes glowPulse {\n  0%, 100% { box-shadow: 0 0 20px #EA580C4d; }\n  50%       { box-shadow: 0 0 40px #EA580Cb3; }\n}\n\n@keyframes gradientShift {\n  0%   { background-position: 0% 50%; }\n  50%  { background-position: 100% 50%; }\n  100% { background-position: 0% 50%; }\n}\n\n/* \u2500\u2500 Glassmorphism card \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.glass-card {\n  background: rgba(255, 255, 255, 0.08);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 1rem;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n\n.glass-card:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);\n}\n\n/* \u2500\u2500 Gradient text utility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.gradient-text {\n  background: linear-gradient(90deg, #2563EB, #EA580C);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n/* \u2500\u2500 Animated hero gradient background \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.hero-gradient {\n  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 50%, #0f172a 100%);\n  background-size: 200% 200%;\n  animation: gradientShift 8s ease infinite;\n}\n\n/* \u2500\u2500 Scroll-reveal (JS-free fade) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.reveal {\n  opacity: 0;\n  transform: translateY(24px);\n  transition: opacity 0.7s ease, transform 0.7s ease;\n}\n\n.reveal.visible {\n  opacity: 1;\n  transform: translateY(0);\n}\n",
+  "sitemap_xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://bubbleup.com/index.html</loc>\n    <priority>1.0</priority>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>",
+  "robots_txt": "User-agent: *\nAllow: /\nSitemap: https://bubbleup.com/sitemap.xml\n",
+  "errors": [
+    "[index] Multiple <h1> tags found (4)",
+    "[index][llm] Missing call-to-action button"
+  ],
+  "metadata": {
+    "design_context": {
+      "style_name": "Soft UI Evolution",
+      "primary_color": "#2563EB",
+      "secondary_color": "#3B82F6",
+      "accent_color": "#EA580C",
+      "heading_font": "Poppins",
+      "body_font": "Open Sans"
+    },
+    "ux_scores": {
+      "index": 83
+    }
+  }
+}

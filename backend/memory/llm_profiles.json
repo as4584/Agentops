@@ -1,0 +1,14 @@
+{
+  "profiles": [
+    {
+      "profile_id": "openrouter-1",
+      "provider": "openrouter",
+      "api_key": "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",
+      "auth_type": "api_key",
+      "monthly_budget_usd": 10.0,
+      "spend_this_month": 0.006249,
+      "last_reset_epoch": 1776491174.834267,
+      "active": true
+    }
+  ]
+}

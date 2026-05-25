@@ -1,0 +1,14 @@
+{
+  "run_id": "027743b9-e19",
+  "started_at": "2026-04-21T15:52:41.113651+00:00",
+  "current_phase": "planning",
+  "step": 0,
+  "total": 6,
+  "business_name": "Business",
+  "clone_url": "",
+  "project_id": "",
+  "project_slug": "",
+  "status": "failed",
+  "last_event_at": "2026-04-21T15:52:41.113672+00:00",
+  "error": "generate_site() got an unexpected keyword argument 'run_id'"
+}

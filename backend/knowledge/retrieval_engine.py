@@ -14,6 +14,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from backend.knowledge.bm25_index import BM25Index
+from backend.knowledge.reranker import Reranker
 
 if TYPE_CHECKING:
     from backend.knowledge.context_assembler import ContextAssembler
@@ -50,6 +51,7 @@ class RetrievalEngine:
         self.bm25         = bm25_index
         self.dense_top_k  = dense_top_k
         self.sparse_top_k = sparse_top_k
+        self._reranker    = Reranker()
 
     # ----------------------------------------------------------------
     # Public API
@@ -123,7 +125,9 @@ class RetrievalEngine:
         for hit in merged:
             hit["retrieval_method"] = method
 
-        return merged[:top_k]
+        # Sprint 3: rerank merged pool → top_k
+        # Failure preserves merged[:top_k] exactly (Sprint 2 behaviour)
+        return self._reranker.rerank(query, merged, top_k=top_k)
 
     # ----------------------------------------------------------------
     # RRF internals

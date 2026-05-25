@@ -203,3 +203,38 @@ def test_generate_with_tools_sets_fallback_metadata(monkeypatch: MonkeyPatch):
     assert result["output"] == "tool fallback ok"
     assert result["fallback_used"] == "claude-sonnet"
     assert result["effective_model"] == "claude-sonnet"
+
+
+def test_generate_resolves_lex_alias_to_installed_model():
+    from backend.llm.unified_registry import UnifiedModelRouter
+
+    class StubLocalClient:
+        def __init__(self) -> None:
+            self.model = "llama3.2"
+            self.seen_models: list[str] = []
+
+        async def is_available(self) -> bool:
+            return True
+
+        async def list_models(self) -> list[str]:
+            return ["lex-v3:latest"]
+
+        async def generate(
+            self,
+            prompt: str,
+            system: str = "",
+            temperature: float = 0.7,
+            max_tokens: int = 2048,
+        ) -> str:
+            del prompt, system, temperature, max_tokens
+            self.seen_models.append(self.model)
+            return "resolved ok"
+
+    router = UnifiedModelRouter()
+    router._local_client = StubLocalClient()  # type: ignore[assignment]
+
+    result = asyncio.run(router.generate(prompt="test", model="lex"))
+
+    assert result["output"] == "resolved ok"
+    assert result["runtime_model_id"] == "lex-v3:latest"
+    assert router.local_client.seen_models == ["lex-v3:latest"]

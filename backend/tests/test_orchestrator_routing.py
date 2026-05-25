@@ -198,6 +198,20 @@ def test_router_falls_back_to_knowledge_agent_when_target_not_in_agents_dict() -
     assert result.get("target_agent") == "knowledge_agent"
 
 
+def test_get_all_agent_definitions_includes_full_canonical_roster_without_eager_instantiation() -> None:
+    """The dashboard roster must remain complete even when _agents is mostly empty."""
+    orch = _make_orchestrator()
+
+    definitions = orch.get_all_agent_definitions()
+    returned_ids = {definition.agent_id for definition in definitions}
+
+    from backend.orchestrator.lex_router import VALID_AGENTS
+
+    assert returned_ids == VALID_AGENTS
+    # Only soul_core should have been instantiated by _make_orchestrator() setup.
+    assert set(orch._agents.keys()) <= {"soul_core"}
+
+
 # ---------------------------------------------------------------------------
 # _agent_executor_node — short-circuit on error state
 # ---------------------------------------------------------------------------
@@ -316,6 +330,7 @@ def test_knowledge_executor_uses_context_assembler_not_legacy_store() -> None:
     )
     orch._knowledge_store.search.assert_not_called()
     assert result["response"] == "mock knowledge response"
+    assert result["sources"] == ["docs/SOURCE_OF_TRUTH.md"]
 
 
 # ---------------------------------------------------------------------------

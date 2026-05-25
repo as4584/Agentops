@@ -15,7 +15,10 @@ Covers:
 from __future__ import annotations
 
 import textwrap
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 
 import pytest
 

@@ -1,0 +1,14 @@
+{
+  "run_id": "11013a7d-888",
+  "started_at": "2026-04-21T19:05:30.878970+00:00",
+  "current_phase": "export",
+  "step": 6,
+  "total": 6,
+  "business_name": "new",
+  "clone_url": "",
+  "project_id": "d2595d867ac2",
+  "project_slug": "new",
+  "status": "completed",
+  "last_event_at": "2026-04-21T19:12:53.711479+00:00",
+  "error": ""
+}

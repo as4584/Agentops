@@ -1,6 +1,7 @@
 import { API_BASE } from '@/lib/api';
 import React, { useEffect, useState } from 'react';
-import { Stack, Group, Text, Badge, Box, ScrollArea } from '@mantine/core';
+import { Stack, Group, Text, Badge, Box, ScrollArea, ActionIcon, Tooltip } from '@mantine/core';
+import { IconTrash } from '@tabler/icons-react';
 
 interface WebgenProject {
   id: string;
@@ -17,6 +18,7 @@ const statusLabel = (s: string) =>
 
 export default function BuildPanel() {
   const [projects, setProjects] = useState<WebgenProject[]>([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchProjects = async () => {
     try {
@@ -26,6 +28,24 @@ export default function BuildPanel() {
         setProjects(data.projects ?? []);
       }
     } catch {}
+  };
+
+  const deleteProject = async (id: string, name: string) => {
+    if (!window.confirm(`Delete "${name}"? This removes the project and its files.`)) return;
+    setDeletingId(id);
+    // Optimistic UI update
+    setProjects((prev) => prev.filter((p) => p.id !== id));
+    try {
+      const r = await fetch(`${API_BASE}/api/webgen/projects/${id}`, { method: 'DELETE' });
+      if (!r.ok) {
+        // Revert on failure
+        await fetchProjects();
+      }
+    } catch {
+      await fetchProjects();
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   useEffect(() => {
@@ -60,13 +80,27 @@ export default function BuildPanel() {
         <Stack gap={4}>
           {recent.length === 0 && <Text size="xs" c="dimmed">No projects yet</Text>}
           {recent.map((p) => (
-            <Group key={p.id} justify="space-between" px={8} py={4}
+            <Group key={p.id} justify="space-between" px={8} py={4} wrap="nowrap"
               style={{ background: '#141619', borderRadius: 4 }}>
-              <Box>
-                <Text size="xs" fw={600}>{p.business_name}</Text>
+              <Box style={{ minWidth: 0, flex: 1 }}>
+                <Text size="xs" fw={600} truncate>{p.business_name}</Text>
                 <Text size="xs" c="dimmed">{new Date(p.updated_at).toLocaleDateString()}</Text>
               </Box>
-              <Badge size="xs" color={statusColor(p.status)}>{statusLabel(p.status)}</Badge>
+              <Group gap={4} wrap="nowrap">
+                <Badge size="xs" color={statusColor(p.status)}>{statusLabel(p.status)}</Badge>
+                <Tooltip label="Delete project" withArrow>
+                  <ActionIcon
+                    variant="subtle"
+                    color="red"
+                    size="sm"
+                    loading={deletingId === p.id}
+                    onClick={() => deleteProject(p.id, p.business_name)}
+                    aria-label={`Delete ${p.business_name}`}
+                  >
+                    <IconTrash size={14} />
+                  </ActionIcon>
+                </Tooltip>
+              </Group>
             </Group>
           ))}
         </Stack>

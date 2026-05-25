@@ -255,6 +255,31 @@ class TestChatEndpoint:
         assert result.agent_id == "devops_agent"
 
     @pytest.mark.asyncio
+    async def test_chat_explicit_agent_bypasses_webgen_intercept(self, mock_orchestrator):
+        from backend.models import ChatRequest
+
+        req = ChatRequest(
+            agent_id="soul_core",
+            message="make me a website",
+            model="qwen2.5-coder:7b",
+        )
+        mock_generate_site = AsyncMock(side_effect=AssertionError("generate_site should not be called"))
+
+        with (
+            patch.object(server_module, "_orchestrator", mock_orchestrator),
+            patch.object(server_module, "_execution_recorder", None),
+            patch.object(server_module, "_execution_analyzer", None),
+            patch("backend.routes.webgen_builder.generate_site", mock_generate_site),
+        ):
+            result = await server_module.chat(req)
+
+        assert result.agent_id == "soul_core"
+        mock_orchestrator.process_message.assert_awaited_once()
+        _, kwargs = mock_orchestrator.process_message.await_args
+        assert kwargs["agent_id"] == "soul_core"
+        assert kwargs["context"]["model"] == "qwen2.5-coder:7b"
+
+    @pytest.mark.asyncio
     async def test_chat_dependency_health_uses_grounded_reply(self, mock_orchestrator):
         from backend.models import ChatRequest
 
@@ -487,6 +512,36 @@ class TestAgentEndpoints:
     async def test_set_agent_model_empty(self):
         result = await server_module.set_agent_model("monitor_agent", {})
         assert result["agent_id"] == "monitor_agent"
+
+    @pytest.mark.asyncio
+    async def test_list_agents_default_returns_only_canonical(self, mock_orchestrator):
+        """GET /agents (no include_factory) must only return agents in VALID_AGENTS roster."""
+        from backend.orchestrator.lex_router import VALID_AGENTS
+
+        # Feed back definitions whose IDs are a superset of the canonical roster
+        # (includes a factory agent that should be filtered out by the endpoint)
+        canonical_ids = list(VALID_AGENTS)
+        factory_id = "factory_debug_agent"
+        all_ids = canonical_ids + [factory_id]
+
+        def make_def(aid: str):
+            d = MagicMock()
+            d.agent_id = aid
+            d.model_dump.return_value = {"agent_id": aid}
+            return d
+
+        mock_orchestrator.get_all_agent_definitions.return_value = [
+            make_def(aid) for aid in canonical_ids
+        ]
+        with patch.object(server_module, "_orchestrator", mock_orchestrator):
+            result = await server_module.list_agents(include_factory=False)
+
+        returned_ids = {a["agent_id"] for a in result}
+        assert returned_ids.issubset(VALID_AGENTS), (
+            f"Non-canonical agents in /agents response: {returned_ids - VALID_AGENTS}"
+        )
+        assert factory_id not in returned_ids
+        assert len(result) <= len(VALID_AGENTS)
 
 
 # ---------------------------------------------------------------------------

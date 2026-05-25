@@ -5,6 +5,43 @@ PYTEST = python -m pytest
 PYTEST_OPTS = --tb=short -q --no-header
 NO_COV = --no-cov
 
+# ─── Dev start / stop / restart ───────────────────────────────────────────────
+# ALL local backend instances must go through port_guard so the registry stays
+# accurate.  Never use uvicorn directly for local dev — see scripts/relaunch.sh.
+
+BACKEND_PORT ?= 8000
+BACKEND_HOST ?= 127.0.0.1
+
+.PHONY: dev-backend
+dev-backend:
+	python -m backend.port_guard serve backend.server:app --host $(BACKEND_HOST) --port $(BACKEND_PORT)
+
+.PHONY: dev-frontend
+dev-frontend:
+	cd frontend && npm run dev
+
+.PHONY: stop
+stop:
+	@python -m backend.port_guard kill $(BACKEND_PORT) 2>/dev/null && echo "Backend stopped" || echo "Backend was not running"
+	@fuser -k 3007/tcp 2>/dev/null && echo "Frontend stopped" || echo "Frontend was not running"
+
+.PHONY: restart
+restart: stop
+	@sleep 1
+	@python -m backend.port_guard serve backend.server:app --host $(BACKEND_HOST) --port $(BACKEND_PORT)
+
+.PHONY: status
+status:
+	@python -m backend.port_guard status
+
+.PHONY: cleanup-runtime
+cleanup-runtime:
+	python scripts/cleanup_runtime_artifacts.py
+
+.PHONY: cleanup-runtime-dry-run
+cleanup-runtime-dry-run:
+	python scripts/cleanup_runtime_artifacts.py --dry-run
+
 # ─── Full suites ──────────────────────────────────────────────────────────────
 
 .PHONY: test
@@ -172,6 +209,43 @@ k8s-dashboard:
 .PHONY: ci
 ci: lint typecheck test-coverage
 
+# ─── Lex router evaluation ─────────────────────────────────────────────────────
+
+# Score lex-v2 against the 150-case golden eval (Ollama must be running)
+.PHONY: eval-lex-golden
+eval-lex-golden:
+	python scripts/eval_lex.py --golden --skip-v3 --no-save
+
+# Score lex-v2 AND lex-v3 against golden eval and save benchmark results
+.PHONY: eval-lex-both
+eval-lex-both:
+	python scripts/eval_lex.py --golden
+
+# CI gate: exit 1 if lex-v2 accuracy < 70% on golden eval
+.PHONY: eval-lex-ci
+eval-lex-ci:
+	python scripts/eval_lex.py --golden --ci-gate 0.70
+
+# Build lex-v3 using Ollama-native few-shot mode (no GPU required)
+.PHONY: lex-v3-build
+lex-v3-build:
+	python scripts/finetune_lex.py --native
+
+# Dry-run lex-v3 native build — shows example selection stats, no file writes
+.PHONY: lex-v3-dry-run
+lex-v3-dry-run:
+	python scripts/finetune_lex.py --native --dry-run
+
+# Generate hard/boundary training examples (no LLM needed)
+.PHONY: generate-hard
+generate-hard:
+	python scripts/generate_hard_examples.py
+
+# Auto-label unlabeled routing records in data/training/
+.PHONY: categorize-training
+categorize-training:
+	python scripts/categorize_training_data.py
+
 .PHONY: lint
 lint:
 	ruff check backend deerflow
@@ -185,6 +259,14 @@ typecheck:
 help:
 	@echo "Agentop Targets"
 	@echo "──────────────────────────────────────────────────"
+	@echo "Dev (port_guard — canonical local start)"
+	@echo "  make dev-backend        Start backend via port_guard on port 8000"
+	@echo "  make dev-frontend       Start Next.js dashboard on port 3007"
+	@echo "  make stop               Kill backend (port_guard) + frontend"
+	@echo "  make restart            stop + start backend"
+	@echo "  make status             Show port_guard registry + known-port scan"
+	@echo "  BACKEND_PORT=8101 make dev-backend  (sandbox instance)"
+	@echo ""
 	@echo "  make k8s-deploy     Build image + sync secret + deploy to K8s"
 	@echo "  make k8s-logs       Tail backend pod logs"
 	@echo "  make k8s-status     Show all pods + services"
@@ -212,3 +294,12 @@ help:
 	@echo "  make test-security  Security agent coverage"
 	@echo ""
 	@echo "  make ci             lint + typecheck + coverage"
+	@echo ""
+	@echo "Lex Router / ML Targets"
+	@echo "──────────────────────────────────────────────────"
+	@echo "  make eval-lex-golden    Score lex-v2 on 150-case golden eval"
+	@echo "  make eval-lex-both      Score lex-v2 AND lex-v3 on golden eval"
+	@echo "  make eval-lex-ci        CI gate: fail if lex-v2 < 70% accuracy"
+	@echo "  make lex-v3-build       Build lex-v3 via Ollama native mode"
+	@echo "  make generate-hard      Generate 528 hard/boundary training examples"
+	@echo "  make categorize-training  Auto-label unlabeled routing records"

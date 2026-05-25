@@ -29,7 +29,10 @@ Or run directly from terminal to log a quick manual entry:
 import argparse
 import json
 import sys
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from pathlib import Path
 
 # ── Paths ──────────────────────────────────────────────────────────────────────

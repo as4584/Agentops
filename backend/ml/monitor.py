@@ -16,7 +16,10 @@ from __future__ import annotations
 import json
 import math
 from collections import deque
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from pathlib import Path
 from threading import RLock
 from typing import Any

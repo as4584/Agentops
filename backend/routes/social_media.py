@@ -65,9 +65,10 @@ def _tiktok_headers() -> dict[str, str]:
 
 
 def _meta_page_token() -> str:
-    token = os.getenv("META_PAGE_ACCESS_TOKEN", "")
+    # Doppler key is FACEBOOK_PAGE_ACCESS_TOKEN; fall back to META_PAGE_ACCESS_TOKEN
+    token = os.getenv("FACEBOOK_PAGE_ACCESS_TOKEN") or os.getenv("META_PAGE_ACCESS_TOKEN", "")
     if not token:
-        raise HTTPException(status_code=500, detail="META_PAGE_ACCESS_TOKEN not set")
+        raise HTTPException(status_code=500, detail="FACEBOOK_PAGE_ACCESS_TOKEN (or META_PAGE_ACCESS_TOKEN) not set")
     return token
 
 
@@ -79,9 +80,10 @@ def _meta_page_id() -> str:
 
 
 def _ig_business_id() -> str:
-    ig_id = os.getenv("INSTAGRAM_BUSINESS_ID", "")
+    # Doppler key is INSTAGRAM_BUSINESS_ACCOUNT_ID; fall back to INSTAGRAM_BUSINESS_ID
+    ig_id = os.getenv("INSTAGRAM_BUSINESS_ACCOUNT_ID") or os.getenv("INSTAGRAM_BUSINESS_ID", "")
     if not ig_id:
-        raise HTTPException(status_code=500, detail="INSTAGRAM_BUSINESS_ID not set")
+        raise HTTPException(status_code=500, detail="INSTAGRAM_BUSINESS_ACCOUNT_ID (or INSTAGRAM_BUSINESS_ID) not set")
     return ig_id
 
 
@@ -98,7 +100,7 @@ def _handle_meta_error(data: dict) -> None:
     if code == 190:
         raise HTTPException(
             status_code=401,
-            detail="Meta access token expired (code 190). Refresh META_PAGE_ACCESS_TOKEN.",
+            detail="Meta access token expired (code 190). Refresh FACEBOOK_PAGE_ACCESS_TOKEN.",
         )
     if code == 506:
         raise HTTPException(
@@ -610,12 +612,12 @@ async def instagram_backfill_performance() -> dict:
     if not ig_posts:
         return {"status": "no_instagram_posts_in_history", "logged": 0}
 
-    ig_id = os.getenv("INSTAGRAM_BUSINESS_ID", "")
-    token = os.getenv("META_PAGE_ACCESS_TOKEN", "")
+    ig_id = os.getenv("INSTAGRAM_BUSINESS_ACCOUNT_ID") or os.getenv("INSTAGRAM_BUSINESS_ID", "")
+    token = os.getenv("FACEBOOK_PAGE_ACCESS_TOKEN") or os.getenv("META_PAGE_ACCESS_TOKEN", "")
     if not ig_id or not token:
         return {
             "status": "credentials_missing",
-            "detail": "INSTAGRAM_BUSINESS_ID and META_PAGE_ACCESS_TOKEN required",
+            "detail": "INSTAGRAM_BUSINESS_ACCOUNT_ID and FACEBOOK_PAGE_ACCESS_TOKEN required",
             "posts_found": len(ig_posts),
             "logged": 0,
         }
@@ -630,7 +632,10 @@ async def instagram_backfill_performance() -> dict:
             if not post_id or post_id in existing_ids:
                 continue
 
-            # Fetch per-post insights
+            metrics: dict[str, int] = {}
+            data_source = "insights"
+
+            # Attempt full insights (requires instagram_manage_insights permission)
             resp = await client.get(
                 f"{META_GRAPH_BASE}/{post_id}/insights",
                 params={
@@ -640,21 +645,49 @@ async def instagram_backfill_performance() -> dict:
             )
             raw = resp.json()
             if "error" in raw:
-                continue  # skip on error, don't halt full backfill
-
-            metrics: dict[str, int] = {m["name"]: m.get("values", [{}])[0].get("value", 0) for m in raw.get("data", [])}
+                err_code = raw["error"].get("code", 0)
+                if err_code == 10:
+                    # Insufficient permission — fall back to basic media fields
+                    basic_resp = await client.get(
+                        f"{META_GRAPH_BASE}/{post_id}",
+                        params={
+                            "fields": "like_count,comments_count,media_type,timestamp",
+                            "access_token": token,
+                        },
+                    )
+                    basic = basic_resp.json()
+                    if "error" not in basic:
+                        metrics = {
+                            "likes": basic.get("like_count", 0),
+                            "comments": basic.get("comments_count", 0),
+                        }
+                        data_source = "basic"
+                    else:
+                        continue  # both endpoints failed — skip
+                else:
+                    continue  # non-permission error — skip
+            else:
+                metrics = {m["name"]: m.get("values", [{}])[0].get("value", 0) for m in raw.get("data", [])}
 
             entry: dict[str, Any] = {
                 "post_id": post_id,
+                "label": post.get("label", post_id),
                 "type": post.get("type", "UNKNOWN"),
-                "topic": "UNKNOWN",
-                "hook": "UNKNOWN",
+                "topic": post.get("topic", "UNKNOWN"),
+                "hook": post.get("hook", "UNKNOWN"),
+                "slides": post.get("slides", 0),
+                "scheduled_day": post.get("scheduled_day", ""),
+                "scheduled_time_est": post.get("scheduled_time_est", ""),
+                "permalink": post.get("permalink", ""),
                 "posted_at": post.get("posted_at", "UNKNOWN"),
                 "views": metrics.get("impressions", 0),
                 "saves": metrics.get("saved", 0),
                 "comments": metrics.get("comments", 0),
                 "follows": 0,  # Graph API does not expose per-post follows
                 "reach": metrics.get("reach", 0),
+                "likes": metrics.get("likes", 0),
+                "shares": metrics.get("shares", 0),
+                "data_source": data_source,  # "insights" or "basic"
                 "source_breakdown": {"feed_pct": 0, "profile_pct": 0},
                 "hypotheses_tested": [],
             }
@@ -701,13 +734,13 @@ async def social_media_status() -> dict:
             "open_id_set": bool(os.getenv("TIKTOK_OPEN_ID")),
         },
         "facebook": {
-            "app_id_set": bool(os.getenv("META_APP_ID")),
-            "page_token_set": bool(os.getenv("META_PAGE_ACCESS_TOKEN")),
+            "app_id_set": bool(os.getenv("FACEBOOK_APP_ID") or os.getenv("META_APP_ID")),
+            "page_token_set": bool(os.getenv("FACEBOOK_PAGE_ACCESS_TOKEN") or os.getenv("META_PAGE_ACCESS_TOKEN")),
             "page_id_set": bool(os.getenv("FACEBOOK_PAGE_ID")),
         },
         "instagram": {
-            "business_id_set": bool(os.getenv("INSTAGRAM_BUSINESS_ID")),
-            "page_token_set": bool(os.getenv("META_PAGE_ACCESS_TOKEN")),
+            "business_id_set": bool(os.getenv("INSTAGRAM_BUSINESS_ACCOUNT_ID") or os.getenv("INSTAGRAM_BUSINESS_ID")),
+            "page_token_set": bool(os.getenv("FACEBOOK_PAGE_ACCESS_TOKEN") or os.getenv("META_PAGE_ACCESS_TOKEN")),
         },
         "analytics_cache_exists": ANALYTICS_CACHE_PATH.exists(),
         "post_count": len(_load_json(POST_HISTORY_PATH, [])),

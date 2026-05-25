@@ -52,12 +52,46 @@ async def list_jobs(status: str | None = None) -> list[dict]:
     return [j.model_dump() for j in jobs]
 
 
+@router.get("/calendar")
+async def list_calendar() -> list[dict]:
+    """Return scheduled, approved, and posted jobs for the calendar view."""
+    jobs = job_store.list_all()
+    return [
+        {
+            "job_id": j.job_id,
+            "topic": j.topic,
+            "status": j.status.value if hasattr(j.status, "value") else str(j.status),
+            "scheduled_time": None,
+            "platform_targets": j.platform_targets if hasattr(j, "platform_targets") else [],
+        }
+        for j in jobs
+        if (j.status.value if hasattr(j.status, "value") else str(j.status))
+        in ("scheduled", "approved", "posted")
+    ]
+
+
 @router.get("/jobs/{job_id}")
 async def get_job(job_id: str) -> dict:
     job = job_store.load(job_id)
     if not job:
         raise HTTPException(404, f"Job {job_id} not found")
     return job.model_dump()
+
+
+@router.get("/jobs/{job_id}/package")
+async def get_job_package(job_id: str) -> dict:
+    """Return the publish package JSON for a completed job."""
+    import json
+    from pathlib import Path
+    from backend.content.publisher_agent import PUBLISH_DIR
+    pkg_path = PUBLISH_DIR / f"{job_id}_package.json"
+    if not pkg_path.exists():
+        # Fall back to job metadata if package not yet written
+        job = job_store.load(job_id)
+        if not job:
+            raise HTTPException(404, f"Package for job {job_id} not found")
+        return {"job_id": job_id, "status": job.status.value, "package": None}
+    return {"job_id": job_id, "package": json.loads(pkg_path.read_text())}
 
 
 # ── Idea approval gate (Jack Craig Step 1 greenlight) ─────────────────────────
@@ -176,6 +210,12 @@ async def run_full_pipeline() -> dict:
     """
     results = await get_pipeline().run_full()
     return results
+
+
+@router.post("/run")
+async def run_pipeline_alias() -> dict:
+    """Alias for /run/full — triggers a full pipeline pass."""
+    return await run_full_pipeline()
 
 
 @router.post("/run/agent/{name}")

@@ -20,6 +20,16 @@ function buildUpstreamUrl(request: NextRequest, path: string[]): string {
   return upstream.toString();
 }
 
+function jsonError(payload: Record<string, unknown>, status: number): Response {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
 async function proxy(request: NextRequest, context: RouteContext): Promise<Response> {
   const { path } = await context.params;
   const headers = new Headers(request.headers);
@@ -29,16 +39,57 @@ async function proxy(request: NextRequest, context: RouteContext): Promise<Respo
     headers.set('Authorization', `Bearer ${API_SECRET}`);
   }
 
+  // Generous timeout for long-running pipeline endpoints (5 min)
+  // but short enough to avoid infinite hangs.
+  // SSE streams (Accept: text/event-stream) get no timeout — they stay open.
+  const controller = new AbortController();
+  const isSSE = request.headers.get('accept')?.includes('text/event-stream');
+  const timeoutMs = isSSE ? 0 : request.method === 'GET' ? 30_000 : 300_000;
+  const timer = timeoutMs > 0 ? setTimeout(() => controller.abort(), timeoutMs) : null;
+
   const init: RequestInit = {
     method: request.method,
     headers,
     redirect: 'manual',
+    ...(timeoutMs > 0 ? { signal: controller.signal } : {}),
   };
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     init.body = await request.arrayBuffer();
   }
 
-  const upstream = await fetch(buildUpstreamUrl(request, path), init);
+  const upstreamUrl = buildUpstreamUrl(request, path);
+  let upstream: Response;
+  try {
+    upstream = await fetch(upstreamUrl, init);
+  } catch (error) {
+    if (timer) clearTimeout(timer);
+    const isAbort = error instanceof DOMException && error.name === 'AbortError';
+    return jsonError(
+      {
+        detail: isAbort
+          ? 'Backend request timed out through the Next proxy'
+          : 'Backend API is unavailable through the Next proxy',
+        upstream: upstreamUrl,
+        proxy: '/api/proxy',
+        error: error instanceof Error ? error.message : 'Unknown fetch error',
+      },
+      isAbort ? 504 : 502,
+    );
+  }
+  if (timer) clearTimeout(timer);
+
+  if (upstream.status === 401 && !API_SECRET) {
+    return jsonError(
+      {
+        detail: 'Backend rejected the request because the frontend proxy is missing AGENTOP_API_SECRET',
+        upstream: upstreamUrl,
+        proxy: '/api/proxy',
+        upstream_status: 401,
+      },
+      401,
+    );
+  }
+
   const responseHeaders = new Headers(upstream.headers);
   responseHeaders.delete('content-encoding');
   responseHeaders.delete('content-length');

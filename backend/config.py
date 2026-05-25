@@ -25,6 +25,17 @@ MEMORY_DIR: Path = PROJECT_ROOT / "data" / "agents"
 OUTPUT_DIR: Path = PROJECT_ROOT / "output"
 BROWSER_ALLOWED_AGENTS: list[str] = [a.strip() for a in os.getenv("BROWSER_ALLOWED_AGENTS", "").split(",") if a.strip()]
 
+# ---------------------------------------------------------------------------
+# Runtime Profiles
+# ---------------------------------------------------------------------------
+RUNTIME_PROFILES: tuple[str, ...] = ("minimal", "operator", "studio")
+_requested_runtime_profile = os.getenv("AGENTOP_RUNTIME_PROFILE", "operator").strip().lower()
+ACTIVE_RUNTIME_PROFILE: str = _requested_runtime_profile if _requested_runtime_profile in RUNTIME_PROFILES else "operator"
+
+
+def runtime_profile_is(*profiles: str) -> bool:
+    return ACTIVE_RUNTIME_PROFILE in profiles
+
 # Governance documents
 SOURCE_OF_TRUTH_PATH: Path = DOCS_DIR / "SOURCE_OF_TRUTH.md"
 CHANGE_LOG_PATH: Path = DOCS_DIR / "CHANGE_LOG.md"
@@ -36,14 +47,37 @@ DRIFT_GUARD_PATH: Path = DOCS_DIR / "DRIFT_GUARD.md"
 # ---------------------------------------------------------------------------
 OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.2")
+WEBGEN_MODEL: str = os.getenv("WEBGEN_MODEL", "mistral:7b-instruct-q4_K_M")
 OLLAMA_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", "120"))
+# How long Ollama keeps a model in RAM after the last request.
+# Default 10 min — model auto-evicts after 10m of inactivity.
+# Set to "-1" to keep models resident indefinitely (increases RAM by ~2-7 GB per model).
+OLLAMA_KEEPALIVE: str = os.getenv("OLLAMA_KEEPALIVE", "10m")
+
+# ---------------------------------------------------------------------------
+# Resource Management / Standby Configuration
+# ---------------------------------------------------------------------------
+# Set NEWS_INTEL_ENABLED=false on dev machines to skip the 6h Playwright scraper
+# (saves ~100-200 MB per scrape cycle and eliminates background browser processes).
+NEWS_INTEL_ENABLED: bool = (
+    os.getenv("NEWS_INTEL_ENABLED", "true").lower() == "true"
+    and not runtime_profile_is("minimal")
+)
+# How long (seconds) an A2UI session's canvas/event state is retained after last activity.
+# Sessions older than this are purged by the hourly GC task.
+A2UI_SESSION_TTL_SECONDS: int = int(os.getenv("A2UI_SESSION_TTL_SECONDS", "3600"))
 
 # ---------------------------------------------------------------------------
 # GLM-OCR Configuration (local document/image → Markdown extraction)
 # Run: python -m glmocr.server   (starts on GLMOCR_URL, default port 5002)
 # ---------------------------------------------------------------------------
 GLMOCR_URL: str = os.getenv("GLMOCR_URL", "http://localhost:5002")
-GLMOCR_ENABLED: bool = os.getenv("GLMOCR_ENABLED", "true").lower() == "true"
+GLMOCR_ENABLED: bool = (
+    os.getenv(
+        "GLMOCR_ENABLED",
+        "true" if runtime_profile_is("studio") else "false",
+    ).lower() == "true"
+)
 GLMOCR_TIMEOUT: int = int(os.getenv("GLMOCR_TIMEOUT", "60"))
 
 # ---------------------------------------------------------------------------
@@ -109,6 +143,28 @@ EVAL_MAX_TOKENS: int = int(os.getenv("EVAL_MAX_TOKENS", "4096"))
 
 # TurboQuant embedding quantization
 TURBOQUANT_BITS: int = int(os.getenv("TURBOQUANT_BITS", "4"))
+
+# Retrieval / index footprint controls
+RETRIEVAL_MODE: str = os.getenv(
+    "AGENTOP_RETRIEVAL_MODE",
+    "deep_index" if runtime_profile_is("studio") else "fast_context",
+).strip().lower()
+if RETRIEVAL_MODE not in {"fast_context", "deep_index"}:
+    RETRIEVAL_MODE = "fast_context"
+
+KNOWLEDGE_JSON_FALLBACK_ENABLED: bool = (
+    os.getenv(
+        "KNOWLEDGE_JSON_FALLBACK_ENABLED",
+        "true" if runtime_profile_is("studio") else "false",
+    ).lower() == "true"
+)
+KNOWLEDGE_SEED_ON_STARTUP: bool = (
+    os.getenv(
+        "KNOWLEDGE_SEED_ON_STARTUP",
+        "true" if runtime_profile_is("studio") else "false",
+    ).lower() == "true"
+)
+KNOWLEDGE_SEED_FORCE_REBUILD: bool = os.getenv("KNOWLEDGE_SEED_FORCE_REBUILD", "false").lower() == "true"
 
 # ---------------------------------------------------------------------------
 # Server Configuration
@@ -191,9 +247,10 @@ MAX_LOG_ENTRIES: int = int(os.getenv("MAX_LOG_ENTRIES", "10000"))
 # ---------------------------------------------------------------------------
 # Sprint 2: ReAct runtime feature flags
 # ---------------------------------------------------------------------------
-# Set AGENT_RUNTIME_V2=true to enable the bounded ReAct loop for all agents.
-# Leave unset (default false) to keep legacy single-pass behaviour as rollback.
-AGENT_RUNTIME_V2: bool = os.getenv("AGENT_RUNTIME_V2", "true").lower() == "true"
+# AGENT_RUNTIME_V2 is now mandatory (v1 legacy path removed in Sprint 5).
+# All agents use the bounded ReAct loop exclusively.
+# See: backend/tests/test_agent_runtime_v2_mandatory.py
+AGENT_RUNTIME_V2: bool = True
 # Maximum think/act/observe iterations per message in the v2 ReAct loop.
 AGENT_MAX_STEPS: int = int(os.getenv("AGENT_MAX_STEPS", "8"))
 
@@ -209,7 +266,11 @@ AGENT_PLANNER_ENABLED: bool = os.getenv("AGENT_PLANNER_ENABLED", "false").lower(
 AGENT_VALIDATOR_HIGH_RISK_THRESHOLD: str = os.getenv("AGENT_VALIDATOR_HIGH_RISK_THRESHOLD", "HIGH")
 # Per-step LLM timeout in seconds for each ReAct executor turn.
 # Set to 0 to disable timeout enforcement.
-AGENT_STEP_TIMEOUT_SECONDS: float = float(os.getenv("AGENT_STEP_TIMEOUT_SECONDS", "60"))
+AGENT_STEP_TIMEOUT_SECONDS: float = float(os.getenv("AGENT_STEP_TIMEOUT_SECONDS", "90"))
+
+# Total /chat request deadline. If the orchestrator hasn't returned in this many
+# seconds, return a 504 so the request doesn't block indefinitely behind Ollama.
+CHAT_REQUEST_TIMEOUT_SECONDS: float = float(os.getenv("CHAT_REQUEST_TIMEOUT_SECONDS", "90"))
 
 # ---------------------------------------------------------------------------
 # GitNexus Code Intelligence (Sprint 5)
@@ -328,10 +389,6 @@ def _parse_cors_origins() -> list[str]:
 
 
 CORS_ORIGINS: list[str] = _parse_cors_origins()
-
-# Optional startup prewarm for the local knowledge vector index.
-KNOWLEDGE_SEED_ON_STARTUP: bool = os.getenv("KNOWLEDGE_SEED_ON_STARTUP", "true").lower() == "true"
-KNOWLEDGE_SEED_FORCE_REBUILD: bool = os.getenv("KNOWLEDGE_SEED_FORCE_REBUILD", "false").lower() == "true"
 
 # Prohibited patterns for safe_shell
 SAFE_SHELL_BLACKLIST: list[str] = [

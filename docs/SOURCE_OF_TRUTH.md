@@ -447,3 +447,5 @@ Built sites are static HTML/CSS/JS with no runtime framework dependency.
 **Agents:** idea_intake → script_writer → voice → caption → avatar_video → qa → publisher → analytics
 **Memory:** `backend/memory/content_jobs/`, `content_audio/`, `content_video/`, `content_notes/`, `content_publish/`, `content_reports/`, `social_intake/`
 
+
+

@@ -213,40 +213,24 @@ class TestStepTimeout:
 class TestLegacyDeprecationWarning:
     @pytest.mark.asyncio
     async def test_legacy_pattern_emits_warning(self, caplog):
-        import logging
-
         agent = make_agent("security_agent")
-        # Ensure this agent hasn't already warned in another test run
         BaseAgent._legacy_tool_warned.discard("security_agent")
 
         fake_response = "[TOOL:file_reader(path=/etc/hosts)]"
-        with patch.object(agent, "_execute_tool", return_value={"content": "127.0.0.1 localhost"}):
-            with patch.object(agent._tool_validator, "validate") as mock_val:
-                mock_val.return_value = MagicMock(valid=True)
-                with caplog.at_level(logging.WARNING, logger="backend.agents"):
-                    await agent._handle_tool_calls(fake_response)
-
-        assert any("legacy [TOOL:...]" in r.message or "legacy" in r.message.lower() for r in caplog.records)
+        with pytest.raises(RuntimeError, match="has been removed in Sprint 5"):
+            await agent._handle_tool_calls(fake_response)
 
     @pytest.mark.asyncio
     async def test_legacy_warning_only_once_per_agent(self, caplog):
-        import logging
-
         agent = make_agent("devops_agent")
         BaseAgent._legacy_tool_warned.discard("devops_agent")
 
         fake_response = "[TOOL:git_ops(cmd=log)]"
-        with patch.object(agent, "_execute_tool", return_value={"content": "commit log"}):
-            with patch.object(agent._tool_validator, "validate") as mock_val:
-                mock_val.return_value = MagicMock(valid=True)
-                with caplog.at_level(logging.WARNING, logger="backend.agents"):
-                    await agent._handle_tool_calls(fake_response)
-                    warning_count_1 = sum(1 for r in caplog.records if "legacy" in r.message.lower())
-                    await agent._handle_tool_calls(fake_response)
-                    warning_count_2 = sum(1 for r in caplog.records if "legacy" in r.message.lower())
-
-        # Second call must not add another warning
-        assert warning_count_1 == warning_count_2
+        # Both calls must raise — legacy text parsing is permanently removed.
+        with pytest.raises(RuntimeError, match="has been removed in Sprint 5"):
+            await agent._handle_tool_calls(fake_response)
+        with pytest.raises(RuntimeError, match="has been removed in Sprint 5"):
+            await agent._handle_tool_calls(fake_response)
 
 
 # ===========================================================================

@@ -7,7 +7,10 @@ Uses local Ollama LLM for performance analysis and recommendations.
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+# UTC timezone compatibility (Python 3.10 and earlier)
+UTC = timezone.utc
 from pathlib import Path
 
 from backend.config import MEMORY_DIR
