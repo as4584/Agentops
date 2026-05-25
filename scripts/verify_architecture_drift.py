@@ -30,13 +30,15 @@ from backend.tools import TOOL_REGISTRY
 _APPROVED_GITNEXUS_AGENTS = frozenset({"code_review_agent", "devops_agent", "security_agent"})
 
 # Expected GitNexus tool set
-_EXPECTED_GITNEXUS_TOOLS = frozenset({
-    "mcp_gitnexus_query",
-    "mcp_gitnexus_context",
-    "mcp_gitnexus_impact",
-    "mcp_gitnexus_detect_changes",
-    "mcp_gitnexus_list_repos",
-})
+_EXPECTED_GITNEXUS_TOOLS = frozenset(
+    {
+        "mcp_gitnexus_query",
+        "mcp_gitnexus_context",
+        "mcp_gitnexus_impact",
+        "mcp_gitnexus_detect_changes",
+        "mcp_gitnexus_list_repos",
+    }
+)
 
 
 def _check_gitnexus_tool_parity(failures: list[str]) -> None:
@@ -52,19 +54,13 @@ def _check_gitnexus_tool_parity(failures: list[str]) -> None:
             f"DRIFT: GitNexus tools in TOOL_REGISTRY but missing from MCP_TOOL_MAP: {sorted(only_in_registry)}"
         )
     if only_in_map:
-        failures.append(
-            f"DRIFT: GitNexus tools in MCP_TOOL_MAP but missing from TOOL_REGISTRY: {sorted(only_in_map)}"
-        )
+        failures.append(f"DRIFT: GitNexus tools in MCP_TOOL_MAP but missing from TOOL_REGISTRY: {sorted(only_in_map)}")
     unexpected = (registry_gitnexus | map_gitnexus) - _EXPECTED_GITNEXUS_TOOLS
     if unexpected:
-        failures.append(
-            f"DRIFT: Unexpected GitNexus tools found (not in expected set): {sorted(unexpected)}"
-        )
+        failures.append(f"DRIFT: Unexpected GitNexus tools found (not in expected set): {sorted(unexpected)}")
     missing = _EXPECTED_GITNEXUS_TOOLS - registry_gitnexus
     if missing:
-        failures.append(
-            f"DRIFT: Expected GitNexus tools missing from registry: {sorted(missing)}"
-        )
+        failures.append(f"DRIFT: Expected GitNexus tools missing from registry: {sorted(missing)}")
 
 
 def _check_gitnexus_agent_permissions(failures: list[str]) -> None:
@@ -113,7 +109,10 @@ def _check_knowledge_rag_convergence(failures: list[str]) -> None:
         failures.append("DRIFT: knowledge agent still calls KnowledgeVectorStore.search directly.")
     if "self._knowledge_store.search_business_profiles(" in orchestrator_source:
         failures.append("DRIFT: business-profile retrieval still bypasses ContextAssembler.")
-    if "self._knowledge_store.rebuild_index(" in orchestrator_source or "self._knowledge_store.ensure_index(" in orchestrator_source:
+    if (
+        "self._knowledge_store.rebuild_index(" in orchestrator_source
+        or "self._knowledge_store.ensure_index(" in orchestrator_source
+    ):
         failures.append("DRIFT: knowledge reindex/startup seed still rebuilds the legacy KnowledgeVectorStore.")
     if "retrieve_records(" not in orchestrator_source:
         failures.append("DRIFT: knowledge agent path is not using ContextAssembler.retrieve_records().")

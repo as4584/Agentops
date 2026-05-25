@@ -417,9 +417,7 @@ class AgentOrchestrator:
             )
 
             # ── Structured output contract (required by Sprint 2 hybrid retrieval) ──
-            citations = list(dict.fromkeys(
-                item["path"] for item in retrieved if item.get("path")
-            ))
+            citations = list(dict.fromkeys(item["path"] for item in retrieved if item.get("path")))
             scores = [item.get("score", 0.0) for item in retrieved]
             confidence = round(sum(scores) / len(scores), 4) if scores else 0.0
             stale_chunks = [

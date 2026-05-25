@@ -31,6 +31,7 @@ SKIP_PATTERNS = {
     ".coverage",
     "tsconfig.tsbuildinfo",
     "docs/handoffs/",  # historical chat logs, triaged safe
+    "reports/quality/",  # generated scanner output; flagging itself creates a feedback loop
 }
 
 # ── Per-file rule overrides (pattern_name → set of file paths) ───────────────

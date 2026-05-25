@@ -19,9 +19,9 @@ Run order:
 
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, patch
 
+import pytest
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -33,12 +33,14 @@ VLAN_TOKENS = {"vlan", "vlan 10", "vlan10"}
 async def embed_client():
     """Embed client using nomic-embed-text — same model as production Qdrant."""
     from backend.llm import OllamaClient
+
     client = OllamaClient(model="nomic-embed-text")
     yield client
     await client.close()
 
 
 # ── Cat 1: Dense-only baseline (documents current state, not a gate) ──────────
+
 
 class TestDenseOnlyBaseline:
     """Document current dense retrieval behaviour before BM25 exists.
@@ -93,6 +95,7 @@ class TestDenseOnlyBaseline:
 
 # ── Cat 2: THE regression gate — exact token test ─────────────────────────────
 
+
 class TestExactTokenRetrieval:
     """
     Exact-token retrieval gate.
@@ -144,7 +147,8 @@ class TestExactTokenRetrieval:
         # Check if any returned chunk mentions "vlan 10" or "vlan10"
         vlan_hit = next(
             (
-                r for r in records
+                r
+                for r in records
                 if any(tok in r.get("text", "").lower() for tok in VLAN_TOKENS)
                 or any(tok in r.get("path", "").lower() for tok in VLAN_TOKENS)
             ),
@@ -191,26 +195,25 @@ class TestExactTokenRetrieval:
 
 # ── Cat 3: Knowledge response contract ────────────────────────────────────────
 
+
 class TestKnowledgeResponseContract:
     """Sprint 1 Handoff 3 — ensure the structured contract is stable."""
 
     async def test_knowledge_response_has_all_required_fields(self) -> None:
         """Every knowledge_agent response must have the 5 Sprint 2 contract fields."""
         from unittest.mock import AsyncMock
+
         from backend.llm import OllamaClient
         from backend.orchestrator import AgentOrchestrator
 
         client = OllamaClient(model="nomic-embed-text")
         try:
             with patch.object(
-                client, "generate",
-                new=AsyncMock(return_value="Test answer.\n\nSources:\n- docs/test.md")
+                client, "generate", new=AsyncMock(return_value="Test answer.\n\nSources:\n- docs/test.md")
             ):
                 with patch.object(client, "embed", new=AsyncMock(return_value=[0.1] * 768)):
                     orch = AgentOrchestrator(client)
-                    result = await orch.process_message(
-                        "knowledge_agent", "what does the corpus say about VLAN 10"
-                    )
+                    result = await orch.process_message("knowledge_agent", "what does the corpus say about VLAN 10")
 
             required = {"answer", "citations", "confidence", "stale_chunks", "agent_scope"}
             for field in required:
@@ -236,10 +239,7 @@ class TestKnowledgeResponseContract:
 
         client = OllamaClient(model="nomic-embed-text")
         try:
-            with patch.object(
-                client, "generate",
-                new=AsyncMock(return_value="Deployment triggered.")
-            ):
+            with patch.object(client, "generate", new=AsyncMock(return_value="Deployment triggered.")):
                 orch = AgentOrchestrator(client)
                 result = await orch.process_message("devops_agent", "deploy to staging")
 

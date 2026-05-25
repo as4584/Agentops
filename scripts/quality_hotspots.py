@@ -153,11 +153,7 @@ def generate_hotspot_report(top: int = 10, output: str = "reports/quality/hotspo
     untyped_set = {str(f["file"]) for f in untyped_files}
     security_set = {str(f["file"]) for f in security}
 
-    critical_files = sorted(
-        (complex_set & untyped_set)
-        | (complex_set & security_set)
-        | (untyped_set & security_set)
-    )
+    critical_files = sorted((complex_set & untyped_set) | (complex_set & security_set) | (untyped_set & security_set))
 
     report: dict[str, object] = {
         "complex_files": complex_files,

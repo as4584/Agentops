@@ -155,7 +155,7 @@ class ContextAssembler:
         # Sprint 2: BM25 sparse index + hybrid RRF retrieval.
         # load() is a no-op if the persisted index doesn't exist yet;
         # call build_bm25_from_qdrant() once after doc_seed to populate it.
-        self._bm25   = BM25Index()
+        self._bm25 = BM25Index()
         self._engine = RetrievalEngine(
             context_assembler=self,
             bm25_index=self._bm25,
@@ -235,9 +235,7 @@ class ContextAssembler:
         Uses raw Qdrant client scroll — VectorStore has no scroll wrapper.
         """
         if not QDRANT_AVAILABLE or self._store._client is None:
-            logger.warning(
-                "[ContextAssembler] Qdrant unavailable — BM25 rebuild skipped"
-            )
+            logger.warning("[ContextAssembler] Qdrant unavailable — BM25 rebuild skipped")
             return []
 
         chunks: list[dict[str, Any]] = []
@@ -253,29 +251,28 @@ class ContextAssembler:
                     with_vectors=False,
                 )
             except Exception as exc:
-                logger.warning(
-                    f"[ContextAssembler] Qdrant scroll failed: {exc}"
-                )
+                logger.warning(f"[ContextAssembler] Qdrant scroll failed: {exc}")
                 break
 
             for point in results:
                 p = point.payload or {}
-                chunks.append({
-                    "chunk_id":     str(point.id),
-                    "text":         p.get("text", ""),
-                    "source":       p.get("source", p.get("file_path", "")),
-                    "section":      p.get("section", ""),
-                    "agent_scope":  p.get("agent_scope", ["all"]),
-                    "last_indexed": p.get("last_indexed", ""),
-                })
+                chunks.append(
+                    {
+                        "chunk_id": str(point.id),
+                        "text": p.get("text", ""),
+                        "source": p.get("source", p.get("file_path", "")),
+                        "section": p.get("section", ""),
+                        "agent_scope": p.get("agent_scope", ["all"]),
+                        "last_indexed": p.get("last_indexed", ""),
+                    }
+                )
 
             if next_offset is None:
                 break
             offset = next_offset
 
         logger.info(
-            f"[ContextAssembler] Fetched {len(chunks)} chunks "
-            f"from Qdrant collection '{collection}' for BM25 rebuild"
+            f"[ContextAssembler] Fetched {len(chunks)} chunks from Qdrant collection '{collection}' for BM25 rebuild"
         )
         return chunks
 

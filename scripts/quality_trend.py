@@ -26,10 +26,7 @@ def append_trend(report: dict[str, object]) -> None:
         "ts": datetime.now(UTC).isoformat(),
         "overall": report["overall_score"],
         "grade": report["grade"],
-        "dimensions": {
-            dim: data["score"]
-            for dim, data in dims.items()
-        },
+        "dimensions": {dim: data["score"] for dim, data in dims.items()},
     }
     with TREND_LOG.open("a") as fh:
         fh.write(json.dumps(entry) + "\n")
@@ -47,10 +44,7 @@ def detect_regression(threshold: float = 5.0) -> bool:
     prev = json.loads(lines[-2])
     drop = float(prev["overall"]) - float(last["overall"])
     if drop > threshold:
-        print(
-            f"QUALITY REGRESSION: score dropped {drop:.1f} points "
-            f"({prev['overall']} → {last['overall']})"
-        )
+        print(f"QUALITY REGRESSION: score dropped {drop:.1f} points ({prev['overall']} → {last['overall']})")
         return True
     delta = float(last["overall"]) - float(prev["overall"])
     trend = "↑" if delta >= 0 else "↓"
@@ -68,9 +62,7 @@ def print_history(n: int = 10) -> None:
     print(f"\n{'Date':<28} {'Score':>6} {'Grade':>5}  Dimensions")
     print("-" * 80)
     for e in entries:
-        dims = "  ".join(
-            f"{k}={v:.0f}" for k, v in e.get("dimensions", {}).items()
-        )
+        dims = "  ".join(f"{k}={v:.0f}" for k, v in e.get("dimensions", {}).items())
         print(f"{e['ts']:<28} {e['overall']:>6.1f} {e['grade']:>5}  {dims}")
 
 

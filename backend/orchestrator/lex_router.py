@@ -107,11 +107,13 @@ if _retired_overlap:
     raise RuntimeError(f"FATAL: Retired agent IDs in VALID_AGENTS: {_retired_overlap}")
 
 # ── High-risk agents requiring >= 0.8 LLM confidence ────────────────────────
-_HIGH_RISK_AGENTS: frozenset[str] = frozenset({
-    "security_agent",
-    "self_healer_agent",
-    "code_review_agent",
-})
+_HIGH_RISK_AGENTS: frozenset[str] = frozenset(
+    {
+        "security_agent",
+        "self_healer_agent",
+        "code_review_agent",
+    }
+)
 
 _SPECIALIST_EXPLICIT_MAP: list[tuple[list[str], str]] = [
     (
@@ -204,84 +206,166 @@ _KEYWORD_MAP: list[tuple[list[str], str]] = [
 # Priority order: first match in SPECIALIST_PRIORITY_ORDER wins.
 SPECIALIST_KEYWORD_MAP: dict[str, list[str]] = {
     "knowledge_agent": [
-        "source of truth", "source_of_truth", "what does the corpus",
-        "corpus say", "docs say", "documentation say",
-        "knowledge base", "search the docs",
+        "source of truth",
+        "source_of_truth",
+        "what does the corpus",
+        "corpus say",
+        "docs say",
+        "documentation say",
+        "knowledge base",
+        "search the docs",
     ],
     "cs_agent": [
-        "i need help with", "help with my account", "billing issue",
-        "my account", "account problem", "subscription", "invoice",
-        "refund", "customer support", "user account",
-        "access issue", "login problem", "password reset",
+        "i need help with",
+        "help with my account",
+        "billing issue",
+        "my account",
+        "account problem",
+        "subscription",
+        "invoice",
+        "refund",
+        "customer support",
+        "user account",
+        "access issue",
+        "login problem",
+        "password reset",
     ],
     "comms_agent": [
-        "notification", "incident notification", "send notification",
-        "incident alert", "notify the team", "send an incident",
-        "alert the team", "stakeholder", "send to slack",
-        "post to slack", "incident report",
+        "notification",
+        "incident notification",
+        "send notification",
+        "incident alert",
+        "notify the team",
+        "send an incident",
+        "alert the team",
+        "stakeholder",
+        "send to slack",
+        "post to slack",
+        "incident report",
     ],
     "code_review_agent": [
-        "review the diff", "review this diff", "review the code",
-        "code review", "review before merge", "review the pr",
-        "check the diff", "review these changes", "review this pr",
+        "review the diff",
+        "review this diff",
+        "review the code",
+        "code review",
+        "review before merge",
+        "review the pr",
+        "check the diff",
+        "review these changes",
+        "review this pr",
     ],
     "self_healer_agent": [
-        "lint errors", "ruff lint", "fix lint errors", "fix the lint",
-        "ruff fix", "ruff check", "ruff format", "fix type errors",
-        "mypy errors", "fix imports", "fix the imports",
-        "clean pycache", "clear pycache",
-        "pod crashlooping", "pod crash", "rollout restart",
-        "auto-remediate", "auto remediate", "self heal",
-        "restart and fix", "fix and restart",
+        "lint errors",
+        "ruff lint",
+        "fix lint errors",
+        "fix the lint",
+        "ruff fix",
+        "ruff check",
+        "ruff format",
+        "fix type errors",
+        "mypy errors",
+        "fix imports",
+        "fix the imports",
+        "clean pycache",
+        "clear pycache",
+        "pod crashlooping",
+        "pod crash",
+        "rollout restart",
+        "auto-remediate",
+        "auto remediate",
+        "self heal",
+        "restart and fix",
+        "fix and restart",
     ],
     "it_agent": [
-        "kubernetes", "kubectl", "k8s", "pod running", "pod status",
-        "port 11434", "port 8000", "port 3007",
-        "vlan", "dns lookup", "nameserver", "traceroute",
-        "vm", "hypervisor",
+        "kubernetes",
+        "kubectl",
+        "k8s",
+        "pod running",
+        "pod status",
+        "port 11434",
+        "port 8000",
+        "port 3007",
+        "vlan",
+        "dns lookup",
+        "nameserver",
+        "traceroute",
+        "vm",
+        "hypervisor",
     ],
     "security_agent": [
-        "scan for secrets", "scan for credentials", "hardcoded credentials",
-        "secret scan", "cve", "vulnerability scan", "audit security",
-        "security audit", "owasp",
+        "scan for secrets",
+        "scan for credentials",
+        "hardcoded credentials",
+        "secret scan",
+        "cve",
+        "vulnerability scan",
+        "audit security",
+        "security audit",
+        "owasp",
     ],
     "data_agent": [
-        "database schema", "schema drift", "check schema",
-        "migrate the database", "sqlite query",
-        "data validation", "table structure",
+        "database schema",
+        "schema drift",
+        "check schema",
+        "migrate the database",
+        "sqlite query",
+        "data validation",
+        "table structure",
     ],
     "monitor_agent": [
-        "tail logs", "tail the logs", "watch logs",
-        "set up alerting", "alert me if", "alert when",
-        "grafana", "prometheus", "latency spike",
-        "response time", "error rate",
+        "tail logs",
+        "tail the logs",
+        "watch logs",
+        "set up alerting",
+        "alert me if",
+        "alert when",
+        "grafana",
+        "prometheus",
+        "latency spike",
+        "response time",
+        "error rate",
     ],
     "devops_agent": [
-        "deploy to", "deploy the", "run the pipeline",
-        "ci pipeline", "cd pipeline", "build and deploy",
-        "pipeline failed", "pipeline passing", "helm chart",
-        "docker build", "docker push", "staging deploy",
-        "production deploy", "rollback", "blue green",
+        "deploy to",
+        "deploy the",
+        "run the pipeline",
+        "ci pipeline",
+        "cd pipeline",
+        "build and deploy",
+        "pipeline failed",
+        "pipeline passing",
+        "helm chart",
+        "docker build",
+        "docker push",
+        "staging deploy",
+        "production deploy",
+        "rollback",
+        "blue green",
     ],
     "soul_core": [
-        "reflect on", "our mission", "our purpose", "trust score",
-        "goal arbitration", "goal tracking",
+        "reflect on",
+        "our mission",
+        "our purpose",
+        "trust score",
+        "goal arbitration",
+        "goal tracking",
     ],
 }
 
 # Order matters: first match wins.
 SPECIALIST_PRIORITY_ORDER: list[str] = [
-    "knowledge_agent",    # corpus queries — distinctive phrases
-    "cs_agent",           # account + billing — distinctive
-    "comms_agent",        # outbound send intent — must beat devops 'incident'
+    "knowledge_agent",  # corpus queries — distinctive phrases
+    "cs_agent",  # account + billing — distinctive
+    "comms_agent",  # outbound send intent — must beat devops 'incident'
     "code_review_agent",  # review intent — must beat devops 'merge'
     "self_healer_agent",  # fix + remediate — must beat code_review 'lint'
-    "it_agent",           # infra + port — must beat self_healer 'restart'
-    "security_agent",     # scan + CVE — distinctive
-    "data_agent",         # schema + database — distinctive
-    "monitor_agent",      # observe + alert setup
-    "devops_agent",       # deploy + pipeline — broad, placed last
-    "soul_core",          # fallback only
+    "it_agent",  # infra + port — must beat self_healer 'restart'
+    "security_agent",  # scan + CVE — distinctive
+    "data_agent",  # schema + database — distinctive
+    "monitor_agent",  # observe + alert setup
+    "devops_agent",  # deploy + pipeline — broad, placed last
+    "soul_core",  # fallback only
 ]
 
 
@@ -443,17 +527,13 @@ async def resolve_agent(message: str) -> dict[str, Any]:
                 if sk and sk[0] != agent_id:
                     sk_agent, sk_conf = sk
                     logger.info(
-                        f"[LexRouter] Specialist override: C→{agent_id} "
-                        f"overridden by specialist keyword → {sk_agent}"
+                        f"[LexRouter] Specialist override: C→{agent_id} overridden by specialist keyword → {sk_agent}"
                     )
                     result = {
                         "agent_id": sk_agent,
                         "method": "keyword",
                         "confidence": sk_conf,
-                        "reasoning": (
-                            f"Specialist keyword overrode C router "
-                            f"({agent_id} → {sk_agent})"
-                        ),
+                        "reasoning": (f"Specialist keyword overrode C router ({agent_id} → {sk_agent})"),
                     }
                     _record_decision(message, result, _t0)
                     return result
@@ -483,12 +563,13 @@ async def resolve_agent(message: str) -> dict[str, Any]:
     # ── Stage 2: LLM routing via Ollama (~800ms) ────────────────────
     if mode == "lex" or mode == "hybrid":
         import asyncio as _asyncio
+
         try:
             agent_id, confidence = await _asyncio.wait_for(
                 _lex_route(message, allowed_agents=GENERAL_AUTO_ROUTE_AGENTS),
                 timeout=1.2,
             )
-        except (_asyncio.TimeoutError, Exception) as _exc:
+        except (TimeoutError, Exception) as _exc:
             logger.warning(f"[LexRouter] _lex_route failed: {_exc} — falling back to soul_core")
             result = {
                 "agent_id": "soul_core",
@@ -501,34 +582,22 @@ async def resolve_agent(message: str) -> dict[str, Any]:
         if agent_id:
             # ── Confidence threshold guards ──────────────────────────
             if confidence < 0.5:
-                logger.info(
-                    f"[LexRouter] Confidence {confidence:.2f} < 0.5 "
-                    f"— escalating to soul_core"
-                )
+                logger.info(f"[LexRouter] Confidence {confidence:.2f} < 0.5 — escalating to soul_core")
                 result = {
                     "agent_id": "soul_core",
                     "method": "low_confidence_escalation",
                     "confidence": confidence,
-                    "reasoning": (
-                        f"Confidence {confidence:.2f} below threshold 0.5 "
-                        f"for {agent_id} — escalating"
-                    ),
+                    "reasoning": (f"Confidence {confidence:.2f} below threshold 0.5 for {agent_id} — escalating"),
                 }
                 _record_decision(message, result, _t0)
                 return result
             if agent_id in _HIGH_RISK_AGENTS and confidence < 0.8:
-                logger.info(
-                    f"[LexRouter] High-risk agent {agent_id} at "
-                    f"confidence {confidence:.2f} < 0.8 — escalating"
-                )
+                logger.info(f"[LexRouter] High-risk agent {agent_id} at confidence {confidence:.2f} < 0.8 — escalating")
                 result = {
                     "agent_id": "soul_core",
                     "method": "high_risk_escalation",
                     "confidence": confidence,
-                    "reasoning": (
-                        f"High-risk agent {agent_id} requires >= 0.8 "
-                        f"confidence, got {confidence:.2f}"
-                    ),
+                    "reasoning": (f"High-risk agent {agent_id} requires >= 0.8 confidence, got {confidence:.2f}"),
                 }
                 _record_decision(message, result, _t0)
                 return result

@@ -2441,9 +2441,17 @@ ALL_AGENT_DEFINITIONS: dict[str, AgentDefinition] = {
 }
 
 assert set(ALL_AGENT_DEFINITIONS.keys()) == {
-    "soul_core", "it_agent", "cs_agent", "devops_agent",
-    "monitor_agent", "self_healer_agent", "code_review_agent",
-    "security_agent", "data_agent", "comms_agent", "knowledge_agent",
+    "soul_core",
+    "it_agent",
+    "cs_agent",
+    "devops_agent",
+    "monitor_agent",
+    "self_healer_agent",
+    "code_review_agent",
+    "security_agent",
+    "data_agent",
+    "comms_agent",
+    "knowledge_agent",
 }, "ALL_AGENT_DEFINITIONS roster drift detected"
 
 

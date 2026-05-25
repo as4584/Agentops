@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -38,10 +38,7 @@ _OUTPUT_PATH = _REPORTS_DIR / "runtime_inventory.json"
 _GITNEXUS_TOOL_NAMES = {k for k, v in MCP_TOOL_MAP.items() if v[0] == "gitnexus"}
 
 # Native tools are those not prefixed with "mcp_" and not browser/k8s/sandbox aliases
-_NATIVE_TOOL_NAMES = [
-    name for name in TOOL_REGISTRY
-    if not name.startswith("mcp_")
-]
+_NATIVE_TOOL_NAMES = [name for name in TOOL_REGISTRY if not name.startswith("mcp_")]
 
 # All MCP tools (including GitNexus)
 _MCP_TOOL_NAMES = [name for name in TOOL_REGISTRY if name.startswith("mcp_")]
@@ -54,17 +51,15 @@ for _tool_name, (_server, _) in MCP_TOOL_MAP.items():
 
 def _build_agent_permissions() -> dict[str, list[str]]:
     from backend.agents import ALL_AGENT_DEFINITIONS
-    return {
-        agent_id: list(defn.tool_permissions)
-        for agent_id, defn in ALL_AGENT_DEFINITIONS.items()
-    }
+
+    return {agent_id: list(defn.tool_permissions) for agent_id, defn in ALL_AGENT_DEFINITIONS.items()}
 
 
 def generate_inventory() -> dict:
     gn_state = get_gitnexus_health()
     agent_permissions = _build_agent_permissions()
     return {
-        "generated_at": datetime.now(tz=timezone.utc).isoformat(),
+        "generated_at": datetime.now(tz=UTC).isoformat(),
         "deployment_mode": AGENTOP_DEPLOYMENT_MODE,
         "gitnexus_repo": GITNEXUS_REPO_NAME,
         "native_tools": sorted(_NATIVE_TOOL_NAMES),

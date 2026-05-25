@@ -4,18 +4,18 @@ Runs entirely local — no external dependencies beyond rank_bm25.
 Designed to sit alongside Qdrant dense retrieval, not replace it.
 Merged with dense hits via Reciprocal Rank Fusion in retrieval_engine.py.
 """
+
 import json
 import logging
 import pickle
 from pathlib import Path
-from typing import Any
 
 from rank_bm25 import BM25Okapi
 
 logger = logging.getLogger(__name__)
 
 BM25_INDEX_PATH = Path("data/bm25_index.pkl")
-BM25_META_PATH  = Path("data/bm25_meta.json")
+BM25_META_PATH = Path("data/bm25_meta.json")
 
 
 class BM25Index:
@@ -27,9 +27,9 @@ class BM25Index:
     """
 
     def __init__(self) -> None:
-        self._bm25:   BM25Okapi | None = None
-        self._chunks: list[dict]       = []  # parallel to BM25 corpus
-        self._built  = False
+        self._bm25: BM25Okapi | None = None
+        self._chunks: list[dict] = []  # parallel to BM25 corpus
+        self._built = False
 
     # ----------------------------------------------------------------
     # Build
@@ -55,9 +55,9 @@ class BM25Index:
         logger.info(f"[BM25] Building index over {len(chunks)} chunks")
 
         self._chunks = chunks
-        tokenized    = [self._tokenize(c["text"]) for c in chunks]
-        self._bm25   = BM25Okapi(tokenized)
-        self._built  = True
+        tokenized = [self._tokenize(c["text"]) for c in chunks]
+        self._bm25 = BM25Okapi(tokenized)
+        self._built = True
 
         self._persist()
         logger.info("[BM25] Index built and persisted")
@@ -68,6 +68,7 @@ class BM25Index:
         Keeps numbers intact — critical for IP/port exact matching.
         """
         import re
+
         tokens = re.findall(r"[a-z0-9_\.\-\/]+", text.lower())
         return tokens if tokens else ["__empty__"]
 
@@ -91,31 +92,18 @@ class BM25Index:
             return []
 
         query_tokens = self._tokenize(query)
-        scores       = self._bm25.get_scores(query_tokens)
+        scores = self._bm25.get_scores(query_tokens)
 
         # Pair chunks with scores
-        scored = [
-            {**self._chunks[i], "bm25_score": float(scores[i])}
-            for i in range(len(self._chunks))
-        ]
+        scored = [{**self._chunks[i], "bm25_score": float(scores[i])} for i in range(len(self._chunks))]
 
         # Apply scope filter
         if agent_scope:
-            scored = [
-                c for c in scored
-                if agent_scope in c.get("agent_scope", [])
-                or "all" in c.get("agent_scope", [])
-            ]
+            scored = [c for c in scored if agent_scope in c.get("agent_scope", []) or "all" in c.get("agent_scope", [])]
 
         # Apply source prefix filter
         if source_prefix:
-            scored = [
-                c for c in scored
-                if any(
-                    c["source"].startswith(p)
-                    for p in source_prefix
-                )
-            ]
+            scored = [c for c in scored if any(c["source"].startswith(p) for p in source_prefix)]
 
         # Sort by BM25 score, return top_k
         scored.sort(key=lambda x: x["bm25_score"], reverse=True)
@@ -137,14 +125,12 @@ class BM25Index:
             json.dump(
                 {
                     "chunk_count": len(self._chunks),
-                    "chunks":      self._chunks,
+                    "chunks": self._chunks,
                 },
-                f, indent=2,
+                f,
+                indent=2,
             )
-        logger.info(
-            f"[BM25] Persisted {len(self._chunks)} chunks "
-            f"to {BM25_INDEX_PATH}"
-        )
+        logger.info(f"[BM25] Persisted {len(self._chunks)} chunks to {BM25_INDEX_PATH}")
 
     def load(self) -> bool:
         """
@@ -160,13 +146,10 @@ class BM25Index:
             with BM25_INDEX_PATH.open("rb") as f:
                 self._bm25 = pickle.load(f)
             with BM25_META_PATH.open() as f:
-                meta          = json.load(f)
-                self._chunks  = meta["chunks"]
+                meta = json.load(f)
+                self._chunks = meta["chunks"]
             self._built = True
-            logger.info(
-                f"[BM25] Loaded {len(self._chunks)} chunks "
-                f"from {BM25_INDEX_PATH}"
-            )
+            logger.info(f"[BM25] Loaded {len(self._chunks)} chunks from {BM25_INDEX_PATH}")
             return True
         except Exception as e:
             logger.warning(f"[BM25] Load failed: {e} — will rebuild")

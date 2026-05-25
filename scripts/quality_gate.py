@@ -51,9 +51,7 @@ def check(report_path: str = "quality_report.json") -> None:
     # ── Overall gate ──────────────────────────────────────────────
     overall = float(report["overall_score"])  # type: ignore[arg-type]
     if overall < THRESHOLDS["overall_score"]:
-        failures.append(
-            f"Overall score {overall:.1f} below minimum {THRESHOLDS['overall_score']}"
-        )
+        failures.append(f"Overall score {overall:.1f} below minimum {THRESHOLDS['overall_score']}")
 
     # ── Per-dimension gates ───────────────────────────────────────
     dimensions: dict[str, dict[str, object]] = report.get("dimensions", {})  # type: ignore[assignment]
@@ -64,9 +62,7 @@ def check(report_path: str = "quality_report.json") -> None:
         score = float(dim_data.get("score", 0))  # type: ignore[arg-type]
         if score < minimum:
             meta = dim_data.get("meta", {})
-            failures.append(
-                f"{dim} score {score:.1f} below minimum {minimum}  (meta: {meta})"
-            )
+            failures.append(f"{dim} score {score:.1f} below minimum {minimum}  (meta: {meta})")
 
     # ── Regression gate ───────────────────────────────────────────
     scores = _last_two_scores()
@@ -74,10 +70,7 @@ def check(report_path: str = "quality_report.json") -> None:
         prev_score, curr_score = scores
         drop = prev_score - curr_score
         if drop > 10.0:  # >10pt drop triggers a hard block
-            failures.append(
-                f"Regression: score dropped {drop:.1f} pts "
-                f"({prev_score:.1f} → {curr_score:.1f})"
-            )
+            failures.append(f"Regression: score dropped {drop:.1f} pts ({prev_score:.1f} → {curr_score:.1f})")
 
     # ── Result ────────────────────────────────────────────────────
     if failures:

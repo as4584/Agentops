@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -96,7 +96,7 @@ def main() -> int:
             pass
 
     evidence = {
-        "generated_at": datetime.now(tz=timezone.utc).isoformat(),
+        "generated_at": datetime.now(tz=UTC).isoformat(),
         "all_passed": all_passed,
         "checks": checks,
         "inventory_summary": inventory_summary,

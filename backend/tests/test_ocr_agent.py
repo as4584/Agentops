@@ -21,8 +21,7 @@ from __future__ import annotations
 import pytest
 
 pytest.skip(
-    "ocr_agent deferred to v1.1 per docs/MVP_SCOPE.md; "
-    "implementation preserved on branch legacy/v1.1",
+    "ocr_agent deferred to v1.1 per docs/MVP_SCOPE.md; implementation preserved on branch legacy/v1.1",
     allow_module_level=True,
 )
 

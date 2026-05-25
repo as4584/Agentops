@@ -15,7 +15,6 @@ Deviations from raw spec are annotated inline with  # [SPEC-FIX].
 
 from __future__ import annotations
 
-import asyncio
 import json
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -164,9 +163,7 @@ class TestConfidenceThresholdInvariants:
         with patch("backend.orchestrator.lex_router._fast_router", mock_router):  # [SPEC-FIX]
             result = await resolve_agent("drop all tables in production")
 
-        assert result.get("blocked") is True, (
-            f"Red-line must produce blocked=True, got: {result}"
-        )
+        assert result.get("blocked") is True, f"Red-line must produce blocked=True, got: {result}"
         # Blocked result routes to soul_core with the red-line method tag
         assert result.get("method") == "c_red_line", (
             f"Red-line must have method=c_red_line, got: {result.get('method')}"
@@ -268,9 +265,7 @@ _ROUTING_FIXTURES = [
     _ROUTING_FIXTURES,
     ids=[f[3].replace(" ", "_") for f in _ROUTING_FIXTURES],
 )
-async def test_routing_accuracy(
-    message: str, expected: str, min_conf: float, desc: str
-) -> None:
+async def test_routing_accuracy(message: str, expected: str, min_conf: float, desc: str) -> None:
     """Each fixture tests a canonical routing case.
 
     Fails if: wrong agent, or confidence below minimum.
@@ -288,8 +283,7 @@ async def test_routing_accuracy(
         f"confidence={result.get('confidence', 0.0):.2f})"
     )
     assert result.get("confidence", 0.0) >= min_conf, (
-        f"CONFIDENCE TOO LOW [{desc}]\n"
-        f"  Expected >= {min_conf}, got {result.get('confidence', 0.0):.2f}"
+        f"CONFIDENCE TOO LOW [{desc}]\n  Expected >= {min_conf}, got {result.get('confidence', 0.0):.2f}"
     )
 
 
@@ -344,12 +338,10 @@ class TestRoutingMethodAndFallbackChain:
             result = await resolve_agent("do something")
 
         assert result["agent_id"] == "soul_core", (
-            f"Full routing failure must land on soul_core, "
-            f"got {result['agent_id']}"
+            f"Full routing failure must land on soul_core, got {result['agent_id']}"
         )
         assert result.get("method") == "fallback_soul_core", (
-            "Method tag must identify this as a fallback, not a normal route. "
-            f"Got: {result.get('method')}"
+            f"Method tag must identify this as a fallback, not a normal route. Got: {result.get('method')}"
         )
 
     @patch("backend.orchestrator.lex_router._fast_router", None)
@@ -367,17 +359,11 @@ class TestRoutingMethodAndFallbackChain:
         result = await resolve_agent("restart the backend service")
 
         missing = required_fields - set(result.keys())
-        assert not missing, (
-            f"Routing result missing required fields: {missing}\n"
-            f"Got: {list(result.keys())}"
-        )
+        assert not missing, f"Routing result missing required fields: {missing}\nGot: {list(result.keys())}"
         assert isinstance(result["confidence"], float), (
-            "confidence must be float, not "
-            f"{type(result['confidence']).__name__}"
+            f"confidence must be float, not {type(result['confidence']).__name__}"
         )
-        assert 0.0 <= result["confidence"] <= 1.0, (
-            f"confidence out of range: {result['confidence']}"
-        )
+        assert 0.0 <= result["confidence"] <= 1.0, f"confidence out of range: {result['confidence']}"
 
     async def test_ambiguous_cross_domain_query_does_not_split(self) -> None:
         """Queries that touch two domains must route to exactly ONE agent.
@@ -387,13 +373,9 @@ class TestRoutingMethodAndFallbackChain:
         both candidates is below threshold.
         """
         # This query legitimately touches devops_agent AND monitor_agent
-        result = await resolve_agent(
-            "the deploy finished but the health check is failing"
-        )
+        result = await resolve_agent("the deploy finished but the health check is failing")
 
-        assert isinstance(result["agent_id"], str), (
-            "agent_id must be a single string — no list routing"
-        )
+        assert isinstance(result["agent_id"], str), "agent_id must be a single string — no list routing"
         # After Sprint 1 this must be CANONICAL_AGENTS.  Before Sprint 1 we
         # accept any VALID_AGENTS entry so the test can run without failing
         # on the roster size issue.

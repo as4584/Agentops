@@ -1,4 +1,5 @@
 """Seed Qdrant from project docs for knowledge-agent retrieval."""
+
 from __future__ import annotations
 
 import argparse
