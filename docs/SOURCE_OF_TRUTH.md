@@ -20,7 +20,8 @@
 investigate incidents, search internal runbooks, and execute approved fixes — without
 sending internal systems or docs to public AI tools.
 
-**Single workflow:** `Ask → Retrieve → Inspect → Propose → Approve → Act → Summarize`.
+**Single workflow:** `Ask → Retrieve → Inspect → Propose → Approve → Act → Summarize`,
+driven from either the web dashboard or the Discord bot.
 
 **MVP agents (in product story):** `knowledge_agent`, `monitor_agent`, `devops_agent`,
 `security_agent`.
@@ -29,10 +30,14 @@ sending internal systems or docs to public AI tools.
 Docker read tools (via MCP), `process_restart` (approval-gated — the **only** state-modifying
 remediation in the MVP path).
 
+**MVP operator surfaces (co-equal):** web dashboard (`frontend/`) and Discord bot
+(`backend/discord_bot.py`). Both speak to the same backend, share the same audit log,
+and support the same approval workflow. Telegram and Slack bridges remain out of scope.
+
 **Out-of-scope for v1.0 (kept in repo as labs/deferred):** content production pipeline,
 WebGen V1 & V2, browser automation as a headline feature, comms/cs/it agents,
 `self_healer` autonomous remediation, `soul_core` as a user-facing concept, OpenClaw
-Discord/Telegram/Slack bridges, social/marketing language.
+Telegram/Slack bridges, social/marketing language.
 
 **Authoritative reference:** [MVP_SCOPE.md](./MVP_SCOPE.md). Any narrative or marketing
 surface that contradicts MVP_SCOPE.md is wrong and must be corrected.

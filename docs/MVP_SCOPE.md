@@ -3,6 +3,11 @@
 > Status: Week 1 deliverable (staged, not yet promoted into SOURCE_OF_TRUTH).
 > Owner: product lead
 > Last updated: 2026-05-25
+> **Amendment 1 (2026-05-25, Week 2 ticket A0):** Discord bot is restored as
+> a tier-1 operator surface alongside the web dashboard. See
+> [WEEK_2_SPRINT.md](./WEEK_2_SPRINT.md) §2 for the amendment rationale and
+> §5 (Pillar B) for the reliability deliverables. Telegram and Slack bridges
+> remain out of scope.
 
 ---
 
@@ -42,14 +47,21 @@ The 30-day MVP ships exactly these capabilities:
    only state-modifying remediation in the MVP path, and only after explicit
    operator approval in the UI.
 6. **Incident workflow** — single end-to-end flow: ask → retrieve → inspect
-   → propose → approve → act → summarize.
+   → propose → approve → act → summarize. Operator drives the workflow from
+   **either** the web dashboard **or** the Discord bot (both surfaces are
+   first-class).
 7. **Audit trail** — every session writes a persisted record: question,
-   sources used, tools called, action taken, result, summary.
+   sources used, tools called, action taken, result, summary. Each audit row
+   carries `source ∈ {"web", "discord", "cli"}`.
 8. **Operator dashboard (slim)** — chat, retrieval status, recent sessions,
    approval queue, health.
-9. **Pilot onboarding flow** — “connect docs”, “connect logs”, “choose
-   approved actions”.
-10. **Demo assets** — 3 scripted scenarios with seeded docs and logs.
+9. **Discord operator surface** — `backend/discord_bot.py` provides the same
+   investigate → propose → approve → act workflow via chat commands
+   (`!approve`, `!reject`, `!pending`, plus `@mention` for grounded Q&A).
+   Runs locally, talks only to the operator's backend, no public chat.
+10. **Pilot onboarding flow** — “connect docs”, “connect logs”, “choose
+    approved actions”.
+11. **Demo assets** — 3 scripted scenarios with seeded docs and logs.
 
 ---
 
@@ -68,9 +80,9 @@ as labs / dormant / deferred:
 - "Soul agent" as a user-facing concept (kept internally as governance only)
 - `self_healer_agent` autonomous remediation
 - Multi-agent fan-out marketing language
-- Discord/Telegram bridges
 - ML learning lab as a product surface
 - VS Code extension as the primary buyer surface (kept as operator tool)
+- Telegram and Slack bridges (Discord only this release)
 - Anything described as "platform", "control center for everything", or
   "autonomous cluster"
 
@@ -84,6 +96,7 @@ Only these surfaces are part of the MVP story:
 |---|---|
 | FastAPI backend (`backend/server.py`) | Operator-only API |
 | Dashboard (slim) | Chat, sessions, approvals, audit, health |
+| Discord bot (`backend/discord_bot.py`) | Co-equal operator surface — chat, approvals, alerts, audit-attributed actions |
 | `knowledge_agent` | Grounded Q&A over ingested docs |
 | `monitor_agent` | Read-only inspection (logs, health, containers) |
 | `devops_agent` | Approval-gated remediation (one action) |
@@ -163,8 +176,10 @@ soul panel, drift monitor, agent tier view, memory namespaces explorer.
 - No new agents added.
 - No new tools added beyond the MVP set.
 - No content/webgen/social work.
+- No Telegram or Slack bridges; Discord is the only chat surface.
 - No "platform" language anywhere buyer-facing.
-- All architecture changes must reduce surface, not expand it.
+- All architecture changes must reduce surface, not expand it (Discord was
+  pre-existing — Week 2 hardens it, does not add new chat surfaces).
 
 ---
 

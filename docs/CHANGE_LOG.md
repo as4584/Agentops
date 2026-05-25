@@ -460,3 +460,15 @@
 - **Risk Assessment:** MEDIUM
 - **Impacted Subsystems:** Auto-routing, knowledge retrieval, business-profile intake, startup/reindex flows, release evidence, runtime inventory
 - **Documentation Updated:** YES
+
+### 2026-05-25T18:00:00Z — Week 2 Sprint approved; MVP scope amended (Discord restored as tier-1 surface)
+
+- **Agent:** product-lead agent (with operator approval)
+- **Files Modified:**
+  - `docs/WEEK_2_SPRINT.md` (new) — 13-ticket sprint plan across 3 pillars (Spine, Discord Hardening, Demo Surface); explicitly approved by operator 2026-05-25
+  - `docs/MVP_SCOPE.md` — Amendment 1: Discord bot restored as tier-1 operator surface alongside web dashboard; §3 In list expanded to 11 items adding Discord surface (item 9) and audit-source attribution; §4 Out list removed "Discord/Telegram bridges", retained Telegram/Slack only; §5 Production Surface table adds Discord bot row; §9 Hard Boundaries clarifies Discord is in but Telegram/Slack stay out
+  - `docs/SOURCE_OF_TRUTH.md` — §0 Product Frame: workflow sentence now reads "driven from either the web dashboard or the Discord bot"; new "MVP operator surfaces (co-equal)" paragraph naming `backend/discord_bot.py`; out-of-scope list narrowed to "OpenClaw Telegram/Slack bridges"
+- **Reason:** Week 1 close incorrectly classified the existing 1,471-LOC Discord bot (`backend/discord_bot.py`) as out-of-scope. Operator reversed that decision and approved a Week 2 sprint that hardens the bot for small local LLMs (qwen3:4b class) rather than removing it. This change is the scope-amendment commit (Week 2 ticket A0) that must land before any Week 2 implementation work begins.
+- **Risk Assessment:** LOW (documentation-only; no code touched)
+- **Impacted Subsystems:** Product scope, sprint planning, MVP narrative
+- **Documentation Updated:** YES
