@@ -426,6 +426,29 @@ class AgentOrchestrator:
                 if item.get("score", 1.0) < 0.5
             ]
 
+            # ── A4: remediation intent → ProposedAction (never executed here) ──
+            from backend.agents.action_proposer import detect_remediation_intent
+            from backend.database import actions_store as _actions_store_module
+            from backend.models.actions import ActionSource
+
+            source_raw = str(context.get("source") or ActionSource.WEB.value).lower()
+            try:
+                proposal_source = ActionSource(source_raw)
+            except ValueError:
+                proposal_source = ActionSource.WEB
+            proposal = detect_remediation_intent(
+                message,
+                agent_id=self._knowledge_agent_id,
+                source=proposal_source,
+            )
+            proposed_action_payload: dict[str, Any] | None = None
+            if proposal is not None:
+                try:
+                    _actions_store_module.actions_store.insert(proposal)
+                    proposed_action_payload = proposal.model_dump(mode="json")
+                except Exception as exc:  # noqa: BLE001 — never fail the chat on store error
+                    logger.warning(f"[knowledge_agent] proposal persistence failed: {exc}")
+
             return {
                 "response": response,
                 "error": None,
@@ -434,6 +457,7 @@ class AgentOrchestrator:
                     "citations": citations,
                     "confidence": confidence,
                     "stale_chunks": stale_chunks,
+                    "proposed_action": proposed_action_payload,
                     "agent_scope": {
                         "agent_id": self._knowledge_agent_id,
                         "chunks_retrieved": len(retrieved),
@@ -534,6 +558,7 @@ class AgentOrchestrator:
                 "confidence": kr.get("confidence"),
                 "stale_chunks": kr.get("stale_chunks"),
                 "agent_scope": kr.get("agent_scope"),
+                "proposed_action": kr.get("proposed_action"),
             }
 
         except Exception as e:
