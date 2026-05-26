@@ -181,6 +181,7 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
         intents.message_content = True
         super().__init__(intents=intents)
         self._http_client: Any = None
+        self._backend: Any = None  # BackendHttpClient (B2/B4)
         self._conversation_agents: dict[int, str] = {}  # channel_id → last agent
         self._rate_limits: dict[int, float] = {}  # user_id → last msg time
         self._rate_limit_seconds: float = 2.0
@@ -193,9 +194,18 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
         self._comment_farm_channel_id: int | None = COMMENT_FARM_CHANNEL_ID  # resolved on ready
 
     async def setup_hook(self) -> None:
+        from backend.discord.backend_client import BackendHttpClient
+
         self._http_client = httpx.AsyncClient(  # type: ignore[union-attr]
             timeout=120.0,
             headers=build_auth_headers(),
+        )
+        # Retry + circuit-breaker wrapper for user-facing /chat calls (B2).
+        # Pollers continue using self._http_client directly so background
+        # noise doesn't trip the breaker.
+        self._backend = BackendHttpClient(
+            AGENTOP_API_URL,
+            client=self._http_client,
         )
         logger.info("Agentop Discord bot initialized")
         # Start security alert poller if channel is configured
@@ -1018,75 +1028,169 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
             text = text[:1900] + "\n*...truncated*"
         await message.reply(text)
 
+    # B4 — Cold-start UX. First request to a fresh Ollama model takes
+    # 10–30s; without feedback the user thinks the bot is broken.
+    _WARMUP_DELAY_SECONDS: float = 5.0
+    _WARMUP_TEXT: str = "⏳ Warming up the model — first request can take 10–30s..."
+
+    async def _send_warmup_after(self, message: Any, delay: float) -> Any | None:
+        """Sleep ``delay`` seconds, then post the warming indicator.
+
+        Returns the sent Discord message (so the caller can ``edit`` it once
+        the real response arrives), or ``None`` if posting failed.
+        """
+        try:
+            await asyncio.sleep(delay)
+        except asyncio.CancelledError:
+            return None
+        try:
+            return await message.reply(self._WARMUP_TEXT)
+        except Exception:  # pragma: no cover — Discord transport issues
+            return None
+
     async def _handle_chat(self, message: Any, text: str, agent_id: str = "auto") -> None:
         """Send message to Agentop backend and relay response.
 
-        Week 2 B1: outbound prompt no longer carries a brittle ``[DISCORD CONTEXT]``
-        text prefix. Surface rules travel as structured ``context['surface_rules']``
-        and the inbound response is validated through ``DiscordResponse`` so
-        agents cannot cause the bot to crash with malformed payloads.
+        Week 2:
+          - B1: structured ``DiscordResponse`` parse (no [DISCORD CONTEXT] prefix).
+          - B2: retry + circuit breaker via ``BackendHttpClient``.
+          - B4: ⏳ warming indicator on slow first calls.
         """
-        if not self._http_client:
+        if not self._http_client or not self._backend:
             await message.reply("Bot not fully initialized yet.")
             return
 
+        from backend.discord.backend_client import CircuitBreakerOpen
         from backend.llm.structured_response import (
             DISCORD_SURFACE_RULES,
             parse_backend_response,
             render_for_discord,
         )
 
-        # Show typing indicator while processing
+        # ── B2: silent during open-breaker window ───────────────────────
+        # When the breaker is open, the bot would otherwise spam every
+        # message with the same "🔌 Can't reach backend" reply. We post the
+        # single 🔧 notice exactly once and stay quiet until recovery.
+        if self._backend.is_open():
+            if self._backend.consume_breaker_notice():
+                try:
+                    await message.reply(
+                        "🔧 Agentop backend is unreachable — operator notified. I'll auto-resume once it recovers."
+                    )
+                except Exception:  # pragma: no cover
+                    pass
+            return
+
+        payload: dict[str, Any] = {
+            "agent_id": agent_id,
+            "message": text,
+            "context": {
+                "source": "discord",
+                "user": str(message.author),
+                "user_id": str(message.author.id),
+                "channel": str(message.channel),
+                "channel_id": str(message.channel.id),
+                "guild": str(getattr(message.guild, "name", "DM")),
+                "surface_rules": DISCORD_SURFACE_RULES,
+            },
+        }
+
+        # Schedule the warmup indicator BEFORE the slow call so the user sees
+        # progress on a cold Ollama model.
+        warmup_task = asyncio.create_task(self._send_warmup_after(message, self._WARMUP_DELAY_SECONDS))
+
         async with message.channel.typing():
             try:
-                payload: dict[str, Any] = {
-                    "agent_id": agent_id,
-                    "message": text,
-                    "context": {
-                        "source": "discord",
-                        "user": str(message.author),
-                        "user_id": str(message.author.id),
-                        "channel": str(message.channel),
-                        "channel_id": str(message.channel.id),
-                        "guild": str(getattr(message.guild, "name", "DM")),
-                        "surface_rules": DISCORD_SURFACE_RULES,
-                    },
-                }
-
-                resp = await self._http_client.post(
-                    f"{AGENTOP_API_URL}/chat",
-                    json=payload,
-                )
-
-                if resp.status_code == 200:
-                    try:
-                        data = resp.json()
-                    except ValueError:
-                        data = {"message": resp.text}
-
-                    discord_resp = parse_backend_response(data, fallback_agent=agent_id)
-                    full_response = render_for_discord(discord_resp)
-
-                    # Track conversation agent for context
-                    self._conversation_agents[message.channel.id] = discord_resp.agent_id
-
-                    await self._send_long(message, full_response)
-
-                elif resp.status_code == 400:
-                    detail = resp.json().get("detail", "Bad request")
-                    await message.reply(f"⚠️ {detail}")
-                elif resp.status_code == 503:
-                    await message.reply("🔧 Agentop backend is starting up. Try again in a moment.")
-                else:
-                    await message.reply(f"❌ Backend error ({resp.status_code}): {resp.text[:200]}")
-
-            except httpx.ConnectError:  # type: ignore[union-attr]
-                await message.reply(f"🔌 Can't reach Agentop backend. Is it running?\nExpected at: `{AGENTOP_API_URL}`")
+                resp = await self._backend.post_tracked("/chat", json=payload)
+            except CircuitBreakerOpen:
+                warmup_task.cancel()
+                # Notice already consumed above when we checked is_open(); if a
+                # concurrent call opened the breaker, surface it here once.
+                if self._backend.consume_breaker_notice():
+                    await message.reply("🔧 Agentop backend is unreachable — operator notified.")
+                return
             except httpx.TimeoutException:  # type: ignore[union-attr]
+                warmup_task.cancel()
                 await message.reply("⏱️ Agent took too long to respond (>120s). Try a simpler question.")
+                return
+            except httpx.ConnectError:  # type: ignore[union-attr]
+                warmup_task.cancel()
+                if self._backend.consume_breaker_notice():
+                    await message.reply("🔧 Agentop backend is unreachable — operator notified.")
+                else:
+                    await message.reply(
+                        f"🔌 Can't reach Agentop backend. Is it running?\nExpected at: `{AGENTOP_API_URL}`"
+                    )
+                return
             except Exception as e:
+                warmup_task.cancel()
                 logger.exception("Discord chat handler error")
                 await message.reply(f"❌ Unexpected error: {type(e).__name__}")
+                return
+
+            # Stop the warmup task and collect the warmup message (if any).
+            warmup_msg = await self._finalize_warmup_task(warmup_task)
+
+            if resp.status_code == 200:
+                try:
+                    data = resp.json()
+                except ValueError:
+                    data = {"message": resp.text}
+
+                discord_resp = parse_backend_response(data, fallback_agent=agent_id)
+                full_response = render_for_discord(discord_resp)
+                self._conversation_agents[message.channel.id] = discord_resp.agent_id
+
+                await self._deliver_reply(message, full_response, warmup_msg)
+                return
+
+            # Non-200 paths — ensure the warmup placeholder doesn't linger.
+            await self._discard_warmup(warmup_msg)
+            if resp.status_code == 400:
+                try:
+                    detail = resp.json().get("detail", "Bad request")
+                except ValueError:
+                    detail = "Bad request"
+                await message.reply(f"⚠️ {detail}")
+            elif resp.status_code == 503:
+                await message.reply("🔧 Agentop backend is starting up. Try again in a moment.")
+            else:
+                await message.reply(f"❌ Backend error ({resp.status_code}): {resp.text[:200]}")
+
+    @staticmethod
+    async def _finalize_warmup_task(task: asyncio.Task[Any]) -> Any | None:
+        """Cancel the warmup scheduler if it hasn't fired, else collect the message."""
+        if task.done():
+            try:
+                return task.result()
+            except Exception:
+                return None
+        task.cancel()
+        try:
+            await task
+        except (asyncio.CancelledError, Exception):
+            pass
+        return None
+
+    async def _deliver_reply(self, message: Any, full_response: str, warmup_msg: Any | None) -> None:
+        """Send the real response, editing the warmup placeholder when possible."""
+        if warmup_msg is not None and len(full_response) <= MAX_DISCORD_LENGTH:
+            try:
+                await warmup_msg.edit(content=full_response)
+                return
+            except Exception:  # pragma: no cover — Discord transport issues
+                pass
+        await self._discard_warmup(warmup_msg)
+        await self._send_long(message, full_response)
+
+    @staticmethod
+    async def _discard_warmup(warmup_msg: Any | None) -> None:
+        if warmup_msg is None:
+            return
+        try:
+            await warmup_msg.delete()
+        except Exception:  # pragma: no cover
+            pass
 
     async def _send_long(self, message: Any, text: str) -> None:
         """Send a message, splitting if over Discord's 2000 char limit."""

@@ -118,11 +118,21 @@ def test_surface_rules_are_structured_not_prose() -> None:
 
 def _make_bot() -> Any:
     """Build an AgentopBot instance without invoking discord.py setup."""
+    from backend.discord.backend_client import BackendHttpClient
     from backend.discord_bot import AgentopBot
 
     bot = AgentopBot.__new__(AgentopBot)
     bot._http_client = MagicMock()
+    # BackendHttpClient calls self._client.request(method, url, json=json);
+    # tests set bot._http_client.request = AsyncMock(side_effect=...).
+    bot._backend = BackendHttpClient(
+        "http://test",
+        client=bot._http_client,
+        sleep=AsyncMock(),  # zero-delay retries in tests
+    )
     bot._conversation_agents = {}
+    # B4 warmup: schedule far in the future so tests don't trip it.
+    bot._WARMUP_DELAY_SECONDS = 9999.0
     return bot
 
 
@@ -169,7 +179,8 @@ async def test_handle_chat_does_not_inject_discord_context_prefix() -> None:
 
     captured: dict[str, Any] = {}
 
-    async def _fake_post(url: str, json: dict[str, Any]) -> Any:
+    async def _fake_request(method: str, url: str, json: dict[str, Any]) -> Any:
+        captured["method"] = method
         captured["url"] = url
         captured["json"] = json
         resp = MagicMock()
@@ -183,7 +194,7 @@ async def test_handle_chat_does_not_inject_discord_context_prefix() -> None:
         }
         return resp
 
-    bot._http_client.post = AsyncMock(side_effect=_fake_post)
+    bot._http_client.request = AsyncMock(side_effect=_fake_request)
     await bot._handle_chat(msg, "is nginx down?", agent_id="auto")
 
     assert "[DISCORD CONTEXT]" not in captured["json"]["message"]
@@ -196,14 +207,14 @@ async def test_handle_chat_renders_unstructured_badge_on_malformed_payload() -> 
     bot = _make_bot()
     msg = _make_message("anything")
 
-    async def _fake_post(url: str, json: dict[str, Any]) -> Any:
+    async def _fake_request(method: str, url: str, json: dict[str, Any]) -> Any:
         resp = MagicMock()
         resp.status_code = 200
         # Missing required 'message' field → must trigger fallback path
         resp.json = lambda: {"agent_id": "knowledge_agent"}
         return resp
 
-    bot._http_client.post = AsyncMock(side_effect=_fake_post)
+    bot._http_client.request = AsyncMock(side_effect=_fake_request)
     await bot._handle_chat(msg, "anything", agent_id="auto")
 
     assert msg._sent, "bot must reply even on malformed payload"
@@ -215,7 +226,7 @@ async def test_handle_chat_renders_approval_hint_when_action_proposed() -> None:
     bot = _make_bot()
     msg = _make_message("nginx is down, restart it")
 
-    async def _fake_post(url: str, json: dict[str, Any]) -> Any:
+    async def _fake_request(method: str, url: str, json: dict[str, Any]) -> Any:
         resp = MagicMock()
         resp.status_code = 200
         resp.json = lambda: {
@@ -231,7 +242,7 @@ async def test_handle_chat_renders_approval_hint_when_action_proposed() -> None:
         }
         return resp
 
-    bot._http_client.post = AsyncMock(side_effect=_fake_post)
+    bot._http_client.request = AsyncMock(side_effect=_fake_request)
     await bot._handle_chat(msg, "nginx is down, restart it", agent_id="auto")
 
     out = "\n".join(msg._sent)
