@@ -1033,6 +1033,8 @@ async def chat(request: ChatRequest) -> ChatResponse:
         message=result.get("response", ""),
         drift_status=DriftStatus(result.get("drift_status", "GREEN")),
         timestamp=datetime.now(UTC_TZ),
+        citations=list(result.get("citations") or []),
+        proposed_action=result.get("proposed_action"),
     )
 
 

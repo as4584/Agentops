@@ -278,13 +278,20 @@ class ChatRequest(BaseModel):
 
 
 class ChatResponse(BaseModel):
-    """Response from an agent."""
+    """Response from an agent.
+
+    ``proposed_action`` and ``citations`` are populated for the
+    knowledge_agent path (Week 2 A4/B1) so surfaces such as the Discord bot
+    can render structured replies without parsing prose.
+    """
 
     agent_id: str
     message: str
     tool_calls: list[ToolExecutionRecord] = Field(default_factory=list)
     drift_status: DriftStatus = DriftStatus.GREEN
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC_TZ))
+    citations: list[str] = Field(default_factory=list)
+    proposed_action: dict[str, Any] | None = None
 
 
 class IntakeStartRequest(BaseModel):

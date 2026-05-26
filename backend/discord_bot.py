@@ -1019,28 +1019,29 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
         await message.reply(text)
 
     async def _handle_chat(self, message: Any, text: str, agent_id: str = "auto") -> None:
-        """Send message to Agentop backend and relay response."""
+        """Send message to Agentop backend and relay response.
+
+        Week 2 B1: outbound prompt no longer carries a brittle ``[DISCORD CONTEXT]``
+        text prefix. Surface rules travel as structured ``context['surface_rules']``
+        and the inbound response is validated through ``DiscordResponse`` so
+        agents cannot cause the bot to crash with malformed payloads.
+        """
         if not self._http_client:
             await message.reply("Bot not fully initialized yet.")
             return
 
+        from backend.llm.structured_response import (
+            DISCORD_SURFACE_RULES,
+            parse_backend_response,
+            render_for_discord,
+        )
+
         # Show typing indicator while processing
         async with message.channel.typing():
             try:
-                # Inject Discord context so agents give concise, accurate answers
-                discord_prefix = (
-                    "[DISCORD CONTEXT] You are responding via Discord. Rules: "
-                    "1) Keep responses under 500 characters. "
-                    "2) Do NOT hallucinate tool calls or agent names. "
-                    "3) Only reference agents: soul_core, devops_agent, monitor_agent, "
-                    "self_healer_agent, code_review_agent, security_agent, data_agent, "
-                    "comms_agent, cs_agent, it_agent, knowledge_agent. "
-                    "4) Be direct and helpful. No verbose preamble. "
-                    "[/DISCORD CONTEXT]\n\n"
-                )
                 payload: dict[str, Any] = {
                     "agent_id": agent_id,
-                    "message": discord_prefix + text,
+                    "message": text,
                     "context": {
                         "source": "discord",
                         "user": str(message.author),
@@ -1048,6 +1049,7 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
                         "channel": str(message.channel),
                         "channel_id": str(message.channel.id),
                         "guild": str(getattr(message.guild, "name", "DM")),
+                        "surface_rules": DISCORD_SURFACE_RULES,
                     },
                 }
 
@@ -1057,34 +1059,17 @@ class AgentopBot(_ClientBase):  # type: ignore[misc, valid-type]
                 )
 
                 if resp.status_code == 200:
-                    data = resp.json()
-                    agent_name = data.get("agent_id", agent_id)
-                    response_text = data.get("message", "No response.")
-                    drift = data.get("drift_status", "GREEN")
+                    try:
+                        data = resp.json()
+                    except ValueError:
+                        data = {"message": resp.text}
 
-                    # Strip any echoed Discord context prefix from response
-                    response_text = re.sub(
-                        r"\[DISCORD CONTEXT\].*?\[/DISCORD CONTEXT\]\s*",
-                        "",
-                        response_text,
-                        flags=re.DOTALL,
-                    ).strip()
-
-                    # Truncate overly verbose responses for Discord
-                    if len(response_text) > 1800:
-                        response_text = response_text[:1800] + "\n\n*...truncated for Discord*"
-
-                    # Format response with agent attribution
-                    header = f"**[{agent_name}]**"
-                    if drift != "GREEN":
-                        header += f" ⚠️ Drift: {drift}"
-
-                    full_response = f"{header}\n{response_text}"
+                    discord_resp = parse_backend_response(data, fallback_agent=agent_id)
+                    full_response = render_for_discord(discord_resp)
 
                     # Track conversation agent for context
-                    self._conversation_agents[message.channel.id] = agent_name
+                    self._conversation_agents[message.channel.id] = discord_resp.agent_id
 
-                    # Split long messages (Discord 2000 char limit)
                     await self._send_long(message, full_response)
 
                 elif resp.status_code == 400:
